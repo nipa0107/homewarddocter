@@ -28,6 +28,7 @@ export default class Login extends Component {
       body: JSON.stringify({
         username,
         password,
+        errorMessage: "", // เพิ่ม state เก็บข้อความผิดพลาด
       }),
     })
       .then((res) => res.json())
@@ -38,13 +39,11 @@ export default class Login extends Component {
           window.localStorage.setItem("token", data.data);
           window.localStorage.setItem("loggedIn", true);
           window.location.href = "./home";
-        } else {
-          //ถ้าเข้าสู่ระบบไม่สำเร็จ
-          const errorElement = document.getElementById("errormessage");
-          if (errorElement) {
-            errorElement.innerText =
-              "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
-          }
+        }  else {
+            //ถ้าเข้าสู่ระบบไม่สำเร็จ
+            this.setState({
+              errorMessage: "เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง",
+            });
         }
       });
   }
@@ -95,7 +94,11 @@ export default class Login extends Component {
             </label>
           </div>
         </div> */}
-            
+                  {/* แสดงข้อความผิดพลาด */}
+                  <p id="errormessage" className="errormessage">
+                {this.state.errorMessage}
+              </p>
+              
 
               <p className="forgot-password">
                 <a href="/forgetpassword">ลืมรหัสผ่าน?</a>
