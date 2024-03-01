@@ -1,0 +1,44 @@
+.containerprofile {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2rem;
+}
+
+.formcontainerpf {
+    /* box-sizing: border-box; */
+    border: 0.1px solid #ddd;
+    box-shadow: 0 4px 21px -12px rgba(0, 0, 0, .66);    
+    width: 60%;
+    height: 100%;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 30px;
+    /* display: flex;
+    flex-wrap: wrap; */
+}
+
+
+.title{
+    margin-top: 2rem;
+}
+.btnsave:link{
+    background-color: #87CEFA;
+}
+.btnsave:hover{
+    background-color: #87CEFA;
+    color: #ffffff;
+    border-color: #87CEFA;
+}
+.textbox{
+    text-decoration: none;
+    color: rgb(72, 72, 72);
+    border: 1px solid rgb(228, 228, 228);
+    padding: 7px;
+    border-radius: 8px;
+}

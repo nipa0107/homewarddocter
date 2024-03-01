@@ -1,0 +1,70 @@
+.add{
+    border-style: solid 1px;
+    border-radius: 5px;
+}
+
+.add:hover{
+    background-color: #87CEFA;
+    color: #ffffff;
+    border-color: #87CEFA;
+}
+
+.deleteimg{
+   border-radius: 10px;
+   width: 5vh;
+   /* float: right; */
+   margin: auto auto;
+}
+.adminall .card-body .deleteimg{
+    float: right;
+}
+.adminall{
+    width: 70% ;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.1); 
+    line-height: 50px;
+    padding: 20px;
+}
+.adminall form{
+    padding: 20px;
+}
+.editimg {
+    border-radius: 10px;
+    width: 5vh;
+    float: right;
+    margin: auto auto;
+}
+.content {
+    margin-top: 145px;
+}
+
+.form{
+
+    align-items: center;
+}
+.btn{
+    background-color: #87CEFA;
+    color: white;
+    text-align: center;
+    margin-top: 20px;
+}
+.cardall{
+    width: 70% ;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.1); 
+    line-height: 50px;
+    padding: 20px;
+}
+.filename a{
+    text-decoration: none;
+    color: rgb(72, 72, 72);
+    border: 1px solid rgb(228, 228, 228);
+    padding: 7px;
+    border-radius: 8px;
+}
+.filename a:hover{
+    background-color: #7e7e7e;
+    color: white;
+}

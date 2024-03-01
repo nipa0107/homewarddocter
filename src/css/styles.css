@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai&display=swap');
+
+* {
+	font-family: 'IBM Plex Sans Thai', sans-serif;
+}
+
+.bartop {
+	margin-top: 60px;
+}
+
+.logincontainer {
+	width: 100%;
+	min-height: 100vh;
+	background-color: #f5f5f5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.formcontainer {
+	width: 900px;
+	height: 500px;
+	display: flex;
+	border-radius: 10px;
+}
+
+.left {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: #87CEFA;
+	border-top-left-radius: 10px;
+	border-bottom-left-radius: 10px;
+}
+
+.left h1 {
+	color: white;
+}
+
+.right {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: white;
+	border-top-right-radius: 10px;
+	border-bottom-right-radius: 10px;
+}
+
+.btnlogin {
+	background-color: #87CEFA;
+	color: white;
+}
+
+.logologin {
+	width: 40vh;
+	align-items: center;
+	margin-bottom: 1.5vh;
+}
+
+.forgot-password{
+	text-align: right;
+}
+.forgot-password a{
+	font-size: 2vh;
+    text-decoration: none;
+    color: rgb(72, 72, 72);
+    padding: 7px;
+    border-radius: 8px;
+}
+
+.homesubmit{
+	margin-top: -10%;
+}
+
+.form-control {
+	font-size: 2vh;
+}
+
+#errormessage {
+	color: red;
+	font-size: 1.5vh;
+}
+
+.box {
+	display: flex;
+}
+
+
