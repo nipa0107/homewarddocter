@@ -35,7 +35,7 @@ export default function Home({ }) {
         </div>
         <ul class="nav-list">
           <li>
-            <a href="#" onClick={() => navigate("/home")}>
+            <a href="#" >
               <i class="bi bi-person-plus"></i>
               <span class="links_name" >เพิ่มบัญชีผู้ป่วย</span>
             </a>
