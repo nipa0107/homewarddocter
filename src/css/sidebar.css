@@ -191,9 +191,8 @@
     list-style-type: none;
     width: 93%;
 }
-
 .nav-logout li i {
-    margin-top: 4px;
+    margin-top: 3px;
     min-width: 55px;
 }
 .sidebar .nav-logout li a:hover {

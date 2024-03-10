@@ -10,6 +10,8 @@ export default function Home({ }) {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
+  const [token, setToken] = useState('');
+
 
   const logOut = () => {
     window.localStorage.clear();
@@ -35,21 +37,17 @@ export default function Home({ }) {
         </div>
         <ul class="nav-list">
           <li>
-            <a href="#" >
-              <i class="bi bi-person-plus"></i>
-              <span class="links_name" >เพิ่มบัญชีผู้ป่วย</span>
+            <a href="home">
+              <i class="bi bi-house"></i>
+              <span class="links_name" >หน้าหลัก</span>
             </a>
           </li>
-
-          {/* เพิ่มเพิ่มผู้ป่วย */}
           <li>
             <a href="#" >
               <i class="bi bi-clipboard2-pulse"></i>
               <span class="links_name" >ติดตาม/ประเมินอาการ</span>
             </a>
           </li>
-          {/* เพิ่มเพิ่มผู้ป่วย */}
-
           <li>
             <a href="#" >
               <i class="bi bi-people"></i>
@@ -70,7 +68,7 @@ export default function Home({ }) {
           </li>
           <div class="nav-logout">
             <li>
-              <a href="#" onClick={logOut}>
+              <a href="./" onClick={logOut}>
                 <i class='bi bi-box-arrow-right' id="log_out" onClick={logOut}></i>
                 <span class="links_name" >ออกจากระบบ</span>
               </a>
@@ -83,9 +81,9 @@ export default function Home({ }) {
         </div>
         <div class="profile_details ">
           <li>
-            <a href="#" >
+            <a href="profile">
               <i class="bi bi-person"></i>
-              <span class="links_name" ></span>
+              <span class="links_name"></span>
             </a>
           </li>
         </div>
@@ -93,7 +91,7 @@ export default function Home({ }) {
         <div className="breadcrumbs">
           <ul>
             <li>
-              <a href="#">
+              <a href="home">
                 <i class="bi bi-house-fill"></i>
               </a>
             </li>

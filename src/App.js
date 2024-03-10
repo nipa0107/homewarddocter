@@ -11,6 +11,7 @@ import {
 import Login from "./components/login";
 import Home from "./components/home";
 import Reset from "./components/forgetpassword";
+import Profile from "./components/profile";
 
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
@@ -36,6 +37,12 @@ function App() {
             path="/home"
             element={
               <PrivateRoute element={<Home />} isLoggedIn={isLoggedIn} />
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute element={<Profile />} isLoggedIn={isLoggedIn} />
             }
           />
 
