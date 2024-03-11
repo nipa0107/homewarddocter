@@ -21,36 +21,36 @@ export default function Home({ }) {
     setIsActive(!isActive);
   };
 
- useEffect(() => {
-    const token = window.localStorage.getItem("token");
-    setToken(token);
-    if (token) {
-      fetch("http://localhost:5000/profiledt", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          token: token,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data)
-          setMPData(data.data);
-          setName(data.name)
-          setNameTitle(data.nametitle)
-        })
-        .catch((error) => {
-          console.error("Error verifying token:", error);
-          logOut();
-        });
-    } else {
-      logOut();
-    }  }, []); 
+//  useEffect(() => {
+//     const token = window.localStorage.getItem("token");
+//     setToken(token);
+//     if (token) {
+//       fetch("http://localhost:5000/profiledt", {
+//         method: "POST",
+//         crossDomain: true,
+//         headers: {
+//           "Content-Type": "application/json",
+//           Accept: "application/json",
+//           "Access-Control-Allow-Origin": "*",
+//         },
+//         body: JSON.stringify({
+//           token: token,
+//         }),
+//       })
+//         .then((res) => res.json())
+//         .then((data) => {
+//           console.log(data)
+//           setMPData(data.data);
+//           setName(data.name)
+//           setNameTitle(data.nametitle)
+//         })
+//         .catch((error) => {
+//           console.error("Error verifying token:", error);
+//           logOut();
+//         });
+//     } else {
+//       logOut();
+//     }  }, []); 
 
   return (
     <main className="body">
