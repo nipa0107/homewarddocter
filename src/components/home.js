@@ -10,8 +10,6 @@ export default function Home({ }) {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
-  const [token, setToken] = useState('');
-
 
   const logOut = () => {
     window.localStorage.clear();
@@ -23,6 +21,36 @@ export default function Home({ }) {
     setIsActive(!isActive);
   };
 
+ useEffect(() => {
+    const token = window.localStorage.getItem("token");
+    setToken(token);
+    if (token) {
+      fetch("http://localhost:5000/profiledt", {
+        method: "POST",
+        crossDomain: true,
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          token: token,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data)
+          setMPData(data.data);
+          setName(data.name)
+          setNameTitle(data.nametitle)
+        })
+        .catch((error) => {
+          console.error("Error verifying token:", error);
+          logOut();
+        });
+    } else {
+      logOut();
+    }  }, []); 
 
   return (
     <main className="body">
@@ -83,7 +111,7 @@ export default function Home({ }) {
           <li>
             <a href="profile">
               <i class="bi bi-person"></i>
-              <span class="links_name"></span>
+              <span class="links_name" ></span>
             </a>
           </li>
         </div>
