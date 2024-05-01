@@ -68,3 +68,11 @@
     background-color: #7e7e7e;
     color: white;
 }
+
+.gray-background {
+    background-color: #e9ecef;
+  }
+
+  .success{
+    text-align: center;
+  }
