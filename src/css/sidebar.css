@@ -25,7 +25,7 @@
     left: 0;
     top: 0;
     height: 100%;
-    width: 82px;
+    width: 320px;
     /* background: #11101D; */
     background: #87CEFA;
     padding: 6px 10px;
@@ -34,7 +34,7 @@
 }
 
 .sidebar.active{
-    width: 320px;
+    width: 82px;
 }
 
 .sidebar .logo_content .logo {
@@ -42,18 +42,18 @@
     width: 100%;
     height: 50px;
     align-items: center;
-    opacity: 0;
+    opacity: 1;
     pointer-events: none;
     transition: all 0.5s ease;
 }
 .sidebar.active .logo_content .logo {
-    opacity: 1;
+    opacity: 0;
 }
 
 .sidebar #btn {
     position: absolute;
     color: white;
-    left: 50%;
+    left: 90%;
     top: 10px;
     font-size: 20px;
     width: 50px;
@@ -63,7 +63,7 @@
     transform: translateX(-50%);
 }
 .sidebar.active #btn{
-    left: 90%;
+    left: 50%;
 }
 
 .sidebar ul {
@@ -79,14 +79,15 @@
     list-style-type: none;
     line-height: 50px;
 }
-.sidebar .links_name{
+.sidebar.active .links_name{
     opacity: 0;
     pointer-events: none;
     transition: all 0.5s ease;
 }
-.sidebar.active .links_name{
+.sidebar .links_name{
     opacity: 1;
     pointer-events: auto;
+    transition: all 0.5s ease;
 }
 .sidebar ul li .tooltip{
     position: absolute;
@@ -221,8 +222,8 @@
 .home_content{
     position: relative;
     height: 100%;
-    width: calc(100% - 78px);
-    left: 88px;
+    width: calc(100% - 330px);
+    left: 330px;
     transition: all 0.5s ease;
 }
 .home_content .header{
@@ -271,8 +272,8 @@
 
 
 .sidebar.active ~ .home_content{
-    width: calc(100% - 330px);
-    left: 330px;
+    width: calc(100% - 78px);
+    left: 78px;
 }
 
 .home_content .toolbar {

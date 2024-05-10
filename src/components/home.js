@@ -70,25 +70,25 @@ export default function Home({ }) {
             </a>
           </li>
           <li>
-            <a href="#" >
+            <a href="./" >
               <i class="bi bi-clipboard2-pulse"></i>
               <span class="links_name" >ติดตาม/ประเมินอาการ</span>
             </a>
           </li>
           <li>
-            <a href="#" >
+            <a href="./" >
               <i class="bi bi-people"></i>
               <span class="links_name" >ข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="#" >
+            <a href="./" >
               <i class="bi bi-clipboard-check"></i>
               <span class="links_name" >ประเมินความพร้อมการดูแล</span>
             </a>
           </li>
           <li>
-            <a href="#" >
+            <a href="./" >
               <i class="bi bi-chat-dots"></i>
               <span class="links_name" >แช็ต</span>
             </a>
