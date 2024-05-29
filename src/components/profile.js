@@ -36,10 +36,8 @@ export default function Home({}) {
           console.error("Error verifying token:", error);
           logOut();
         });
-    } else {
-      logOut();
     }
-  }, []);
+  },[] );
   const logOut = () => {
     window.localStorage.clear();
     window.location.href = "./";
@@ -69,7 +67,7 @@ export default function Home({}) {
             </a>
           </li>
           <li>
-            <a href="#">
+          <a href="assessment" >
               <i class="bi bi-clipboard2-pulse"></i>
               <span class="links_name">ติดตาม/ประเมินอาการ</span>
             </a>
@@ -112,7 +110,7 @@ export default function Home({}) {
           <li>
             <a href="profile">
               <i class="bi bi-person"></i>
-              <span class="links_name" >{data && data.nametitle+data.name}</span>
+              <span class="links_name" >{data && data.nametitle+data.name+" "+data.surname}</span>
             </a>
           </li>
         </div>
@@ -132,34 +130,74 @@ export default function Home({}) {
             </li>
           </ul>
         </div>
-        <h3>โปรไฟล์</h3>
-        <div className="formcontainerpf card mb-3">
-          <div className="mb-3">
+        {/* <h3>โปรไฟล์</h3> */}
+        <div className="formcontainerpf card mb-2">
+          <div className="mb-2">
             <label>ชื่อผู้ใช้</label>
-            <div className="textbox gray-background">{data.username}</div>{" "}
-            <br />
+            <input
+              type="text"
+              className="form-control gray-background"
+              readOnly
+              value={data.username}
+            //   onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+
+          <div className="mb-2">
             <label>คำนำหน้าชื่อ</label>
-            <div className="textbox">{data.nametitle}</div>{" "}
-            <br />
-            <label>ชื่อ-นามสกุล</label>
-            <div className="textbox">{data.name}</div>{" "}
-            <br />
-            <label>อีเมล</label>
-            <div className="textbox gray-background">{data.email}</div>{" "}
-            <br />
-            <label>เบอร์โทรศัพท์</label>
-            <div className="textbox">{data.tel}</div>{" "}
-            <br />
+            <input
+              className="form-control"
+              readOnly
+              value={data.nametitle}
+            />
+            
+          </div>
+          <div className="mb-2">
+          <label>ชื่อ</label>
+          <input
+              readOnly
+              type="text"
+              className="form-control"
+              value={data.name}
+            />
+          </div>
+          <div className="mb-2">
+          <label>นามสกุล</label>
+          <input
+              readOnly
+              type="text"
+              className="form-control"
+              value={data.surname}
+            />
+          </div>
+          <div className="mb-2">
+          <label>อีเมล</label>
+          <input
+              type="text"
+              className="form-control gray-background"
+              readOnly
+              value={data.email}
+            //   onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>      
+          <div className="mb-2">
+          <label>เบอร์โทรศัพท์</label>
+          <input
+              type="text"
+              className="form-control"
+              value={data.tel}
+            />
+          </div>   
+
+
             <a className="editname" onClick={() => navigate("/updateprofile", { state: data })}>
               แก้ไขโปรไฟล์
             </a>
-            <br />
             <a className="editname" onClick={() => navigate("/updatepassword", { state: data })}>
               เปลี่ยนรหัสผ่าน
             </a>
           </div>
         </div>
-      </div>
     </main>
   );
 }

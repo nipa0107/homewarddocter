@@ -15,7 +15,9 @@ import Profile from "./components/profile";
 import Updatepassword from "./components/updatepassword";
 import UpdateProfile from "./components/updateprofile";
 import Success from "./components/success";
-
+import Assessment from "./components/Assessment";
+import Assessmentuser from "./components/Assessmentuser";
+import Assessmentuserone from "./components/Assessmentuserone";
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
     element
@@ -52,19 +54,53 @@ function App() {
           <Route
             path="/updatepassword"
             element={
-              <PrivateRoute element={<Updatepassword />} isLoggedIn={isLoggedIn} />
+              <PrivateRoute
+                element={<Updatepassword />}
+                isLoggedIn={isLoggedIn}
+              />
             }
           />
-           <Route
+          <Route
             path="/updateprofile"
             element={
-              <PrivateRoute element={<UpdateProfile />} isLoggedIn={isLoggedIn} />
+              <PrivateRoute
+                element={<UpdateProfile />}
+                isLoggedIn={isLoggedIn}
+              />
             }
           />
-          
+
+{/* การประเมิน */}
+          <Route
+            path="/assessment"
+            element={
+              <PrivateRoute
+                element={<Assessment />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/assessmentuser"
+            element={
+              <PrivateRoute
+                element={<Assessmentuser />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/assessmentuserone"
+            element={
+              <PrivateRoute
+                element={<Assessmentuserone />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+        
           <Route path="/forgetpassword" element={<Reset />} />
           <Route path="/success" element={<Success />} />
-
         </Routes>
       </div>
     </Router>

@@ -36,7 +36,7 @@
     margin: auto auto;
 }
 .content {
-    margin-top: 145px;
+    margin-top: 10px;
 }
 
 .form{
@@ -49,6 +49,7 @@
     text-align: center;
     margin-top: 20px;
 }
+
 .cardall{
     width: 70% ;
     margin-left: auto;
@@ -76,3 +77,271 @@
   .success{
     text-align: center;
   }
+
+  td.assessmentnull{
+    text-align: center;
+  }
+
+  .headerassesment{
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .textassesment{
+    text-align: center;
+  }
+  .contentinass{
+    width: 80%; 
+	margin :0 auto;
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1); 
+	/* line-height: 50px;  */
+	padding: 1%; 
+	border-collapse: collapse; 
+	border-spacing: 1; 
+	border-radius: 10px; 
+	position: relative;
+	overflow: hidden;
+  
+  }
+  .texthead{
+    text-align: center;
+    font-weight: bold;
+
+  }
+  .textheadSymptom{
+    font-weight: bold;
+  }
+
+  /* .btn-group{
+    margin-left: auto;
+    margin-right: auto;
+    justify-content: center;
+  } */
+
+  .mb-3 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+.btnass {
+  flex: 1;
+  padding:0.5rem 1.3rem;
+  cursor: pointer;
+  margin: 5px;
+  border-radius: 5px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap; 
+  overflow: hidden;  
+  text-overflow: ellipsis;
+}
+  /* Outline button style */
+  .btn-outline {
+    border: 1px solid #ccc;
+    background-color: transparent;
+  }
+  
+  /* Normal status button style */
+  .btn-normal {
+    background-color: #72DA95;
+    color: white;
+  }
+  
+  /* Abnormal status button style */
+  .btn-abnormal {
+    background-color: #FF6A6A;
+    color: white;
+  }
+  
+  /* Completed status button style */
+  .btn-completed {
+    background-color: #FFCC80;
+    color: white;
+  }
+
+
+  .normal-status {
+    /* color: #72DA95; */
+    color: #1fc657;
+
+
+  }
+  
+  .abnormal-status {
+    color: #FF6A6A; 
+  }
+  
+  .end-of-treatment-status {
+    color: #FFCC80;
+  }
+  
+  .not-evaluated {
+    color: #B2B2B2;
+    text-align: center;
+  }
+  .info {
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  /* General styles for the content container */
+/* .content {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+} */
+
+.headerassesment {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.textassesment {
+  font-size: 1.1em;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.contentinass {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+}
+
+.texthead {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+/* Symptom heading styles */
+.textheadSymptom {
+  font-size: 1.2em;
+  font-weight: bold;
+  /* color: #ff6f61; */
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+/* General text styles */
+.text {
+  font-size: 1em;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* Styles for symptoms */
+.contentinass p {
+  margin: 5px 0;
+}
+
+.text p {
+  color: #333;
+}
+
+.textheadSymptom p {
+  color: #ff6f61;
+}
+
+.contentinass p:nth-child(odd) {
+ background: #f1f1f1;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.contentinass p:nth-child(even) {
+  /* background: #e9e9e9 ;  */
+  padding: 5px;
+  border-radius: 4px;
+}
+
+.form-controls {
+  font-size: 2vh;
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+
+p .label {
+  font-weight: bold;
+  display: block;
+  color: #333;
+}
+
+.inline-container {
+  display: flex;
+  align-items: center;
+
+}
+
+.inline-container label {
+  margin-left: 3%;
+  margin-right: 1rem;
+  font-weight: bold;
+  color: #333;
+
+}
+.textassesment label{
+  margin-left: 1%;
+  margin-right: 0.5rem;
+  font-size: 16;
+  font-weight: bold;
+  color: #333;
+
+}
+
+
+.inline-container .text {
+  flex: 1;
+  margin: 0;
+  color: #555;
+}
+
+.inline-container textarea {
+  flex: 1;
+  padding: 8px;
+  margin-top: 8px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.inline-container textarea:focus {
+  border-color: #87CEFA;
+  box-shadow: 0 0 5px rgba(13, 124, 242, 0.5);
+}
+
+textarea {
+  resize: none;
+  height: auto;
+  min-height: 100px;
+  height: 50%;
+}
+.select{
+  width: 20%;
+}
+.custom-legend {
+  font-size: 100px;
+  color: #fff;
+}
+
+.gray-text {
+  color: rgba(214, 214, 214, 0.6); /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
+}
+

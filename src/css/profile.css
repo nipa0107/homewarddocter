@@ -27,14 +27,23 @@
 .title{
     margin-top: 2rem;
 }
+
+/* ปุ่มบันทึก */
+.save{
+    width: 20%;
+    margin-left: auto;
+    margin-right: auto;
+}
 .btnsave:link{
     background-color: #87CEFA;
 }
+
 .btnsave:hover{
     background-color: #87CEFA;
     color: #ffffff;
     border-color: #87CEFA;
 }
+
 .textbox{
     text-decoration: none;
     color: rgb(72, 72, 72);

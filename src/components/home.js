@@ -45,11 +45,8 @@ export default function Home({ }) {
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
-          logOut();
         });
-    } else {
-      logOut();
-    }  }, []); 
+    } },); 
 
   return (
     <main className="body">
@@ -70,7 +67,7 @@ export default function Home({ }) {
             </a>
           </li>
           <li>
-            <a href="./" >
+            <a href="assessment" >
               <i class="bi bi-clipboard2-pulse"></i>
               <span class="links_name" >ติดตาม/ประเมินอาการ</span>
             </a>
@@ -110,7 +107,7 @@ export default function Home({ }) {
           <li>
             <a href="profile">
               <i class="bi bi-person"></i>
-              <span class="links_name" >{data && data.nametitle+data.name}</span>
+              <span class="links_name" >{data && data.nametitle+data.name+" "+data.surname}</span>
             </a>
           </li>
         </div>

@@ -61,10 +61,8 @@ function Updatepassword(){
       .then((data) => {
         console.log(data);
         if (data.status === "ok") {
-          // หลังจากอัปเดตสำเร็จ ให้ navigate ไปยังหน้าโปรไฟล์
           navigate("/profile");
         } else {
-          // หากมีข้อผิดพลาดในการอัปเดต กำหนดข้อความ error และแสดงในหน้าเว็บ
           setError(data.error);
         }
       })
@@ -110,7 +108,7 @@ return(
         </a>
       </li>
       <li>
-        <a href="#">
+      <a href="assessment" >
           <i class="bi bi-people"></i>
           <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
         </a>
@@ -142,12 +140,12 @@ return(
     </ul>
   </div>
   <div className="home_content">
-    <div className="header">โปรไฟล์</div>
+    <div className="header">เปลี่ยนรหัสผ่าน</div>
     <div class="profile_details ">
       <li>
         <a href="profile">
           <i class="bi bi-person"></i>
-          <span class="links_name" >{data && data.nametitle+data.name}</span>
+          <span class="links_name" >{data && data.nametitle+data.name+" "+data.surname}</span>
         </a>
       </li>
     </div>
@@ -171,7 +169,7 @@ return(
             </li>
           </ul>
         </div>
-        <h3>เปลี่ยนรหัสผ่าน</h3>
+        {/* <h3>เปลี่ยนรหัสผ่าน</h3> */}
         <div className="formcontainerpf">
           <div className="auth-inner">
             รหัสผ่านเก่า
@@ -197,10 +195,10 @@ return(
             {/* แสดงข้อความ error */}
             <p id="errormessage" className="errormessage">{error}</p>
           </div>
-          <div className="d-grid">
+          <div className="d-grid save">
             <button
               onClick={Updatepassword}
-              className="btn btn-outline py-2"
+              className="btn btnsave py-2"
             >
               บันทึก
             </button>

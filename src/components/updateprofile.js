@@ -16,6 +16,8 @@ export default function UpdateProfile() {
     const [tel, setTel] = useState("");
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
+    const [surname, setSurname] = useState("");
+
     const [nametitle, setNameTitle] = useState("");
     useEffect(() => {
         const token = window.localStorage.getItem("token");
@@ -38,6 +40,7 @@ export default function UpdateProfile() {
               console.log(data);
               setData(data.data);
               setName(data.data.name);
+              setSurname(data.data.surname);
               setNameTitle(data.data.nametitle)
               setUsername(data.data.username)
               setTel(data.data.tel)
@@ -45,12 +48,10 @@ export default function UpdateProfile() {
             })
             .catch((error) => {
               console.error("Error verifying token:", error);
-              logOut();
+              // logOut();
             });
-        } else {
-          logOut();
         }
-      }, []);
+      },[]);
 
       const UpdateProfile = async () => {
         try {
@@ -58,6 +59,7 @@ export default function UpdateProfile() {
           { nametitle,
             name,
             tel,
+            surname,
           };
           const response = await fetch(`http://localhost:5000/updateprofile/${location.state._id}`, {
             method: "POST",
@@ -114,7 +116,7 @@ export default function UpdateProfile() {
                 </a>
               </li>
               <li>
-                <a href="#">
+              <a href="assessment" >
                   <i class="bi bi-clipboard2-pulse"></i>
                   <span class="links_name">ติดตาม/ประเมินอาการ</span>
                 </a>
@@ -152,12 +154,12 @@ export default function UpdateProfile() {
             </ul>
           </div>
           <div className="home_content">
-            <div className="header">โปรไฟล์</div>
+            <div className="header">แก้ไขโปรไฟล์ผู้ใช้</div>
             <div class="profile_details ">
               <li>
                 <a href="profile">
                   <i class="bi bi-person"></i>
-                  <span class="links_name" >{data && data.nametitle+data.name}</span>
+                  <span class="links_name" >{data && data.nametitle+data.name+" "+data.surname}</span>
                 </a>
               </li>
             </div>
@@ -181,9 +183,9 @@ export default function UpdateProfile() {
             </li>
           </ul>
         </div>
-            <h3>แก้ไขโปรไฟล์ผู้ใช้</h3>
-            <div className="formcontainerpf card mb-3">
-              <div className="mb-3">
+            {/* <h3>แก้ไขโปรไฟล์ผู้ใช้</h3> */}
+            <div className="formcontainerpf card mb-2">
+              <div className="mb-2">
               <label>ชื่อผู้ใช้</label>
           <input
               type="text"
@@ -193,7 +195,7 @@ export default function UpdateProfile() {
             //   onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-          <div className="mb-3">
+          <div className="mb-2">
             <label>คำนำหน้าชื่อ</label>
             <select
               className="form-control"
@@ -205,8 +207,8 @@ export default function UpdateProfile() {
                 <option value="นายแพทย์">นายแพทย์</option>
             </select>
           </div>
-          <div className="mb-3">
-          <label>ชื่อ-นามสกุล</label>
+          <div className="mb-2">
+          <label>ชื่อ</label>
           <input
               type="text"
               className="form-control"
@@ -214,8 +216,17 @@ export default function UpdateProfile() {
               onChange={(e) => setName(e.target.value)}
             />
           </div>
+          <div className="mb-2">
+          <label>นามสกุล</label>
+          <input
+              type="text"
+              className="form-control"
+              value={surname}
+              onChange={(e) => setSurname(e.target.value)}
+            />
+          </div>
           
-          <div className="mb-3">
+          <div className="mb-2">
           <label>อีเมล</label>
           <input
               type="text"
@@ -225,7 +236,7 @@ export default function UpdateProfile() {
             //   onChange={(e) => setEmail(e.target.value)}
             />
           </div>      
-          <div className="mb-3">
+          <div className="mb-2">
           <label>เบอร์โทรศัพท์</label>
           <input
               type="text"
@@ -235,11 +246,11 @@ export default function UpdateProfile() {
             />
           </div>   
 
-                <div className="d-grid">
+                <div className="d-grid save">
             <button
               onClick={UpdateProfile}
               type="submit"
-              className="btn btn-outline py-2"
+              className="btn btnsave py-2"
             >
               บันทึก
             </button>

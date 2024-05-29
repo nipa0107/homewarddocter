@@ -54,6 +54,10 @@
 	background-color: #87CEFA;
 	color: white;
 }
+.btnlogin:hover {
+	background-color: #87CEFA;
+	color: white;
+}
 
 .logologin {
 	width: 40vh;
@@ -88,5 +92,46 @@
 .box {
 	display: flex;
 }
-
+.table100{
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+  }
+  th,
+  td {
+	width: 20%;
+  }
+  
+  .table {
+	width: 85%; 
+	margin :0 auto;
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1); 
+	line-height: 50px; 
+	padding: 15px; 
+	border-collapse: collapse; 
+	border-spacing: 1; 
+	border-radius: 10px; 
+	position: relative;
+	overflow: hidden;
+  }
+  
+  .table th, .table td {
+	padding: 10px;
+	padding-left: 20px;
+	text-align: left;
+	border-bottom: 1px solid #dee2e6;
+  }
+  
+  .table th {
+	/* font-weight: bold; */
+	background-color: #87CEFA;
+	color: #000;
+	text-transform: uppercase;
+	border-bottom: 2px solid #87CEFA; 
+  }
+  
+  .table td:last-child {
+	width: 20%; 
+	white-space: nowrap;
+  }
 
