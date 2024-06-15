@@ -21,8 +21,9 @@ import "../css/contentgraph.css";
 export default function Assessmentuserone({}) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState("");
+
+  const [isActive, setIsActive] = useState(false);
   const [patientFormsone, setPatientFormsone] = useState("");
   const location = useLocation();
   const { id } = location.state;
@@ -574,7 +575,7 @@ export default function Assessmentuserone({}) {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="chat">
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>
@@ -595,7 +596,7 @@ export default function Assessmentuserone({}) {
       </div>
 
       <div className="home_content">
-        <div>
+      <div className="homeheader">
           <div className="header">ติดตาม/ประเมินอาการ</div>
           <div className="profile_details ">
             <li>
@@ -608,8 +609,6 @@ export default function Assessmentuserone({}) {
             </li>
           </div>
         </div>
-
-        <hr></hr>
 
         <div className="breadcrumbs">
           <ul>

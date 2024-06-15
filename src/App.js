@@ -18,6 +18,8 @@ import Success from "./components/success";
 import Assessment from "./components/Assessment";
 import Assessmentuser from "./components/Assessmentuser";
 import Assessmentuserone from "./components/Assessmentuserone";
+import ChatComponent from "./components/Chat";
+
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
     element
@@ -98,7 +100,15 @@ function App() {
               />
             }
           />
-        
+                  <Route
+            path="/chat"
+            element={
+              <PrivateRoute
+                element={<ChatComponent/>}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
           <Route path="/forgetpassword" element={<Reset />} />
           <Route path="/success" element={<Success />} />
         </Routes>

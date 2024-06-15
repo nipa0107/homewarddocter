@@ -184,7 +184,7 @@ export default function Assessment({}) {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="chat">
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>
@@ -205,18 +205,19 @@ export default function Assessment({}) {
       </div>
 
       <div className="home_content">
-        <div className="header">ติดตาม/ประเมินอาการ</div>
-        <div class="profile_details ">
-          <li>
-            <a href="profile">
-              <i class="bi bi-person"></i>
-              <span class="links_name">
-                {data && data.nametitle + data.name + " " + data.surname}
-              </span>
-            </a>
-          </li>
+        <div className="homeheader">
+          <div className="header">ติดตาม/ประเมินอาการ</div>
+          <div class="profile_details ">
+            <li>
+              <a href="profile">
+                <i class="bi bi-person"></i>
+                <span class="links_name">
+                  {data && data.nametitle + data.name + " " + data.surname}
+                </span>
+              </a>
+            </li>
+          </div>
         </div>
-        <hr></hr>
         <div className="breadcrumbs">
           <ul>
             <li>
@@ -284,7 +285,7 @@ export default function Assessment({}) {
           <table className="table">
             <thead>
               <tr>
-                <th>HN</th>
+                <th>HN </th>
                 <th>AN</th>
                 <th>ชื่อ-สกุล</th>
                 {/* <th>อายุ</th> */}
@@ -314,23 +315,49 @@ export default function Assessment({}) {
                   }
                   return (
                     <tr key={index}>
-<td>
-  <span style={{ color: medicalData[i._id]?.hn ? 'inherit' : '#B2B2B2' }}>
-    {medicalData[i._id]?.hn ? medicalData[i._id]?.hn : "ไม่มีข้อมูล"}
-  </span>
-</td>
-<td>
-  <span style={{ color: medicalData[i._id]?.an ? 'inherit' : '#B2B2B2' }}>
-    {medicalData[i._id]?.an ? medicalData[i._id]?.an : "ไม่มีข้อมูล"}
-  </span>
-</td>
-<td>{i.name} {i.surname}</td>
-{/* <td>{userAge}</td> */}
-<td>
-  <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
-    {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
-  </span>
-</td>
+                      <td>
+                        <span
+                          style={{
+                            color: medicalData[i._id]?.hn
+                              ? "inherit"
+                              : "#B2B2B2",
+                          }}
+                        >
+                          {medicalData[i._id]?.hn
+                            ? medicalData[i._id]?.hn
+                            : "ไม่มีข้อมูล"}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            color: medicalData[i._id]?.an
+                              ? "inherit"
+                              : "#B2B2B2",
+                          }}
+                        >
+                          {medicalData[i._id]?.an
+                            ? medicalData[i._id]?.an
+                            : "ไม่มีข้อมูล"}
+                        </span>
+                      </td>
+                      <td>
+                        {i.name} {i.surname}
+                      </td>
+                      {/* <td>{userAge}</td> */}
+                      <td>
+                        <span
+                          style={{
+                            color: medicalData[i._id]?.diagnosis
+                              ? "inherit"
+                              : "#B2B2B2",
+                          }}
+                        >
+                          {medicalData[i._id]?.diagnosis
+                            ? medicalData[i._id]?.diagnosis
+                            : "ไม่มีข้อมูล"}
+                        </span>
+                      </td>
 
                       <td>
                         <a

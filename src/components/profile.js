@@ -85,7 +85,7 @@ export default function Home({}) {
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="chat">
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>
@@ -105,6 +105,8 @@ export default function Home({}) {
         </ul>
       </div>
       <div className="home_content">
+      <div className="homeheader">
+
         <div className="header">โปรไฟล์</div>
         <div class="profile_details ">
           <li>
@@ -114,7 +116,7 @@ export default function Home({}) {
             </a>
           </li>
         </div>
-        <hr></hr>
+        </div>
         <div className="breadcrumbs">
           <ul>
             <li>
