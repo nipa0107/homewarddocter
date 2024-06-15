@@ -101,7 +101,7 @@ export default class Login extends Component {
               
 
               <p className="forgot-password">
-                <a href="/forgetpassword">ลืมรหัสผ่าน?</a>
+                <a href="/forgetpassword">ลืมรหัสผ่าน ?</a>
               </p>
               
               <div className="d-grid homesubmit">
