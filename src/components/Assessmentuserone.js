@@ -563,23 +563,18 @@ export default function Assessmentuserone({}) {
             </a>
           </li>
           <li>
-<<<<<<< HEAD
           <a href="allpatient">
-=======
-            <a href="./">
->>>>>>> parent of 160bc0b (7.7)
               <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="assessreadiness">
               <i class="bi bi-clipboard-check"></i>
               <span class="links_name">ประเมินความพร้อมการดูแล</span>
             </a>
           </li>
           <li>
-<<<<<<< HEAD
             <a href="assessinhomesss" >
               <i class="bi bi-house-check"></i>
               <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
@@ -587,9 +582,6 @@ export default function Assessmentuserone({}) {
           </li>
           <li>
             <a href="chat">
-=======
-            <a href="./">
->>>>>>> parent of 160bc0b (7.7)
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>
