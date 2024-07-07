@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import "../css/alladmin.css";
 import "../css/sidebar.css";
+import "../css/alladmin.css"
+import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 
-export default function Assessment({ }) {
+export default function Assessinhomesss({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState("");
   const [datauser, setDatauser] = useState([]);
@@ -12,6 +13,7 @@ export default function Assessment({ }) {
   const [searchKeyword, setSearchKeyword] = useState(""); //ค้นหา
   const [token, setToken] = useState("");
   const [medicalData, setMedicalData] = useState({});
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const token = window.localStorage.getItem("token");
@@ -211,7 +213,7 @@ export default function Assessment({ }) {
       </div>
 
       <div className="home_content">
-        <div className="header">ติดตาม/ประเมินอาการ</div>
+        <div className="header">แบบประเมินเยี่ยมบ้าน</div>
         <div class="profile_details ">
           <li>
             <a href="profile">
@@ -234,13 +236,10 @@ export default function Assessment({ }) {
               <i class="bi bi-chevron-double-right"></i>
             </li>
             <li>
-              <a>ติดตาม/ประเมินอาการ</a>
+              <a>แบบประเมินเยี่ยมบ้าน</a>
             </li>
           </ul>
         </div>
-
-        {/*ค้นหา */}
-        {/* <h3>จัดการข้อมูลผู้ป่วย</h3> */}
         <div className="search-bar">
           <input
             className="search-text"
@@ -258,44 +257,14 @@ export default function Assessment({ }) {
           </p>
         </div>
         <div className="content">
-          {/* {data
-  .filter(user => user.deletedAt === null)
-  .map((i) => {
-    const userBirthday = i.birthday ? new Date(i.birthday) : null;
-    let userAge = "";
-    if (userBirthday) {
-      const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
-      const isBeforeBirthday =
-        currentDate.getMonth() < userBirthday.getMonth() ||
-        (currentDate.getMonth() === userBirthday.getMonth() &&
-          currentDate.getDate() < userBirthday.getDate());
-      userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
-    }
-    return (
-      <div key={i._id} className="adminall card mb-3 ">
-        <div className="card-body">
-          <h5 className="card-title">{i.name}{" "}{i.surname}</h5>
-          <h5 className="card-title">{userAge}</h5>
-          <a
-            className="info"
-            onClick={() => navigate("/allinfo", { state: { id: i._id } })}
-          >
-            รายละเอียด
-          </a>
-        </div>
-      </div>
-    );
-  })} */}
-
           <table className="table">
             <thead>
               <tr>
                 <th>HN</th>
                 <th>AN</th>
                 <th>ชื่อ-สกุล</th>
-                {/* <th>อายุ</th> */}
                 <th>ผู้ป่วยโรค</th>
-                <th>รายละเอียด</th>
+                <th>สถานะ</th>
               </tr>
             </thead>
             <tbody>
@@ -341,17 +310,18 @@ export default function Assessment({ }) {
                         <a
                           className="info"
                           onClick={() =>
-                            navigate("/assessmentuser", {
+                            navigate("/assessreadinesspage1", {
                               state: { id: i._id },
                             })
                           }
                         >
-                          รายละเอียด
+                          ยังไม่ได้รับการประเมิน
                         </a>
                       </td>
                     </tr>
                   );
-                })}
+                })
+              }
             </tbody>
           </table>
         </div>

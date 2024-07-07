@@ -102,23 +102,29 @@ return(
         </a>
       </li>
       <li>
-        <a href="#">
+        <a href="assessment">
           <i class="bi bi-clipboard2-pulse"></i>
           <span class="links_name">ติดตาม/ประเมินอาการ</span>
         </a>
       </li>
       <li>
-      <a href="assessment" >
+      <a href="allpatient" >
           <i class="bi bi-people"></i>
           <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
         </a>
       </li>
       <li>
-        <a href="#">
+        <a href="assessreadiness">
           <i class="bi bi-clipboard-check"></i>
           <span class="links_name">ประเมินความพร้อมการดูแล</span>
         </a>
       </li>
+      <li>
+            <a href="assessinhomesss" >
+              <i class="bi bi-house-check"></i>
+              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+            </a>
+          </li>
       <li>
         <a href="#">
           <i class="bi bi-chat-dots"></i>

@@ -562,15 +562,21 @@ export default function Assessmentuserone({}) {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="allpatient">
               <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="assessreadiness">
               <i class="bi bi-clipboard-check"></i>
               <span class="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss" >
+              <i class="bi bi-house-check"></i>
+              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
