@@ -274,6 +274,7 @@ export default function Assessmentuser({}) {
             </a>
           </li>
           <li>
+<<<<<<< HEAD
             <a href="assessinhomesss" >
               <i class="bi bi-house-check"></i>
               <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
@@ -281,6 +282,9 @@ export default function Assessmentuser({}) {
             </li>
           <li>
             <a href="chat">
+=======
+            <a href="./">
+>>>>>>> parent of 160bc0b (7.7)
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>

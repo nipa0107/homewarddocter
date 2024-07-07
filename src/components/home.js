@@ -5,8 +5,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 
-
-export default function Home() {
+export default function Home({ }) {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
@@ -86,18 +85,12 @@ export default function Home() {
             </a>
           </li>
           <li>
-            <a href="assessinhomesss">
-              <i className="bi bi-house-check"></i>
-              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
+            <a href="./" >
+              <i class="bi bi-chat-dots"></i>
+              <span class="links_name" >แช็ต</span>
             </a>
           </li>
-          <li>
-            <a href="./">
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-            </a>
-          </li>
-          <div className="nav-logout">
+          <div class="nav-logout">
             <li>
               <a href="./" onClick={logOut}>
                 <i class='bi bi-box-arrow-right' id="log_out" onClick={logOut}></i>
@@ -131,7 +124,7 @@ export default function Home() {
             </li>
             <li><a>ภาพรวมระบบ</a>
             </li>
-            <li><a>ภาพรวมระบบ</a></li>
+
           </ul>
         </div>
       </div>
