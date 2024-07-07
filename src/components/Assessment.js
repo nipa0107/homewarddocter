@@ -321,23 +321,23 @@ export default function Assessment({ }) {
                   }
                   return (
                     <tr key={index}>
-<td>
-  <span style={{ color: medicalData[i._id]?.hn ? 'inherit' : '#B2B2B2' }}>
-    {medicalData[i._id]?.hn ? medicalData[i._id]?.hn : "ไม่มีข้อมูล"}
-  </span>
-</td>
-<td>
-  <span style={{ color: medicalData[i._id]?.an ? 'inherit' : '#B2B2B2' }}>
-    {medicalData[i._id]?.an ? medicalData[i._id]?.an : "ไม่มีข้อมูล"}
-  </span>
-</td>
-<td>{i.name} {i.surname}</td>
-{/* <td>{userAge}</td> */}
-<td>
-  <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
-    {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
-  </span>
-</td>
+                      <td>
+                        <span style={{ color: medicalData[i._id]?.hn ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[i._id]?.hn ? medicalData[i._id]?.hn : "ไม่มีข้อมูล"}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ color: medicalData[i._id]?.an ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[i._id]?.an ? medicalData[i._id]?.an : "ไม่มีข้อมูล"}
+                        </span>
+                      </td>
+                      <td>{i.name} {i.surname}</td>
+                      {/* <td>{userAge}</td> */}
+                      <td>
+                        <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
+                        </span>
+                      </td>
 
                       <td>
                         <a
