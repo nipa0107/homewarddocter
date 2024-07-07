@@ -1,177 +1,133 @@
-.add {
-  border-style: solid 1px;
-  border-radius: 5px;
+.add{
+    border-style: solid 1px;
+    border-radius: 5px;
 }
 
-.add:hover {
-  background-color: #87CEFA;
-  color: #ffffff;
-  border-color: #87CEFA;
+.add:hover{
+    background-color: #87CEFA;
+    color: #ffffff;
+    border-color: #87CEFA;
 }
 
-.deleteimg {
-  border-radius: 10px;
-  width: 5vh;
-  /* float: right; */
-  margin: auto auto;
+.deleteimg{
+   border-radius: 10px;
+   width: 5vh;
+   /* float: right; */
+   margin: auto auto;
 }
-
-.btn-group {
-  gap: 10px;
-  display: flex;
-  justify-content: center;
-  /* margin-bottom: 30px; */
+.adminall .card-body .deleteimg{
+    float: right;
 }
-
-.btn-pre button {
-  color: #000;
-  /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
-  background-color: #fff;
-  /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
-  border: 1px solid #ccc;
-  /* ตั้งค่าขอบเป็นสีเทา */
-  padding: 10px 20px;
-  /* ตั้งค่าการระบุช่องว่างภายในปุ่ม */
-  cursor: pointer;
-  /* เพิ่ม cursor เมื่อนำเมาส์ไปวางที่ปุ่ม */
-  outline: none;
-  /* ลบเส้นขอบน้ำเงินเมื่อกด */
+.adminall{
+    width: 70% ;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.1); 
+    line-height: 50px;
+    padding: 20px;
 }
-
-.btn-pre button:hover {
-  background-color: #eee;
-  /* สีพื้นหลังเมื่อโฮเวอร์ปุ่ม */
+.adminall form{
+    padding: 20px;
 }
-
-.btn-next button {
-  padding: 10px 30px;
-  background-color: #87CEFA;
-  border-color: #87CEFA;
-}
-
-.adminall .card-body .deleteimg {
-  float: right;
-}
-
-.adminall {
-  width: 70%;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
-  line-height: 50px;
-  padding: 20px;
-}
-
-.adminall form {
-  padding: 20px;
-}
-
 .editimg {
-  border-radius: 10px;
-  width: 5vh;
-  float: right;
-  margin: auto auto;
+    border-radius: 10px;
+    width: 5vh;
+    float: right;
+    margin: auto auto;
 }
-
 .content {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
-.form {
+.form{
 
-  align-items: center;
+    align-items: center;
+}
+.btn{
+    background-color: #87CEFA;
+    color: white;
+    text-align: center;
+    margin-top: 20px;
 }
 
-.btn {
-  background-color: #87CEFA;
-  color: white;
-  text-align: center;
-  margin-top: 20px;
+.cardall{
+    width: 70% ;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.1); 
+    line-height: 50px;
+    padding: 20px;
 }
-
-.cardall {
-  width: 70%;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
-  line-height: 50px;
-  padding: 20px;
+.filename a{
+    text-decoration: none;
+    color: rgb(72, 72, 72);
+    border: 1px solid rgb(228, 228, 228);
+    padding: 7px;
+    border-radius: 8px;
 }
-
-.filename a {
-  text-decoration: none;
-  color: rgb(72, 72, 72);
-  border: 1px solid rgb(228, 228, 228);
-  padding: 7px;
-  border-radius: 8px;
-}
-
-.filename a:hover {
-  background-color: #7e7e7e;
-  color: white;
+.filename a:hover{
+    background-color: #7e7e7e;
+    color: white;
 }
 
 .gray-background {
-  background-color: #e9ecef;
-}
+    background-color: #e9ecef;
+  }
 
-.success {
-  text-align: center;
-}
+  .success{
+    text-align: center;
+  }
 
-td.assessmentnull {
-  text-align: center;
-}
+  td.assessmentnull{
+    text-align: center;
+  }
 
-.headerassesment {
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
+  .headerassesment{
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
 
-.textassesment {
-  text-align: center;
-}
+  .textassesment{
+    text-align: center;
+  }
+  .contentinass{
+    width: 80%; 
+	margin :0 auto;
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1); 
+	/* line-height: 50px;  */
+	padding: 1%; 
+	border-collapse: collapse; 
+	border-spacing: 1; 
+	border-radius: 10px; 
+	position: relative;
+	overflow: hidden;
+  
+  }
+  .texthead{
+    text-align: center;
+    font-weight: bold;
 
-.contentinass {
-  width: 80%;
-  margin: 0 auto;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
-  /* line-height: 50px;  */
-  padding: 1%;
-  border-collapse: collapse;
-  border-spacing: 1;
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
+  }
+  .textheadSymptom{
+    font-weight: bold;
+  }
 
-}
-
-.texthead {
-  text-align: center;
-  font-weight: bold;
-
-}
-
-.textheadSymptom {
-  font-weight: bold;
-}
-
-/* .btn-group{
+  /* .btn-group{
     margin-left: auto;
     margin-right: auto;
     justify-content: center;
   } */
 
-.mb-3 {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
+  .mb-3 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
 .btnass {
   flex: 1;
-  padding: 0.5rem 1.3rem;
+  padding:0.5rem 1.3rem;
   cursor: pointer;
   margin: 5px;
   border-radius: 5px;
@@ -179,219 +135,70 @@ td.assessmentnull {
   display: flex;
   justify-content: center;
   align-items: center;
-  white-space: nowrap;
-  overflow: hidden;
+  white-space: nowrap; 
+  overflow: hidden;  
   text-overflow: ellipsis;
 }
-
-/* Outline button style */
-.btn-outline {
-  border: 1px solid #ccc;
-  background-color: transparent;
-}
-
-/* Normal status button style */
-.btn-normal {
-  background-color: #72DA95;
-  color: white;
-}
-
-/* Abnormal status button style */
-.btn-abnormal {
-  background-color: #FF6A6A;
-  color: white;
-}
-
-/* Completed status button style */
-.btn-completed {
-  background-color: #FFCC80;
-  color: white;
-}
-
-
-.normal-status {
-  /* color: #72DA95; */
-  color: #1fc657;
+  /* Outline button style */
+  .btn-outline {
+    border: 1px solid #ccc;
+    background-color: transparent;
+  }
+  
+  /* Normal status button style */
+  .btn-normal {
+    background-color: #72DA95;
+    color: white;
+  }
+  
+  /* Abnormal status button style */
+  .btn-abnormal {
+    background-color: #FF6A6A;
+    color: white;
+  }
+  
+  /* Completed status button style */
+  .btn-completed {
+    background-color: #FFCC80;
+    color: white;
+  }
 
 
-}
+  .normal-status {
+    /* color: #72DA95; */
+    color: #1fc657;
 
-.abnormal-status {
-  color: #FF6A6A;
-}
 
-.end-of-treatment-status {
-  color: #FFCC80;
-}
-
-.not-evaluated {
-  color: #B2B2B2;
-  text-align: center;
-}
-
-.info {
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.user-info {
-  display: flex;
-  justify-content: space-between;
-  padding-left: 6%;
-
-}
-.info3 .header {
-  background-color: #95d7ff; /* สีฟ้า */
-  color: #000; /* ตัวหนังสือสีดำ */
-  padding: 5px 0px 5px 25px;
-  margin: 0;
-  border-radius: 3px 3px 0 0;
-}
-.info3 .header b{
-  font-size: 20px;
-}
-.info3.card {
-  padding: 0;
-}
-.info3 {
-  width: 70%;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
-  line-height: 50px;
+  }
+  
+  .abnormal-status {
+    color: #FF6A6A; 
+  }
+  
+  .end-of-treatment-status {
+    color: #FFCC80;
+  }
+  
+  .not-evaluated {
+    color: #B2B2B2;
+    text-align: center;
+  }
+  .info {
+    text-decoration: none;
+    cursor: pointer;
+  }
+  
+  /* General styles for the content container */
+/* .content {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 20px auto;
   padding: 20px;
-}
-.btn-group {
-  gap: 10px;
-  display: flex;
-  justify-content: center;
-  /* margin-bottom: 30px; */
-}
-
-.btn-pre button {
-  color: #000;
-  /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
-  background-color: #fff;
-  /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
-  border: 1px solid #ccc;
-  /* ตั้งค่าขอบเป็นสีเทา */
-  padding: 10px 20px;
-  /* ตั้งค่าการระบุช่องว่างภายในปุ่ม */
-  cursor: pointer;
-  /* เพิ่ม cursor เมื่อนำเมาส์ไปวางที่ปุ่ม */
-  outline: none;
-  /* ลบเส้นขอบน้ำเงินเมื่อกด */
-}
-
-.btn-pre button:hover {
-  background-color: #eee;
-  /* สีพื้นหลังเมื่อโฮเวอร์ปุ่ม */
-}
-
-.btn-next button {
-  padding: 10px 30px;
-}
-
-.right-info {
-  margin-top: 21px;
-  margin-left: 21px;
-  word-spacing: 10px;
-  flex: 1;
-}
-
-.right-info1 {
-  margin-top: 21px;
-  margin-left: 25px;
-  word-spacing: 10px;
-  flex: 1;
-}
-
-.left-info {
-  margin-top: 12px;
-  word-spacing: 12px;
-  padding: 10px;
-}
-
-.user-info p {
-  line-height: 15px;
-}
-
-.deleteimg1 button {
-  border-radius: 5px;
-  width: 10vh;
-  background-color: rgb(236, 78, 78);
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.editimg1 button {
-  border-radius: 5px;
-  width: 10vh;
-  background-color: #ffde59;
-  color: black;
-  border: none;
-  cursor: pointer;
-
-}
-
-.adddata {
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.adddata button {
-  border-radius: 5px;
-  width: 11vh;
-  background-color: #87CEFA;
-  color: white;
-  border: none;
-}
-
-.adddata button:hover {
-  background-color: #5cb3fd;
-  /* Darker blue on hover */
-}
-
-.delete-btn {
-  color: rgb(255, 255, 255);
-  background: rgb(236, 78, 78);
-  border-radius: 3px;
-  width: 10vh;
-  padding: 15px;
-  border: none;
-  margin-left: 390px;
-  /* ปรับตำแหน่งของปุ่มลบ */
-}
-
-.no-equipment {
-  margin-top: 20px;
-  /* ปรับระยะห่างของข้อความ "ไม่มีข้อมูลอุปกรณ์" */
-  text-align: center;
-}
-
-.equip-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.equipment-item {
-  display: flex;
-  align-items: center;
-}
-
-.equipment-item input {
-  margin-right: 10px;
-  margin-top: 8px;
-}
-
-.adminall .card-body .deleteimg1 {
-  float: none;
-  /* Remove float property */
-}
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+} */
 
 .headerassesment {
   font-size: 1.5em;
@@ -410,7 +217,7 @@ td.assessmentnull {
   background: #fff;
   padding: 15px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
   margin-bottom: 20px;
 }
 
@@ -451,7 +258,7 @@ td.assessmentnull {
 }
 
 .contentinass p:nth-child(odd) {
-  background: #f1f1f1;
+ background: #f1f1f1;
   padding: 0.5rem;
   border-radius: 4px;
 }
@@ -493,8 +300,7 @@ p .label {
   color: #333;
 
 }
-
-.textassesment label {
+.textassesment label{
   margin-left: 1%;
   margin-right: 0.5rem;
   font-size: 16;
@@ -516,7 +322,6 @@ p .label {
   margin-top: 8px;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
-
 .inline-container textarea:focus {
   border-color: #87CEFA;
   box-shadow: 0 0 5px rgba(13, 124, 242, 0.5);
@@ -528,17 +333,15 @@ textarea {
   min-height: 100px;
   height: 50%;
 }
-
-.select {
+.select{
   width: 20%;
 }
-
 .custom-legend {
   font-size: 100px;
   color: #fff;
 }
 
 .gray-text {
-  color: rgba(214, 214, 214, 0.6);
-  /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
+  color: rgba(214, 214, 214, 0.6); /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
 }
+

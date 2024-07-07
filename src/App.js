@@ -15,11 +15,6 @@ import Profile from "./components/profile";
 import Updatepassword from "./components/updatepassword";
 import UpdateProfile from "./components/updateprofile";
 import Success from "./components/success";
-import Allpatient from "./components/allpatient";
-import Infopatient from "./components/infopatient";
-import Updatepatient from "./components/updatepatient";
-import Updatemedicalinformation from "./components/updatemedicalinformation";
-import Addequippatient from "./components/addequippatient";
 import Assessment from "./components/Assessment";
 import Assessmentuser from "./components/Assessmentuser";
 import Assessmentuserone from "./components/Assessmentuserone";
@@ -70,51 +65,6 @@ function App() {
             element={
               <PrivateRoute
                 element={<UpdateProfile />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/allpatient"
-            element={
-              <PrivateRoute
-                element={<Allpatient />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/infopatient"
-            element={
-              <PrivateRoute
-                element={<Infopatient />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/updatepatient"
-            element={
-              <PrivateRoute
-                element={<Updatepatient />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/updatemedicalinformation"
-            element={
-              <PrivateRoute
-                element={<Updatemedicalinformation />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/addequippatient"
-            element={
-              <PrivateRoute
-                element={<Addequippatient />}
                 isLoggedIn={isLoggedIn}
               />
             }

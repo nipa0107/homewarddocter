@@ -4,7 +4,7 @@ import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 
-export default function Assessment({ }) {
+export default function Assessment({}) {
   const navigate = useNavigate();
   const [data, setData] = useState("");
   const [datauser, setDatauser] = useState([]);
@@ -172,21 +172,15 @@ export default function Assessment({ }) {
             </a>
           </li>
           <li>
-            <a href="allpatient">
+            <a href="./">
               <i class="bi bi-people"></i>
-              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="assessreadiness">
+            <a href="./">
               <i class="bi bi-clipboard-check"></i>
               <span class="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss" >
-              <i class="bi bi-house-check"></i>
-              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -338,7 +332,6 @@ export default function Assessment({ }) {
                           {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
                         </span>
                       </td>
-
                       <td>
                         <a
                           className="info"

@@ -5,7 +5,7 @@ import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
 
-export default function Assessmentuser({ }) {
+export default function Assessmentuser({}) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [isActive, setIsActive] = useState(false);
@@ -87,12 +87,12 @@ export default function Assessmentuser({ }) {
           console.error("Error fetching medical information:", error);
         }
       };
-
+  
       fetchMedicalInfo();
     }
   }, [userData]);
-
-
+  
+  
 
   const fetchpatientForms = async () => {
     try {
@@ -139,6 +139,12 @@ export default function Assessmentuser({ }) {
     fetchAssessments();
   }, []);
 
+  // const hasAssessment = (patientFormId) => {
+  //   return assessments.some(
+  //     (assessment) => assessment.PatientForm === patientFormId
+  //   );
+  // };
+
   const fetchMpersonnel = async () => {
     try {
       const response = await fetch(`http://localhost:5000/allMpersonnel`, {
@@ -162,6 +168,18 @@ export default function Assessmentuser({ }) {
   const currentDate = new Date();
 
   const userBirthday = new Date(birthday);
+
+  // let userAge = "";
+  // if (userBirthday) {
+  //   const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
+
+  //   const isBeforeBirthday =
+  //     currentDate.getMonth() < userBirthday.getMonth() ||
+  //     (currentDate.getMonth() === userBirthday.getMonth() &&
+  //       currentDate.getDate() < userBirthday.getDate());
+
+  //   userAge = isBeforeBirthday ? ageDiff - 1 : ageDiff;
+  // }
 
   useEffect(() => {
     if (birthday) {
@@ -212,9 +230,11 @@ export default function Assessmentuser({ }) {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-      } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } เวลา ${hours < 10 ? "0" + hours : hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } น.`;
   };
 
   return (
@@ -242,13 +262,13 @@ export default function Assessmentuser({ }) {
             </a>
           </li>
           <li>
-            <a href="allpatient">
+            <a href="./">
               <i class="bi bi-people"></i>
-              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="assessreadiness">
+            <a href="./">
               <i class="bi bi-clipboard-check"></i>
               <span class="links_name">ประเมินความพร้อมการดูแล</span>
             </a>
@@ -258,7 +278,7 @@ export default function Assessmentuser({ }) {
               <i class="bi bi-house-check"></i>
               <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
             </a>
-          </li>
+            </li>
           <li>
             <a href="chat">
               <i class="bi bi-chat-dots"></i>
@@ -322,31 +342,31 @@ export default function Assessmentuser({ }) {
         <div className="toolbar"></div>
         <div className="content">
           <div className="">
-            <p className="headerassesment">
-              {name} {surname}
-            </p>
-            {birthday ? (
-              <p className="textassesment">
-                <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
-              </p>
-            ) : (
-              <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
-            )}
+          <p className="headerassesment">
+            {name} {surname}
+          </p>
+          {birthday ? (
             <p className="textassesment">
-
-              <label>HN:</label>
-              {medicalData && medicalData.HN
-                ? medicalData.HN
-                : "ไม่มีข้อมูล"}
-              <label>AN:</label>
-              {medicalData && medicalData.AN
-                ? medicalData.AN
-                : "ไม่มีข้อมูล"}
-              <label>ผู้ป่วยโรค:</label>
-              {medicalData && medicalData.Diagnosis
-                ? medicalData.Diagnosis
-                : "ไม่มีข้อมูล"}
+              <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
             </p>
+          ) : (
+            <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
+          )}
+          <p className="textassesment">
+            
+          <label>HN:</label>
+            {medicalData && medicalData.HN
+              ? medicalData.HN
+              : "ไม่มีข้อมูล"}
+             <label>AN:</label>
+            {medicalData && medicalData.AN
+              ? medicalData.AN
+              : "ไม่มีข้อมูล"}
+             <label>ผู้ป่วยโรค:</label>
+            {medicalData && medicalData.Diagnosis
+              ? medicalData.Diagnosis
+              : "ไม่มีข้อมูล"}
+          </p>
 
           </div>
 
@@ -392,8 +412,8 @@ export default function Assessmentuser({ }) {
                                   assessment.status_name === "ปกติ"
                                     ? "normal-status"
                                     : assessment.status_name === "ผิดปกติ"
-                                      ? "abnormal-status"
-                                      : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
+                                    ? "abnormal-status"
+                                    : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
                                       "end-of-treatment-status"
                                 }
                               >
@@ -412,22 +432,22 @@ export default function Assessmentuser({ }) {
                           (assessment) => assessment.PatientForm === form._id
                         )
                           ? assessments.map((assessment) =>
-                            assessment.PatientForm === form._id ? (
-                              <span key={assessment._id}>
-                                {mpersonnel.map((person) =>
-                                  person._id === assessment.MPersonnel ? (
-                                    <span key={person._id}>
-                                      {person.nametitle} {person.name}{" "}
-                                      {person.surname}
-                                    </span>
-                                  ) : null
-                                )}
-                              </span>
-                            ) : null
-                          )
-                          : <span className="not-evaluated">
-                            ยังไม่ได้รับการประเมิน
-                          </span>}
+                              assessment.PatientForm === form._id ? (
+                                <span key={assessment._id}>
+                                  {mpersonnel.map((person) =>
+                                    person._id === assessment.MPersonnel ? (
+                                      <span key={person._id}>
+                                        {person.nametitle} {person.name}{" "}
+                                        {person.surname}
+                                      </span>
+                                    ) : null
+                                  )}
+                                </span>
+                              ) : null
+                            )
+                          :     <span className="not-evaluated">
+                          ยังไม่ได้รับการประเมิน
+                        </span>}
                       </td>
                     </tr>
                   ))

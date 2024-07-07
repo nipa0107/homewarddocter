@@ -3,17 +3,12 @@ import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
-import Pt from "../img/pt.png";
-import Pt2 from "../img/pt2.png";
-import Dt from "../img/dt.png";
 import { useNavigate } from "react-router-dom";
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
-import CountUp from 'react-countup';
 
 
-export default function Home({ }) {
+export default function Home() {
   const [data, setData] = useState([]);
-  const [datauser, setDatauser] = useState([]);
+  const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState('');
 
@@ -22,11 +17,12 @@ export default function Home({ }) {
     window.location.href = "./";
   };
 
+  // bi-list
   const handleToggleSidebar = () => {
     setIsActive(!isActive);
   };
 
-  useEffect(() => {
+ useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
     if (token) {
@@ -38,16 +34,18 @@ export default function Home({ }) {
           Accept: "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({
+          token: token,
+        }),
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
+          console.log(data)
           setData(data.data);
+         
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
-          // logOut();
         });
     } },); 
 
@@ -62,7 +60,7 @@ export default function Home({ }) {
           </div>
           <i class='bi bi-list' id="btn" onClick={handleToggleSidebar}></i>
         </div>
-        <ul className="nav-list">
+        <ul class="nav-list">
           <li>
             <a href="home">
               <i class="bi bi-house"></i>
@@ -88,9 +86,15 @@ export default function Home({ }) {
             </a>
           </li>
           <li>
-            <a href="./" >
-              <i class="bi bi-chat-dots"></i>
-              <span class="links_name" >แช็ต</span>
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
+            </a>
+          </li>
+          <li>
+            <a href="./">
+              <i className="bi bi-chat-dots"></i>
+              <span className="links_name">แช็ต</span>
             </a>
           </li>
           <div className="nav-logout">
@@ -119,104 +123,16 @@ export default function Home({ }) {
           <ul>
             <li>
               <a href="home">
-                <i className="bi bi-house-fill"></i>
+                <i class="bi bi-house-fill"></i>
               </a>
             </li>
             <li className="arrow">
-              <i className="bi bi-chevron-double-right"></i>
+              <i class="bi bi-chevron-double-right"></i>
             </li>
             <li><a>ภาพรวมระบบ</a>
             </li>
-
+            <li><a>ภาพรวมระบบ</a></li>
           </ul>
-        </div>
-        <div className="row px-5 mt-5">
-          <div className="grid">
-            <div className="item">
-              <div className="countcontent">
-                <div className="row align-items-center">
-                  <div className="color-strip bg-primary"></div>
-                  <div className="col">
-                    <div className="bg-icon">
-                      <img src={Pt2} className="patient" alt="patient" />
-                    </div>
-                  </div>
-                  <div className="col">
-                    <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
-                    <p className="name fs-5">ผู้ป่วยทั้งหมด</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="item">
-              <div className="countcontent">
-                <div className="row align-items-center">
-                  <div className="color-strip bg-success"></div>
-                  <div className="col">
-                    <div className="bg-icon">
-                      <img src={Pt} className="patient" alt="patient" />
-                    </div>
-                  </div>
-                  <div className="col">
-                    <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
-                    <p className="name fs-5">ผู้ป่วยที่กำลังรักษา</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="item">
-              <div className="countcontent">
-                <div className="row align-items-center">
-                  <div className="color-strip bg-yellow"></div>
-                  <div className="col">
-                    <div className="bg-icon">
-                      <img src={Dt} className="patient" alt="patient" />
-                    </div>
-                  </div>
-                  <div className="col">
-                    <p className="num mt-2"><CountUp end={data.length} /></p>
-                    <p className="name fs-5">แพทย์ทั้งหมด</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="chart-container d-flex justify-content-center mt-5">
-          <div className="chart-content">
-            <PieChart width={500} height={500}>
-              <Pie
-                dataKey="value"
-                isAnimationActive={true}
-                data={diagnosisData}
-                cx="50%"
-                cy="50%"
-                outerRadius={150}
-                fill="#8884d8"
-                label={({ name, percent }) => ` ${(percent * 100).toFixed(0)}%`}
-              >
-                {diagnosisData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value, name) => [`ผู้ป่วย${name}`]} />
-            </PieChart>
-          </div>
-          <div className="legend-content mb-5">
-            <div className="diagnosis-legend">
-              <h5> <b>Diagnosis</b></h5>
-              <ul>
-                {diagnosisData.map((entry, index) => (
-                  <li key={`item-${index}`} style={{ color: COLORS[index % COLORS.length] }}>
-                    <span style={{ color: COLORS[index % COLORS.length], padding: '10px 10px', borderRadius: '5px', lineHeight: '30px' }}>
-                      ผู้ป่วย{entry.name} : {entry.value} cases
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
         </div>
       </div>
     </main>

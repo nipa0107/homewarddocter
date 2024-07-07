@@ -563,7 +563,7 @@ export default function Assessmentuserone({}) {
             </a>
           </li>
           <li>
-            <a href="allpatient">
+          <a href="allpatient">
               <i class="bi bi-people"></i>
               <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
