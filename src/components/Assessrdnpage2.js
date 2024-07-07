@@ -254,9 +254,9 @@ export default function Assessreadiness2({ }) {
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? 'active' : ''}`}>
-                <div class="logo_content">
-                    <div class="logo">
-                        <div class="logo_name" >
+                <div className="logo_content">
+                    <div className="logo">
+                        <div className="logo_name" >
                             <img src={logow} className="logow" alt="logo" ></img>
                         </div>
                     </div>
@@ -294,7 +294,7 @@ export default function Assessreadiness2({ }) {
                         </a>
                     </li>
                     <li>
-                        <a href="./" >
+                        <a href="chat" >
                             <i class="bi bi-chat-dots"></i>
                             <span class="links_name" >แช็ต</span>
                         </a>

@@ -192,7 +192,7 @@ export default function Assessinhomesss({ }) {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="chat">
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>

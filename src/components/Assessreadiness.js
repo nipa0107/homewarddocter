@@ -175,8 +175,8 @@ export default function Assessreadiness({ }) {
           </li>
           <li>
             <a href="allpatient">
-              <i class="bi bi-people"></i>
-              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
+              <i className="bi bi-people"></i>
+              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
@@ -192,7 +192,7 @@ export default function Assessreadiness({ }) {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="chat">
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>

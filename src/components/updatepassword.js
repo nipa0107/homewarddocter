@@ -110,7 +110,7 @@ return(
       <li>
       <a href="allpatient" >
           <i class="bi bi-people"></i>
-          <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+          <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
         </a>
       </li>
       <li>

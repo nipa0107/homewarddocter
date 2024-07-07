@@ -74,8 +74,8 @@ export default function Home({}) {
           </li>
           <li>
             <a href="allpatient">
-              <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <i className="bi bi-people"></i>
+              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>

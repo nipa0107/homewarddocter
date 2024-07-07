@@ -373,15 +373,21 @@ const ChatComponent = () => {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="allpatient">
               <i className="bi bi-people"></i>
-              <span className="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="assessreadiness">
               <i className="bi bi-clipboard-check"></i>
               <span className="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
