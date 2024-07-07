@@ -141,7 +141,7 @@ export default function UpdateProfile() {
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="chat">
               <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>
@@ -161,106 +161,108 @@ export default function UpdateProfile() {
         </ul>
       </div>
       <div className="home_content">
-        <div className="header">แก้ไขโปรไฟล์ผู้ใช้</div>
-        <div class="profile_details ">
-          <li>
-            <a href="profile">
-              <i class="bi bi-person"></i>
-              <span class="links_name" >{data && data.nametitle + data.name + " " + data.surname}</span>
-            </a>
-          </li>
-        </div>
-        <hr></hr>
-        <div className="breadcrumbs">
-          <ul>
+        <div className="homeheader">
+          <div className="header">แก้ไขโปรไฟล์ผู้ใช้</div>
+          <div class="profile_details ">
             <li>
-              <a href="home">
-                <i class="bi bi-house-fill"></i>
+              <a href="profile">
+                <i class="bi bi-person"></i>
+                <span class="links_name" >{data && data.nametitle + data.name + " " + data.surname}</span>
               </a>
             </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
-            </li>
-            <li><a href="profile">โปรไฟล์</a>
-            </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
-            </li>
-            <li><a>แก้ไขโปรไฟล์ผู้ใช้</a>
-            </li>
-          </ul>
-        </div>
-        {/* <h3>แก้ไขโปรไฟล์ผู้ใช้</h3> */}
-        <div className="formcontainerpf card mb-2">
-          <div className="mb-2">
-            <label>ชื่อผู้ใช้</label>
-            <input
-              type="text"
-              className="form-control gray-background"
-              readOnly
-              value={username}
-            //   onChange={(e) => setUsername(e.target.value)}
-            />
           </div>
-          <div className="mb-2">
-            <label>คำนำหน้าชื่อ</label>
-            <select
-              className="form-control"
-              value={nametitle}
-              onChange={(e) => setNameTitle(e.target.value)}
-            >
-              <option value="">กรุณาเลือก</option>
-              <option value="แพทย์หญิง">แพทย์หญิง</option>
-              <option value="นายแพทย์">นายแพทย์</option>
-            </select>
+          <hr></hr>
+          <div className="breadcrumbs">
+            <ul>
+              <li>
+                <a href="home">
+                  <i class="bi bi-house-fill"></i>
+                </a>
+              </li>
+              <li className="arrow">
+                <i class="bi bi-chevron-double-right"></i>
+              </li>
+              <li><a href="profile">โปรไฟล์</a>
+              </li>
+              <li className="arrow">
+                <i class="bi bi-chevron-double-right"></i>
+              </li>
+              <li><a>แก้ไขโปรไฟล์ผู้ใช้</a>
+              </li>
+            </ul>
           </div>
-          <div className="mb-2">
-            <label>ชื่อ</label>
-            <input
-              type="text"
-              className="form-control"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="mb-2">
-            <label>นามสกุล</label>
-            <input
-              type="text"
-              className="form-control"
-              value={surname}
-              onChange={(e) => setSurname(e.target.value)}
-            />
-          </div>
+          {/* <h3>แก้ไขโปรไฟล์ผู้ใช้</h3> */}
+          <div className="formcontainerpf card mb-2">
+            <div className="mb-2">
+              <label>ชื่อผู้ใช้</label>
+              <input
+                type="text"
+                className="form-control gray-background"
+                readOnly
+                value={username}
+              //   onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <div className="mb-2">
+              <label>คำนำหน้าชื่อ</label>
+              <select
+                className="form-control"
+                value={nametitle}
+                onChange={(e) => setNameTitle(e.target.value)}
+              >
+                <option value="">กรุณาเลือก</option>
+                <option value="แพทย์หญิง">แพทย์หญิง</option>
+                <option value="นายแพทย์">นายแพทย์</option>
+              </select>
+            </div>
+            <div className="mb-2">
+              <label>ชื่อ</label>
+              <input
+                type="text"
+                className="form-control"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
+            <div className="mb-2">
+              <label>นามสกุล</label>
+              <input
+                type="text"
+                className="form-control"
+                value={surname}
+                onChange={(e) => setSurname(e.target.value)}
+              />
+            </div>
 
-          <div className="mb-2">
-            <label>อีเมล</label>
-            <input
-              type="text"
-              className="form-control gray-background"
-              readOnly
-              value={email}
-            //   onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="mb-2">
-            <label>เบอร์โทรศัพท์</label>
-            <input
-              type="text"
-              className="form-control"
-              value={tel}
-              onChange={(e) => setTel(e.target.value)}
-            />
-          </div>
+            <div className="mb-2">
+              <label>อีเมล</label>
+              <input
+                type="text"
+                className="form-control gray-background"
+                readOnly
+                value={email}
+              //   onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <div className="mb-2">
+              <label>เบอร์โทรศัพท์</label>
+              <input
+                type="text"
+                className="form-control"
+                value={tel}
+                onChange={(e) => setTel(e.target.value)}
+              />
+            </div>
 
-          <div className="d-grid save">
-            <button
-              onClick={UpdateProfile}
-              type="submit"
-              className="btn btnsave py-2"
-            >
-              บันทึก
-            </button>
+            <div className="d-grid save">
+              <button
+                onClick={UpdateProfile}
+                type="submit"
+                className="btn btnsave py-2"
+              >
+                บันทึก
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -23,10 +23,6 @@ import Addequippatient from "./components/addequippatient";
 import Assessment from "./components/Assessment";
 import Assessmentuser from "./components/Assessmentuser";
 import Assessmentuserone from "./components/Assessmentuserone";
-import Assessreadiness  from "./components/Assessreadiness";
-import Assessreadiness1  from "./components/Assessrdnpage1";
-import Assessreadiness2  from "./components/Assessrdnpage2";
-import Assessinhomesss  from "./components/Assessinhomesss";
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
     element
@@ -148,42 +144,6 @@ function App() {
             element={
               <PrivateRoute
                 element={<Assessmentuserone />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/assessreadiness"
-            element={
-              <PrivateRoute
-                element={<Assessreadiness />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/assessreadinesspage1"
-            element={
-              <PrivateRoute
-                element={<Assessreadiness1 />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/assessreadinesspage2"
-            element={
-              <PrivateRoute
-                element={<Assessreadiness2 />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
-            path="/assessinhomesss"
-            element={
-              <PrivateRoute
-                element={<Assessinhomesss />}
                 isLoggedIn={isLoggedIn}
               />
             }

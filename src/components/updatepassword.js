@@ -126,7 +126,7 @@ return(
             </a>
           </li>
       <li>
-        <a href="#">
+        <a href="chat">
           <i class="bi bi-chat-dots"></i>
           <span class="links_name">แช็ต</span>
         </a>
@@ -146,6 +146,8 @@ return(
     </ul>
   </div>
   <div className="home_content">
+  <div className="homeheader">
+
     <div className="header">เปลี่ยนรหัสผ่าน</div>
     <div class="profile_details ">
       <li>
@@ -154,6 +156,7 @@ return(
           <span class="links_name" >{data && data.nametitle+data.name+" "+data.surname}</span>
         </a>
       </li>
+    </div>
     </div>
     <hr></hr>
     <div className="breadcrumbs">

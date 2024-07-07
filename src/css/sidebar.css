@@ -156,11 +156,19 @@
     transition: all 0.3s ease;
 }
 
+.homeheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 .profile_details {
-    position: absolute;
+    /* position: absolute; */
     right: 30px;
     top: 10px;
-    display: flex;
+    /* display: flex; */
     padding: 5px;
     align-items: center;
     font-size: 20px;
@@ -184,6 +192,7 @@
 .profile_details li a:hover {
     color: #4ab4ec;
 }
+
 .sidebar .nav-logout {
     position: absolute;
     color: white;
@@ -223,7 +232,7 @@
     position: relative;
     height: 100%;
     width: calc(100% - 330px);
-    left: 330px;
+    left: 320px;
     transition: all 0.5s ease;
     margin-bottom: 2%;
 }
@@ -308,6 +317,7 @@ hr{
     box-shadow: 0 4px 30px -10px rgba(0, 0, 0, 0.2);
     border-radius: 15px;
     width: fit-content;
+    margin-top: 5px;
 }
 .breadcrumbs ul i{
     vertical-align: middle;
@@ -332,4 +342,10 @@ hr{
 }
 .breadcrumbs ul li:last-child a{
     font-weight: bold;
+}
+
+.countchat{
+    justify-content: flex-end;
+    align-items: flex-end;
+
 }

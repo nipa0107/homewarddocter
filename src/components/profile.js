@@ -90,9 +90,10 @@ export default function Home({}) {
               <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
+          <li></li>
           <li>
-            <a href="./">
-              <i class="bi bi-chat-dots"></i>
+          <a href="chat">
+          <i class="bi bi-chat-dots"></i>
               <span class="links_name">แช็ต</span>
             </a>
           </li>
@@ -111,6 +112,8 @@ export default function Home({}) {
         </ul>
       </div>
       <div className="home_content">
+      <div className="homeheader">
+
         <div className="header">โปรไฟล์</div>
         <div class="profile_details ">
           <li>
@@ -120,7 +123,7 @@ export default function Home({}) {
             </a>
           </li>
         </div>
-        <hr></hr>
+        </div>
         <div className="breadcrumbs">
           <ul>
             <li>
