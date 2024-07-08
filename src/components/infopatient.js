@@ -336,17 +336,18 @@ export default function Infopatient({ }) {
                 </ul>
             </div>
             <div className="home_content">
-                <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
-                <div class="profile_details ">
-                    <li>
-                        <a href="profile">
-                            <i class="bi bi-person"></i>
-                            <span class="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
-                        </a>
-                    </li>
+                <div className="homeheader">
+                    <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
+                    <div class="profile_details ">
+                        <li>
+                            <a href="profile">
+                                <i class="bi bi-person"></i>
+                                <span class="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
+                            </a>
+                        </li>
+                    </div>
                 </div>
-                <hr></hr>
-                <div className="breadcrumbs">
+                <div className="breadcrumbs mt-4">
                     <ul>
                         <li>
                             <a href="home">

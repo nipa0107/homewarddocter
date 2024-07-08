@@ -4,8 +4,11 @@ import "../css/alladmin.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function Assessreadiness() {
+export default function Assessreadiness1() {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [isActive, setIsActive] = useState(false);
@@ -24,6 +27,7 @@ export default function Assessreadiness() {
     const [userAgeInMonths, setUserAgeInMonths] = useState(0);
     const [userData, setUserData] = useState(null);
     const [medicalData, setMedicalData] = useState([]);
+    // const { control, handleSubmit } = useForm();
 
     useEffect(() => {
         const token = window.localStorage.getItem("token");
@@ -81,7 +85,7 @@ export default function Assessreadiness() {
                     const data = await response.json();
                     console.log("Medical Information:", data);
                     setMedicalData(data.data);
-                    console.log("22:", medicalData);
+                    console.log("medicalData:", medicalData);
 
                 } catch (error) {
                     console.error("Error fetching medical information:", error);
@@ -160,8 +164,6 @@ export default function Assessreadiness() {
 
     const currentDate = new Date();
 
-    const userBirthday = new Date(birthday);
-
     useEffect(() => {
         if (birthday) {
             const userBirthday = new Date(birthday);
@@ -188,51 +190,230 @@ export default function Assessreadiness() {
     const handleToggleSidebar = () => {
         setIsActive(!isActive);
     };
-    const formatDate = (dateTimeString) => {
-        const dateTime = new Date(dateTimeString);
-        const day = dateTime.getDate();
-        const month = dateTime.getMonth() + 1;
-        const year = dateTime.getFullYear();
-        const hours = dateTime.getHours();
-        const minutes = dateTime.getMinutes();
 
-        const thaiMonths = [
-            "มกราคม",
-            "กุมภาพันธ์",
-            "มีนาคม",
-            "เมษายน",
-            "พฤษภาคม",
-            "มิถุนายน",
-            "กรกฎาคม",
-            "สิงหาคม",
-            "กันยายน",
-            "ตุลาคม",
-            "พฤศจิกายน",
-            "ธันวาคม",
-        ];
+    const Step1 = ({ register, errors, watch }) => (
+        <div>
+            <div className="mb-1">
+                <label>1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยใน ที่บ้านจากแพทย์อย่างครบถ้วน และให้คำยินยอมก่อนรับบริการใช่หรือไม่?</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_1" value="ใช่" {...register('step1.question1_1', { required: true })} />
+                        ใช่
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_1" value="ไม่ใช่" {...register('step1.question1_1', { required: true })} />
+                        ไม่ใช่
+                    </label>
+                </div>
+                {errors.question1_1 && <span>This field is required</span>}
+            </div>
+            <div className="mb-1">
+                <label>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน มีความปลอดภัยใช่หรือไม่?</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_2" value="ใช่" {...register('step1.question1_2', { required: true })} />
+                        ใช่
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_2" value="ไม่ใช่" {...register('step1.question1_2', { required: true })} />
+                        ไม่ใช่
+                    </label>
+                </div>
+                {errors.question1_2 && <span>This field is required</span>}
+            </div>
+            <div className="mb-1">
+                <label>3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน อยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_3" value="ใช่" {...register('step1.question1_3', { required: true })} />
+                        ใช่
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_3" value="ไม่ใช่" {...register('step1.question1_3', { required: true })} />
+                        ไม่ใช่
+                    </label>
+                </div>
+                {errors.question1_3 && <span>This field is required</span>}
+            </div>
+            <div className="mb-1">
+                <label>4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน สามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_4" value="ใช่" {...register('step1.question1_4', { required: true })} />
+                        ใช่
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question1_4" value="ไม่ใช่" {...register('step1.question1_4', { required: true })} />
+                        ไม่ใช่
+                    </label>
+                </div>
+                {errors.question1_4 && <span>This field is required</span>}
+            </div>
+        </div>
+    );
 
-        return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-            } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-            } น.`;
+    const Step2 = ({ register, errors, watch }) => (
+        <div>
+            <div className="mb-1">
+                <label>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_1" value="ถูกต้อง" {...register('step2.question2_1', { required: true })} />
+                        ถูกต้อง
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_1" value="ไม่ถูกต้อง" {...register('step2.question2_1', { required: true })} />
+                        ไม่ถูกต้อง
+                    </label>
+                </div>
+                {/* {errors.question2_1 && <span>This field is required</span>} */}
+            </div>
+            <div className="mb-1">
+                <label>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_2" value="ถูกต้อง" {...register('step2.question2_2', { required: true })} />
+                        ถูกต้อง
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_2" value="ไม่ถูกต้อง" {...register('step2.question2_2', { required: true })} />
+                        ไม่ถูกต้อง
+                    </label>
+                </div>
+                {/* {errors.question2_2 && <span>This field is required</span>} */}
+            </div>
+            <div className="mb-1">
+                <label>3. Environment : มีการเตรียมสิ่งแวดล้อม</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_3" value="ถูกต้อง" {...register('step2.question2_3', { required: true })} />
+                        ถูกต้อง
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_3" value="ไม่ถูกต้อง" {...register('step2.question2_3', { required: true })} />
+                        ไม่ถูกต้อง
+                    </label>
+                </div>
+                {/* {errors.question2_3 && <span>This field is required</span>} */}
+            </div>
+            <div className="mb-1">
+                <label>4.Treatment : มีการฝึกทักษะที่จำเป็น</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_4" value="ถูกต้อง" {...register('step2.question2_4', { required: true })} />
+                        ถูกต้อง
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_4" value="ไม่ถูกต้อง" {...register('step2.question2_4', { required: true })} />
+                        ไม่ถูกต้อง
+                    </label>
+                </div>
+                {/* {errors.question2_4 && <span>This field is required</span>} */}
+            </div>
+            <div className="mb-1">
+                <label>5. Health : รู้ข้อจำกัดด้านสุขภาพ</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_5" value="ถูกต้อง" {...register('step2.question2_5', { required: true })} />
+                        ถูกต้อง
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_5" value="ไม่ถูกต้อง" {...register('step2.question2_5', { required: true })} />
+                        ไม่ถูกต้อง
+                    </label>
+                </div>
+                {/* {errors.question2_5 && <span>This field is required</span>} */}
+            </div>
+            <div className="mb-1">
+                <label>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_6" value="ถูกต้อง" {...register('step2.question2_6', { required: true })} />
+                        ถูกต้อง
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_6" value="ไม่ถูกต้อง" {...register('step2.question2_6', { required: true })} />
+                        ไม่ถูกต้อง
+                    </label>
+                </div>
+                {/* {errors.question2_6 && <span>This field is required</span>} */}
+            </div>
+            <div className="mb-1">
+                <label>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค</label>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_7" value="ถูกต้อง" {...register('step2.question2_7', { required: true })} />
+                        ถูกต้อง
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        <input type="radio" name="question2_7" value="ไม่ถูกต้อง" {...register('step2.question2_7', { required: true })} />
+                        ไม่ถูกต้อง
+                    </label>
+                </div>
+                {/* {errors.question2_7 && <span>This field is required</span>} */}
+            </div>
+        </div>
+    );
+    const [step, setStep] = useState(1);
+    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
+    const onSubmit = async (formData) => {
+        try {
+            const response = await fetch(`http://localhost:5000/submitAssessment/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: id,
+                    step1: formData.step1,
+                    step2: formData.step2,
+                }),
+            });
+
+            const data = await response.json();
+            console.log(data);
+            if (response.ok) {
+                const Formdata = data;
+                console.log("ประเมินความพร้อมสำเร็จ:", Formdata);
+                toast.success("ประเมินข้อมูลสำเร็จ");
+                setTimeout(() => {
+                    navigate("/assessreadiness");
+                }, 1100);
+            } else {
+                toast.error("เกิดข้อผิดพลาดในการประเมิน");
+            }
+        } catch (error) {
+            console.error("Error updating equipment:", error);
+            toast.error("เกิดข้อผิดพลาดในการประเมิน");
+        }
     };
 
-    const [formData, setFormData] = useState({
-        question1: '',
-        question2: '',
-        question3: '',
-        question4: '',
-    });
 
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleNext = () => {
-        navigate("/assessreadinesspage2", { state: { id, formData } });
-    };
+    const handleNext = () => setStep(prevStep => prevStep + 1);
+    const handlePrevious = () => setStep(prevStep => prevStep - 1);
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? 'active' : ''}`}>
@@ -292,18 +473,19 @@ export default function Assessreadiness() {
                 </ul>
             </div>
             <div className="home_content">
-                <div className="header">ประเมินความพร้อมการดูแล
+                <div className="homeheader">
+                    <div className="header">ประเมินความพร้อมการดูแล
+                    </div>
+                    <div class="profile_details ">
+                        <li>
+                            <a href="profile">
+                                <i class="bi bi-person"></i>
+                                <span class="links_name" >{data && data.nametitle + data.name + " " + data.surname}</span>
+                            </a>
+                        </li>
+                    </div>
                 </div>
-                <div class="profile_details ">
-                    <li>
-                        <a href="profile">
-                            <i class="bi bi-person"></i>
-                            <span class="links_name" >{data && data.nametitle + data.name + " " + data.surname}</span>
-                        </a>
-                    </li>
-                </div>
-                <hr></hr>
-                <div className="breadcrumbs">
+                <div className="breadcrumbs mt-4">
                     <ul>
                         <li>
                             <a href="home">
@@ -318,7 +500,7 @@ export default function Assessreadiness() {
                         </li>
                     </ul>
                 </div>
-                <h3>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในบ้าน</h3>
+                <h3>ประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในบ้าน</h3>
                 <div className="">
                     <p className="headerassesment">
                         {name} {surname}
@@ -348,124 +530,29 @@ export default function Assessreadiness() {
 
                 </div>
                 <div className="adminall card mb-1">
-                    <form>
-                        <div className="mb-1">
-                            <label>1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยใน ที่บ้านจากแพทย์อย่างครบถ้วน และให้คำยินยอมก่อนรับบริการใช่หรือไม่?</label>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question1"
-                                        value="ใช่"
-                                        checked={formData.question1 === 'ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ใช่
-                                </label>
-                            </div>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question1"
-                                        value="ไม่ใช่"
-                                        checked={formData.question1 === 'ไม่ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ไม่ใช่
-                                </label>
-                            </div>
-                        </div>
-                        <div className="mb-1">
-                            <label>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน มีความปลอดภัยใช่หรือไม่?</label>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question2"
-                                        value="ใช่"
-                                        checked={formData.question2 === 'ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ใช่
-                                </label>
-                            </div>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question2"
-                                        value="ไม่ใช่"
-                                        checked={formData.question2 === 'ไม่ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ไม่ใช่
-                                </label>
-                            </div>
-                        </div>
-                        <div className="mb-1">
-                            <label>3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน อยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?</label>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question3"
-                                        value="ใช่"
-                                        checked={formData.question3 === 'ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ใช่
-                                </label>
-                            </div>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question3"
-                                        value="ไม่ใช่"
-                                        checked={formData.question3 === 'ไม่ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ไม่ใช่
-                                </label>
-                            </div>
-                        </div>
-                        <div className="mb-1">
-                            <label>4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน สามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?</label>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question4"
-                                        value="ใช่"
-                                        checked={formData.question4 === 'ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ใช่
-                                </label>
-                            </div>
-                            <div>
-                                <label>
-                                    <input
-                                        type="radio"
-                                        name="question4"
-                                        value="ไม่ใช่"
-                                        checked={formData.question4 === 'ไม่ใช่'}
-                                        onChange={handleChange}
-                                    />
-                                    ไม่ใช่
-                                </label>
-                            </div>
-                        </div>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        {step === 1 && <Step1 register={register} errors={errors} />}
+                        {step === 2 && <Step2 register={register} errors={errors} />}
                         <div className="btn-group">
-                            <div className="btn-next">
-                                <button type="button" onClick={handleNext} className="btn btn-outline py-2">
-                                    ถัดไป
-                                </button>
-                            </div>
+                            {step > 1 && (
+                                <div className="btn-pre">
+                                    <button type="button" onClick={handlePrevious} className="btn btn-outline py-2">ก่อนหน้า</button>
+                                </div>
+                            )}
+                            {step < 2 && (
+                                <div className="btn-next">
+                                    <button type="button" onClick={handleNext} className="btn btn-outline-primary py-2">ถัดไป</button>
+                                </div>
+                            )}
+                            {step === 2 && (
+                                <div className="btn-next">
+                                    <button type="submit" className="btn btn-outline-primary py-2">บันทึก</button>
+                                </div>
+                            )}
                         </div>
                     </form>
                 </div>
+                <ToastContainer />
             </div>
         </main>
     );

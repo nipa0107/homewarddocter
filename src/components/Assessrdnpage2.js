@@ -188,33 +188,6 @@ export default function Assessreadiness2({ }) {
     const handleToggleSidebar = () => {
         setIsActive(!isActive);
     };
-    const formatDate = (dateTimeString) => {
-        const dateTime = new Date(dateTimeString);
-        const day = dateTime.getDate();
-        const month = dateTime.getMonth() + 1;
-        const year = dateTime.getFullYear();
-        const hours = dateTime.getHours();
-        const minutes = dateTime.getMinutes();
-
-        const thaiMonths = [
-            "มกราคม",
-            "กุมภาพันธ์",
-            "มีนาคม",
-            "เมษายน",
-            "พฤษภาคม",
-            "มิถุนายน",
-            "กรกฎาคม",
-            "สิงหาคม",
-            "กันยายน",
-            "ตุลาคม",
-            "พฤศจิกายน",
-            "ธันวาคม",
-        ];
-
-        return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-            } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-            } น.`;
-    };
 
     const [formData, setFormData] = useState({
         question1: '',
@@ -246,9 +219,25 @@ export default function Assessreadiness2({ }) {
         navigate("/assessreadinesspage1", { state: { id, formData } });
     };
 
-    const handleSave = () => {
-        // Save formData to the server or perform some action
-        console.log('Form Data:', formData);
+    const handleSave = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/saveFormData/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (response.ok) {
+                console.log('Form Data Saved');
+            } else {
+                console.error('Error saving form data');
+            }
+        } catch (error) {
+            console.error('Error saving form data:', error);
+        }
     };
 
     return (
@@ -331,11 +320,21 @@ export default function Assessreadiness2({ }) {
                         <li className="arrow">
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
-                        <li><a>ประเมินความพร้อมการดูแล</a>
+                        <li><a href="assessreadiness">ประเมินความพร้อมการดูแล</a>
+                        </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li><a href="assessreadinesspage1" onClick={handlePrevious}>ประเมินที่พักอาศัย</a>
+                        </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li><a >ประเมินความรู้ความเข้าใจ</a>
                         </li>
                     </ul>
                 </div>
-                <h3>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในบ้าน</h3>
+                <h3>ประเมินความรู้ ความเข้าใจ (ตาม D – METHOD)</h3>
                 <div className="">
                     <p className="headerassesment">
                         {name} {surname}

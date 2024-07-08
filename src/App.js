@@ -1,5 +1,7 @@
 import React from "react";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import LinearStepper from "./components/LinearStepper";
+
 
 import {
   BrowserRouter as Router,
@@ -27,6 +29,7 @@ import Assessmentuserone from "./components/Assessmentuserone";
 import Assessreadiness from "./components/Assessreadiness";
 import Assessreadiness1 from "./components/Assessrdnpage1";
 import Assessreadiness2 from "./components/Assessrdnpage2";
+import DetailAssessreadiness from "./components/detailassessrdn";
 import Assessinhomesss from "./components/Assessinhomesss";
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
@@ -63,7 +66,7 @@ function App() {
           <Route
             path="/chat"
             element={
-              <PrivateRoute element={<Chat/>} isLoggedIn={isLoggedIn} />
+              <PrivateRoute element={<Chat />} isLoggedIn={isLoggedIn} />
             }
           />
           <Route
@@ -129,6 +132,15 @@ function App() {
               />
             }
           />
+          <Route
+            path="/LinearStepper"
+            element={
+              <PrivateRoute
+                element={<LinearStepper />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
           {/* การประเมิน */}
           <Route
             path="/assessment"
@@ -162,6 +174,15 @@ function App() {
             element={
               <PrivateRoute
                 element={<Assessreadiness />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/detailassessreadiness"
+            element={
+              <PrivateRoute
+                element={<DetailAssessreadiness />}
                 isLoggedIn={isLoggedIn}
               />
             }

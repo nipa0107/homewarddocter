@@ -172,7 +172,7 @@ export default function UpdateProfile() {
             </li>
           </div>
           <hr></hr>
-          <div className="breadcrumbs">
+          <div className="breadcrumbs mt-4">
             <ul>
               <li>
                 <a href="home">

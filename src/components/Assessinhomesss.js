@@ -213,6 +213,7 @@ export default function Assessinhomesss({ }) {
       </div>
 
       <div className="home_content">
+      <div className="homeheader">
         <div className="header">แบบประเมินเยี่ยมบ้าน</div>
         <div class="profile_details ">
           <li>
@@ -224,8 +225,8 @@ export default function Assessinhomesss({ }) {
             </a>
           </li>
         </div>
-        <hr></hr>
-        <div className="breadcrumbs">
+        </div>
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">

@@ -209,18 +209,19 @@ export default function Home() {
         </ul>
       </div>
       <div className="home_content">
-        <div className="header">ภาพรวมระบบ
+        <div className="homeheader">
+          <div className="header">ภาพรวมระบบ
+          </div>
+          <div className="profile_details">
+            <li>
+              <a href="profile">
+                <i className="bi bi-person"></i>
+                <span className="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
+              </a>
+            </li>
+          </div>
         </div>
-        <div className="profile_details">
-          <li>
-            <a href="profile">
-              <i className="bi bi-person"></i>
-              <span className="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
-            </a>
-          </li>
-        </div>
-        <hr></hr>
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">

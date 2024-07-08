@@ -13,7 +13,6 @@ export default function Assessreadiness({ }) {
   const [searchKeyword, setSearchKeyword] = useState(""); //ค้นหา
   const [token, setToken] = useState("");
   const [medicalData, setMedicalData] = useState({});
-  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     const token = window.localStorage.getItem("token");
@@ -213,6 +212,7 @@ export default function Assessreadiness({ }) {
       </div>
 
       <div className="home_content">
+      <div className="homeheader">
         <div className="header">ประเมินความพร้อมการดูแล</div>
         <div class="profile_details ">
           <li>
@@ -224,8 +224,8 @@ export default function Assessreadiness({ }) {
             </a>
           </li>
         </div>
-        <hr></hr>
-        <div className="breadcrumbs">
+        </div>
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
@@ -269,23 +269,15 @@ export default function Assessreadiness({ }) {
             </thead>
             <tbody>
               {datauser
-
                 .filter((user) => user.deletedAt === null)
                 .map((i, index) => {
                   const userBirthday = i.birthday ? new Date(i.birthday) : null;
                   let userAge = "";
                   if (userBirthday) {
-                    const ageDiff =
-                      currentDate.getFullYear() - userBirthday.getFullYear();
-                    const monthDiff =
-                      currentDate.getMonth() - userBirthday.getMonth();
-                    const isBeforeBirthday =
-                      monthDiff < 0 ||
-                      (monthDiff === 0 &&
-                        currentDate.getDate() < userBirthday.getDate());
-                    userAge = isBeforeBirthday
-                      ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน`
-                      : `${ageDiff} ปี ${monthDiff} เดือน`;
+                    const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
+                    const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
+                    const isBeforeBirthday = monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate());
+                    userAge = isBeforeBirthday ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน` : `${ageDiff} ปี ${monthDiff} เดือน`;
                   }
                   return (
                     <tr key={index}>
@@ -300,23 +292,24 @@ export default function Assessreadiness({ }) {
                         </span>
                       </td>
                       <td>{i.name} {i.surname}</td>
-                      {/* <td>{userAge}</td> */}
                       <td>
                         <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
                           {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
                         </span>
                       </td>
                       <td>
-                        <a
-                          className="info"
-                          onClick={() =>
-                            navigate("/assessreadinesspage1", {
-                              state: { id: i._id },
-                            })
-                          }
-                        >
-                          ยังไม่ได้รับการประเมิน
-                        </a>
+                        {i.assessed ? (
+                          <span className="assessed">ได้รับการประเมินแล้ว</span>
+                        ) : (
+                          <a
+                            className="info"
+                            onClick={() => navigate("/assessreadinesspage1", { state: { id: i._id } })}
+                          >
+                            <span className="not-evaluated">
+                            ยังไม่ได้รับการประเมิน
+                          </span>
+                          </a>
+                        )}
                       </td>
                     </tr>
                   );

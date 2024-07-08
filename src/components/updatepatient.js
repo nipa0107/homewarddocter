@@ -253,6 +253,7 @@ export default function Updatepatient() {
                 </ul>
             </div>
             <div className="home_content">
+            <div className="homeheader">
                 <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
                 <div class="profile_details ">
                     <li>
@@ -262,8 +263,8 @@ export default function Updatepatient() {
                         </a>
                     </li>
                 </div>
-                <hr></hr>
-                <div className="breadcrumbs">
+                </div>
+                <div className="breadcrumbs mt-4">
                     <ul>
                         <li>
                             <a href="home">
