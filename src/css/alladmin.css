@@ -532,3 +532,10 @@ textarea {
   color: rgba(214, 214, 214, 0.6);
   /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
 }
+.evaluated {
+  color: rgb(7, 195, 7); /* Text color for evaluated */
+}
+/* 
+.info .card{
+  margin: 150px;
+} */

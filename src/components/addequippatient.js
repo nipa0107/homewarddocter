@@ -21,28 +21,38 @@ export default function AddEquipPatient() {
     const [selectedEquipType2, setSelectedEquipType2] = useState("");
     const [selectedEquipType3, setSelectedEquipType3] = useState("");
     const [equipValidationMessages, setEquipValidationMessages] = useState({});
+    const [profileData, setProfileData] = useState(null);
 
     useEffect(() => {
         const token = window.localStorage.getItem("token");
         setToken(token);
         if (token) {
-            fetch("http://localhost:5000/profiledt", {
-                method: "POST",
-                crossDomain: true,
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                },
-                body: JSON.stringify({ token: token }),
+          fetch("http://localhost:5000/profiledt", {
+            method: "POST",
+            crossDomain: true,
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({
+              token: token,
+            }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              console.log(data);
+              setProfileData(data.data);
             })
-                .then((res) => res.json())
-                .then((data) => {
-                    setData(data.data);
-                });
+            .catch((error) => {
+              console.error("Error verifying token:", error);
+            });
         }
+      }, []);
+
+      useEffect(() => {
         getAllEquip();
-    }, [token]);
+      }, []);
 
     const getAllEquip = () => {
         fetch("http://localhost:5000/allequip", {
@@ -224,7 +234,7 @@ export default function AddEquipPatient() {
                         <li>
                             <a href="profile">
                                 <i class="bi bi-person"></i>
-                                <span class="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
+                                <span class="links_name">{profileData && profileData.nametitle + profileData.name + " " + profileData.surname}</span>
                             </a>
                         </li>
                     </div>

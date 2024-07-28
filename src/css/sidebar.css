@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit&family=Noto+Sans+Thai+Looped&display=swap');
 
 * {
-    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-family: "Kanit", sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -52,10 +52,10 @@
 
 .sidebar #btn {
     position: absolute;
-    color: white;
+    color: rgb(0, 0, 0);
     left: 90%;
     top: 10px;
-    font-size: 20px;
+    font-size: 25px;
     width: 50px;
     height: 50px;
     text-align: center;
@@ -78,6 +78,8 @@
     width: 100%;
     list-style-type: none;
     line-height: 50px;
+    font-size: 17px;
+    font-weight: bold; 
 }
 .sidebar.active .links_name{
     opacity: 0;
@@ -131,7 +133,7 @@
 
 
 .sidebar ul li a {
-    color: white;
+    color: rgb(0, 0, 0);
     display: flex;
     align-items: center;
     text-decoration: none;

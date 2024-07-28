@@ -22,7 +22,6 @@ export default function Assessmentuserone({}) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [token, setToken] = useState("");
-
   const [isActive, setIsActive] = useState(false);
   const [patientFormsone, setPatientFormsone] = useState("");
   const location = useLocation();
@@ -174,7 +173,6 @@ export default function Assessmentuserone({}) {
         }
       });
   };
-
   useEffect(() => {
     const fetchAssessments = async () => {
       try {
@@ -202,7 +200,6 @@ export default function Assessmentuserone({}) {
         console.error("Error fetching assessments:", error);
       }
     };
-
     fetchAssessments();
   }, [patientFormsone._id]);
 
@@ -883,36 +880,6 @@ export default function Assessmentuserone({}) {
             <div className="contentinass">
               <p className="texthead">การประเมินอาการ</p>
               <div className="mb-1">
-                {/* <div className="mb-3">
-                  <div className="btn-group">
-                    <div
-                      className={`btnass ${
-                        statusName === "ปกติ" ? "btn-normal" : "btn-outline"
-                      }`}
-                    >
-                      ปกติ
-                    </div>
-                    <div
-                      className={`btnass ${
-                        statusName === "ผิดปกติ"
-                          ? "btn-abnormal"
-                          : "btn-outline"
-                      }`}
-                    >
-                      ผิดปกติ
-                    </div>
-                    <div
-                      className={`btnass ${
-                        statusName === "จบการรักษา"
-                          ? "btn-completed"
-                          : "btn-outline"
-                      }`}
-                    >
-                      จบการรักษา
-                    </div>
-                    <input type="hidden" value={statusName} />
-                  </div>
-                </div> */}
                 <div className="mb-3">
                   <div className="btn-group">
                     {statusName === "ปกติ" && (

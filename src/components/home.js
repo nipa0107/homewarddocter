@@ -6,8 +6,8 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import Pt from "../img/pt.png";
 import Pt2 from "../img/pt2.png";
-import Dt from "../img/dt.png";
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from 'recharts';
+import Bh from "../img/better-health.png";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import CountUp from 'react-countup';
 
 export default function Home() {
@@ -17,6 +17,7 @@ export default function Home() {
   const [token, setToken] = useState('');
   const [medicalData, setMedicalData] = useState({});
   const navigate = useNavigate();
+  const [completedCount, setCompletedCount] = useState(0);
 
   const logOut = () => {
     window.localStorage.clear();
@@ -40,37 +41,25 @@ export default function Home() {
           Accept: "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({
+          token: token,
+        }),
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data)
+          console.log(data);
           setData(data.data);
-
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
         });
     }
   }, []);
+
   useEffect(() => {
     getAllUser();
-    getAllMpersonnel();
   }, []);
 
-  const getAllMpersonnel = () => {
-    fetch("http://localhost:5000/allMpersonnel", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`, // เพิ่ม Authorization header เพื่อส่ง token ในการร้องขอ
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data, "AllMpersonnel");
-        setData(data.data);
-      });
-  };
 
   const getAllUser = () => {
     fetch("http://localhost:5000/alluser", {
@@ -87,30 +76,45 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const fetchCompletedCount = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/completedAssessmentsCount', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        setCompletedCount(data.count);
+      } catch (error) {
+        console.error('Error fetching completed assessments count:', error);
+      }
+    };
+
+    fetchCompletedCount();
+  }, []);
+
+  useEffect(() => {
     const fetchMedicalData = async () => {
       const promises = datauser.map(async (user) => {
         if (user.deletedAt === null) {
           try {
-            const response = await fetch(
-              `http://localhost:5000/medicalInformation/${user._id}`
-            );
+            const response = await fetch(`http://localhost:5000/medicalInformation/${user._id}`);
             const medicalInfo = await response.json();
             return {
               userId: user._id,
               hn: medicalInfo.data?.HN,
               an: medicalInfo.data?.AN,
               diagnosis: medicalInfo.data?.Diagnosis,
+              isCaseClosed: medicalInfo.data?.isCaseClosed, // สมมติว่า API ส่งสถานะการปิดเคสมา
             };
           } catch (error) {
-            console.error(
-              `Error fetching medical information for user ${user._id}:`,
-              error
-            );
+            console.error(`Error fetching medical information for user ${user._id}:`, error);
             return {
               userId: user._id,
               hn: "Error",
               an: "Error",
               diagnosis: "Error fetching data",
+              isCaseClosed: false, // ถ้าเกิดข้อผิดพลาด กำหนดเป็น false
             };
           }
         }
@@ -126,6 +130,7 @@ export default function Home() {
       }, {});
       setMedicalData(medicalDataMap);
     };
+
 
     if (datauser.length > 0) {
       fetchMedicalData();
@@ -149,6 +154,76 @@ export default function Home() {
 
   // Define colors for each diagnosis
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28AFF', '#FF6F91', '#FF6361', '#BC5090'];
+
+  // คำนวณจำนวนเพศแต่ละประเภท
+  const genderCounts = datauser.reduce((acc, user) => {
+    if (user.deletedAt === null && user.gender) {
+      acc[user.gender] = (acc[user.gender] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  // แปลงข้อมูลเพศเป็นรูปแบบที่เหมาะสมสำหรับแท่งกราฟ
+  const genderData = Object.keys(genderCounts).map((gender) => ({
+    gender,
+    count: genderCounts[gender],
+  }));
+
+  // เตรียมข้อมูลสำหรับแท่งกราฟ
+  const barChartData = genderData.map((entry) => ({
+    name: entry.gender,
+    count: entry.count,
+  }));
+
+  // กำหนดสีแต่ละแท่งกราฟ
+  const BAR_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28AFF', '#FF6F91', '#FF6361', '#BC5090'];
+
+  // ฟังก์ชั่นเพื่อหากลุ่มอายุ
+  const getAgeGroup = (age) => {
+    if (age >= 1 && age <= 10) {
+      return '1-10';
+    } else if (age >= 11 && age <= 20) {
+      return '11-20';
+    } else if (age >= 21 && age <= 30) {
+      return '21-30';
+    } else if (age >= 31 && age <= 40) {
+      return '31-40';
+    } else if (age >= 41 && age <= 50) {
+      return '41-50';
+    } else if (age >= 51 && age <= 60) {
+      return '51-60';
+    } else if (age >= 61 && age <= 70) {
+      return '61-70';
+    } else if (age >= 71 && age <= 80) {
+      return '71-80';
+    } else if (age >= 81 && age <= 90) {
+      return '81-90';
+    } else {
+      return '91-100';
+    }
+  };
+
+  // คำนวณจำนวนผู้ป่วยตามช่วงอายุและเพศ
+  const ageGroupCounts = datauser.reduce((acc, user) => {
+    if (user.deletedAt === null && user.age) {
+      const ageGroup = getAgeGroup(user.age);
+      if (!acc[ageGroup]) {
+        acc[ageGroup] = {};
+      }
+      if (!acc[ageGroup][user.gender]) {
+        acc[ageGroup][user.gender] = 0;
+      }
+      acc[ageGroup][user.gender]++;
+    }
+    return acc;
+  }, {});
+
+  // แปลงข้อมูลเป็นรูปแบบที่เหมาะสมสำหรับแผนภูมิแท่ง
+  const ageGroupData = Object.keys(ageGroupCounts).map((ageGroup) => ({
+    ageGroup,
+    Male: ageGroupCounts[ageGroup]['Male'] || 0,
+    Female: ageGroupCounts[ageGroup]['Female'] || 0,
+  }));
 
   return (
     <main className="body">
@@ -216,7 +291,9 @@ export default function Home() {
             <li>
               <a href="profile">
                 <i className="bi bi-person"></i>
-                <span className="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
+                <span className="links_name">
+                {data && data.nametitle + data.name + " " + data.surname}
+                </span>
               </a>
             </li>
           </div>
@@ -274,19 +351,41 @@ export default function Home() {
                   <div className="color-strip bg-yellow"></div>
                   <div className="col">
                     <div className="bg-icon">
-                      <img src={Dt} className="patient" alt="patient" />
+                      <img src={Bh} className="patient" alt="patient" />
                     </div>
                   </div>
                   <div className="col">
-                    <p className="num mt-2"><CountUp end={data.length} /></p>
-                    <p className="name fs-5">แพทย์ทั้งหมด</p>
+                    <p className="num mt-2"><CountUp end={((user) => user.deletedAt === null).length} duration={2} /></p>
+                    <p className="name fs-5">ผู้ป่วยที่ปิดเคสแล้ว</p>
                   </div>
                 </div>
               </div>
             </div>
+            {/* <div className="item">
+              <h6> <b>Gender</b></h6>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={barChartData}
+                  isAnimationActive={true}>
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="count" fill="#8884d8" label={{ position: 'top' }}>
+                    {barChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="item">
+              <h6><b></b></h6>
+              <ResponsiveContainer width="100%" height={300}>
+
+              </ResponsiveContainer>
+            </div> */}
           </div>
         </div>
-
         <div className="chart-container d-flex justify-content-center mt-5">
           <div className="chart-content">
             <PieChart width={500} height={500}>

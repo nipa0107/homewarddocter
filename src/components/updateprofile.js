@@ -160,6 +160,7 @@ export default function UpdateProfile() {
           </div>
         </ul>
       </div>
+
       <div className="home_content">
         <div className="homeheader">
           <div className="header">แก้ไขโปรไฟล์ผู้ใช้</div>
@@ -171,7 +172,7 @@ export default function UpdateProfile() {
               </a>
             </li>
           </div>
-          <hr></hr>
+          </div>
           <div className="breadcrumbs mt-4">
             <ul>
               <li>
@@ -191,8 +192,10 @@ export default function UpdateProfile() {
               </li>
             </ul>
           </div>
-          {/* <h3>แก้ไขโปรไฟล์ผู้ใช้</h3> */}
-          <div className="formcontainerpf card mb-2">
+          
+        
+        {/* <h3>แก้ไขโปรไฟล์ผู้ใช้</h3> */}
+        <div className="formcontainerpf card mb-2">
             <div className="mb-2">
               <label>ชื่อผู้ใช้</label>
               <input
@@ -233,7 +236,6 @@ export default function UpdateProfile() {
                 onChange={(e) => setSurname(e.target.value)}
               />
             </div>
-
             <div className="mb-2">
               <label>อีเมล</label>
               <input
@@ -264,7 +266,6 @@ export default function UpdateProfile() {
               </button>
             </div>
           </div>
-        </div>
       </div>
     </main>
   );

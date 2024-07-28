@@ -3,16 +3,20 @@ import "../css/sidebar.css";
 import "../css/alladmin.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
-export default function Assessreadiness({ }) {
+export default function Assessreadiness() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [data, setData] = useState("");
   const [datauser, setDatauser] = useState([]);
   const [isActive, setIsActive] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState(""); //ค้นหา
+  const [searchKeyword, setSearchKeyword] = useState("");
   const [token, setToken] = useState("");
   const [medicalData, setMedicalData] = useState({});
+  const [assessmentStatuses, setAssessmentStatuses] = useState({});
 
   useEffect(() => {
     const token = window.localStorage.getItem("token");
@@ -26,39 +30,17 @@ export default function Assessreadiness({ }) {
           Accept: "application/json",
           "Access-Control-Allow-Origin": "*",
         },
-        body: JSON.stringify({
-          token: token,
-        }),
+        body: JSON.stringify({ token }),
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
           setData(data.data);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
-          // logOut();
         });
     }
   }, []);
-
-  useEffect(() => {
-    getAllUser();
-  }, []);
-
-  const getAllUser = () => {
-    fetch("http://localhost:5000/alluser", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data, "AllUser");
-        setDatauser(data.data);
-      });
-  };
 
   useEffect(() => {
     const fetchMedicalData = async () => {
@@ -105,49 +87,86 @@ export default function Assessreadiness({ }) {
       fetchMedicalData();
     }
   }, [datauser]);
-
-  const currentDate = new Date();
-
+  
   const logOut = () => {
     window.localStorage.clear();
     window.location.href = "./";
   };
-  // bi-list
+
   const handleToggleSidebar = () => {
     setIsActive(!isActive);
   };
 
-  useEffect(() => {
-    const searchUser = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/searchassessment?keyword=${encodeURIComponent(
-            searchKeyword
-          )}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        const searchData = await response.json();
-        if (response.ok) {
-          if (searchData.data.length > 0) {
-            setDatauser(searchData.data);
-          } else {
-            setDatauser([]);
-          }
-        } else {
-          console.error("Error during search:", searchData.status);
+  const searchUser = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/searchassessment?keyword=${encodeURIComponent(
+          searchKeyword
+        )}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (error) {
-        console.error("Error during search:", error);
+      );
+
+      const searchData = await response.json();
+      if (response.ok) {
+        setDatauser(searchData.data.length > 0 ? searchData.data : []);
+      } else {
+        console.error("Error during search:", searchData.status);
       }
-    };
+    } catch (error) {
+      console.error("Error during search:", error);
+    }
+  };
+
+  useEffect(() => {
     searchUser();
   }, [searchKeyword, token]);
 
+  const currentDate = new Date();
+
+  useEffect(() => {
+    const fetchAssessmentStatuses = async () => {
+      const promises = datauser.map(async (user) => {
+        if (user.deletedAt === null) { // Check if user is not deleted
+          try {
+            const response = await fetch(`http://localhost:5000/getUserAssessreadiness/${user._id}`);
+            const data = await response.json();
+  
+            // Check if the status_name exists and log the user ID
+            if (response.ok && data.status_name) {
+              console.log(`User ID: ${user._id} Status: ${data.status_name}`);
+              return { userId: user._id, status: data.status_name };
+            } else {
+              console.log(`User ID: ${user._id} ยังไม่ได้รับการประเมิน.`);
+              return { userId: user._id, status: 'ยังไม่ได้รับการประเมิน' };
+            }
+          } catch (error) {
+            console.error(`Error fetching assessment status for user ${user._id}:`, error);
+            return { userId: user._id, status: 'ยังไม่ได้รับการประเมิน' };
+          }
+        }
+        return null; // Return null for deleted users
+      });
+  
+      const results = await Promise.all(promises);
+      const statusMap = results.reduce((acc, result) => {
+        if (result) {
+          acc[result.userId] = result.status; // Only add non-null results
+        }
+        return acc;
+      }, {});
+      setAssessmentStatuses(statusMap);
+    };
+  
+    if (datauser.length > 0) {
+      fetchAssessmentStatuses();
+    }
+  }, [datauser]);
+  
+  
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -212,18 +231,18 @@ export default function Assessreadiness({ }) {
       </div>
 
       <div className="home_content">
-      <div className="homeheader">
-        <div className="header">ประเมินความพร้อมการดูแล</div>
-        <div class="profile_details ">
-          <li>
-            <a href="profile">
-              <i class="bi bi-person"></i>
-              <span class="links_name">
-                {data && data.nametitle + data.name + " " + data.surname}
-              </span>
-            </a>
-          </li>
-        </div>
+        <div className="homeheader">
+          <div className="header">ประเมินความพร้อมการดูแล</div>
+          <div class="profile_details ">
+            <li>
+              <a href="profile">
+                <i class="bi bi-person"></i>
+                <span class="links_name">
+                  {data && data.nametitle + data.name + " " + data.surname}
+                </span>
+              </a>
+            </li>
+          </div>
         </div>
         <div className="breadcrumbs mt-4">
           <ul>
@@ -270,52 +289,47 @@ export default function Assessreadiness({ }) {
             <tbody>
               {datauser
                 .filter((user) => user.deletedAt === null)
-                .map((i, index) => {
-                  const userBirthday = i.birthday ? new Date(i.birthday) : null;
-                  let userAge = "";
-                  if (userBirthday) {
-                    const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
-                    const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
-                    const isBeforeBirthday = monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate());
-                    userAge = isBeforeBirthday ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน` : `${ageDiff} ปี ${monthDiff} เดือน`;
-                  }
+                .map((user, index) => {
+                  const userBirthday = user.birthday ? new Date(user.birthday) : null;
+                  const ageDiff = userBirthday ? currentDate.getFullYear() - userBirthday.getFullYear() : 0;
+                  const monthDiff = userBirthday ? currentDate.getMonth() - userBirthday.getMonth() : 0;
+                  const isBeforeBirthday = userBirthday ? (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())) : false;
+                  const userAge = userBirthday ? (isBeforeBirthday ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน` : `${ageDiff} ปี ${monthDiff} เดือน`) : 'ไม่มีข้อมูล';
+
                   return (
                     <tr key={index}>
                       <td>
-                        <span style={{ color: medicalData[i._id]?.hn ? 'inherit' : '#B2B2B2' }}>
-                          {medicalData[i._id]?.hn ? medicalData[i._id]?.hn : "ไม่มีข้อมูล"}
+                        <span style={{ color: medicalData[user._id]?.hn ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[user._id]?.hn ? medicalData[user._id]?.hn : "ไม่มีข้อมูล"}
                         </span>
                       </td>
                       <td>
-                        <span style={{ color: medicalData[i._id]?.an ? 'inherit' : '#B2B2B2' }}>
-                          {medicalData[i._id]?.an ? medicalData[i._id]?.an : "ไม่มีข้อมูล"}
+                        <span style={{ color: medicalData[user._id]?.an ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[user._id]?.an ? medicalData[user._id]?.an : "ไม่มีข้อมูล"}
                         </span>
                       </td>
-                      <td>{i.name} {i.surname}</td>
+                      <td>{user.name} {user.surname}</td>
                       <td>
-                        <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
-                          {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
+                        <span style={{ color: medicalData[user._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[user._id]?.diagnosis ? medicalData[user._id]?.diagnosis : "ไม่มีข้อมูล"}
                         </span>
                       </td>
                       <td>
-                        {i.assessed ? (
-                          <span className="assessed">ได้รับการประเมินแล้ว</span>
+                        {assessmentStatuses[user._id] === 'ประเมินแล้ว' ? (
+                          <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id: user._id } })}>
+                            <span className="evaluated">ประเมินแล้ว</span>
+                          </a>
                         ) : (
-                          <a
-                            className="info"
-                            onClick={() => navigate("/assessreadinesspage1", { state: { id: i._id } })}
-                          >
-                            <span className="not-evaluated">
-                            ยังไม่ได้รับการประเมิน
-                          </span>
+                          <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: user._id } })}>
+                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
                           </a>
                         )}
                       </td>
                     </tr>
                   );
-                })
-              }
+                })}
             </tbody>
+
           </table>
         </div>
       </div>

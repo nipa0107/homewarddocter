@@ -28,9 +28,11 @@ import Assessmentuser from "./components/Assessmentuser";
 import Assessmentuserone from "./components/Assessmentuserone";
 import Assessreadiness from "./components/Assessreadiness";
 import Assessreadiness1 from "./components/Assessrdnpage1";
-import Assessreadiness2 from "./components/Assessrdnpage2";
 import DetailAssessreadiness from "./components/detailassessrdn";
 import Assessinhomesss from "./components/Assessinhomesss";
+import MultiStepForm from "./components/MultiStepForm";
+// import Immobility from "./components/Immobility";
+
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
     element
@@ -197,15 +199,6 @@ function App() {
             }
           />
           <Route
-            path="/assessreadinesspage2"
-            element={
-              <PrivateRoute
-                element={<Assessreadiness2 />}
-                isLoggedIn={isLoggedIn}
-              />
-            }
-          />
-          <Route
             path="/assessinhomesss"
             element={
               <PrivateRoute
@@ -214,6 +207,24 @@ function App() {
               />
             }
           />
+          <Route
+            path="/MultiStepForm"
+            element={
+              <PrivateRoute
+                element={<MultiStepForm />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          {/* <Route
+            path="/immobility"
+            element={
+              <PrivateRoute
+                element={<Immobility />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          /> */}
           <Route path="/forgetpassword" element={<Reset />} />
           <Route path="/success" element={<Success />} />
         </Routes>

@@ -556,14 +556,15 @@ export default function Updatepatient() {
                             onChange={(e) => setCaregiverTel(e.target.value)}
                         />
                     </div>
-                    <div className="btn-group">
+                    
+                </div>
+                <div className="btn-group">
                         <div className="btn-next">
                             <button type="button" onClick={Updatepatient} className="btn btn-outline py-2">
                                 บันทึก
                             </button>
                         </div>
                     </div>
-                </div>
             </div>
             <div></div>
         </main>

@@ -24,6 +24,7 @@ export default function Assessmentuser({ }) {
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [userData, setUserData] = useState(null);
   const [medicalData, setMedicalData] = useState([]);
+
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -47,7 +48,6 @@ export default function Assessmentuser({ }) {
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
-          // logOut();
         });
     }
   }, []);
@@ -260,9 +260,9 @@ export default function Assessmentuser({ }) {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="allpatient">
               <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>

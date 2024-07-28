@@ -6,18 +6,26 @@ import logow from "../img/logow.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { Immobility } from "./stepform/Immobility";
-import { Nutrition } from "./stepform/Nutrition";
-import { Housing } from "./stepform/Housing"
-import { Physicalexamination } from "./stepform/Physicalexamination"
-import { SSS } from "./stepform/SSS"
-import { Otherassessment } from "./stepform/Otherassessment"
-import { Otherpeople } from "./stepform/Otherpeople"
-import { Medication } from "./stepform/Medication"
-import { Typography, Stepper, Step, StepLabel } from "@material-ui/core";
-import { useForm, FormProvider } from "react-hook-form";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, Chart, Bar, XAxis, YAxis } from 'recharts';
+import {
+    Typography,
+    TextField,
+    Button,
+    Stepper,
+    Step,
+    StepLabel,
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
+import {
+    useForm,
+    Controller,
+    FormProvider,
+    useFormContext,
+} from "react-hook-form";
+import { useStepContext } from "@mui/material";
 
-export default function LinaerStepper({ }) {
+
+export default function MultiStepForm() {
     const navigate = useNavigate();
     const [data, setData] = useState("");
     const [isActive, setIsActive] = useState(false);
@@ -35,6 +43,7 @@ export default function LinaerStepper({ }) {
     const [userAge, setUserAge] = useState(0);
     const [userAgeInMonths, setUserAgeInMonths] = useState(0);
     const [userData, setUserData] = useState(null);
+
 
     useEffect(() => {
         const token = window.localStorage.getItem("token");
@@ -134,6 +143,7 @@ export default function LinaerStepper({ }) {
         }
     }, [currentDate]);
 
+
     const logOut = () => {
         window.localStorage.clear();
         window.location.href = "./";
@@ -143,76 +153,20 @@ export default function LinaerStepper({ }) {
         setIsActive(!isActive);
     };
 
-    const methods = useForm({
-        defaultValues: {
-        },
-    });
-
-    const steps = getSteps();
-
-    function getSteps() {
-        return [
-            "Immobility",
-            "Nutrition",
-            "Housing",
-            "Other people",
-            "Medication",
-            "Examination",
-            "SSS",
-            "OtherAssessment",
-        ];
-    }
-
-    function getStepContent(step) {
-        switch (step) {
-            case 0:
-                return <Immobility />;
-            case 1:
-                return <Nutrition />;
-            case 2:
-                return <Housing />;
-            case 3:
-                return <Otherpeople/>;
-            case 4:
-                return <Medication/>;
-            case 5:
-                return <Physicalexamination />;
-            case 6:
-                return <SSS />;
-            case 7:
-                return <Otherassessment />;
-            case 8:
-                return ;
-            default:
-                return "unknown step";
-        }
-    }
-
     const [activeStep, setActiveStep] = useState(0);
 
-
-    const handleNext = (data) => {
-        console.log(data);
-        if (activeStep == steps.length - 1) {
-            fetch("https://jsonplaceholder.typicode.com/comments")
-                .then((data) => data.json())
-                .then((res) => {
-                    console.log(res);
-                    setActiveStep(activeStep + 1);
-                });
-        } else {
-            setActiveStep(activeStep + 1);
-
-        }
-    };
-
-    const handleBack = () => {
-        setActiveStep(activeStep - 1);
-    };
+    const nextStep = () =>{
+        if(activeStep < 6)
+        setActiveStep((currentStep)=> currentStep + 1)
+    }
+    const previousStep = () =>{
+        if(activeStep !== -1)
+        setActiveStep((currentStep)=> currentStep - 1)
+    }
 
     return (
-        <main>
-            {/* <div className={`sidebar ${isActive ? "active" : ""}`}>
+        <main className="body">
+            <div className={`sidebar ${isActive ? "active" : ""}`}>
                 <div class="logo_content">
                     <div class="logo">
                         <div class="logo_name">
@@ -271,8 +225,9 @@ export default function LinaerStepper({ }) {
                         </li>
                     </div>
                 </ul>
-            </div> */}
-            <div>
+            </div>
+
+            <div className="home_content">
                 <div className="homeheader">
                     <div className="header">แบบประเมินเยี่ยมบ้าน</div>
                     <div class="profile_details ">
@@ -309,17 +264,25 @@ export default function LinaerStepper({ }) {
                 </div>
                 <br></br>
                 <Stepper alternativeLabel activeStep={activeStep}>
-                    {steps.map((step, index) => {
-                        const labelProps = {};
-                        const stepProps = {};
-                        return (
-                            <Step {...stepProps} key={index}>
-                                <StepLabel {...labelProps}>{step}</StepLabel>
-                            </Step>
-                        );
-                    })}
+                    <Step>
+                        <StepLabel>Immobility</StepLabel>
+                    </Step>
+                    <Step>
+                        <StepLabel>Nutrition</StepLabel>
+                    </Step>
+                    <Step>
+                        <StepLabel>Housing</StepLabel>
+                    </Step>
+                    <Step>
+                        <StepLabel>Physical examination</StepLabel>
+                    </Step>
+                    <Step>
+                        <StepLabel>SSS</StepLabel>
+                    </Step>
+                    <Step>
+                        <StepLabel>Assessment</StepLabel>
+                    </Step>
                 </Stepper>
-                <br></br>
                 <div className="">
                     <p className="headerassesment">
                         {name} {surname}
@@ -345,42 +308,22 @@ export default function LinaerStepper({ }) {
                             ? medicalData.Diagnosis
                             : "ไม่มีข้อมูล"}
                     </p>
+                    <p>{assessmentData.map((assessment, index) => (
+                        <div key={index}>
+                            <p className="textassesment"><p className="evaluated"><label>สถานะ:</label>{assessment.status_name || "ไม่มีข้อมูล"}</p></p>
+                        </div>
+                    ))}</p>
                 </div>
-                {activeStep === steps.length ? (
-                    <h3 variant="h3" align="center">
-                        การประเมินเสร็จสิ้น
-                    </h3>
-                ) : (
-                    <>
-                        <FormProvider {...methods}>
-                            <form onSubmit={methods.handleSubmit(handleNext)}>
-                                {getStepContent(activeStep)}
-                                <div className="btn-group">
-                                    <div className="btn-pre">
-                                        <button
-                                            className="btn btn-outline py-2"
-                                            disabled={activeStep === 0}
-                                            onClick={handleBack}
-                                            type="button"
-                                        >
-                                            ก่อนหน้า
-                                        </button>
-                                    </div>
-                                    <div className="btn-next">
-                                        <button
-                                            className="btn btn-outline-primary py-2"
-                                            type="submit"
-                                        >
-                                            {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </FormProvider>
-                    </>
-                )}
+                <h3>{activeStep}</h3>
+                <div className="btn-group">
+                    <div className="btn-pre">
+                        <button type="button" onClick={() => previousStep()} className="btn btn-outline py-2">ก่อนหน้า</button>
+                    </div>
+                    <div className="btn-next">
+                        <button type="button" onClick={() => nextStep()}className="btn btn-outline-primary py-2">ถัดไป</button>
+                    </div>
+                </div>
             </div>
         </main>
     );
-};
-
+}

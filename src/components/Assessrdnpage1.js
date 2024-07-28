@@ -27,7 +27,7 @@ export default function Assessreadiness1() {
     const [userAgeInMonths, setUserAgeInMonths] = useState(0);
     const [userData, setUserData] = useState(null);
     const [medicalData, setMedicalData] = useState([]);
-    // const { control, handleSubmit } = useForm();
+
 
     useEffect(() => {
         const token = window.localStorage.getItem("token");
@@ -95,8 +95,6 @@ export default function Assessreadiness1() {
             fetchMedicalInfo();
         }
     }, [userData]);
-
-
 
     const fetchpatientForms = async () => {
         try {
@@ -191,19 +189,19 @@ export default function Assessreadiness1() {
         setIsActive(!isActive);
     };
 
-    const Step1 = ({ register, errors, watch }) => (
+    const Readiness1 = ({ register, errors, watch }) => (
         <div>
             <div className="mb-1">
                 <label>1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยใน ที่บ้านจากแพทย์อย่างครบถ้วน และให้คำยินยอมก่อนรับบริการใช่หรือไม่?</label>
-                <div>
+                <div >
                     <label>
-                        <input type="radio" name="question1_1" value="ใช่" {...register('step1.question1_1', { required: true })} />
+                        <input type="radio" name="question1_1" value="ใช่" {...register('Readiness1.question1_1', { required: true })} />
                         ใช่
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_1" value="ไม่ใช่" {...register('step1.question1_1', { required: true })} />
+                        <input type="radio" name="question1_1" value="ไม่ใช่" {...register('Readiness1.question1_1', { required: true })} />
                         ไม่ใช่
                     </label>
                 </div>
@@ -213,13 +211,13 @@ export default function Assessreadiness1() {
                 <label>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน มีความปลอดภัยใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_2" value="ใช่" {...register('step1.question1_2', { required: true })} />
+                        <input type="radio" name="question1_2" value="ใช่" {...register('Readiness1.question1_2', { required: true })} />
                         ใช่
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_2" value="ไม่ใช่" {...register('step1.question1_2', { required: true })} />
+                        <input type="radio" name="question1_2" value="ไม่ใช่" {...register('Readiness1.question1_2', { required: true })} />
                         ไม่ใช่
                     </label>
                 </div>
@@ -229,13 +227,13 @@ export default function Assessreadiness1() {
                 <label>3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน อยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_3" value="ใช่" {...register('step1.question1_3', { required: true })} />
+                        <input type="radio" name="question1_3" value="ใช่" {...register('Readiness1.question1_3', { required: true })} />
                         ใช่
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_3" value="ไม่ใช่" {...register('step1.question1_3', { required: true })} />
+                        <input type="radio" name="question1_3" value="ไม่ใช่" {...register('Readiness1.question1_3', { required: true })} />
                         ไม่ใช่
                     </label>
                 </div>
@@ -245,13 +243,13 @@ export default function Assessreadiness1() {
                 <label>4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน สามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_4" value="ใช่" {...register('step1.question1_4', { required: true })} />
+                        <input type="radio" name="question1_4" value="ใช่" {...register('Readiness1.question1_4', { required: true })} />
                         ใช่
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_4" value="ไม่ใช่" {...register('step1.question1_4', { required: true })} />
+                        <input type="radio" name="question1_4" value="ไม่ใช่" {...register('Readiness1.question1_4', { required: true })} />
                         ไม่ใช่
                     </label>
                 </div>
@@ -260,119 +258,119 @@ export default function Assessreadiness1() {
         </div>
     );
 
-    const Step2 = ({ register, errors, watch }) => (
+    const Readiness2 = ({ register, errors, watch }) => (
         <div>
             <div className="mb-1">
                 <label>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย</label>
                 <div>
                     <label>
-                        <input type="radio" name="question2_1" value="ถูกต้อง" {...register('step2.question2_1', { required: true })} />
+                        <input type="radio" name="Disease" value="ถูกต้อง" {...register('Readiness2.Disease', { required: true })} />
                         ถูกต้อง
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question2_1" value="ไม่ถูกต้อง" {...register('step2.question2_1', { required: true })} />
+                        <input type="radio" name="Disease" value="ไม่ถูกต้อง" {...register('Readiness2.Disease', { required: true })} />
                         ไม่ถูกต้อง
                     </label>
                 </div>
-                {/* {errors.question2_1 && <span>This field is required</span>} */}
+                {/* {errors.Disease && <span>This field is required</span>} */}
             </div>
             <div className="mb-1">
                 <label>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา</label>
                 <div>
                     <label>
-                        <input type="radio" name="question2_2" value="ถูกต้อง" {...register('step2.question2_2', { required: true })} />
+                        <input type="radio" name="Medication" value="ถูกต้อง" {...register('Readiness2.Medication', { required: true })} />
                         ถูกต้อง
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question2_2" value="ไม่ถูกต้อง" {...register('step2.question2_2', { required: true })} />
+                        <input type="radio" name="Medication" value="ไม่ถูกต้อง" {...register('Readiness2.Medication', { required: true })} />
                         ไม่ถูกต้อง
                     </label>
                 </div>
-                {/* {errors.question2_2 && <span>This field is required</span>} */}
+                {/* {errors.Medication && <span>This field is required</span>} */}
             </div>
             <div className="mb-1">
                 <label>3. Environment : มีการเตรียมสิ่งแวดล้อม</label>
                 <div>
                     <label>
-                        <input type="radio" name="question2_3" value="ถูกต้อง" {...register('step2.question2_3', { required: true })} />
+                        <input type="radio" name="Environment" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })} />
                         ถูกต้อง
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question2_3" value="ไม่ถูกต้อง" {...register('step2.question2_3', { required: true })} />
+                        <input type="radio" name="Environment" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })} />
                         ไม่ถูกต้อง
                     </label>
                 </div>
-                {/* {errors.question2_3 && <span>This field is required</span>} */}
+                {/* {errors.Environment && <span>This field is required</span>} */}
             </div>
             <div className="mb-1">
                 <label>4.Treatment : มีการฝึกทักษะที่จำเป็น</label>
                 <div>
                     <label>
-                        <input type="radio" name="question2_4" value="ถูกต้อง" {...register('step2.question2_4', { required: true })} />
+                        <input type="radio" name="Treatment" value="ถูกต้อง" {...register('Readiness2.Treatment', { required: true })} />
                         ถูกต้อง
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question2_4" value="ไม่ถูกต้อง" {...register('step2.question2_4', { required: true })} />
+                        <input type="radio" name="Treatment" value="ไม่ถูกต้อง" {...register('Readiness2.Treatment', { required: true })} />
                         ไม่ถูกต้อง
                     </label>
                 </div>
-                {/* {errors.question2_4 && <span>This field is required</span>} */}
+                {/* {errors.Treatment && <span>This field is required</span>} */}
             </div>
             <div className="mb-1">
                 <label>5. Health : รู้ข้อจำกัดด้านสุขภาพ</label>
                 <div>
                     <label>
-                        <input type="radio" name="question2_5" value="ถูกต้อง" {...register('step2.question2_5', { required: true })} />
+                        <input type="radio" name="Health" value="ถูกต้อง" {...register('Readiness2.Health', { required: true })} />
                         ถูกต้อง
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question2_5" value="ไม่ถูกต้อง" {...register('step2.question2_5', { required: true })} />
+                        <input type="radio" name="Health" value="ไม่ถูกต้อง" {...register('Readiness2.Health', { required: true })} />
                         ไม่ถูกต้อง
                     </label>
                 </div>
-                {/* {errors.question2_5 && <span>This field is required</span>} */}
+                {/* {errors.Health && <span>This field is required</span>} */}
             </div>
             <div className="mb-1">
                 <label>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ</label>
                 <div>
                     <label>
-                        <input type="radio" name="question2_6" value="ถูกต้อง" {...register('step2.question2_6', { required: true })} />
+                        <input type="radio" name="Out_patient" value="ถูกต้อง" {...register('Readiness2.Out_patient', { required: true })} />
                         ถูกต้อง
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question2_6" value="ไม่ถูกต้อง" {...register('step2.question2_6', { required: true })} />
+                        <input type="radio" name="Out_patient" value="ไม่ถูกต้อง" {...register('Readiness2.Out_patient', { required: true })} />
                         ไม่ถูกต้อง
                     </label>
                 </div>
-                {/* {errors.question2_6 && <span>This field is required</span>} */}
+                {/* {errors.Out_patient && <span>This field is required</span>} */}
             </div>
             <div className="mb-1">
                 <label>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค</label>
                 <div>
                     <label>
-                        <input type="radio" name="question2_7" value="ถูกต้อง" {...register('step2.question2_7', { required: true })} />
+                        <input type="radio" name="Diet" value="ถูกต้อง" {...register('Readiness2.Diet', { required: true })} />
                         ถูกต้อง
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question2_7" value="ไม่ถูกต้อง" {...register('step2.question2_7', { required: true })} />
+                        <input type="radio" name="Diet" value="ไม่ถูกต้อง" {...register('Readiness2.Diet', { required: true })} />
                         ไม่ถูกต้อง
                     </label>
                 </div>
-                {/* {errors.question2_7 && <span>This field is required</span>} */}
+                {/* {errors.Diet && <span>This field is required</span>} */}
             </div>
         </div>
     );
@@ -381,32 +379,32 @@ export default function Assessreadiness1() {
 
     const onSubmit = async (formData) => {
         try {
-            const response = await fetch(`http://localhost:5000/submitAssessment/${id}`, {
+            const response = await fetch(`http://localhost:5000/submitAssessreadiness/${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     userId: id,
-                    step1: formData.step1,
-                    step2: formData.step2,
+                    Readiness1: formData.Readiness1,
+                    Readiness2: formData.Readiness2,
+                    status_name: 'ประเมินแล้ว',
                 }),
             });
 
             const data = await response.json();
-            console.log(data);
             if (response.ok) {
-                const Formdata = data;
-                console.log("ประเมินความพร้อมสำเร็จ:", Formdata);
+                console.log("ประเมินความพร้อมสำเร็จ:", data);
                 toast.success("ประเมินข้อมูลสำเร็จ");
                 setTimeout(() => {
                     navigate("/assessreadiness");
-                }, 1100);
+                }, 1000);
             } else {
+                console.error("Error during Assessreadiness submission:", data);
                 toast.error("เกิดข้อผิดพลาดในการประเมิน");
             }
         } catch (error) {
-            console.error("Error updating equipment:", error);
+            console.error("Error updating Assessreadiness:", error);
             toast.error("เกิดข้อผิดพลาดในการประเมิน");
         }
     };
@@ -527,12 +525,11 @@ export default function Assessreadiness1() {
                             ? medicalData.Diagnosis
                             : "ไม่มีข้อมูล"}
                     </p>
-
                 </div>
                 <div className="adminall card mb-1">
                     <form onSubmit={handleSubmit(onSubmit)}>
-                        {step === 1 && <Step1 register={register} errors={errors} />}
-                        {step === 2 && <Step2 register={register} errors={errors} />}
+                        {step === 1 && <Readiness1 register={register} errors={errors} />}
+                        {step === 2 && <Readiness2 register={register} errors={errors} />}
                         <div className="btn-group">
                             {step > 1 && (
                                 <div className="btn-pre">

@@ -6,6 +6,7 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 
+
 export default function Infopatient({ }) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
@@ -31,57 +32,60 @@ export default function Infopatient({ }) {
     const [mdata, setMData] = useState([]);
     const [medicalEquipment, setMedicalEquipment] = useState(null);
     const [selectedEquipments, setSelectedEquipments] = useState([]);
+    const [userData, setUserData] = useState(null);
 
 
     useEffect(() => {
         const token = window.localStorage.getItem("token");
         setToken(token);
         if (token) {
-            fetch("http://localhost:5000/profiledt", {
-                method: "POST",
-                crossDomain: true,
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                },
-                body: JSON.stringify({
-                    token: token,
-                }),
+          fetch("http://localhost:5000/profiledt", {
+            method: "POST",
+            crossDomain: true,
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({
+              token: token,
+            }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              console.log(data);
+              setData(data.data);
             })
-                .then((res) => res.json())
-                .then((data) => {
-                    console.log(data);
-                    setData(data.data);
-                })
-                .catch((error) => {
-                    console.error("Error verifying token:", error);
-                    // logOut();
-                });
+            .catch((error) => {
+              console.error("Error verifying token:", error);
+            });
         }
-    }, []);
+      }, []);
+
+      useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const response = await fetch(`http://localhost:5000/getuser/${id}`);
+            const data = await response.json();
+            setUserData(data);
+            setUsername(data.username);
+            setName(data.name);
+            setSurName(data.surname);
+            setGender(data.gender);
+            setBirthday(data.birthday);
+            setNationality(data.nationality);
+            setIDCardNumber(data.ID_card_number);
+            setTel(data.tel);
+            setAddress(data.Address);
+          } catch (error) {
+            console.error("Error fetching caremanual data:", error);
+          }
+        };
+    
+        fetchData();
+      }, [id]);
 
     useEffect(() => {
-        const fetchUserId = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/user/${id}`);
-                const userdata = await response.json();
-                setData([data.data]);
-                setUsername(userdata.data.username);
-                setName(userdata.data.name);
-                setSurName(userdata.data.surname);
-                setBirthday(userdata.data.birthday);
-                setGender(userdata.data.gender);
-                setNationality(userdata.data.nationality);
-                setIDCardNumber(userdata.data.ID_card_number);
-                setTel(userdata.data.tel);
-                setAddress(userdata.data.Address);
-            } catch (error) {
-                console.error("Error fetching user ID:", error);
-            }
-        };
-
-
         const fetchCaregiverData = async () => {
             try {
                 const response = await fetch(`http://localhost:5000/getcaregiver/${id}`);
@@ -96,9 +100,9 @@ export default function Infopatient({ }) {
                 console.error("Error fetching caregiver data:", error);
             }
         };
-        fetchUserId();
         fetchCaregiverData();
     }, [id]);
+
 
     useEffect(() => {
         const fetchMedicalInformation = async () => {

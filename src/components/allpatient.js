@@ -38,7 +38,6 @@ export default function Allpatient({ }) {
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
-          // logOut();
         });
     }
   }, []);

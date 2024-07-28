@@ -36,6 +36,8 @@ export default function Updatemedicalinformation() {
     const [pdfURLM, setPdfURLM] = useState("");
     const [pdfURLPhy, setPdfURLPhy] = useState("");
     const [data, setData] = useState([]);
+    const [profileData, setProfileData] = useState(null);
+    
 
     const initialSelectedPersonnel = medicalInfo
         ? medicalInfo.selectedPersonnel
@@ -84,27 +86,32 @@ export default function Updatemedicalinformation() {
         const token = window.localStorage.getItem("token");
         setToken(token);
         if (token) {
-            fetch("http://localhost:5000/profiledt", {
-                method: "POST",
-
-                crossDomain: true,
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                },
-                body: JSON.stringify({
-                    token: token,
-                }),
+          fetch("http://localhost:5000/profiledt", {
+            method: "POST",
+            crossDomain: true,
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({
+              token: token,
+            }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              console.log(data);
+              setProfileData(data.data);
             })
-                .then((res) => res.json())
-                .then((data) => {
-                    console.log(data);
-                    setData(data.data);
-                });
+            .catch((error) => {
+              console.error("Error verifying token:", error);
+            });
         }
+      }, []);
+
+      useEffect(() => {
         getAllMpersonnel();
-    }, []);
+      }, []);
 
     useEffect(() => {
         const fetchMedicalInformation = async () => {
@@ -164,10 +171,6 @@ export default function Updatemedicalinformation() {
         setIsActive(!isActive);
     };
 
-    const handleBreadcrumbClick = () => {
-        navigate("/allinfo", { state: { id: id, user: user } });
-    };
-
     const getAllMpersonnel = () => {
         fetch("http://localhost:5000/allMpersonnel", {
             method: "GET",
@@ -179,7 +182,6 @@ export default function Updatemedicalinformation() {
             .then((data) => {
                 console.log(data, "AllMpersonnel");
                 setData(data.data);
-                console.log("info:", id);
             });
     };
 
@@ -318,7 +320,7 @@ export default function Updatemedicalinformation() {
                         <li>
                             <a href="profile">
                                 <i class="bi bi-person"></i>
-                                <span class="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
+                                <span class="links_name">{profileData && profileData.nametitle + profileData.name + " " + profileData.surname}</span>
                             </a>
                         </li>
                     </div>
@@ -541,15 +543,17 @@ export default function Updatemedicalinformation() {
                                 onChange={(e) => setPhychosocial_assessment(e.target.value)}
                             />
                         </div>
-                        <div className="btn-group">
+                        
+                    </div>
+                    
+                )}
+                <div className="btn-group">
                             <div className="btn-next">
                                 <button onClick={UpdateMedical} className="btn btn-outline py-2">
                                     บันทึก
                                 </button>
                             </div>
                         </div>
-                    </div>
-                )}
             </div>
 
             <div></div>

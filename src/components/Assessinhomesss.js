@@ -311,7 +311,7 @@ export default function Assessinhomesss({ }) {
                         <a
                           className="info"
                           onClick={() =>
-                            navigate("/assessreadinesspage1", {
+                            navigate("/LinearStepper", {
                               state: { id: i._id },
                             })
                           }
