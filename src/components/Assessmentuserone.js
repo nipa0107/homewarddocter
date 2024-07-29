@@ -925,7 +925,7 @@ const filteredAlerts = filterType === "unread"
                 </div>
               ))}
 
-            <div className="inline-container">
+            <div className="inline-containersymtoms-count">
               <label className="title-ptf">
                 ความถี่ของอาการ
                 <span className="bracket">(นับรวมการบันทึกปัจจุบัน)</span>:

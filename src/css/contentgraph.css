@@ -315,7 +315,16 @@
     display: flex;
     
   }
-
+  .inline-containersymtoms-count{
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .inline-containersymtoms-count .title-ptf{
+    margin-left: 3%;
+    margin-right: 1rem;
+    font-weight: bold;
+    color: #333;
+  }
   .symtoms-count {
     margin-right: 10px;
     margin-bottom: 5px;
