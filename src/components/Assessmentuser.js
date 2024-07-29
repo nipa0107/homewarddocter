@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { fetchAlerts } from './Alert/alert';
+import { renderAlerts } from './Alert/renderAlerts'; 
 
-export default function Assessmentuser({}) {
+export default function Assessmentuser({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [isActive, setIsActive] = useState(false);
@@ -25,32 +27,110 @@ export default function Assessmentuser({}) {
   const [userData, setUserData] = useState(null);
   const [medicalData, setMedicalData] = useState([]);
   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationsRef]);
+  const fetchUserData = (token) => {
+    return fetch("http://localhost:5000/profiledt", {
+      method: "POST",
+      crossDomain: true,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data.data);
+        if (data.data == "token expired") {
+          window.localStorage.clear();
+          window.location.href = "./";
+        }
+        return data.data; 
+      })
+      .catch((error) => {
+        console.error("Error verifying token:", error);
+      });
+  };
+  const fetchAndSetAlerts = (token, userId) => {
+    fetchAlerts(token)
+      .then((alerts) => {
+        setAlerts(alerts);
+        const unreadAlerts = alerts.filter(
+          (alert) => !alert.viewedBy.includes(userId) 
+        ).length;
+        setUnreadCount(unreadAlerts);
+      })
+      .catch((error) => {
+        console.error("Error fetching alerts:", error);
+      });
+  };
+  
+  useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
+  
     if (token) {
-      fetch("http://localhost:5000/profiledt", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          token: token,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          setData(data.data);
+      fetchUserData(token)
+        .then(user => {
+          setUserId(user._id); 
+          fetchAndSetAlerts(token, user._id); 
+          
+          const interval = setInterval(() => {
+            fetchAndSetAlerts(token, user._id); 
+            fetchAllUsers(user._id);
+          }, 1000);
+  
+          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
-          // logOut();
         });
     }
   }, []);
+  
+
+  const markAllAlertsAsViewed = () => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId: userId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const updatedAlerts = alerts.map((alert) => ({
+          ...alert,
+          viewedBy: [...alert.viewedBy, userId],
+        }));
+        setAlerts(updatedAlerts);
+        setUnreadCount(0);
+      })
+      .catch((error) => {
+        console.error("Error marking all alerts as viewed:", error);
+      });
+  };
+  
+  const handleFilterChange = (type) => {
+    setFilterType(type);
+  };
+
+const filteredAlerts = filterType === "unread"
+  ? alerts.filter(alert => !alert.viewedBy.includes(userId))
+  : alerts;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -87,12 +167,12 @@ export default function Assessmentuser({}) {
           console.error("Error fetching medical information:", error);
         }
       };
-  
+
       fetchMedicalInfo();
     }
   }, [userData]);
-  
-  
+
+
 
   const fetchpatientForms = async () => {
     try {
@@ -118,6 +198,7 @@ export default function Assessmentuser({}) {
       fetchpatientForms();
     }
   }, [id]);
+  
 
   const fetchAssessments = async () => {
     try {
@@ -230,13 +311,61 @@ export default function Assessmentuser({}) {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
+// แช็ตยังไม่อ่าน
+  const fetchAllUsers = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/alluserchat?userId=${userId}`
+      );
+      const data = await response.json();
+
+      const usersWithLastMessage = await Promise.all(
+        data.data.map(async (user) => {
+          const lastMessageResponse = await fetch(
+            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
+          );
+          const lastMessageData = await lastMessageResponse.json();
+
+          const lastMessage = lastMessageData.lastMessage;
+          return { ...user, lastMessage: lastMessage ? lastMessage : null };
+        })
+      );
+
+      const sortedUsers = usersWithLastMessage.sort((a, b) => {
+        if (!a.lastMessage) return 1;
+        if (!b.lastMessage) return -1;
+        return (
+          new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+        );
+      });
+
+      setAllUsers(sortedUsers);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+    }
+  };
+  //polling
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchAllUsers(data._id);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [data]);
+
+  const countUnreadUsers = () => {
+    const unreadUsers = allUsers.filter((user) => {
+      const lastMessage = user.lastMessage;
+      return (
+        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+      );
+    });
+    return unreadUsers.length;
+  };
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -262,21 +391,32 @@ export default function Assessmentuser({}) {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="allpatient">
               <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
+            <a href="assessreadiness">
+              <i className="bi bi-clipboard-check"></i>
+              <span className="links_name">ประเมินความพร้อมการดูแล</span>
             </a>
           </li>
           <li>
-            <a href="chat">
-              <i class="bi bi-chat-dots"></i>
-              <span class="links_name">แช็ต</span>
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
+            </a>
+          </li>
+          <li>
+          <a href="chat" style={{ position: "relative" }}>
+              <i className="bi bi-chat-dots"></i>
+              <span className="links_name">แช็ต</span>
+              {countUnreadUsers() !== 0 && (
+                <span className="notification-countchat">
+                  {countUnreadUsers()}
+                </span>
+              )}
             </a>
           </li>
           <div class="nav-logout">
@@ -310,7 +450,7 @@ export default function Assessmentuser({}) {
         </div>
         </div>
 
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
@@ -336,31 +476,31 @@ export default function Assessmentuser({}) {
         <div className="toolbar"></div>
         <div className="content">
           <div className="">
-          <p className="headerassesment">
-            {name} {surname}
-          </p>
-          {birthday ? (
-            <p className="textassesment">
-              <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
+            <p className="headerassesment">
+              {name} {surname}
             </p>
-          ) : (
-            <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
-          )}
-          <p className="textassesment">
-            
-          <label>HN:</label>
-            {medicalData && medicalData.HN
-              ? medicalData.HN
-              : "ไม่มีข้อมูล"}
-             <label>AN:</label>
-            {medicalData && medicalData.AN
-              ? medicalData.AN
-              : "ไม่มีข้อมูล"}
-             <label>ผู้ป่วยโรค:</label>
-            {medicalData && medicalData.Diagnosis
-              ? medicalData.Diagnosis
-              : "ไม่มีข้อมูล"}
-          </p>
+            {birthday ? (
+              <p className="textassesment">
+                <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
+              </p>
+            ) : (
+              <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
+            )}
+            <p className="textassesment">
+
+              <label>HN:</label>
+              {medicalData && medicalData.HN
+                ? medicalData.HN
+                : "ไม่มีข้อมูล"}
+              <label>AN:</label>
+              {medicalData && medicalData.AN
+                ? medicalData.AN
+                : "ไม่มีข้อมูล"}
+              <label>ผู้ป่วยโรค:</label>
+              {medicalData && medicalData.Diagnosis
+                ? medicalData.Diagnosis
+                : "ไม่มีข้อมูล"}
+            </p>
 
           </div>
 
@@ -406,8 +546,8 @@ export default function Assessmentuser({}) {
                                   assessment.status_name === "ปกติ"
                                     ? "normal-status"
                                     : assessment.status_name === "ผิดปกติ"
-                                    ? "abnormal-status"
-                                    : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
+                                      ? "abnormal-status"
+                                      : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
                                       "end-of-treatment-status"
                                 }
                               >
@@ -426,22 +566,22 @@ export default function Assessmentuser({}) {
                           (assessment) => assessment.PatientForm === form._id
                         )
                           ? assessments.map((assessment) =>
-                              assessment.PatientForm === form._id ? (
-                                <span key={assessment._id}>
-                                  {mpersonnel.map((person) =>
-                                    person._id === assessment.MPersonnel ? (
-                                      <span key={person._id}>
-                                        {person.nametitle} {person.name}{" "}
-                                        {person.surname}
-                                      </span>
-                                    ) : null
-                                  )}
-                                </span>
-                              ) : null
-                            )
-                          :     <span className="not-evaluated">
-                          ยังไม่ได้รับการประเมิน
-                        </span>}
+                            assessment.PatientForm === form._id ? (
+                              <span key={assessment._id}>
+                                {mpersonnel.map((person) =>
+                                  person._id === assessment.MPersonnel ? (
+                                    <span key={person._id}>
+                                      {person.nametitle} {person.name}{" "}
+                                      {person.surname}
+                                    </span>
+                                  ) : null
+                                )}
+                              </span>
+                            ) : null
+                          )
+                          : <span className="not-evaluated">
+                            ยังไม่ได้รับการประเมิน
+                          </span>}
                       </td>
                     </tr>
                   ))
@@ -455,6 +595,31 @@ export default function Assessmentuser({}) {
             </tbody>
           </table>
         </div>
+        {showNotifications && (
+        <div className="notifications-dropdown" ref={notificationsRef}>
+          <div className="notifications-head">
+            <h2 className="notifications-title">การแจ้งเตือน</h2>
+            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+              ทำเครื่องหมายว่าอ่านทั้งหมด
+            </p>
+            <div className="notifications-filter">
+              <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                ดูทั้งหมด
+              </button>
+              <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                ยังไม่อ่าน
+              </button>
+            </div>
+          </div>
+          {filteredAlerts.length > 0 ? (
+            <>
+              {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+            </>
+          ) : (
+            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+          )}
+        </div>
+      )}
       </div>
     </main>
   );

@@ -1,5 +1,7 @@
 import React from "react";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+import LinearStepper from "./components/LinearStepper";
+
 
 import {
   BrowserRouter as Router,
@@ -15,10 +17,21 @@ import Profile from "./components/profile";
 import Updatepassword from "./components/updatepassword";
 import UpdateProfile from "./components/updateprofile";
 import Success from "./components/success";
+import Chat from "./components/Chat";
+import Allpatient from "./components/allpatient";
+import Infopatient from "./components/infopatient";
+import Updatepatient from "./components/updatepatient";
+import Updatemedicalinformation from "./components/updatemedicalinformation";
+import Addequippatient from "./components/addequippatient";
 import Assessment from "./components/Assessment";
 import Assessmentuser from "./components/Assessmentuser";
 import Assessmentuserone from "./components/Assessmentuserone";
-import ChatComponent from "./components/Chat";
+import Assessreadiness from "./components/Assessreadiness";
+import Assessreadiness1 from "./components/Assessrdnpage1";
+import DetailAssessreadiness from "./components/detailassessrdn";
+import Assessinhomesss from "./components/Assessinhomesss";
+import MultiStepForm from "./components/MultiStepForm";
+// import Immobility from "./components/Immobility";
 
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
@@ -52,7 +65,12 @@ function App() {
               <PrivateRoute element={<Profile />} isLoggedIn={isLoggedIn} />
             }
           />
-
+          <Route
+            path="/chat"
+            element={
+              <PrivateRoute element={<Chat />} isLoggedIn={isLoggedIn} />
+            }
+          />
           <Route
             path="/updatepassword"
             element={
@@ -71,8 +89,61 @@ function App() {
               />
             }
           />
-
-{/* การประเมิน */}
+          <Route
+            path="/allpatient"
+            element={
+              <PrivateRoute
+                element={<Allpatient />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/infopatient"
+            element={
+              <PrivateRoute
+                element={<Infopatient />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/updatepatient"
+            element={
+              <PrivateRoute
+                element={<Updatepatient />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/updatemedicalinformation"
+            element={
+              <PrivateRoute
+                element={<Updatemedicalinformation />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/addequippatient"
+            element={
+              <PrivateRoute
+                element={<Addequippatient />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/LinearStepper"
+            element={
+              <PrivateRoute
+                element={<LinearStepper />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          {/* การประเมิน */}
           <Route
             path="/assessment"
             element={
@@ -100,21 +171,69 @@ function App() {
               />
             }
           />
-                  <Route
-            path="/chat"
+          <Route
+            path="/assessreadiness"
             element={
               <PrivateRoute
-                element={<ChatComponent/>}
+                element={<Assessreadiness />}
                 isLoggedIn={isLoggedIn}
               />
             }
           />
+          <Route
+            path="/detailassessreadiness"
+            element={
+              <PrivateRoute
+                element={<DetailAssessreadiness />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/assessreadinesspage1"
+            element={
+              <PrivateRoute
+                element={<Assessreadiness1 />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/assessinhomesss"
+            element={
+              <PrivateRoute
+                element={<Assessinhomesss />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/MultiStepForm"
+            element={
+              <PrivateRoute
+                element={<MultiStepForm />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          {/* <Route
+            path="/immobility"
+            element={
+              <PrivateRoute
+                element={<Immobility />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          /> */}
           <Route path="/forgetpassword" element={<Reset />} />
           <Route path="/success" element={<Success />} />
         </Routes>
+        
       </div>
     </Router>
+    
   );
 }
+
 
 export default App;

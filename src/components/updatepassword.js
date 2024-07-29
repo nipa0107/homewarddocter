@@ -6,7 +6,7 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 // import 'react-toastify/dist/ReactToastify.css';
-function Updatepassword(){
+function Updatepassword() {
   const location = useLocation();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -38,6 +38,10 @@ function Updatepassword(){
           console.log(data)
           console.log(location);
           setData(data.data);
+          if (data.data == "token expired") {
+            window.localStorage.clear();
+            window.location.href = "./";
+          }
         });
     }
   }, [location]);
@@ -70,7 +74,7 @@ function Updatepassword(){
         console.error(error);
       });
   };
-  
+
 
   const logOut = () => {
     window.localStorage.clear();
@@ -83,77 +87,82 @@ function Updatepassword(){
   };
 
 
-return(
-  <main className="body">
-  <div className={`sidebar ${isActive ? "active" : ""}`}>
-    <div class="logo_content">
-      <div class="logo">
-        <div class="logo_name">
-          <img src={logow} className="logow" alt="logo"></img>
+  return (
+    <main className="body">
+      <div className={`sidebar ${isActive ? "active" : ""}`}>
+        <div class="logo_content">
+          <div class="logo">
+            <div class="logo_name">
+              <img src={logow} className="logow" alt="logo"></img>
+            </div>
+          </div>
+          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
         </div>
+        <ul class="nav-list">
+          <li>
+            <a href="home">
+              <i class="bi bi-house"></i>
+              <span class="links_name">หน้าหลัก</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessment">
+              <i class="bi bi-clipboard2-pulse"></i>
+              <span class="links_name">ติดตาม/ประเมินอาการ</span>
+            </a>
+          </li>
+          <li>
+            <a href="allpatient" >
+              <i class="bi bi-people"></i>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessreadiness">
+              <i class="bi bi-clipboard-check"></i>
+              <span class="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss" >
+              <i class="bi bi-house-check"></i>
+              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+            </a>
+          </li>
+          <li>
+            <a href="chat">
+              <i class="bi bi-chat-dots"></i>
+              <span class="links_name">แช็ต</span>
+            </a>
+          </li>
+          <div class="nav-logout">
+            <li>
+              <a href="./" onClick={logOut}>
+                <i
+                  class="bi bi-box-arrow-right"
+                  id="log_out"
+                  onClick={logOut}
+                ></i>
+                <span class="links_name">ออกจากระบบ</span>
+              </a>
+            </li>
+          </div>
+        </ul>
       </div>
-      <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-    </div>
-    <ul class="nav-list">
-      <li>
-        <a href="home">
-          <i class="bi bi-house"></i>
-          <span class="links_name">หน้าหลัก</span>
-        </a>
-      </li>
-      <li>
-        <a href="#">
-          <i class="bi bi-clipboard2-pulse"></i>
-          <span class="links_name">ติดตาม/ประเมินอาการ</span>
-        </a>
-      </li>
-      <li>
-      <a href="assessment" >
-          <i class="bi bi-people"></i>
-          <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
-        </a>
-      </li>
-      <li>
-        <a href="#">
-          <i class="bi bi-clipboard-check"></i>
-          <span class="links_name">ประเมินความพร้อมการดูแล</span>
-        </a>
-      </li>
-      <li>
-        <a href="chat">
-          <i class="bi bi-chat-dots"></i>
-          <span class="links_name">แช็ต</span>
-        </a>
-      </li>
-      <div class="nav-logout">
-        <li>
-          <a href="./" onClick={logOut}>
-            <i
-              class="bi bi-box-arrow-right"
-              id="log_out"
-              onClick={logOut}
-            ></i>
-            <span class="links_name">ออกจากระบบ</span>
-          </a>
-        </li>
-      </div>
-    </ul>
-  </div>
-  <div className="home_content">
-  <div className="homeheader">
+      <div className="home_content">
+        <div className="homeheader">
 
-    <div className="header">เปลี่ยนรหัสผ่าน</div>
-    <div class="profile_details ">
-      <li>
-        <a href="profile">
-          <i class="bi bi-person"></i>
-          <span class="links_name" >{data && data.nametitle+data.name+" "+data.surname}</span>
-        </a>
-      </li>
-    </div>
-    </div>
-    <hr></hr>
-    <div className="breadcrumbs">
+          <div className="header">เปลี่ยนรหัสผ่าน</div>
+          <div class="profile_details ">
+            <li>
+              <a href="profile">
+                <i class="bi bi-person"></i>
+                <span class="links_name" >{data && data.nametitle + data.name + " " + data.surname}</span>
+              </a>
+            </li>
+          </div>
+        </div>
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
@@ -207,9 +216,9 @@ return(
             </button>
           </div>
         </div>
-    </div>
+      </div>
     </main>
-);
-    
+  );
+
 }
 export default Updatepassword;

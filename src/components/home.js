@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
+import "../css/noti.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 
-export default function Home({}) {
+export default function Home() {
   const [data, setData] = useState([]);
-  const navigate = useNavigate();
+  const [datauser, setDatauser] = useState([]);
   const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState("");
 
@@ -16,31 +17,70 @@ export default function Home({}) {
     window.location.href = "./";
   };
 
-  // bi-list
   const handleToggleSidebar = () => {
     setIsActive(!isActive);
   };
 
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  const fetchUserData = (token) => {
+    return fetch("http://localhost:5000/profiledt", {
+      method: "POST",
+      crossDomain: true,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data.data);
+        if (data.data == "token expired") {
+          window.localStorage.clear();
+          window.location.href = "./";
+        }
+        return data.data; 
+      })
+      .catch((error) => {
+        console.error("Error verifying token:", error);
+      });
+  };
+
+  const fetchAndSetAlerts = (token, userId) => {
+    fetchAlerts(token)
+      .then((alerts) => {
+        setAlerts(alerts);
+        const unreadAlerts = alerts.filter(
+          (alert) => !alert.viewedBy.includes(userId) // ตรวจสอบว่า userId ไม่อยู่ใน viewedBy
+        ).length;
+        setUnreadCount(unreadAlerts);
+      })
+      .catch((error) => {
+        console.error("Error fetching alerts:", error);
+      });
+  };
+  
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
+  
     if (token) {
-      fetch("http://localhost:5000/profiledt", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          token: token,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          setData(data.data);
+      fetchUserData(token)
+        .then(user => {
+          setUserId(user._id); // ตั้งค่า userId
+          fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
+          fetchDiagnosisCounts();
+  
+          const interval = setInterval(() => {
+            fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
+            fetchAllUsers(user._id);
+          }, 1000);
+  
+          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -59,11 +99,11 @@ export default function Home({}) {
           </div>
           <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
         </div>
-        <ul class="nav-list">
+        <ul className="nav-list">
           <li>
             <a href="home">
-              <i class="bi bi-house"></i>
-              <span class="links_name">หน้าหลัก</span>
+              <i className="bi bi-house"></i>
+              <span className="links_name">หน้าหลัก</span>
             </a>
           </li>
           <li>
@@ -90,7 +130,7 @@ export default function Home({}) {
               <span class="links_name">แช็ต</span>
             </a>
           </li>
-          <div class="nav-logout">
+          <div className="nav-logout">
             <li>
               <a href="./" onClick={logOut}>
                 <i
@@ -127,19 +167,17 @@ export default function Home({}) {
             </li>
           </div>
         </div>
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
-                <i class="bi bi-house-fill"></i>
+                <i className="bi bi-house-fill"></i>
               </a>
             </li>
             <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
+              <i className="bi bi-chevron-double-right"></i>
             </li>
-            <li>
-              <a>ภาพรวมระบบ</a>
-            </li>
+            <li><a>ภาพรวมระบบ</a></li>
           </ul>
         </div>
       </div>

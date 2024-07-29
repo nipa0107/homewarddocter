@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit&family=Noto+Sans+Thai+Looped&display=swap');
 
 * {
-    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-family: "Kanit", sans-serif;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -27,7 +27,8 @@
     height: 100%;
     width: 320px;
     /* background: #11101D; */
-    background: #87CEFA;
+    background-color: #87CEFA;
+    /* background: #30a9f4; */
     padding: 6px 10px;
     z-index: 99;
     transition: all 0.5s ease;
@@ -52,10 +53,10 @@
 
 .sidebar #btn {
     position: absolute;
-    color: white;
+    color: rgb(0, 0, 0);
     left: 90%;
     top: 10px;
-    font-size: 20px;
+    font-size: 25px;
     width: 50px;
     height: 50px;
     text-align: center;
@@ -78,6 +79,8 @@
     width: 100%;
     list-style-type: none;
     line-height: 50px;
+    font-size: 17px;
+    font-weight: bold; 
 }
 .sidebar.active .links_name{
     opacity: 0;
@@ -116,12 +119,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 20px; 
+    /* margin-top: 20px;  */
 }
 .search-text{
     border-radius: 5px;
     margin-top: 20px;
-    padding: 3px;
+    padding: 8px;
     width: 250px;
     border: 1.4px solid rgb(187, 186, 186) ;
 }
@@ -131,7 +134,7 @@
 
 
 .sidebar ul li a {
-    color: white;
+    color: rgb(0, 0, 0);
     display: flex;
     align-items: center;
     text-decoration: none;
@@ -141,7 +144,7 @@
 }
 
 .sidebar ul li a:hover {
-    width: 93%;
+    width: 100%;
     color: black;
     background-color: white;
     transition: all 0.3s ease;
@@ -164,15 +167,12 @@
     border-bottom: 1px solid #ddd;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
-.profile_details {
-    /* position: absolute; */
-    right: 30px;
-    top: 10px;
-    /* display: flex; */
-    padding: 5px;
-    align-items: center;
+  .profile_details {
     font-size: 20px;
-}
+    display: flex;
+    align-items: center;
+    margin-right: 30px; 
+  }
 
 .profile_details li a{
     padding: 5px;
@@ -180,6 +180,14 @@
     color: black;
     transition: all 0.5s ease;
 }
+
+.profile_details .nav-list {
+    display: flex;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+
 .profile_details .bi{
     margin-right: 15px;
 }
@@ -187,6 +195,7 @@
 .profile_details  li {
     cursor: pointer;
     list-style-type: none;
+    margin-left: 10px;
 }
 
 .profile_details li a:hover {
@@ -231,7 +240,7 @@
 .home_content{
     position: relative;
     height: 100%;
-    width: calc(100% - 330px);
+    width: calc(100% - 300px);
     left: 320px;
     transition: all 0.5s ease;
     margin-bottom: 2%;
@@ -291,9 +300,16 @@
     margin-right: 250px;
     line-height: 40px;
 }
-.home_content .toolbar p{
-    text-align: center;
+.home_content .toolbar {
+    /* float: right; */
+    margin-right: 120px;
+    line-height: 40px;
 }
+.toolbar {
+    margin-top: auto; 
+    align-self: end; 
+    text-align: end;
+  }
 
 hr{
     margin: 2rem 2rem;

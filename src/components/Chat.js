@@ -3,6 +3,9 @@ import "../css/sidebar.css";
 import "../css/stylechat.css";
 import logow from "../img/logow.png";
 import Linkify from "linkify-it";
+import { fetchAlerts } from "./Alert/alert";
+import { renderAlerts } from "./Alert/renderAlerts";
+import { useNavigate } from "react-router-dom";
 
 const ChatComponent = () => {
   const [message, setMessage] = useState("");
@@ -24,6 +27,13 @@ const ChatComponent = () => {
   const inputRef = useRef(null);
   const [modalImage, setModalImage] = useState(null);
 
+  const navigate = useNavigate();
+  const [alerts, setAlerts] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [filterType, setFilterType] = useState("all");
+  const notificationsRef = useRef(null);
+  const [userId, setUserId] = useState("");
   const linkify = Linkify();
 
   const linkifyText = (text) => {
@@ -58,32 +68,123 @@ const ChatComponent = () => {
       reader.readAsDataURL(file);
     }
   };
-  useEffect(() => {
-    const token = window.localStorage.getItem("token");
-    setToken(token);
-    if (token) {
-      fetch("http://localhost:5000/profiledt", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({ token }),
-      })
+ const fetchUserData = (token) => {
+    return fetch("http://localhost:5000/profiledt", {
+      method: "POST",
+      crossDomain: true,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ token }),
+    })
         .then((res) => res.json())
         .then((data) => {
           setData(data.data);
           setSender(data.data._id);
           setSenderModel(data.data.role === "user" ? "User" : "MPersonnel");
-          fetchAllUsers(data.data._id); // ส่ง userId ของผู้ใช้ที่ล็อกอินไปกับการเรียก API
+          fetchAllUsers(data.data._id);
+          if (data.data == "token expired") {
+            window.localStorage.clear();
+            window.location.href = "./";
+          }
+          return data.data; 
+        })
+        .catch((error) => {
+          console.error("Error verifying token:", error);
+        });
+    
+  };
+
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationsRef]);
+
+  const fetchAndSetAlerts = (token, userId) => {
+    fetchAlerts(token)
+      .then((alerts) => {
+        setAlerts(alerts);
+        const unreadAlerts = alerts.filter(
+          (alert) => !alert.viewedBy.includes(userId) 
+        ).length;
+        setUnreadCount(unreadAlerts);
+      })
+      .catch((error) => {
+        console.error("Error fetching alerts:", error);
+      });
+  };
+  
+  useEffect(() => {
+    const token = window.localStorage.getItem("token");
+    setToken(token);
+  
+    if (token) {
+      fetchUserData(token)
+        .then(user => {
+          setUserId(user._id); 
+          fetchAndSetAlerts(token, user._id); 
+          
+          const interval = setInterval(() => {
+            fetchAndSetAlerts(token, user._id); 
+            fetchAllUsers(user._id);
+          }, 1000);
+  
+          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
         });
     }
   }, []);
+  
+
+  const markAllAlertsAsViewed = () => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId: userId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const updatedAlerts = alerts.map((alert) => ({
+          ...alert,
+          viewedBy: [...alert.viewedBy, userId],
+        }));
+        setAlerts(updatedAlerts);
+        setUnreadCount(0);
+      })
+      .catch((error) => {
+        console.error("Error marking all alerts as viewed:", error);
+      });
+  };
+  
+  const handleFilterChange = (type) => {
+    setFilterType(type);
+  };
+
+const filteredAlerts = filterType === "unread"
+  ? alerts.filter(alert => !alert.viewedBy.includes(userId))
+  : alerts;
 
   const fetchAllUsers = async (userId) => {
     try {
@@ -117,7 +218,6 @@ const ChatComponent = () => {
       console.error("Error fetching all users:", error);
     }
   };
-
   //polling
   useEffect(() => {
     const interval = setInterval(() => {
@@ -126,11 +226,24 @@ const ChatComponent = () => {
     return () => clearInterval(interval);
   }, [data]);
 
+  const countUnreadUsers = () => {
+    const unreadUsers = allUsers.filter((user) => {
+      const lastMessage = user.lastMessage;
+      return (
+        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+      );
+    });
+    return unreadUsers.length;
+  };
+
   const handleSelectRecipient = async (user) => {
     setSelectedUserId(user._id);
     setRecipientId(user._id);
     setCurrentRecipient(user);
     setRecipientModel("User");
+    setMessage("");
+    setUploadedImage(null);
+    setImagePreview(null);
 
     try {
       const recipientChatsResponse = await fetch(
@@ -145,48 +258,10 @@ const ChatComponent = () => {
 
   const handleChangeMessage = (e) => {
     setMessage(e.target.value);
-    // ปรับความสูงของ input element ตามข้อความที่พิมพ์
     inputRef.current.style.height = "auto";
     inputRef.current.style.height = inputRef.current.scrollHeight + "px";
   };
 
-  // const adjustTextareaHeight = (textarea) => {
-  //   textarea.style.height = "auto";
-  //   textarea.style.height = textarea.scrollHeight + "px";
-  // };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     if (data) {
-  //       const response = await fetch("http://localhost:5000/chat", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({
-  //           message,
-  //           recipientId,
-  //           senderId: data._id,
-  //           recipientModel,
-  //           senderModel,
-  //         }),
-  //       });
-  //       const result = await response.json();
-  //       if (result.success) {
-  //         setMessage("");
-  //         fetchRecipientChats(recipientId, recipientModel);
-  //         fetchAllUsers(data._id);
-  //       } else {
-  //         console.error("Error sending message:", result.message);
-  //       }
-  //     } else {
-  //       console.error("Error: Data is not available yet.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error sending message:", error);
-  //   }
-  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -209,7 +284,7 @@ const ChatComponent = () => {
         if (result.success) {
           setMessage("");
           setUploadedImage(null);
-          setImagePreview(null); 
+          setImagePreview(null);
           fetchRecipientChats(recipientId, recipientModel);
           fetchAllUsers(data._id);
           document.getElementById("file-input").value = ""; // เคลียร์ค่าไฟล์ใน input
@@ -226,32 +301,25 @@ const ChatComponent = () => {
 
   const fetchRecipientChats = async (recipientId, recipientModel) => {
     try {
-      console.log(
-        `Fetching chats for recipientId: ${recipientId}, recipientModel: ${recipientModel}, sender: ${sender}, senderModel: ${senderModel}`
-      );
-
       const response = await fetch(
         `http://localhost:5000/chat/${recipientId}/${recipientModel}/${sender}/${senderModel}`
       );
       const data = await response.json();
 
-      const filteredChats = data.chats;
-
-      setRecipientChats(filteredChats);
+      setRecipientChats(data.chats);
     } catch (error) {
       console.error("Error fetching recipient chats:", error);
     }
   };
 
-  //polling
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (selectedUserId) {
-  //       fetchRecipientChats(selectedUserId, recipientModel);
-  //     }
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [selectedUserId, recipientModel]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (selectedUserId) {
+        fetchRecipientChats(selectedUserId, recipientModel);
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [selectedUserId, recipientModel]);
 
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
@@ -338,16 +406,6 @@ const ChatComponent = () => {
     scrollToBottom();
   }, [recipientChats]);
 
-  const countUnreadUsers = () => {
-    const unreadUsers = allUsers.filter((user) => {
-      const lastMessage = user.lastMessage;
-      return (
-        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-      );
-    });
-    return unreadUsers.length;
-  };
-
   return (
     <main className="bodychat">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -373,26 +431,35 @@ const ChatComponent = () => {
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="allpatient">
               <i className="bi bi-people"></i>
-              <span className="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="assessreadiness">
               <i className="bi bi-clipboard-check"></i>
               <span className="links_name">ประเมินความพร้อมการดูแล</span>
             </a>
           </li>
           <li>
-            <a href="chat">
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
+            </a>
+          </li>
+          <li>
+            <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
               {countUnreadUsers() !== 0 && (
-                <span className="countchat">{countUnreadUsers()}</span>
+                <span className="notification-countchat">
+                  {countUnreadUsers()}
+                </span>
               )}
             </a>
           </li>
+
           <div className="nav-logout">
             <li>
               <a href="./" onClick={logOut}>
@@ -411,16 +478,29 @@ const ChatComponent = () => {
       <div className="home_contentchat">
         <div className="homeheader">
           <div className="header">แช็ต</div>
-
           <div className="profile_details">
-            <li>
-              <a href="profile">
-                <i className="bi bi-person"></i>
-                <span className="links_name">
-                  {data && data.nametitle + data.name + " " + data.surname}
-                </span>
-              </a>
-            </li>
+            <ul className="nav-list">
+              <li>
+                <a className="bell-icon" onClick={toggleNotifications}>
+                  {showNotifications ? (
+                    <i className="bi bi-bell-fill"></i>
+                  ) : (
+                    <i className="bi bi-bell"></i>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="notification-count">{unreadCount}</span>
+                  )}
+                </a>
+              </li>
+              <li>
+                <a href="profile">
+                  <i className="bi bi-person"></i>
+                  <span className="links_name">
+                    {data && data.nametitle + data.name + " " + data.surname}
+                  </span>
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 
@@ -513,15 +593,15 @@ const ChatComponent = () => {
               </div>
             </div>
             <div className="chat-window">
-              <div className="chat-header">
-                <span>
-                  {currentRecipient
-                    ? `${currentRecipient.name} ${currentRecipient.surname}`
-                    : ""}
-                </span>
-              </div>
-              {currentRecipient && (
+              {currentRecipient ? (
                 <>
+                  <div className="chat-header">
+                    <span>
+                      {currentRecipient
+                        ? `${currentRecipient.name} ${currentRecipient.surname}`
+                        : ""}
+                    </span>
+                  </div>
                   <div className="chat-messages">
                     {recipientChats.map((chat, index) => (
                       <div
@@ -666,16 +746,41 @@ const ChatComponent = () => {
                         <i className="bi bi-send"></i>
                       </button>
                     )}
-                    {/* 
-  <button type="submit">
-    <i className="bi bi-send"></i>
-  </button> */}
                   </form>
                 </>
+                 ) : (
+                  <div className="start-chat-message">
+                    <p>เริ่มการแช็ต</p>
+                  </div>
               )}
             </div>
           </div>
         </div>
+        {showNotifications && (
+        <div className="notifications-dropdown" ref={notificationsRef}>
+          <div className="notifications-head">
+            <h2 className="notifications-title">การแจ้งเตือน</h2>
+            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+              ทำเครื่องหมายว่าอ่านทั้งหมด
+            </p>
+            <div className="notifications-filter">
+              <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                ดูทั้งหมด
+              </button>
+              <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                ยังไม่อ่าน
+              </button>
+            </div>
+          </div>
+          {filteredAlerts.length > 0 ? (
+            <>
+              {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+            </>
+          ) : (
+            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+          )}
+        </div>
+      )}
       </div>
     </main>
   );

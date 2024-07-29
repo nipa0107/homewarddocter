@@ -31,6 +31,10 @@ export default function Home({}) {
         .then((data) => {
           console.log(data);
           setData(data.data);
+          if (data.data == "token expired") {
+            window.localStorage.clear();
+            window.location.href = "./";
+          }
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -73,15 +77,27 @@ export default function Home({}) {
             </a>
           </li>
           <li>
-            <a href="#">
-              <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+            <a href="allpatient">
+              <i className="bi bi-people"></i>
+              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="#">
+            <a href="assessreadiness">
               <i class="bi bi-clipboard-check"></i>
               <span class="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss" >
+              <i class="bi bi-house-check"></i>
+              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss" >
+              <i class="bi bi-house-check"></i>
+              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -117,7 +133,7 @@ export default function Home({}) {
           </li>
         </div>
         </div>
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">

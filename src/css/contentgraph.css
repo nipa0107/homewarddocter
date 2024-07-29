@@ -37,23 +37,24 @@
     flex-wrap: wrap;
   }
 
-  .custom-chart {
-    width: 80%;
-    height: 100%;
-  }
-  .custom-tooltip {
-    background-color: white;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 5px;
-  
-  }
+.custom-chart {
+  width: 80%;
+  height: 100%;
+}
 
-  .contentgraph .recharts-wrapper {
-    width: 100%;
-    height: 100%;
-  }
-  
+.custom-tooltip {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+
+}
+
+.contentgraph .recharts-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
 
   .contentgraph .recharts-responsive-container {
     margin: 0 auto;

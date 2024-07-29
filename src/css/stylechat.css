@@ -92,7 +92,7 @@
 
 .user-list {
   overflow-y: auto;
-  max-height: calc(100vh - 100px);
+  max-height: calc(90vh - 100px);
   max-width: calc(82vh - 10vh);
   border-right: 1px solid #ccc;
   /* padding: 10px; */
@@ -243,16 +243,17 @@
 
 .search-bar1 {
   display: flex;
+  width: 100%;
   justify-content: center;
-  margin: 20px 0;
+  margin: 10px 0;
 }
 
 .search-text1 {
-  width: 80%;
+  width: 90%;
   padding: 10px;
   font-size: 16px;
   border: 1px solid #ccc;
-  border-radius: 25px;
+  border-radius: 10px;
   transition: border 0.3s ease;
 }
 
@@ -584,4 +585,26 @@ textarea{
 
 .linkify:hover {
   text-decoration: underline;
+}
+.notification-count {
+  position: absolute;
+  top: -5px;
+  right: 6px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: .7rem;
+  font-weight: bold;
+  align-items: center;
+  justify-content: center;
+}
+
+.start-chat-message {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  color: #888;
 }
