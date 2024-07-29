@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
+import { fetchAlerts } from './Alert/alert';
+import { renderAlerts } from './Alert/renderAlerts'; 
 
 export default function Assessmentuser({}) {
   const navigate = useNavigate();
@@ -24,33 +26,125 @@ export default function Assessmentuser({}) {
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [userData, setUserData] = useState(null);
   const [medicalData, setMedicalData] = useState([]);
+
+  const [allUsers, setAllUsers] = useState([]);
+  const [datauser, setDatauser] = useState([]);
+
+  const [alerts, setAlerts] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [filterType, setFilterType] = useState("all");
+  const notificationsRef = useRef(null);
+  const [userId, setUserId] = useState("");
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationsRef]);
+  const fetchUserData = (token) => {
+    return fetch("http://localhost:5000/profiledt", {
+      method: "POST",
+      crossDomain: true,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data.data);
+        if (data.data == "token expired") {
+          window.localStorage.clear();
+          window.location.href = "./";
+        }
+        return data.data; 
+      })
+      .catch((error) => {
+        console.error("Error verifying token:", error);
+      });
+  };
+  const fetchAndSetAlerts = (token, userId) => {
+    fetchAlerts(token)
+      .then((alerts) => {
+        setAlerts(alerts);
+        const unreadAlerts = alerts.filter(
+          (alert) => !alert.viewedBy.includes(userId) 
+        ).length;
+        setUnreadCount(unreadAlerts);
+      })
+      .catch((error) => {
+        console.error("Error fetching alerts:", error);
+      });
+  };
+  
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
+  
     if (token) {
-      fetch("http://localhost:5000/profiledt", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          token: token,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          setData(data.data);
+      fetchUserData(token)
+        .then(user => {
+          setUserId(user._id); 
+          fetchAndSetAlerts(token, user._id); 
+          
+          const interval = setInterval(() => {
+            fetchAndSetAlerts(token, user._id); 
+            fetchAllUsers(user._id);
+          }, 1000);
+  
+          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
-          // logOut();
         });
     }
   }, []);
+  
+
+  const markAllAlertsAsViewed = () => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId: userId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const updatedAlerts = alerts.map((alert) => ({
+          ...alert,
+          viewedBy: [...alert.viewedBy, userId],
+        }));
+        setAlerts(updatedAlerts);
+        setUnreadCount(0);
+      })
+      .catch((error) => {
+        console.error("Error marking all alerts as viewed:", error);
+      });
+  };
+  
+  const handleFilterChange = (type) => {
+    setFilterType(type);
+  };
+
+const filteredAlerts = filterType === "unread"
+  ? alerts.filter(alert => !alert.viewedBy.includes(userId))
+  : alerts;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -118,6 +212,7 @@ export default function Assessmentuser({}) {
       fetchpatientForms();
     }
   }, [id]);
+  
 
   const fetchAssessments = async () => {
     try {
@@ -237,6 +332,56 @@ export default function Assessmentuser({}) {
     } น.`;
   };
 
+// แช็ตยังไม่อ่าน
+  const fetchAllUsers = async (userId) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/alluserchat?userId=${userId}`
+      );
+      const data = await response.json();
+
+      const usersWithLastMessage = await Promise.all(
+        data.data.map(async (user) => {
+          const lastMessageResponse = await fetch(
+            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
+          );
+          const lastMessageData = await lastMessageResponse.json();
+
+          const lastMessage = lastMessageData.lastMessage;
+          return { ...user, lastMessage: lastMessage ? lastMessage : null };
+        })
+      );
+
+      const sortedUsers = usersWithLastMessage.sort((a, b) => {
+        if (!a.lastMessage) return 1;
+        if (!b.lastMessage) return -1;
+        return (
+          new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+        );
+      });
+
+      setAllUsers(sortedUsers);
+    } catch (error) {
+      console.error("Error fetching all users:", error);
+    }
+  };
+  //polling
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchAllUsers(data._id);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [data]);
+
+  const countUnreadUsers = () => {
+    const unreadUsers = allUsers.filter((user) => {
+      const lastMessage = user.lastMessage;
+      return (
+        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+      );
+    });
+    return unreadUsers.length;
+  };
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -274,9 +419,14 @@ export default function Assessmentuser({}) {
             </a>
           </li>
           <li>
-            <a href="chat">
-              <i class="bi bi-chat-dots"></i>
-              <span class="links_name">แช็ต</span>
+          <a href="chat" style={{ position: "relative" }}>
+              <i className="bi bi-chat-dots"></i>
+              <span className="links_name">แช็ต</span>
+              {countUnreadUsers() !== 0 && (
+                <span className="notification-countchat">
+                  {countUnreadUsers()}
+                </span>
+              )}
             </a>
           </li>
           <div class="nav-logout">
@@ -298,16 +448,30 @@ export default function Assessmentuser({}) {
       <div className="homeheader">
 
         <div className="header">ติดตาม/ประเมินอาการ</div>
-        <div class="profile_details ">
-          <li>
-            <a href="profile">
-              <i class="bi bi-person"></i>
-              <span class="links_name">
-                {data && data.nametitle + data.name + " " + data.surname}
-              </span>
-            </a>
-          </li>
-        </div>
+        <div className="profile_details">
+            <ul className="nav-list">
+              <li>
+                <a className="bell-icon" onClick={toggleNotifications}>
+                  {showNotifications ? (
+                    <i className="bi bi-bell-fill"></i>
+                  ) : (
+                    <i className="bi bi-bell"></i>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="notification-count">{unreadCount}</span>
+                  )}
+                </a>
+              </li>
+              <li>
+                <a href="profile">
+                  <i className="bi bi-person"></i>
+                  <span className="links_name">
+                    {data && data.nametitle + data.name + " " + data.surname}
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div className="breadcrumbs">
@@ -455,6 +619,31 @@ export default function Assessmentuser({}) {
             </tbody>
           </table>
         </div>
+        {showNotifications && (
+        <div className="notifications-dropdown" ref={notificationsRef}>
+          <div className="notifications-head">
+            <h2 className="notifications-title">การแจ้งเตือน</h2>
+            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+              ทำเครื่องหมายว่าอ่านทั้งหมด
+            </p>
+            <div className="notifications-filter">
+              <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                ดูทั้งหมด
+              </button>
+              <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                ยังไม่อ่าน
+              </button>
+            </div>
+          </div>
+          {filteredAlerts.length > 0 ? (
+            <>
+              {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+            </>
+          ) : (
+            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+          )}
+        </div>
+      )}
       </div>
     </main>
   );

@@ -112,9 +112,12 @@ function App() {
           <Route path="/forgetpassword" element={<Reset />} />
           <Route path="/success" element={<Success />} />
         </Routes>
+        
       </div>
     </Router>
+    
   );
 }
+
 
 export default App;

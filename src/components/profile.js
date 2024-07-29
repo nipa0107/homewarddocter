@@ -31,6 +31,10 @@ export default function Home({}) {
         .then((data) => {
           console.log(data);
           setData(data.data);
+          if (data.data == "token expired") {
+            window.localStorage.clear();
+            window.location.href = "./";
+          }
         })
         .catch((error) => {
           console.error("Error verifying token:", error);

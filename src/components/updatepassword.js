@@ -38,6 +38,10 @@ function Updatepassword(){
           console.log(data)
           console.log(location);
           setData(data.data);
+          if (data.data == "token expired") {
+            window.localStorage.clear();
+            window.location.href = "./";
+          }
         });
     }
   }, [location]);

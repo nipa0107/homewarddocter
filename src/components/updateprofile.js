@@ -45,6 +45,10 @@ export default function UpdateProfile() {
               setUsername(data.data.username)
               setTel(data.data.tel)
               setEmail(data.data.email)
+              if (data.data == "token expired") {
+                window.localStorage.clear();
+                window.location.href = "./";
+              }
             })
             .catch((error) => {
               console.error("Error verifying token:", error);

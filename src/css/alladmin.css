@@ -246,7 +246,7 @@
 
 /* Styles for symptoms */
 .contentinass p {
-  margin: 5px 0;
+  margin: 5px 5px;
 }
 
 .text p {
@@ -258,14 +258,14 @@
 }
 
 .contentinass p:nth-child(odd) {
- background: #f1f1f1;
-  padding: 0.5rem;
+ /* background: #f1f1f1; */
+  /* padding: 0.5rem; */
   border-radius: 4px;
 }
 
 .contentinass p:nth-child(even) {
   /* background: #e9e9e9 ;  */
-  padding: 5px;
+  /* padding: 5px; */
   border-radius: 4px;
 }
 
@@ -290,15 +290,22 @@ p .label {
 .inline-container {
   display: flex;
   align-items: center;
-
 }
 
-.inline-container label {
+.inline-container .title-ptf{
   margin-left: 3%;
   margin-right: 1rem;
   font-weight: bold;
   color: #333;
+}
 
+.inline-container .title-ass{
+  margin-left: 3%;
+  margin-right: 1rem;
+  font-weight: bold;
+  color: #333;
+  flex: 0 0 10%;
+  display: flex;
 }
 .textassesment label{
   margin-left: 1%;
@@ -345,3 +352,11 @@ textarea {
   color: rgba(214, 214, 214, 0.6); /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
 }
 
+.no-notification{
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.symtoms-count{
+  margin-left: 5;
+}
