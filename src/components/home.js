@@ -10,7 +10,7 @@ import { renderAlerts } from "./Alert/renderAlerts";
 
 export default function Home() {
   const [data, setData] = useState([]);
-  const navigate = useNavigate();
+  const [datauser, setDatauser] = useState([]);
   const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState("");
   const [alerts, setAlerts] = useState([]);
@@ -19,8 +19,7 @@ export default function Home() {
   const [filterType, setFilterType] = useState("all");
   const [userId, setUserId] = useState("");
   const [allUsers, setAllUsers] = useState([]);
-  const [datauser, setDatauser] = useState([]);
-
+  const navigate = useNavigate();
   const notificationsRef = useRef(null);
   useEffect(() => {
     getAllUser();
@@ -123,7 +122,6 @@ export default function Home() {
             fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
             fetchAllUsers(user._id);
           }, 1000);
-
           return () => clearInterval(interval);
         })
         .catch((error) => {
@@ -329,7 +327,7 @@ export default function Home() {
             </ul>
           </div>
         </div>
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
@@ -342,6 +340,7 @@ export default function Home() {
             <li>
               <a>ภาพรวมระบบ</a>
             </li>
+            <li><a>ภาพรวมระบบ</a></li>
           </ul>
         </div>
 

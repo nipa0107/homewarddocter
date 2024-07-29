@@ -92,6 +92,57 @@ export default function Assessmentuser({ }) {
   };
   
   useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationsRef]);
+  const fetchUserData = (token) => {
+    return fetch("http://localhost:5000/profiledt", {
+      method: "POST",
+      crossDomain: true,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data.data);
+        if (data.data == "token expired") {
+          window.localStorage.clear();
+          window.location.href = "./";
+        }
+        return data.data; 
+      })
+      .catch((error) => {
+        console.error("Error verifying token:", error);
+      });
+  };
+  const fetchAndSetAlerts = (token, userId) => {
+    fetchAlerts(token)
+      .then((alerts) => {
+        setAlerts(alerts);
+        const unreadAlerts = alerts.filter(
+          (alert) => !alert.viewedBy.includes(userId) 
+        ).length;
+        setUnreadCount(unreadAlerts);
+      })
+      .catch((error) => {
+        console.error("Error fetching alerts:", error);
+      });
+  };
+  
+  useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
   
