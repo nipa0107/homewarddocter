@@ -118,8 +118,10 @@
   text-align: center;
 }
 
-td.assessmentnull {
+tr.assessmentnull {
   text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .headerassesment {
@@ -358,7 +360,7 @@ td.assessmentnull {
   cursor: pointer;
 }
 .user-info {
-  display: flex;
+  /* display: flex; */
   justify-content: space-between;
   padding-left: 6%;
 
@@ -441,8 +443,8 @@ td.assessmentnull {
 }
 
 .contentinass p:nth-child(odd) {
- background: #f1f1f1;
-  padding: 0.5rem;
+ /* background: #f1f1f1; */
+  /* padding: 0.5rem; */
   border-radius: 4px;
 }
 
@@ -540,3 +542,11 @@ textarea {
   /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
 }
 
+.no-notification{
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+.symtoms-count{
+  margin-left: 5;
+}

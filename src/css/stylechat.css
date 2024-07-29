@@ -92,7 +92,7 @@
 
 .user-list {
   overflow-y: auto;
-  max-height: calc(90vh - 100px);
+  max-height: calc(90vh - 90px);
   max-width: calc(82vh - 10vh);
   border-right: 1px solid #ccc;
   /* padding: 10px; */

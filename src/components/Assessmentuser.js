@@ -26,6 +26,20 @@ export default function Assessmentuser({ }) {
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [userData, setUserData] = useState(null);
   const [medicalData, setMedicalData] = useState([]);
+
+  const [allUsers, setAllUsers] = useState([]);
+  const [datauser, setDatauser] = useState([]);
+
+  const [alerts, setAlerts] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [filterType, setFilterType] = useState("all");
+  const notificationsRef = useRef(null);
+  const [userId, setUserId] = useState("");
+  const toggleNotifications = () => {
+    setShowNotifications(!showNotifications);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
@@ -438,16 +452,30 @@ const filteredAlerts = filterType === "unread"
       <div className="homeheader">
 
         <div className="header">ติดตาม/ประเมินอาการ</div>
-        <div class="profile_details ">
-          <li>
-            <a href="profile">
-              <i class="bi bi-person"></i>
-              <span class="links_name">
-                {data && data.nametitle + data.name + " " + data.surname}
-              </span>
-            </a>
-          </li>
-        </div>
+        <div className="profile_details">
+            <ul className="nav-list">
+              <li>
+                <a className="bell-icon" onClick={toggleNotifications}>
+                  {showNotifications ? (
+                    <i className="bi bi-bell-fill"></i>
+                  ) : (
+                    <i className="bi bi-bell"></i>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="notification-count">{unreadCount}</span>
+                  )}
+                </a>
+              </li>
+              <li>
+                <a href="profile">
+                  <i className="bi bi-person"></i>
+                  <span className="links_name">
+                    {data && data.nametitle + data.name + " " + data.surname}
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
 
         <div className="breadcrumbs mt-4">
@@ -587,10 +615,11 @@ const filteredAlerts = filterType === "unread"
                   ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="assessmentnull">
-                    ยังไม่มีการบันทึกอาการ
-                  </td>
-                </tr>
+                <td colSpan="4" className="assessmentnull" style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                  ยังไม่มีการบันทึกอาการ
+                </td>
+              </tr>
+              
               )}
             </tbody>
           </table>
