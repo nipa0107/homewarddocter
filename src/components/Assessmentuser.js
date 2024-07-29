@@ -7,7 +7,7 @@ import { useParams } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts'; 
 
-export default function Assessmentuser({}) {
+export default function Assessmentuser({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [isActive, setIsActive] = useState(false);
@@ -26,20 +26,6 @@ export default function Assessmentuser({}) {
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [userData, setUserData] = useState(null);
   const [medicalData, setMedicalData] = useState([]);
-
-  const [allUsers, setAllUsers] = useState([]);
-  const [datauser, setDatauser] = useState([]);
-
-  const [alerts, setAlerts] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [filterType, setFilterType] = useState("all");
-  const notificationsRef = useRef(null);
-  const [userId, setUserId] = useState("");
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
@@ -181,12 +167,12 @@ const filteredAlerts = filterType === "unread"
           console.error("Error fetching medical information:", error);
         }
       };
-  
+
       fetchMedicalInfo();
     }
   }, [userData]);
-  
-  
+
+
 
   const fetchpatientForms = async () => {
     try {
@@ -325,11 +311,9 @@ const filteredAlerts = filterType === "unread"
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
 // แช็ตยังไม่อ่าน
@@ -407,15 +391,21 @@ const filteredAlerts = filterType === "unread"
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="allpatient">
               <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
+            <a href="assessreadiness">
+              <i className="bi bi-clipboard-check"></i>
+              <span className="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -448,33 +438,19 @@ const filteredAlerts = filterType === "unread"
       <div className="homeheader">
 
         <div className="header">ติดตาม/ประเมินอาการ</div>
-        <div className="profile_details">
-            <ul className="nav-list">
-              <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
-                  {showNotifications ? (
-                    <i className="bi bi-bell-fill"></i>
-                  ) : (
-                    <i className="bi bi-bell"></i>
-                  )}
-                  {unreadCount > 0 && (
-                    <span className="notification-count">{unreadCount}</span>
-                  )}
-                </a>
-              </li>
-              <li>
-                <a href="profile">
-                  <i className="bi bi-person"></i>
-                  <span className="links_name">
-                    {data && data.nametitle + data.name + " " + data.surname}
-                  </span>
-                </a>
-              </li>
-            </ul>
-          </div>
+        <div class="profile_details ">
+          <li>
+            <a href="profile">
+              <i class="bi bi-person"></i>
+              <span class="links_name">
+                {data && data.nametitle + data.name + " " + data.surname}
+              </span>
+            </a>
+          </li>
+        </div>
         </div>
 
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
@@ -500,31 +476,31 @@ const filteredAlerts = filterType === "unread"
         <div className="toolbar"></div>
         <div className="content">
           <div className="">
-          <p className="headerassesment">
-            {name} {surname}
-          </p>
-          {birthday ? (
-            <p className="textassesment">
-              <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
+            <p className="headerassesment">
+              {name} {surname}
             </p>
-          ) : (
-            <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
-          )}
-          <p className="textassesment">
-            
-          <label>HN:</label>
-            {medicalData && medicalData.HN
-              ? medicalData.HN
-              : "ไม่มีข้อมูล"}
-             <label>AN:</label>
-            {medicalData && medicalData.AN
-              ? medicalData.AN
-              : "ไม่มีข้อมูล"}
-             <label>ผู้ป่วยโรค:</label>
-            {medicalData && medicalData.Diagnosis
-              ? medicalData.Diagnosis
-              : "ไม่มีข้อมูล"}
-          </p>
+            {birthday ? (
+              <p className="textassesment">
+                <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
+              </p>
+            ) : (
+              <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
+            )}
+            <p className="textassesment">
+
+              <label>HN:</label>
+              {medicalData && medicalData.HN
+                ? medicalData.HN
+                : "ไม่มีข้อมูล"}
+              <label>AN:</label>
+              {medicalData && medicalData.AN
+                ? medicalData.AN
+                : "ไม่มีข้อมูล"}
+              <label>ผู้ป่วยโรค:</label>
+              {medicalData && medicalData.Diagnosis
+                ? medicalData.Diagnosis
+                : "ไม่มีข้อมูล"}
+            </p>
 
           </div>
 
@@ -570,8 +546,8 @@ const filteredAlerts = filterType === "unread"
                                   assessment.status_name === "ปกติ"
                                     ? "normal-status"
                                     : assessment.status_name === "ผิดปกติ"
-                                    ? "abnormal-status"
-                                    : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
+                                      ? "abnormal-status"
+                                      : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
                                       "end-of-treatment-status"
                                 }
                               >
@@ -590,22 +566,22 @@ const filteredAlerts = filterType === "unread"
                           (assessment) => assessment.PatientForm === form._id
                         )
                           ? assessments.map((assessment) =>
-                              assessment.PatientForm === form._id ? (
-                                <span key={assessment._id}>
-                                  {mpersonnel.map((person) =>
-                                    person._id === assessment.MPersonnel ? (
-                                      <span key={person._id}>
-                                        {person.nametitle} {person.name}{" "}
-                                        {person.surname}
-                                      </span>
-                                    ) : null
-                                  )}
-                                </span>
-                              ) : null
-                            )
-                          :     <span className="not-evaluated">
-                          ยังไม่ได้รับการประเมิน
-                        </span>}
+                            assessment.PatientForm === form._id ? (
+                              <span key={assessment._id}>
+                                {mpersonnel.map((person) =>
+                                  person._id === assessment.MPersonnel ? (
+                                    <span key={person._id}>
+                                      {person.nametitle} {person.name}{" "}
+                                      {person.surname}
+                                    </span>
+                                  ) : null
+                                )}
+                              </span>
+                            ) : null
+                          )
+                          : <span className="not-evaluated">
+                            ยังไม่ได้รับการประเมิน
+                          </span>}
                       </td>
                     </tr>
                   ))

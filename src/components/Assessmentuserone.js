@@ -329,7 +329,6 @@ const filteredAlerts = filterType === "unread"
         }
       });
   };
-
   useEffect(() => {
     const fetchAssessments = async () => {
       try {
@@ -357,7 +356,6 @@ const filteredAlerts = filterType === "unread"
         console.error("Error fetching assessments:", error);
       }
     };
-
     fetchAssessments();
   }, [patientFormsone._id]);
 
@@ -779,15 +777,21 @@ const filteredAlerts = filterType === "unread"
             </a>
           </li>
           <li>
-            <a href="./">
+          <a href="allpatient">
               <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="assessreadiness">
               <i class="bi bi-clipboard-check"></i>
               <span class="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss" >
+              <i class="bi bi-house-check"></i>
+              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -845,7 +849,7 @@ const filteredAlerts = filterType === "unread"
           </div>
         </div>
 
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
@@ -1380,36 +1384,6 @@ const filteredAlerts = filterType === "unread"
             <div className="contentinass">
               <p className="texthead">การประเมินอาการ</p>
               <div className="mb-1">
-                {/* <div className="mb-3">
-                  <div className="btn-group">
-                    <div
-                      className={`btnass ${
-                        statusName === "ปกติ" ? "btn-normal" : "btn-outline"
-                      }`}
-                    >
-                      ปกติ
-                    </div>
-                    <div
-                      className={`btnass ${
-                        statusName === "ผิดปกติ"
-                          ? "btn-abnormal"
-                          : "btn-outline"
-                      }`}
-                    >
-                      ผิดปกติ
-                    </div>
-                    <div
-                      className={`btnass ${
-                        statusName === "จบการรักษา"
-                          ? "btn-completed"
-                          : "btn-outline"
-                      }`}
-                    >
-                      จบการรักษา
-                    </div>
-                    <input type="hidden" value={statusName} />
-                  </div>
-                </div> */}
                 <div className="mb-3">
                   <div className="btn-group">
                     {statusName === "ปกติ" && (

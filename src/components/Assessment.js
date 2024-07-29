@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts'; 
 
-export default function Assessment({}) {
+export default function Assessment({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState("");
   const [datauser, setDatauser] = useState([]);
@@ -345,15 +345,21 @@ const filteredAlerts = filterType === "unread"
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="allpatient">
               <i class="bi bi-people"></i>
-              <span class="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
+            <a href="assessreadiness">
+              <i className="bi bi-clipboard-check"></i>
+              <span className="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -410,7 +416,7 @@ const filteredAlerts = filterType === "unread"
             </ul>
           </div>
         </div>
-        <div className="breadcrumbs">
+        <div className="breadcrumbs mt-4">
           <ul>
             <li>
               <a href="home">
@@ -481,49 +487,22 @@ const filteredAlerts = filterType === "unread"
                   return (
                     <tr key={index}>
                       <td>
-                        <span
-                          style={{
-                            color: medicalData[i._id]?.hn
-                              ? "inherit"
-                              : "#B2B2B2",
-                          }}
-                        >
-                          {medicalData[i._id]?.hn
-                            ? medicalData[i._id]?.hn
-                            : "ไม่มีข้อมูล"}
+                        <span style={{ color: medicalData[i._id]?.hn ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[i._id]?.hn ? medicalData[i._id]?.hn : "ไม่มีข้อมูล"}
                         </span>
                       </td>
                       <td>
-                        <span
-                          style={{
-                            color: medicalData[i._id]?.an
-                              ? "inherit"
-                              : "#B2B2B2",
-                          }}
-                        >
-                          {medicalData[i._id]?.an
-                            ? medicalData[i._id]?.an
-                            : "ไม่มีข้อมูล"}
+                        <span style={{ color: medicalData[i._id]?.an ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[i._id]?.an ? medicalData[i._id]?.an : "ไม่มีข้อมูล"}
                         </span>
                       </td>
-                      <td>
-                        {i.name} {i.surname}
-                      </td>
+                      <td>{i.name} {i.surname}</td>
                       {/* <td>{userAge}</td> */}
                       <td>
-                        <span
-                          style={{
-                            color: medicalData[i._id]?.diagnosis
-                              ? "inherit"
-                              : "#B2B2B2",
-                          }}
-                        >
-                          {medicalData[i._id]?.diagnosis
-                            ? medicalData[i._id]?.diagnosis
-                            : "ไม่มีข้อมูล"}
+                        <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
+                          {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
                         </span>
                       </td>
-
                       <td>
                         <a
                           className="info"
