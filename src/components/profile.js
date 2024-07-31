@@ -270,12 +270,6 @@ export default function Home({}) {
             </a>
           </li>
           <li>
-            <a href="assessinhomesss" >
-              <i class="bi bi-house-check"></i>
-              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>

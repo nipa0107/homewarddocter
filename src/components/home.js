@@ -1,9 +1,14 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef , PureComponent } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "../css/noti.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
+import Pt from "../img/pt.png";
+import Pt2 from "../img/pt2.png";
+import Bh from "../img/better-health.png";
+import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
+import CountUp from 'react-countup';
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
@@ -21,6 +26,9 @@ export default function Home() {
   const [allUsers, setAllUsers] = useState([]);
   const navigate = useNavigate();
   const notificationsRef = useRef(null);
+  const [completedCount, setCompletedCount] = useState(0);
+  const [medicalData, setMedicalData] = useState({});
+
   useEffect(() => {
     getAllUser();
   }, []);
@@ -242,7 +250,88 @@ export default function Home() {
     return unreadUsers.length;
   };
 
+  useEffect(() => {
+    const fetchCompletedCount = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/completedAssessmentsCount', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        setCompletedCount(data.count);
+      } catch (error) {
+        console.error('Error fetching completed assessments count:', error);
+      }
+    };
+
+    fetchCompletedCount();
+  }, []);
+
+  useEffect(() => {
+    const fetchMedicalData = async () => {
+      const promises = datauser.map(async (user) => {
+        if (user.deletedAt === null) {
+          try {
+            const response = await fetch(`http://localhost:5000/medicalInformation/${user._id}`);
+            const medicalInfo = await response.json();
+            return {
+              userId: user._id,
+              hn: medicalInfo.data?.HN,
+              an: medicalInfo.data?.AN,
+              diagnosis: medicalInfo.data?.Diagnosis,
+              isCaseClosed: medicalInfo.data?.isCaseClosed, // สมมติว่า API ส่งสถานะการปิดเคสมา
+            };
+          } catch (error) {
+            console.error(`Error fetching medical information for user ${user._id}:`, error);
+            return {
+              userId: user._id,
+              hn: "Error",
+              an: "Error",
+              diagnosis: "Error fetching data",
+              isCaseClosed: false, // ถ้าเกิดข้อผิดพลาด กำหนดเป็น false
+            };
+          }
+        }
+        return null;
+      });
+
+
+      const results = await Promise.all(promises);
+      const medicalDataMap = results.reduce((acc, result) => {
+        if (result) {
+          acc[result.userId] = result;
+        }
+        return acc;
+      }, {});
+      setMedicalData(medicalDataMap);
+    };
+    if (datauser.length > 0) {
+      fetchMedicalData();
+    }
+  }, [datauser]);
+
+   // Aggregate diagnosis data
+   const diagnosisCount = datauser.reduce((acc, user) => {
+    if (user.deletedAt === null && medicalData[user._id]?.diagnosis) {
+      const diagnosis = medicalData[user._id].diagnosis;
+      if (acc[diagnosis]) {
+        acc[diagnosis]++;
+      } else {
+        acc[diagnosis] = 1;
+      }
+    }
+    return acc;
+  }, {});
+
+  const diagnosisData = Object.entries(diagnosisCount).map(([name, value]) => ({ name, value }));
+
+  // Define colors for each diagnosis
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28AFF', '#FF6F91', '#FF6361', '#BC5090'];
+
+
   return (
+    
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
         <div className="logo_content">
@@ -267,15 +356,21 @@ export default function Home() {
             </a>
           </li>
           <li>
-            <a href="./">
+          <a href="allpatient">
               <i className="bi bi-people"></i>
-              <span className="links_name">ข้อมูลการดูแลผู้ป่วย</span>
+              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
           </li>
           <li>
-            <a href="./">
+            <a href="assessreadiness">
               <i className="bi bi-clipboard-check"></i>
               <span className="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -337,9 +432,6 @@ export default function Home() {
             <li className="arrow">
               <i className="bi bi-chevron-double-right"></i>
             </li>
-            <li>
-              <a>ภาพรวมระบบ</a>
-            </li>
             <li><a>ภาพรวมระบบ</a></li>
           </ul>
         </div>
@@ -386,7 +478,95 @@ export default function Home() {
             )}
           </div>
         )}
+        <div className="row px-5 mt-5">
+          <div className="grid">
+            <div className="item">
+              <div className="countcontent">
+                <div className="row align-items-center">
+                  <div className="color-strip bg-primary"></div>
+                  <div className="col">
+                    <div className="bg-icon">
+                      <img src={Pt2} className="patient" alt="patient" />
+                    </div>
+                  </div>
+                  <div className="col">
+                    <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
+                    <p className="name fs-5">ผู้ป่วยทั้งหมด</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="item">
+              <div className="countcontent">
+                <div className="row align-items-center">
+                  <div className="color-strip bg-success"></div>
+                  <div className="col">
+                    <div className="bg-icon">
+                      <img src={Pt} className="patient" alt="patient" />
+                    </div>
+                  </div>
+                  <div className="col">
+                    <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
+                    <p className="name fs-5">ผู้ป่วยที่กำลังรักษา</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="item">
+              <div className="countcontent">
+                <div className="row align-items-center">
+                  <div className="color-strip bg-yellow"></div>
+                  <div className="col">
+                    <div className="bg-icon">
+                      <img src={Bh} className="patient" alt="patient" />
+                    </div>
+                  </div>
+                  <div className="col">
+                    <p className="num mt-2"><CountUp end={((user) => user.deletedAt === null).length} duration={2} /></p>
+                    <p className="name fs-5">ผู้ป่วยที่ปิดเคสแล้ว</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <div className="chart-container d-flex justify-content-center mt-5">
+          <div className="chart-content">
+            <PieChart width={500} height={500}>
+              <Pie
+                dataKey="value"
+                isAnimationActive={true}
+                data={diagnosisData}
+                cx="50%"
+                cy="50%"
+                outerRadius={150}
+                fill="#8884d8"
+                label={({ name, percent }) => ` ${(percent * 100).toFixed(0)}%`}
+              >
+                {diagnosisData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip formatter={(value, name) => [`ผู้ป่วย${name}`]} />
+            </PieChart>
+          </div>
+          <div className="legend-content mb-5">
+            <div className="diagnosis-legend">
+              <h5> <b>Diagnosis</b></h5>
+              <ul>
+                {diagnosisData.map((entry, index) => (
+                  <li key={`item-${index}`} style={{ color: COLORS[index % COLORS.length] }}>
+                    <span style={{ color: COLORS[index % COLORS.length], padding: '10px 10px', borderRadius: '5px', lineHeight: '30px' }}>
+                      ผู้ป่วย{entry.name} : {entry.value} cases
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );
-}
+} 

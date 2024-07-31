@@ -360,7 +360,7 @@ tr.assessmentnull {
   cursor: pointer;
 }
 .user-info {
-  /* display: flex; */
+  display: flex;
   justify-content: space-between;
   padding-left: 6%;
 
@@ -549,4 +549,7 @@ textarea {
 }
 .symtoms-count{
   margin-left: 5;
+}
+.evaluated {
+  color: rgb(7, 195, 7); /* Text color for evaluated */
 }

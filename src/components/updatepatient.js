@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { fetchAlerts } from './Alert/alert';
+import { renderAlerts } from './Alert/renderAlerts';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -33,8 +35,16 @@ export default function Updatepatient() {
     const [otherGender, setOtherGender] = useState("");
     const [showOtherInput, setShowOtherInput] = useState(false);
     const [otherRelationship, setOtherRelationship] = useState("");
+    const [medicalData, setMedicalData] = useState({});
+    const [userId, setUserId] = useState("");
+    const [allUsers, setAllUsers] = useState([]);
+    const [alerts, setAlerts] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+    const [filterType, setFilterType] = useState("all");
+    const notificationsRef = useRef(null);
 
-    const formatDate = (date) => {
+    const FormatDate = (date) => {
         const formattedDate = new Date(date);
         // ตรวจสอบว่า date เป็น NaN หรือไม่
         if (isNaN(formattedDate.getTime())) {
@@ -79,28 +89,123 @@ export default function Updatepatient() {
             }
         };
 
-        const token = window.localStorage.getItem("token");
-        setToken(token);
-        if (token) {
-            fetch("http://localhost:5000/profiledt", {
-                method: "POST",
-                crossDomain: true,
-                headers: {
-                    "Content-Type": "application/json",
-                    Accept: "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                },
-                body: JSON.stringify({ token: token }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    console.log(data);
-                    setData(data.data);
-                });
-        }
         fetchData();
         fetchCaregiverData();
     }, [id]);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [notificationsRef]);
+
+    const toggleNotifications = () => {
+        setShowNotifications(!showNotifications);
+    };
+
+    const fetchUserData = (token) => {
+        return fetch("http://localhost:5000/profiledt", {
+            method: "POST",
+            crossDomain: true,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({ token }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setData(data.data);
+                if (data.data == "token expired") {
+                    window.localStorage.clear();
+                    window.location.href = "./";
+                }
+                return data.data;
+            })
+            .catch((error) => {
+                console.error("Error verifying token:", error);
+            });
+    };
+
+    const fetchAndSetAlerts = (token, userId) => {
+        fetchAlerts(token)
+            .then((alerts) => {
+                setAlerts(alerts);
+                const unreadAlerts = alerts.filter(
+                    (alert) => !alert.viewedBy.includes(userId)
+                ).length;
+                setUnreadCount(unreadAlerts);
+            })
+            .catch((error) => {
+                console.error("Error fetching alerts:", error);
+            });
+    };
+
+    useEffect(() => {
+        const token = window.localStorage.getItem("token");
+        setToken(token);
+
+        if (token) {
+            fetchUserData(token)
+                .then(user => {
+                    setUserId(user._id);
+                    fetchAndSetAlerts(token, user._id);
+
+                    const interval = setInterval(() => {
+                        fetchAndSetAlerts(token, user._id);
+                        fetchAllUsers(user._id);
+                    }, 1000);
+
+                    return () => clearInterval(interval);
+                })
+                .catch((error) => {
+                    console.error("Error verifying token:", error);
+                });
+        }
+    }, []);
+
+
+    const markAllAlertsAsViewed = () => {
+        fetch("http://localhost:5000/alerts/mark-all-viewed", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ userId: userId }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                const updatedAlerts = alerts.map((alert) => ({
+                    ...alert,
+                    viewedBy: [...alert.viewedBy, userId],
+                }));
+                setAlerts(updatedAlerts);
+                setUnreadCount(0);
+            })
+            .catch((error) => {
+                console.error("Error marking all alerts as viewed:", error);
+            });
+    };
+
+    const handleFilterChange = (type) => {
+        setFilterType(type);
+    };
+
+    const filteredAlerts = filterType === "unread"
+        ? alerts.filter(alert => !alert.viewedBy.includes(userId))
+        : alerts;
+
+    const currentDate = new Date();
 
     const Updatepatient = async () => {
         try {
@@ -155,27 +260,85 @@ export default function Updatepatient() {
     const handleToggleSidebar = () => {
         setIsActive(!isActive);
     };
+    const formatDate = (dateTimeString) => {
+        const dateTime = new Date(dateTimeString);
+        const day = dateTime.getDate();
+        const month = dateTime.getMonth() + 1;
+        const year = dateTime.getFullYear();
+        const hours = dateTime.getHours();
+        const minutes = dateTime.getMinutes();
 
-    const handleBreadcrumbClick = () => {
-        navigate("/allinfo", { state: { id: id, user: user } });
+        const thaiMonths = [
+            "มกราคม",
+            "กุมภาพันธ์",
+            "มีนาคม",
+            "เมษายน",
+            "พฤษภาคม",
+            "มิถุนายน",
+            "กรกฎาคม",
+            "สิงหาคม",
+            "กันยายน",
+            "ตุลาคม",
+            "พฤศจิกายน",
+            "ธันวาคม",
+        ];
+
+        return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+            } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+            } น.`;
     };
 
-    const handleGenderChange = (e) => {
-        const value = e.target.value;
-        setGender(value);
-        if (value === "อื่นๆ") {
-            setShowOtherInput(true);
-        } else {
-            setShowOtherInput(false);
-            setOtherGender("");
+    const fetchAllUsers = async (userId) => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/alluserchat?userId=${userId}`
+            );
+            const data = await response.json();
+
+            const usersWithLastMessage = await Promise.all(
+                data.data.map(async (user) => {
+                    const lastMessageResponse = await fetch(
+                        `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
+                    );
+                    const lastMessageData = await lastMessageResponse.json();
+
+                    const lastMessage = lastMessageData.lastMessage;
+                    return { ...user, lastMessage: lastMessage ? lastMessage : null };
+                })
+            );
+
+            const sortedUsers = usersWithLastMessage.sort((a, b) => {
+                if (!a.lastMessage) return 1;
+                if (!b.lastMessage) return -1;
+                return (
+                    new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+                );
+            });
+
+            setAllUsers(sortedUsers);
+        } catch (error) {
+            console.error("Error fetching all users:", error);
         }
     };
+    //polling
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchAllUsers(data._id);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [data]);
 
-    const handleOtherGenderChange = (e) => {
-        const value = e.target.value;
-        setOtherGender(value);
-        setGender(value); // Update gender to the value of otherGender
+    const countUnreadUsers = () => {
+        const unreadUsers = allUsers.filter((user) => {
+            const lastMessage = user.lastMessage;
+            return (
+                lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+            );
+        });
+        return unreadUsers.length;
     };
+
+
 
     const handleRelationshipChange = (e) => {
         const value = e.target.value;
@@ -237,9 +400,14 @@ export default function Updatepatient() {
                         </a>
                     </li>
                     <li>
-                        <a href="chat" >
-                            <i class="bi bi-chat-dots"></i>
-                            <span class="links_name" >แช็ต</span>
+                        <a href="chat" style={{ position: "relative" }}>
+                            <i className="bi bi-chat-dots"></i>
+                            <span className="links_name">แช็ต</span>
+                            {countUnreadUsers() !== 0 && (
+                                <span className="notification-countchat">
+                                    {countUnreadUsers()}
+                                </span>
+                            )}
                         </a>
                     </li>
                     <div class="nav-logout">
@@ -253,17 +421,58 @@ export default function Updatepatient() {
                 </ul>
             </div>
             <div className="home_content">
-            <div className="homeheader">
-                <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
-                <div class="profile_details ">
-                    <li>
-                        <a href="profile">
-                            <i class="bi bi-person"></i>
-                            <span class="links_name">{data && data.nametitle + data.name + " " + data.surname}</span>
-                        </a>
-                    </li>
+                <div className="homeheader">
+                    <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
+                    <div className="profile_details">
+                        <ul className="nav-list">
+                            <li>
+                                <a className="bell-icon" onClick={toggleNotifications}>
+                                    {showNotifications ? (
+                                        <i className="bi bi-bell-fill"></i>
+                                    ) : (
+                                        <i className="bi bi-bell"></i>
+                                    )}
+                                    {unreadCount > 0 && (
+                                        <span className="notification-count">{unreadCount}</span>
+                                    )}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="profile">
+                                    <i className="bi bi-person"></i>
+                                    <span className="links_name">
+                                        {data && data.nametitle + data.name + " " + data.surname}
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                </div>
+                {showNotifications && (
+                    <div className="notifications-dropdown" ref={notificationsRef}>
+                        <div className="notifications-head">
+                            <h2 className="notifications-title">การแจ้งเตือน</h2>
+                            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+                                ทำเครื่องหมายว่าอ่านทั้งหมด
+                            </p>
+                            <div className="notifications-filter">
+                                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                                    ดูทั้งหมด
+                                </button>
+                                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                                    ยังไม่อ่าน
+                                </button>
+                            </div>
+                        </div>
+                        {filteredAlerts.length > 0 ? (
+                            <>
+                                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+                            </>
+                        ) : (
+                            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+                        )}
+                    </div>
+                )}
                 <div className="breadcrumbs mt-4">
                     <ul>
                         <li>
@@ -275,7 +484,7 @@ export default function Updatepatient() {
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
                         <li>
-                            <a href="alluser">จัดการข้อมูลการดูแลผู้ป่วย</a>
+                            <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
                         </li>
                         <li className="arrow">
                             <i class="bi bi-chevron-double-right"></i>
@@ -293,26 +502,6 @@ export default function Updatepatient() {
                 </div>
                 <h3>แก้ไขข้อมูลทั่วไป</h3>
                 <div className="adminall card mb-1">
-                    {/* <div className="mb-1">
-                        <label>ชื่อผู้ใช้</label>
-                        <input
-                            type="text"
-                            readOnly
-                            className="form-control gray-background"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-1">
-                        <label>อีเมล</label>
-                        <input
-                            type="text"
-                            value={email}
-                            readOnly
-                            className="form-control gray-background"
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                    </div> */}
                     <div className="mb-1">
                         <label>ชื่อ</label>
                         <input
@@ -341,69 +530,10 @@ export default function Updatepatient() {
                             onChange={(e) => setGender(e.target.value)}
                         />
                     </div>
-                    {/* <div className="mb-1">
-                        <label>เพศ</label>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="ชาย"
-                                    checked={gender === "ชาย"}
-                                    onChange={handleGenderChange}
-                                />
-                                ชาย
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="หญิง"
-                                    checked={gender === "หญิง"}
-                                    onChange={handleGenderChange}
-                                />
-                                หญิง
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="ไม่ต้องการระบุ"
-                                    checked={gender === "ไม่ต้องการระบุ"}
-                                    onChange={handleGenderChange}
-                                />
-                                ไม่ต้องการระบุ
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="อื่นๆ"
-                                    checked={showOtherInput}
-                                    onChange={handleGenderChange}
-                                />
-                                อื่นๆ
-                            </label>
-                            {showOtherInput && (
-                                <div className="mt-2">
-                                    <label>กรุณาระบุ:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={otherGender}
-                                        onChange={handleOtherGenderChange}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div> */}
-
                     <div className="mb-1">
                         <label>วันเกิด</label>
                         <input
-                            value={formatDate(birthday)}
+                            value={FormatDate(birthday)}
                             type="date"
                             className="form-control"
                             onChange={(e) => setBirthday(e.target.value)}
@@ -556,15 +686,15 @@ export default function Updatepatient() {
                             onChange={(e) => setCaregiverTel(e.target.value)}
                         />
                     </div>
-                    
+
                 </div>
                 <div className="btn-group">
-                        <div className="btn-next">
-                            <button type="button" onClick={Updatepatient} className="btn btn-outline py-2">
-                                บันทึก
-                            </button>
-                        </div>
+                    <div className="btn-next">
+                        <button type="button" onClick={Updatepatient} className="btn btn-outline py-2">
+                            บันทึก
+                        </button>
                     </div>
+                </div>
             </div>
             <div></div>
         </main>
