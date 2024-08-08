@@ -72,6 +72,7 @@ export default function Assessmentuserone({}) {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -110,7 +111,7 @@ export default function Assessmentuserone({}) {
           window.localStorage.clear();
           window.location.href = "./";
         }
-        return data.data; 
+        return data.data;
       })
       .catch((error) => {
         console.error("Error verifying token:", error);
@@ -121,7 +122,7 @@ export default function Assessmentuserone({}) {
       .then((alerts) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
-          (alert) => !alert.viewedBy.includes(userId) 
+          (alert) => !alert.viewedBy.includes(userId)
         ).length;
         setUnreadCount(unreadAlerts);
       })
@@ -129,22 +130,22 @@ export default function Assessmentuserone({}) {
         console.error("Error fetching alerts:", error);
       });
   };
-  
+
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
-  
+
     if (token) {
       fetchUserData(token)
-        .then(user => {
-          setUserId(user._id); 
-          fetchAndSetAlerts(token, user._id); 
-          
+        .then((user) => {
+          setUserId(user._id);
+          fetchAndSetAlerts(token, user._id);
+
           const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id); 
+            fetchAndSetAlerts(token, user._id);
             fetchAllUsers(user._id);
           }, 1000);
-  
+
           return () => clearInterval(interval);
         })
         .catch((error) => {
@@ -152,7 +153,6 @@ export default function Assessmentuserone({}) {
         });
     }
   }, []);
-  
 
   const markAllAlertsAsViewed = () => {
     fetch("http://localhost:5000/alerts/mark-all-viewed", {
@@ -176,14 +176,15 @@ export default function Assessmentuserone({}) {
         console.error("Error marking all alerts as viewed:", error);
       });
   };
-  
+
   const handleFilterChange = (type) => {
     setFilterType(type);
   };
 
-const filteredAlerts = filterType === "unread"
-  ? alerts.filter(alert => !alert.viewedBy.includes(userId))
-  : alerts;
+  const filteredAlerts =
+    filterType === "unread"
+      ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+      : alerts;
 
   // แช็ตยังไม่อ่าน
   const fetchAllUsers = async (userId) => {
@@ -236,7 +237,6 @@ const filteredAlerts = filterType === "unread"
     return unreadUsers.length;
   };
 
-  
   useEffect(() => {
     const fetchpatientForms = async () => {
       try {
@@ -498,7 +498,6 @@ const filteredAlerts = filterType === "unread"
     const fetchDataTemperature = async () => {
       try {
         if (patientFormsone.user && patientFormsone._id) {
-          // Assumes _id is the formId
           const response = await fetch(
             `http://localhost:5000/getTemperatureData/${patientFormsone.user}/${patientFormsone._id}`,
             {
@@ -610,78 +609,78 @@ const filteredAlerts = filterType === "unread"
     } น.`;
   };
 
-  const CustomTooltipDTX = ({ active, payload, label }) => {
+  const CustomTooltipDTX = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <p className="desc">{`DTX: ${data.DTX}`}</p>
+          <span className="desc">{`DTX: ${data.DTX}`}</span>
         </div>
       );
     }
     return null;
   };
 
-  const CustomTooltipPainscore = ({ active, payload, label }) => {
+  const CustomTooltipPainscore = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <p className="desc">{`Painscore: ${data.Painscore}`}</p>
+          <span className="desc">{`Painscore: ${data.Painscore}`}</span>
         </div>
       );
     }
     return null;
   };
 
-  const CustomTooltipTemperature = ({ active, payload, label }) => {
+  const CustomTooltipTemperature = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <p className="desc">{`Temperature: ${data.Temperature}`}</p>
+          <span className="desc">{`Temperature: ${data.Temperature}`}</span>
         </div>
       );
     }
     return null;
   };
 
-  const CustomTooltipBloodPressure = ({ active, payload, label }) => {
+  const CustomTooltipBloodPressure = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <p className="desc">{`SBP: ${data.SBP}`}</p>
-          <p className="desc">{`DBP: ${data.DBP}`}</p>
+          <span className="desc">{`SBP: ${data.SBP}`}</span>
+          <span className="desc">{` DBP: ${data.DBP}`}</span>
         </div>
       );
     }
     return null;
   };
-  const CustomTooltipPulseRate = ({ active, payload, label }) => {
+  const CustomTooltipPulseRate = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <p className="desc">{`PulseRate: ${data.PulseRate}`}</p>
+          <span className="desc">{`PulseRate: ${data.PulseRate}`}</span>
         </div>
       );
     }
     return null;
   };
 
-  const CustomTooltipRespiration = ({ active, payload, label }) => {
+  const CustomTooltipRespiration = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <p className="desc">{`Respiration: ${data.Respiration}`}</p>
+          <span className="desc">{`Respiration: ${data.Respiration}`}</span>
         </div>
       );
     }
@@ -777,7 +776,7 @@ const filteredAlerts = filterType === "unread"
             </a>
           </li>
           <li>
-          <a href="allpatient">
+            <a href="allpatient">
               <i class="bi bi-people"></i>
               <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
             </a>
@@ -789,9 +788,9 @@ const filteredAlerts = filterType === "unread"
             </a>
           </li>
           <li>
-            <a href="assessinhomesss" >
+            <a href="assessinhomesss">
               <i class="bi bi-house-check"></i>
-              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+              <span class="links_name">แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -908,50 +907,94 @@ const filteredAlerts = filterType === "unread"
               ? medicalData.Diagnosis
               : "ไม่มีข้อมูล"}
           </p>
-
-          <div className="contentinass">
-            <p className="texthead">
-              วันที่บันทึก: {formatDate(patientFormsone.createdAt)}
-            </p>
-            <p className="textheadSymptom">อาการและอาการแสดง</p>
-
-            {patientFormsone.Symptoms &&
-              patientFormsone.Symptoms.map((symptom, index) => (
-                <div className="inline-container" key={index}>
-                  <label className="title-ptf">{`อาการที่ ${
-                    index + 1
-                  }: `}</label>
-                  <p className="text">{symptom}</p>
+          <div className="contentin-outmost">
+            <div className="divdate">
+              <b className="textdate" align="center">
+                วันที่บันทึก: {formatDate(patientFormsone.createdAt)}
+              </b>
+            </div>
+            <div className="content-in">
+              <p className="textheadSymptom">สัญญาณชีพ</p>
+              <div className="inline-container-Vitalsigns">
+                <div className="patient-data">
+                  <label className="title-Vitalsigns">ความดันตัวบน</label>
+                  <p className="text">{patientFormsone.SBP || "-"} mmHg</p>
                 </div>
-              ))}
+                <div className="patient-data">
+                  <label className="title-Vitalsigns">ความดันตัวล่าง</label>
+                  <p className="text">{patientFormsone.DBP || "-"} mmHg</p>
+                </div>
+                <div className="patient-data">
+                  <label className="title-Vitalsigns">ชีพจร</label>
+                  <p className="text">
+                    {patientFormsone.DBP || "-"} ครั้ง/นาที
+                  </p>
+                </div>
+                <div className="patient-data">
+                  <label className="title-Vitalsigns">การหายใจ</label>
+                  <p className="text">
+                    {patientFormsone.PulseRate || "-"} ครั้ง/นาที
+                  </p>
+                </div>
+                <div className="patient-data">
+                  <label className="title-Vitalsigns">อุณหภูมิ</label>
+                  <p className="text">
+                    {patientFormsone.Temperature || "-"} °C
+                  </p>
+                </div>
+                <div className="patient-data">
+                  <label className="title-Vitalsigns">ระดับความเจ็บปวด</label>
+                  <p className="text">{patientFormsone.Painscore || "-"}</p>
+                </div>
+                <div className="patient-data">
+                  <label className="title-Vitalsigns">DTX</label>
+                  <p className="text">{patientFormsone.DTX || "-"} mg/dL</p>
+                </div>
+              </div>
 
-            <div className="inline-containersymtoms-count">
-              <label className="title-ptf">
+              <p className="textheadSymptom">อาการและอาการแสดง</p>
+
+              {patientFormsone.Symptoms &&
+                patientFormsone.Symptoms.map((symptom, index) => (
+                  <div className="symptom-item" key={index}>
+                    <label className="title-ptf1">{`อาการที่ ${
+                      index + 1
+                    }: `}</label>
+                    <span className="text1">{symptom}</span>
+                  </div>
+                ))}
+
+              <label className="textheadSymptom">
                 ความถี่ของอาการ
                 <span className="bracket">(นับรวมการบันทึกปัจจุบัน)</span>:
               </label>
-              {symptomsCount.map((symptom) => (
-                <p className="symtoms-count" key={symptom._id}>
-                  {symptom._id}: {symptom.count}{" "}
+              <div className="inline-containersymtoms-count">
+                {symptomsCount.map((symptom) => (
+                  <p className="symtoms-count" key={symptom._id}>
+                    {symptom._id}: {symptom.count}{" "}
+                  </p>
+                ))}
+              </div>
+              <div className="inline-container">
+                <label className="textheadSymptom">
+                  สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม:
+                </label>
+                <p className="text">
+                  &nbsp;{patientFormsone.request_detail || "-"}
                 </p>
-              ))}
-            </div>
-            <div className="inline-container">
-              <label className="title-ptf">
-                สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม:
-              </label>
-              <p className="text">{patientFormsone.request_detail}</p>
-            </div>
-            <div className="inline-container">
-              <label className="title-ptf">ความรุนแรงของอาการ:</label>
-              <p className="text">{patientFormsone.LevelSymptom}</p>
-            </div>
-            <div className="inline-container">
-              <label className="title-ptf">ผู้บันทึก:</label>
-              <p className="text">{patientFormsone.Recorder}</p>
+              </div>
+              <div className="inline-container">
+                <label className="textheadSymptom">ความรุนแรงของอาการ:</label>
+                <p className="text">
+                  &nbsp;{patientFormsone.LevelSymptom || "-"}
+                </p>
+              </div>
+              <div className="inline-container">
+                <label className="textheadSymptom">ผู้บันทึก:</label>
+                <p className="text">&nbsp;{patientFormsone.Recorder || "-"}</p>
+              </div>
             </div>
           </div>
-
           {/* <div className="contentinass"> */}
           <div className="contentgraphs">
             <div className="selecttime">
@@ -979,12 +1022,12 @@ const filteredAlerts = filterType === "unread"
               </div>
               <p className="textgraph"></p>
               {BloodPressuredata && (
-                <div className="chart-container">
+                <div className="chart-containerass1">
                   <ComposedChart
-                    width={1300}
-                    height={400}
+                    width={1000}
+                    height={300}
                     data={BloodPressuredata}
-                    margin={{ right: 45, left: 45 }}
+                    margin={{ right: 30, left: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -996,9 +1039,12 @@ const filteredAlerts = filterType === "unread"
                       tick={
                         timeRange === "1month"
                           ? false
-                          : { fontSize: 12, lineHeight: 1.5 }
+                          : { fontSize: 10, lineHeight: 1.5 }
                       }
                     />
+                    {timeRange === "1month" && (
+                      <YAxis tick={{ fontSize: 10 }} />
+                    )}
                     <Tooltip content={<CustomTooltipBloodPressure />} />
                     {/* <Legend verticalAlign="top" align="center" wrapperStyle={{ color: '#000' }} /> */}
                     <Area
@@ -1007,7 +1053,13 @@ const filteredAlerts = filterType === "unread"
                       stroke="#5ec1ff"
                       fill="rgb(94, 193, 255,0.3)"
                       connectNulls={true}
-                      dot={<CustomDot dataKey="SBP" />}
+                      dot={
+                        timeRange === "1month" ? (
+                          false
+                        ) : (
+                          <CustomDot dataKey="SBP" />
+                        )
+                      }
                       legendType="none"
                     />
                     <Line
@@ -1016,15 +1068,29 @@ const filteredAlerts = filterType === "unread"
                       name="ความดันตัวบน"
                       stroke="#5ec1ff"
                       strokeWidth={3}
-                      dot={<CustomDot dataKey="SBP" />}
+                      dot={
+                        timeRange === "1month" ? (
+                          false
+                        ) : (
+                          <CustomDot dataKey="SBP" />
+                        )
+                      }
                       connectNulls={true}
                     >
-                      <LabelList
-                        dataKey="SBP"
-                        position="inside"
-                        style={{ fill: "white", fontSize: "12px" }}
-                        dot={<CustomDot dataKey="SBP" />}
-                      />
+                      {timeRange !== "1month" && (
+                        <LabelList
+                          dataKey="SBP"
+                          position="inside"
+                          style={{ fill: "white", fontSize: "10" }}
+                          dot={
+                            timeRange === "1month" ? (
+                              false
+                            ) : (
+                              <CustomDot dataKey="SBP" />
+                            )
+                          }
+                        />
+                      )}
                     </Line>
                     <Area
                       type="monotone"
@@ -1040,22 +1106,33 @@ const filteredAlerts = filterType === "unread"
                       name="ความดันตัวล่าง"
                       stroke="rgb(44, 223, 71)"
                       strokeWidth={3}
-                      dot={<CustomDot dataKey="DBP" />}
+                      dot={
+                        timeRange === "1month" ? (
+                          false
+                        ) : (
+                          <CustomDot dataKey="DBP" />
+                        )
+                      }
                       connectNulls={true}
                     >
-                      <LabelList
-                        dataKey="DBP"
-                        position="inside"
-                        style={{ fill: "white", fontSize: "12px" }}
-                      />
+                      {timeRange !== "1month" && (
+                        <LabelList
+                          dataKey="DBP"
+                          position="inside"
+                          style={{ fill: "white", fontSize: "10" }}
+                          dot={<CustomDot dataKey="DBP" />}
+                        />
+                      )}
                     </Line>
-                    <Brush
-                      tickFormatter={formatDateTime}
-                      dataKey="createdAt"
-                      height={15}
-                      style={{ fontSize: "12px" }}
-                      stroke="#878787"
-                    />
+                    {/* {timeRange === "1month" && (
+                      <Brush
+                        tickFormatter={formatDateTime}
+                        dataKey="createdAt"
+                        height={15}
+                        style={{ fontSize: "10" }}
+                        stroke="#878787"
+                      />
+                    )} */}
                   </ComposedChart>
                 </div>
               )}
@@ -1070,12 +1147,12 @@ const filteredAlerts = filterType === "unread"
               </div>
               <p className="textgraph"></p>
               {PulseRateData && (
-                <div className="chart-container">
+                <div className="chart-containerass1">
                   <ComposedChart
-                    width={1300}
-                    height={350}
+                    width={1000}
+                    height={300}
                     data={PulseRateData}
-                    margin={{ right: 45, left: 45 }}
+                    margin={{ right: 30, left: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -1087,12 +1164,21 @@ const filteredAlerts = filterType === "unread"
                       tick={
                         timeRange === "1month"
                           ? false
-                          : { fontSize: 12, lineHeight: 1.5 }
+                          : { fontSize: 10, lineHeight: 1.5 }
                       }
                     />{" "}
-                    {/* <YAxis tick={{ fontSize: 12 }} /> */}
+                    {timeRange === "1month" && (
+                      <YAxis
+                        tick={{ fontSize: 10 }}
+                        ticks={[0, 25, 50, 75, 100, 125, 150]}
+                      />
+                    )}
+                    <YAxis
+                      tick={{ fontSize: 10 }}
+                      ticks={[0, 25, 50, 75, 100, 125, 150]}
+                      hide={true}
+                    />
                     <Tooltip content={<CustomTooltipPulseRate />} />
-                    {/* <Legend /> */}
                     <Area
                       type="monotone"
                       dataKey="PulseRate"
@@ -1105,22 +1191,32 @@ const filteredAlerts = filterType === "unread"
                       dataKey="PulseRate"
                       stroke="rgb(224, 44, 98)"
                       strokeWidth={3}
-                      dot={<CustomDot />}
+                      dot={
+                        timeRange === "1month" ? (
+                          false
+                        ) : (
+                          <CustomDot dataKey="PulseRate" />
+                        )
+                      }
                       connectNulls={true}
                     >
-                      <LabelList
-                        dataKey="PulseRate"
-                        position="inside"
-                        style={{ fill: "white", fontSize: "12px" }}
-                      />
+                      {timeRange !== "1month" && (
+                        <LabelList
+                          dataKey="PulseRate"
+                          position="inside"
+                          style={{ fill: "white", fontSize: "10" }}
+                        />
+                      )}
                     </Line>
-                    <Brush
-                      tickFormatter={formatDateTime}
-                      dataKey="createdAt"
-                      height={20}
-                      style={{ fontSize: "12px" }}
-                      stroke="#878787"
-                    />
+                    {/* {timeRange === "1month" && (
+                      <Brush
+                        tickFormatter={formatDateTime}
+                        dataKey="createdAt"
+                        height={15}
+                        style={{ fontSize: "10" }}
+                        stroke="#878787"
+                      />
+                    )} */}
                   </ComposedChart>
                 </div>
               )}
@@ -1135,12 +1231,12 @@ const filteredAlerts = filterType === "unread"
               </div>
               <p className="textgraph"></p>
               {Respirationdata && (
-                <div className="chart-container">
+                <div className="chart-containerass1">
                   <ComposedChart
-                    width={1350}
-                    height={350}
+                    width={1000}
+                    height={300}
                     data={Respirationdata}
-                    margin={{ right: 45, left: 45 }}
+                    margin={{ right: 30, left: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -1152,12 +1248,17 @@ const filteredAlerts = filterType === "unread"
                       tick={
                         timeRange === "1month"
                           ? false
-                          : { fontSize: 12, lineHeight: 1.5 }
+                          : { fontSize: 10, lineHeight: 1.5 }
                       }
                     />{" "}
-                    {/* <YAxis tick={{ fontSize: 12 }} /> */}
+                      <YAxis
+                      tick={{ fontSize: 10 }}
+                      ticks={[0, 10, 20, 30, 40]}
+                      hide={timeRange !== "1month"}
+                    />
+                  
                     <Tooltip content={<CustomTooltipRespiration />} />
-                    {/* <Legend /> */}
+                    
                     <Area
                       type="monotone"
                       dataKey="Respiration"
@@ -1170,22 +1271,32 @@ const filteredAlerts = filterType === "unread"
                       dataKey="Respiration"
                       stroke="rgb(229, 113, 63)"
                       strokeWidth={3}
-                      dot={<CustomDot />}
+                      dot={
+                        timeRange === "1month" ? (
+                          false
+                        ) : (
+                          <CustomDot dataKey="Respiration" />
+                        )
+                      }
                       connectNulls={true}
                     >
-                      <LabelList
-                        dataKey="Respiration"
-                        position="inside"
-                        style={{ fill: "white", fontSize: "12px" }}
-                      />
+                      {timeRange !== "1month" && (
+                        <LabelList
+                          dataKey="Respiration"
+                          position="inside"
+                          style={{ fill: "white", fontSize: "10" }}
+                        />
+                      )}
                     </Line>
-                    <Brush
-                      tickFormatter={formatDateTime}
-                      dataKey="createdAt"
-                      height={15}
-                      style={{ fontSize: "12px" }}
-                      stroke="#878787"
-                    />
+                    {/* {timeRange === "1month" && (
+                      <Brush
+                        tickFormatter={formatDateTime}
+                        dataKey="createdAt"
+                        height={15}
+                        style={{ fontSize: "10" }}
+                        stroke="#878787"
+                      />
+                    )} */}
                   </ComposedChart>
                 </div>
               )}
@@ -1200,12 +1311,12 @@ const filteredAlerts = filterType === "unread"
               </div>
               <p className="textgraph"></p>
               {Temperaturedata && (
-                <div className="chart-container">
+                <div className="chart-containerass1">
                   <ComposedChart
-                    width={1300}
-                    height={350}
+                    width={1000}
+                    height={300}
                     data={Temperaturedata}
-                    margin={{ right: 45, left: 45 }}
+                    margin={{ right: 30, left: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -1217,15 +1328,20 @@ const filteredAlerts = filterType === "unread"
                       tick={
                         timeRange === "1month"
                           ? false
-                          : { fontSize: 12, lineHeight: 1.5 }
+                          : { fontSize: 10, lineHeight: 1.5 }
                       }
+                    />
+                    <YAxis
+                      tick={{ fontSize: 10 }}
+                      ticks={[0, 10, 20, 30, 40]}
+                      hide={timeRange !== "1month"}
                     />
                     <Tooltip content={<CustomTooltipTemperature />} />
                     <Area
                       type="monotone"
                       dataKey="Temperature"
-                      stroke="rgb(197, 44, 224)" // สีขอบเส้น
-                      fill="rgb(197, 44, 224,0.3)" // สีพื้นที่และความโปร่งใส
+                      stroke="rgb(197, 44, 224)"
+                      fill="rgb(197, 44, 224,0.3)"
                       connectNulls={true}
                     />
                     <Line
@@ -1233,22 +1349,26 @@ const filteredAlerts = filterType === "unread"
                       dataKey="Temperature"
                       stroke="rgb(197, 44, 224)"
                       strokeWidth={3}
-                      dot={<CustomDot />}
+                      dot={timeRange === "1month" ? false : <CustomDot />}
                       connectNulls={true}
                     >
-                      <LabelList
-                        dataKey="Temperature"
-                        position="inside"
-                        style={{ fill: "white", fontSize: "12px" }}
-                      />
+                      {timeRange !== "1month" && (
+                        <LabelList
+                          dataKey="Temperature"
+                          position="inside"
+                          style={{ fill: "white", fontSize: "10" }}
+                        />
+                      )}
                     </Line>
-                    <Brush
-                      tickFormatter={formatDateTime}
-                      dataKey="createdAt"
-                      height={15}
-                      style={{ fontSize: "12px" }}
-                      stroke="#878787"
-                    />
+                    {/* {timeRange === "1month" && (
+                      <Brush
+                        tickFormatter={formatDateTime}
+                        dataKey="createdAt"
+                        height={15}
+                        style={{ fontSize: "10" }}
+                        stroke="#878787"
+                      />
+                    )} */}
                   </ComposedChart>
                 </div>
               )}
@@ -1262,12 +1382,12 @@ const filteredAlerts = filterType === "unread"
               </div>
               <p className="textgraph"></p>
               {Painscoredata && (
-                <div className="chart-container">
+                <div className="chart-containerass1">
                   <ComposedChart
-                    width={1300}
-                    height={350}
+                    width={1000}
+                    height={300}
                     data={Painscoredata}
-                    margin={{ right: 45, left: 45 }}
+                    margin={{ right: 30, left: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -1279,15 +1399,22 @@ const filteredAlerts = filterType === "unread"
                       tick={
                         timeRange === "1month"
                           ? false
-                          : { fontSize: 12, lineHeight: 1.5 }
+                          : { fontSize: 10, lineHeight: 1.5 }
                       }
                     />
+
+                    <YAxis
+                      tick={{ fontSize: 10 }}
+                      ticks={[0, 2, 4, 6, 8, 10,12]}
+                      hide={timeRange !== "1month"}
+                    />
+
                     <Tooltip content={<CustomTooltipPainscore />} />
                     <Area
                       type="monotone"
                       dataKey="Painscore"
-                      stroke="rgb(93, 93, 233)" // ขอบเส้น
-                      fill="rgb(93, 93, 233,0.3)" // สีพื้นและความโปร่งใส
+                      stroke="rgb(93, 93, 233)"
+                      fill="rgb(93, 93, 233,0.3)"
                       connectNulls={true}
                     />
                     <Line
@@ -1296,22 +1423,26 @@ const filteredAlerts = filterType === "unread"
                       stroke="rgb(93, 93, 233)"
                       strokeWidth={3}
                       name="ระดับความเจ็บปวด"
-                      dot={<CustomDot />}
+                      dot={timeRange === "1month" ? false : <CustomDot />}
                       connectNulls={true}
                     >
-                      <LabelList
-                        dataKey="Painscore"
-                        position="inside"
-                        style={{ fill: "white", fontSize: "12px" }}
-                      />
+                      {timeRange !== "1month" && (
+                        <LabelList
+                          dataKey="Painscore"
+                          position="inside"
+                          style={{ fill: "white", fontSize: "10" }}
+                        />
+                      )}
                     </Line>
-                    <Brush
-                      tickFormatter={formatDateTime}
-                      dataKey="createdAt"
-                      height={15}
-                      style={{ fontSize: "12px" }}
-                      stroke="#878787"
-                    />
+                    {/* {timeRange === "1month" && (
+                      <Brush
+                        tickFormatter={formatDateTime}
+                        dataKey="createdAt"
+                        height={15}
+                        style={{ fontSize: "10" }}
+                        stroke="#878787"
+                      />
+                    )} */}
                   </ComposedChart>
                 </div>
               )}
@@ -1326,12 +1457,12 @@ const filteredAlerts = filterType === "unread"
               </div>
               <p className="textgraph"></p>
               {dtxdata && (
-                <div className="chart-container">
+                <div className="chart-containerass1">
                   <ComposedChart
-                    width={1350}
-                    height={350}
+                    width={1000}
+                    height={300}
                     data={dtxdata}
-                    margin={{ right: 45, left: 45 }}
+                    margin={{ right: 30, left: 30 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -1343,8 +1474,12 @@ const filteredAlerts = filterType === "unread"
                       tick={
                         timeRange === "1month"
                           ? false
-                          : { fontSize: 12, lineHeight: 1.5 }
-                      }                    />
+                          : { fontSize: 10, lineHeight: 1.5 }
+                      }
+                    />
+                    {timeRange === "1month" && (
+                      <YAxis tick={{ fontSize: 10 }} />
+                    )}
                     <Tooltip content={<CustomTooltipDTX />} />
                     <Area
                       type="monotone"
@@ -1358,22 +1493,26 @@ const filteredAlerts = filterType === "unread"
                       dataKey="DTX"
                       stroke="rgb(237, 219, 51)"
                       strokeWidth={3}
-                      dot={<CustomDot />}
+                      dot={timeRange === "1month" ? false : <CustomDot />}
                       connectNulls={true}
                     >
-                      <LabelList
-                        dataKey="DTX"
-                        position="inside"
-                        style={{ fill: "white", fontSize: "12px" }}
-                      />
+                      {timeRange !== "1month" && (
+                        <LabelList
+                          dataKey="DTX"
+                          position="inside"
+                          style={{ fill: "white", fontSize: "10" }}
+                        />
+                      )}
                     </Line>
-                    <Brush
-                      tickFormatter={formatDateTime}
-                      dataKey="createdAt"
-                      height={15}
-                      style={{ fontSize: "12px", fill: "#000" }}
-                      stroke="#878787"
-                    />
+                    {/* {timeRange === "1month" && (
+                      <Brush
+                        tickFormatter={formatDateTime}
+                        dataKey="createdAt"
+                        height={15}
+                        style={{ fontSize: "10", fill: "#000" }}
+                        stroke="#878787"
+                      />
+                    )} */}
                   </ComposedChart>
                 </div>
               )}
@@ -1416,16 +1555,16 @@ const filteredAlerts = filterType === "unread"
               </div>
               <div className="inline-container">
                 <label className="title-ass">PPS: </label>
-                <p className="text">{PPS}</p>
+                <p className="text">{PPS || "-"}</p>
               </div>
 
               <div className="inline-container">
-                <label className="title-ass">รายละเอียด: </label>
-                <p className="text">{detail}</p>
+                <label className="title-ass">รายละเอียดสำหรับแพทย์: </label>
+                <p className="text">{detail || "-"}</p>
               </div>
               <div className="inline-container">
-                <label className="title-ass">คำแนะนำ: </label>
-                <p className="text">{suggestion}</p>
+                <label className="title-ass">คำแนะนำสำหรับผู้ป่วย: </label>
+                <p className="text">{suggestion || "-"}</p>
               </div>
               <div className="inline-container">
                 <label className="title-ass">ผู้ประเมิน: </label>
@@ -1498,7 +1637,7 @@ const filteredAlerts = filterType === "unread"
                   </div>
                 </div>
                 <div className="inline-container">
-                  <label className="title-ass">รายละเอียด: </label>
+                  <label className="title-ass">รายละเอียดสำหรับแพทย์: </label>
                   <textarea
                     type="text"
                     className="form-control"
@@ -1506,7 +1645,7 @@ const filteredAlerts = filterType === "unread"
                   />
                 </div>
                 <div className="inline-container">
-                  <label className="title-ass">คำแนะนำ: </label>
+                  <label className="title-ass">คำแนะนำสำหรับผู้ป่วย: </label>
                   <textarea
                     type="text"
                     className="form-control"
@@ -1524,30 +1663,47 @@ const filteredAlerts = filterType === "unread"
           )}
         </div>
         {showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
-            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-            <div className="notifications-filter">
-              <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                ดูทั้งหมด
-              </button>
-              <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                ยังไม่อ่าน
-              </button>
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
+              <p
+                className="notifications-allread"
+                onClick={markAllAlertsAsViewed}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+              <div className="notifications-filter">
+                <button
+                  className={filterType === "all" ? "active" : ""}
+                  onClick={() => handleFilterChange("all")}
+                >
+                  ดูทั้งหมด
+                </button>
+                <button
+                  className={filterType === "unread" ? "active" : ""}
+                  onClick={() => handleFilterChange("unread")}
+                >
+                  ยังไม่อ่าน
+                </button>
+              </div>
             </div>
+            {filteredAlerts.length > 0 ? (
+              <>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          {filteredAlerts.length > 0 ? (
-            <>
-              {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-            </>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
       </div>
     </main>
   );

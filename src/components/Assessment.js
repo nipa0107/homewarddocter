@@ -463,7 +463,7 @@ export default function Assessment({ }) {
             <tbody>
               {datauser
 
-                .filter((user) => user.deletedAt === null)
+                .filter(user => user.deletedAt === null)
                 .map((i, index) => {
                   const userBirthday = i.birthday ? new Date(i.birthday) : null;
                   let userAge = "";

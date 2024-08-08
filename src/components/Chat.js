@@ -7,7 +7,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import { useNavigate } from "react-router-dom";
 
-const ChatComponent = () => {
+export default function  ChatComponent ()  {
   const [message, setMessage] = useState("");
   const [recipientId, setRecipientId] = useState("");
   const [recipientModel, setRecipientModel] = useState("");
@@ -122,7 +122,7 @@ const ChatComponent = () => {
       .then((alerts) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
-          (alert) => !alert.viewedBy.includes(userId) 
+          (alert) => !alert.viewedBy.includes(userId)
         ).length;
         setUnreadCount(unreadAlerts);
       })
@@ -130,7 +130,6 @@ const ChatComponent = () => {
         console.error("Error fetching alerts:", error);
       });
   };
-  
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -344,9 +343,9 @@ const filteredAlerts = filterType === "unread"
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    }`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const formatTime = (dateTimeString) => {
@@ -774,8 +773,8 @@ const filteredAlerts = filterType === "unread"
           </div>
           {filteredAlerts.length > 0 ? (
             <>
-              {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-            </>
+                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+                </>
           ) : (
             <p className="no-notification">ไม่มีการแจ้งเตือน</p>
           )}
@@ -786,4 +785,4 @@ const filteredAlerts = filterType === "unread"
   );
 };
 
-export default ChatComponent;
+
