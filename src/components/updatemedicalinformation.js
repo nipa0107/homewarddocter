@@ -160,83 +160,83 @@ export default function Updatemedicalinformation() {
         : alerts;
 
 
-        const formatDate = (dateTimeString) => {
-            const dateTime = new Date(dateTimeString);
-            const day = dateTime.getDate();
-            const month = dateTime.getMonth() + 1;
-            const year = dateTime.getFullYear();
-            const hours = dateTime.getHours();
-            const minutes = dateTime.getMinutes();
-    
-            const thaiMonths = [
-                "มกราคม",
-                "กุมภาพันธ์",
-                "มีนาคม",
-                "เมษายน",
-                "พฤษภาคม",
-                "มิถุนายน",
-                "กรกฎาคม",
-                "สิงหาคม",
-                "กันยายน",
-                "ตุลาคม",
-                "พฤศจิกายน",
-                "ธันวาคม",
-            ];
-    
-            return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-                } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-                } น.`;
-        };
-    
-        const fetchAllUsers = async (userId) => {
-            try {
-                const response = await fetch(
-                    `http://localhost:5000/alluserchat?userId=${userId}`
-                );
-                const data = await response.json();
-    
-                const usersWithLastMessage = await Promise.all(
-                    data.data.map(async (user) => {
-                        const lastMessageResponse = await fetch(
-                            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-                        );
-                        const lastMessageData = await lastMessageResponse.json();
-    
-                        const lastMessage = lastMessageData.lastMessage;
-                        return { ...user, lastMessage: lastMessage ? lastMessage : null };
-                    })
-                );
-    
-                const sortedUsers = usersWithLastMessage.sort((a, b) => {
-                    if (!a.lastMessage) return 1;
-                    if (!b.lastMessage) return -1;
-                    return (
-                        new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+    const formatDate = (dateTimeString) => {
+        const dateTime = new Date(dateTimeString);
+        const day = dateTime.getDate();
+        const month = dateTime.getMonth() + 1;
+        const year = dateTime.getFullYear();
+        const hours = dateTime.getHours();
+        const minutes = dateTime.getMinutes();
+
+        const thaiMonths = [
+            "มกราคม",
+            "กุมภาพันธ์",
+            "มีนาคม",
+            "เมษายน",
+            "พฤษภาคม",
+            "มิถุนายน",
+            "กรกฎาคม",
+            "สิงหาคม",
+            "กันยายน",
+            "ตุลาคม",
+            "พฤศจิกายน",
+            "ธันวาคม",
+        ];
+
+        return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+            } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+            } น.`;
+    };
+
+    const fetchAllUsers = async (userId) => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/alluserchat?userId=${userId}`
+            );
+            const data = await response.json();
+
+            const usersWithLastMessage = await Promise.all(
+                data.data.map(async (user) => {
+                    const lastMessageResponse = await fetch(
+                        `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
                     );
-                });
-    
-                setAllUsers(sortedUsers);
-            } catch (error) {
-                console.error("Error fetching all users:", error);
-            }
-        };
-        //polling
-        useEffect(() => {
-            const interval = setInterval(() => {
-                fetchAllUsers(data._id);
-            }, 1000);
-            return () => clearInterval(interval);
-        }, [data]);
-    
-        const countUnreadUsers = () => {
-            const unreadUsers = allUsers.filter((user) => {
-                const lastMessage = user.lastMessage;
+                    const lastMessageData = await lastMessageResponse.json();
+
+                    const lastMessage = lastMessageData.lastMessage;
+                    return { ...user, lastMessage: lastMessage ? lastMessage : null };
+                })
+            );
+
+            const sortedUsers = usersWithLastMessage.sort((a, b) => {
+                if (!a.lastMessage) return 1;
+                if (!b.lastMessage) return -1;
                 return (
-                    lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+                    new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
                 );
             });
-            return unreadUsers.length;
-        };
+
+            setAllUsers(sortedUsers);
+        } catch (error) {
+            console.error("Error fetching all users:", error);
+        }
+    };
+    //polling
+    useEffect(() => {
+        const interval = setInterval(() => {
+            fetchAllUsers(data._id);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [data]);
+
+    const countUnreadUsers = () => {
+        const unreadUsers = allUsers.filter((user) => {
+            const lastMessage = user.lastMessage;
+            return (
+                lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+            );
+        });
+        return unreadUsers.length;
+    };
 
     const initialSelectedPersonnel = medicalInfo
         ? medicalInfo.selectedPersonnel
@@ -283,32 +283,32 @@ export default function Updatemedicalinformation() {
         const token = window.localStorage.getItem("token");
         setToken(token);
         if (token) {
-          fetch("http://localhost:5000/profiledt", {
-            method: "POST",
-            crossDomain: true,
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              "Access-Control-Allow-Origin": "*",
-            },
-            body: JSON.stringify({
-              token: token,
-            }),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              console.log(data);
-              setProfileData(data.data);
+            fetch("http://localhost:5000/profiledt", {
+                method: "POST",
+                crossDomain: true,
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                },
+                body: JSON.stringify({
+                    token: token,
+                }),
             })
-            .catch((error) => {
-              console.error("Error verifying token:", error);
-            });
+                .then((res) => res.json())
+                .then((data) => {
+                    console.log(data);
+                    setProfileData(data.data);
+                })
+                .catch((error) => {
+                    console.error("Error verifying token:", error);
+                });
         }
-      }, []);
+    }, []);
 
-      useEffect(() => {
+    useEffect(() => {
         getAllMpersonnel();
-      }, []);
+    }, []);
 
     useEffect(() => {
         const fetchMedicalInformation = async () => {
@@ -495,7 +495,7 @@ export default function Updatemedicalinformation() {
                         </a>
                     </li>
                     <li>
-                    <a href="chat" style={{ position: "relative" }}>
+                        <a href="chat" style={{ position: "relative" }}>
                             <i className="bi bi-chat-dots"></i>
                             <span className="links_name">แช็ต</span>
                             {countUnreadUsers() !== 0 && (
@@ -707,10 +707,12 @@ export default function Updatemedicalinformation() {
                             </div>
                             <textarea
                                 className="form-control"
+                                value={Present_illness} // Set the value attribute
                                 rows="3"
                                 style={{ resize: "vertical" }}
                                 onChange={(e) => setPresent_illness(e.target.value)}
                             />
+
                         </div>
 
                         <div className="mb-1">
@@ -743,6 +745,7 @@ export default function Updatemedicalinformation() {
                             </div>
                             <textarea
                                 className="form-control"
+                                value={Management_plan} // Set the value here
                                 rows="3"
                                 style={{ resize: "vertical" }}
                                 onChange={(e) => setManagement_plan(e.target.value)}
@@ -781,22 +784,23 @@ export default function Updatemedicalinformation() {
                             </div>
                             <textarea
                                 className="form-control"
-                                rows="3" // กำหนดจำนวนแถวเริ่มต้น
+                                value={Phychosocial_assessment} // Set the value here
+                                rows="3"
                                 style={{ resize: "vertical" }}
                                 onChange={(e) => setPhychosocial_assessment(e.target.value)}
                             />
                         </div>
-                        
+
                     </div>
-                    
+
                 )}
                 <div className="btn-group">
-                            <div className="btn-next">
-                                <button onClick={UpdateMedical} className="btn btn-outline py-2">
-                                    บันทึก
-                                </button>
-                            </div>
-                        </div>
+                    <div className="btn-next">
+                        <button onClick={UpdateMedical} className="btn btn-outline py-2">
+                            บันทึก
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div></div>

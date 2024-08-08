@@ -347,7 +347,7 @@ export const Nutrition = () => {
                 /></td>
               </tr>
               <tr>
-                <td>อาหารโปรด</td>
+                <td>อาหารที่ชอบ</td>
                 <td colSpan="2"><Controller
                   name="favoriteFood"
                   control={control}
@@ -386,6 +386,55 @@ export const Nutrition = () => {
                     <input type="checkbox" checked={field.value} {...field} />
                   )}
                 /> ซื้อจากร้านอาหาร</td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="info3 card mt-4">
+        <div className="header" align="center">
+          <b>Mini Nutritional Assessment</b>
+        </div>
+        <div className='m-4'>
+          {/* <b>ภาวะโภชนาการ</b> */}
+          <table className='nutrition-table'>
+            <tbody>
+            <tr>
+                <td><b>ประเมินภาวะโภชนาการอย่างย่อ</b></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>ภาวะโภชนาการ</td>
+                <td><Controller
+                  name="normal"
+                  control={control}
+                  defaultValue={false}
+                  render={({ field }) => (
+                    <input type="radio" checked={field.value} {...field} />
+                  )}
+                /> ปกติ</td>
+                <td><Controller
+                  name=""
+                  control={control}
+                  defaultValue={false}
+                  render={({ field }) => (
+                    <input type="radio" checked={field.value} {...field} />
+                  )}
+                /> เกินเกณฑ์</td>
+                {/* <td>ต่ำกว่าเกณฑ์</td> */}
+              </tr>
+              <tr>
+                <td></td>
+                <td><Controller
+                  name=""
+                  control={control}
+                  defaultValue={false}
+                  render={({ field }) => (
+                    <input type="radio" checked={field.value} {...field} />
+                  )}
+                /> ต่ำกว่าเกณฑ์</td>
                 <td></td>
               </tr>
             </tbody>

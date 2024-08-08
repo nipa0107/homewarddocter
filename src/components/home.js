@@ -7,6 +7,9 @@ import logow from "../img/logow.png";
 import Pt from "../img/pt.png";
 import Pt2 from "../img/pt2.png";
 import Bh from "../img/better-health.png";
+import VSG from "../img/vsg.png";
+import VSR from "../img/vsr.png";
+import Noti from "../img//noti.png";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import CountUp from 'react-countup';
 import { useNavigate } from "react-router-dom";
@@ -483,7 +486,7 @@ export default function Home() {
             <div className="item">
               <div className="countcontent">
                 <div className="row align-items-center">
-                  <div className="color-strip bg-primary"></div>
+                  <div className="color-strip bg-info"></div>
                   <div className="col">
                     <div className="bg-icon">
                       <img src={Pt2} className="patient" alt="patient" />
@@ -499,7 +502,7 @@ export default function Home() {
             <div className="item">
               <div className="countcontent">
                 <div className="row align-items-center">
-                  <div className="color-strip bg-success"></div>
+                  <div className="color-strip bg-primary"></div>
                   <div className="col">
                     <div className="bg-icon">
                       <img src={Pt} className="patient" alt="patient" />
@@ -515,7 +518,7 @@ export default function Home() {
             <div className="item">
               <div className="countcontent">
                 <div className="row align-items-center">
-                  <div className="color-strip bg-yellow"></div>
+                  <div className="color-strip bg-secondary"></div>
                   <div className="col">
                     <div className="bg-icon">
                       <img src={Bh} className="patient" alt="patient" />
@@ -528,7 +531,54 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
+            <div className="item">
+              <div className="countcontent">
+                <div className="row align-items-center">
+                  <div className="color-strip bg-success"></div>
+                  <div className="col">
+                    <div className="bg-icon">
+                      <img src={VSG} className="patient" alt="patient" />
+                    </div>
+                  </div>
+                  <div className="col">
+                    <p className="num mt-2"><CountUp end={((user) => user.deletedAt === null).length} duration={2} /></p>
+                    <p className="name fs-5">เคสที่ V/S ปกติ</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="item">
+              <div className="countcontent">
+                <div className="row align-items-center">
+                  <div className="color-strip bg-danger"></div>
+                  <div className="col">
+                    <div className="bg-icon">
+                      <img src={VSR} className="patient" alt="patient" />
+                    </div>
+                  </div>
+                  <div className="col">
+                    <p className="num mt-2"><CountUp end={0} duration={2} /></p>
+                    <p className="name fs-5">เคสที่ V/S ผิดปกติ</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="item">
+              <div className="countcontent">
+                <div className="row align-items-center">
+                  <div className="color-strip bg-yellow"></div>
+                  <div className="col">
+                    <div className="bg-icon">
+                      <img src={Noti} className="patient" alt="patient" />
+                    </div>
+                  </div>
+                  <div className="col">
+                    <p className="num mt-2"><CountUp end={0} duration={2} /></p>
+                    <p className="name fs-5">เคสที่มีแจ้งเตือน</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div className="chart-container d-flex justify-content-center mt-5">

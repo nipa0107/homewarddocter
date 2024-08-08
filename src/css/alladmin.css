@@ -148,6 +148,11 @@ tr.assessmentnull {
 
 }
 
+.texthead {
+  text-align: center;
+  font-weight: bold;
+
+}
 
 .textheadSymptom {
   font-weight: bold;
@@ -355,8 +360,8 @@ tr.assessmentnull {
   cursor: pointer;
 }
 .user-info {
-  /* display: flex;
-  justify-content: space-between; */
+  display: flex;
+  justify-content: space-between;
   padding-left: 6%;
 
 }
@@ -402,29 +407,32 @@ tr.assessmentnull {
 }
 
 .texthead {
-  text-align: center;
-  font-weight: bold;
   font-size: 1.2em;
   font-weight: bold;
   color: #444;
   margin-bottom: 10px;
 }
 
+/* Symptom heading styles */
 .textheadSymptom {
+  font-size: 1.2em;
   font-weight: bold;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  padding-left: 10px;
-  /* border-left: 4px solid #5cb3fd; */
+  /* color: #ff6f61; */
+  margin-top: 20px;
+  margin-bottom: 10px;
 }
 
+/* General text styles */
 .text {
   font-size: 1em;
   color: #555;
-  margin-bottom: 2px;
+  margin-bottom: 10px;
 }
 
-
+/* Styles for symptoms */
+/* .contentinass p {
+  margin: 5px 5px;
+} */
 
 .text p {
   color: #333;
@@ -469,13 +477,8 @@ p .label {
   align-items: center;
 }
 
-.inline-container .title-ptf1{
-  margin-left: 3%;
-  margin-right: 1rem;
-  font-weight: bold;
-  color: #333;
-}
 .inline-container .title-ptf{
+  margin-left: 3%;
   margin-right: 1rem;
   font-weight: bold;
   color: #333;
@@ -486,7 +489,7 @@ p .label {
   margin-right: 1rem;
   font-weight: bold;
   color: #333;
-  flex: 0 0 20%;
+  flex: 0 0 10%;
   display: flex;
 }
 
@@ -546,8 +549,29 @@ textarea {
 }
 .symtoms-count{
   margin-left: 5;
- 
 }
 .evaluated {
   color: rgb(7, 195, 7); /* Text color for evaluated */
+}
+.assessment-table {
+  width: 100%;
+  border-collapse: collapse;
+
+
+}
+
+.assessment-table th, .assessment-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #dee2e6;
+  text-align: left;
+}
+
+.assessment-table th {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+}
+
+.assessment-table tr:nth-child(even) {
+  background-color: #f9f9f9;
 }

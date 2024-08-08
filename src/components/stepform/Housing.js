@@ -4,55 +4,73 @@ import { Controller, useFormContext } from 'react-hook-form';
 export const Housing = () => {
   const { control, register, getValues } = useFormContext();
   const [hasPets, setHasPets] = useState(false);
-  const [hasNeighbors, setHasNeighbors] = useState(false);
-  // const [selectedRole, setSelectedRole] = useState('');
-  // const [customRole, setCustomRole] = useState('');
-  // const [selectedStatus, setSelectedStatus] = useState('');
-  // const [selectedOccupation, setSelectedOccupation] = useState('');
-  // const [customOccupation, setCustomOccupation] = useState('');
-  // const [selectedEducation, setSelectedEducation] = useState('');
-  // const [customEducation, setCustomEducation] = useState('');
-  // const [selectedIncome, setSelectedIncome] = useState('');
-  // const [selectedBenefit, setSelectedBenefit] = useState('');
-
-  // const handleEducationChange = (e) => {
-  //   setSelectedEducation(e.target.value);
-  //   if (e.target.value !== "อื่นๆ") {
-  //     setCustomEducation("");
-  //   }
-  // };
-
-  // const handleOccupationChange = (e) => {
-  //   setSelectedOccupation(e.target.value);
-  //   if (e.target.value !== "อื่นๆ") {
-  //     setCustomOccupation("");
-  //   }
-  // };
-
-  // const handleRoleChange = (e) => {
-  //   setSelectedRole(e.target.value);
-  //   if (e.target.value !== 'อื่นๆ') {
-  //     setCustomRole('');
-  //   }
-  // };
-
-  // const handleStatusChange = (e) => {
-  //   setSelectedStatus(e.target.value);
-  // };
-
-  // const handleIncomeChange = (e) => {
-  //   setSelectedIncome(e.target.value);
-  // };
-
-  // const handleBenefitChange = (e) => {
-  //   setSelectedBenefit(e.target.value);
-  // };
 
   return (
     <div>
       <div className="info3 card mt-4">
         <div className="header" align="center">
           <b>Housing</b>
+        </div>
+        <div className='m-4'>
+          <table className='nutrition-table'>
+            <tbody>
+              <tr>
+                <td><b>สภาพแวดล้อมในบ้าน</b></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>ลักษณะบ้าน: </td>
+                <td colSpan="2">
+                  <input
+                    type="text"
+                    className="form-control"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>วัสดุที่ใช้ทำ: </td>
+                <td colSpan="2">
+                  <input
+                    type="text"
+                    className="form-control"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>มีกี่ชั้น:</td>
+                <td colSpan="2">
+                  <input
+                    type="text"
+                    className="form-control"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>มีกี่ห้อง:</td>
+                <td colSpan="2">
+                  <input
+                    type="text"
+                    className="form-control"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>ผู้ป่วยอาศัยอยู่ชั้นไหน:</td>
+                <td colSpan="2">
+                  <input
+                    type="text"
+                    className="form-control"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="info3 card mt-4">
+        <div className="header" align="center">
+          <b>Home environment</b>
         </div>
         <div className='m-4'>
           <table className='nutrition-table'>
@@ -118,50 +136,13 @@ export const Housing = () => {
                 </tr>
               )}
               <tr>
-                <td></td>
-                <td colSpan="2">
-                  <input
-                    type="checkbox"
-                    checked={hasNeighbors}
-                    onChange={(e) => setHasNeighbors(e.target.checked)}
-                  /> มีเพื่อนบ้านอาศัยอยู่รอบๆบ้านอย่างน้อย 1 หลัง
-                </td>
-              </tr>
-              {hasNeighbors && (
-                <>
-                  <tr>
-                    <td></td>
-                    <td><input type="checkbox" name="neighborOpinion" value="ดี" {...register("neighborOpinion")} /> ดี</td>
-                    <td><input type="checkbox" name="neighborOpinion" value="ไม่ดี" {...register("neighborOpinion")} /> ไม่ดี</td>
-                  </tr>
-                  <tr>
-                    <td></td>
-                    <td colSpan="2">
-                      <Controller
-                        name="otherNeighborOpinion"
-                        control={control}
-                        defaultValue=""
-                        render={({ field }) => (
-                          <input
-                            type='text'
-                            className="form-control"
-                            placeholder="อื่นๆ"
-                            {...field}
-                          />
-                        )}
-                      />
-                    </td>
-                  </tr>
-                </>
-              )}
-              <tr>
                 <td>อื่นๆ ระบุ:</td>
                 <td colSpan="2">
                   <input
                     type="text"
                     className="form-control"
                     placeholder="อื่นๆ"
-                    {...register("other")}
+                    {...register("other_home_environment")}
                   />
                 </td>
               </tr>
@@ -169,7 +150,65 @@ export const Housing = () => {
           </table>
         </div>
       </div>
-      
+      <div className="info3 card mt-4">
+        <div className="header" align="center">
+          <b>Neighbors</b>
+        </div>
+        <div className='m-4'>
+          <table className='nutrition-table'>
+            <tbody>
+              <tr>
+                <td><b>ลักษณะของเพื่อนบ้าน</b></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>จำนวนเพื่อนบ้าน: </td>
+                <td colSpan="2">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="ระบุตัวเลข"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>ความสัมพันธ์กับเพื่อนบ้าน: </td>
+                <td>
+                  <input
+                    type="radio"
+                  /> ดี 
+                </td>
+                <td><input
+                    type="radio"
+                  /> ไม่ดี</td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colSpan="2">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="ความสัมพันธ์อื่นๆ"
+                    {...register("OtherRelationshipNeighbor")}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>ความช่วยเหลือกันของเพื่อนบ้าน: </td>
+                <td>
+                  <input
+                    type="radio"
+                  /> ช่วยเหลือกันดีเมื่อมีปัญหา
+                </td>
+                <td><input
+                    type="radio"
+                  /> ไม่ช่วยเหลือกัน</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

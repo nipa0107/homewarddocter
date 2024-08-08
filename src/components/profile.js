@@ -6,7 +6,8 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
-export default function Home({}) {
+
+export default function Home({ }) {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
   const [isActive, setIsActive] = useState(false);
@@ -20,7 +21,7 @@ export default function Home({}) {
   const [datauser, setDatauser] = useState([]);
 
   const notificationsRef = useRef(null);
- 
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -156,11 +157,9 @@ export default function Home({}) {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const fetchAllUsers = async (userId) => {
@@ -222,7 +221,7 @@ export default function Home({}) {
   const handleToggleSidebar = () => {
     setIsActive(!isActive);
   };
-  
+
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
@@ -246,7 +245,7 @@ export default function Home({}) {
             </a>
           </li>
           <li>
-          <a href="assessment" >
+            <a href="assessment" >
               <i class="bi bi-clipboard2-pulse"></i>
               <span class="links_name">ติดตาม/ประเมินอาการ</span>
             </a>
@@ -295,10 +294,10 @@ export default function Home({}) {
         </ul>
       </div>
       <div className="home_content">
-      <div className="homeheader">
+        <div className="homeheader">
 
-        <div className="header">โปรไฟล์</div>
-        <div className="profile_details">
+          <div className="header">โปรไฟล์</div>
+          <div className="profile_details">
             <ul className="nav-list">
               <li>
                 <a className="bell-icon" onClick={toggleNotifications}>
@@ -358,11 +357,11 @@ export default function Home({}) {
               readOnly
               value={data.nametitle}
             />
-            
+
           </div>
           <div className="mb-2">
-          <label>ชื่อ</label>
-          <input
+            <label>ชื่อ</label>
+            <input
               readOnly
               type="text"
               className="form-control"
@@ -370,8 +369,8 @@ export default function Home({}) {
             />
           </div>
           <div className="mb-2">
-          <label>นามสกุล</label>
-          <input
+            <label>นามสกุล</label>
+            <input
               readOnly
               type="text"
               className="form-control"
@@ -379,76 +378,76 @@ export default function Home({}) {
             />
           </div>
           <div className="mb-2">
-          <label>อีเมล</label>
-          <input
+            <label>อีเมล</label>
+            <input
               type="text"
               className="form-control gray-background"
               readOnly
               value={data.email}
             //   onChange={(e) => setEmail(e.target.value)}
             />
-          </div>      
+          </div>
           <div className="mb-2">
-          <label>เบอร์โทรศัพท์</label>
-          <input
+            <label>เบอร์โทรศัพท์</label>
+            <input
               type="text"
               className="form-control"
               value={data.tel}
             />
-          </div>   
-
-
-            <a className="editname" onClick={() => navigate("/updateprofile", { state: data })}>
-              แก้ไขโปรไฟล์
-            </a>
-            <a className="editname" onClick={() => navigate("/updatepassword", { state: data })}>
-              เปลี่ยนรหัสผ่าน
-            </a>
           </div>
+
+
+          <a className="editname" onClick={() => navigate("/updateprofile", { state: data })}>
+            แก้ไขโปรไฟล์
+          </a>
+          <a className="editname" onClick={() => navigate("/updatepassword", { state: data })}>
+            เปลี่ยนรหัสผ่าน
+          </a>
         </div>
-        
-        {showNotifications && (
-          <div className="notifications-dropdown" ref={notificationsRef}>
-            <div className="notifications-head">
-              <h2 className="notifications-title">การแจ้งเตือน</h2>
-              <p
-                className="notifications-allread"
-                onClick={markAllAlertsAsViewed}
+      </div>
+
+      {showNotifications && (
+        <div className="notifications-dropdown" ref={notificationsRef}>
+          <div className="notifications-head">
+            <h2 className="notifications-title">การแจ้งเตือน</h2>
+            <p
+              className="notifications-allread"
+              onClick={markAllAlertsAsViewed}
+            >
+              ทำเครื่องหมายว่าอ่านทั้งหมด
+            </p>
+            <div className="notifications-filter">
+              <button
+                className={filterType === "all" ? "active" : ""}
+                onClick={() => handleFilterChange("all")}
               >
-                ทำเครื่องหมายว่าอ่านทั้งหมด
-              </p>
-              <div className="notifications-filter">
-                <button
-                  className={filterType === "all" ? "active" : ""}
-                  onClick={() => handleFilterChange("all")}
-                >
-                  ดูทั้งหมด
-                </button>
-                <button
-                  className={filterType === "unread" ? "active" : ""}
-                  onClick={() => handleFilterChange("unread")}
-                >
-                  ยังไม่อ่าน
-                </button>
-              </div>
+                ดูทั้งหมด
+              </button>
+              <button
+                className={filterType === "unread" ? "active" : ""}
+                onClick={() => handleFilterChange("unread")}
+              >
+                ยังไม่อ่าน
+              </button>
             </div>
-            {filteredAlerts.length > 0 ? (
-              <>
-                {renderAlerts(
-                  filteredAlerts,
-                  token,
-                  userId,
-                  navigate,
-                  setAlerts,
-                  setUnreadCount,
-                  formatDate
-                )}
-              </>
-            ) : (
-              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-            )}
           </div>
-        )}
+          {filteredAlerts.length > 0 ? (
+            <>
+              {renderAlerts(
+                filteredAlerts,
+                token,
+                userId,
+                navigate,
+                setAlerts,
+                setUnreadCount,
+                formatDate
+              )}
+            </>
+          ) : (
+            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+          )}
+        </div>
+      )}
     </main>
   );
 }

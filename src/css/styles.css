@@ -202,3 +202,83 @@
 .nutrition-table tr:nth-child(odd) {
     background-color: #ffffff;
 }
+/* New style for the equipment table */
+.equipment-table {
+    width: 100%; /* Full width of the container */
+    border-collapse: collapse; /* Collapse borders */
+}
+
+.equipment-table th, .equipment-table td {
+    padding: 2px 55px; /* More padding for better spacing */
+    text-align: left; /* Align text to the left */
+    border-bottom: 1px solid #dee2e6; /* Bottom border */
+}
+
+.equipment-table th {
+    background-color: #f5f5f5; 
+    color: hsl(0, 0%, 0%); /* Header text color */
+    text-transform: uppercase; /* Uppercase text for header */
+}
+
+/* .equipment-table tr:nth-child(even) {
+    background-color: #f9f9f9; 
+} */
+
+.equipment-table tr:nth-child(odd) {
+    background-color: #ffffff; /* White for odd rows */
+}
+
+.equipment-table td input[type="checkbox"] {
+    margin-right: 10px; /* Margin for checkboxes */
+}
+
+.equipment-category h4 {
+	font: bold;
+    margin-left: 25px; /* Add margin to separate from the table */
+    color: #333; /* Color of category headers */
+    font-size: 1.2em;
+    text-transform: uppercase;
+}
+.equipment-table th:nth-child(1), .equipment-table td:nth-child(1) {
+	margin-left: 50px;
+    width: 18%; /* Width for checkbox column */
+}
+.equipment-table th:nth-child(2), .equipment-table td:nth-child(2) {
+    width: 5%; /* Width for checkbox column */
+}
+
+.equipment-table th:nth-child(3), .equipment-table td:nth-child(3) {
+    width: 30%; /* Width for equipment name column */
+}
+
+.equipment-table th:nth-child(4), .equipment-table td:nth-child(4) {
+    width: 45%; /* Width for date added column */
+}
+.equipment-type-title {
+    margin-top: 20px; /* Adjust the value as needed */
+}
+.assessment-table {
+	width: 100%;
+	border-collapse: collapse;
+  }
+  
+  .assessment-table th,
+  .assessment-table td {
+	padding: 5px;
+	border-bottom: 1px solid #ddd; /* Light grey line for separation */
+  }
+  
+  .assessment-table .question-col {
+	width: 40%; /* Larger space for questions */
+  }
+  
+  .assessment-table .answer-col {
+	width: 20%; /* Smaller space for answers */
+	text-align: right; /* Align the text to the right */
+  }
+  
+  .assessment-table .answer-cell {
+	text-align: right; /* Ensure answers within the column are right-aligned */
+	font-weight: bold; /* Optional: Makes the answer text bold */
+  }
+  

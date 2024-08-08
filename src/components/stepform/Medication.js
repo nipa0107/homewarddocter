@@ -7,9 +7,23 @@ export const Medication = () => {
     prescribedMedication: '',
     actualMedication: '',
     supplements: '',
-    administration: '', // New state for radio group
-    consistency: '', // New state for radio group
+    administration: '', 
+    consistency: '',
+    intake: '', 
+    consistency: ''
   });
+  const handleAdministrationChange = (e) => {
+    setMedicationData({ ...medicationData, administration: e.target.value });
+  };
+
+  const handleIntakeChange = (e) => {
+    setMedicationData({ ...medicationData, intake: e.target.value });
+  };
+
+  // Handler for consistency changes
+  const handleConsistencyChange = (e) => {
+    setMedicationData({ ...medicationData, consistency: e.target.value });
+  };
 
   return (
     <div className="info3 card mt-4">
@@ -27,7 +41,7 @@ export const Medication = () => {
                   control={control}
                   defaultValue=""
                   render={({ field }) => (
-                    <input
+                    <textarea
                       type="text"
                       className="form-control"
                       placeholder="กรอกยาที่แพทย์สั่ง"
@@ -50,7 +64,7 @@ export const Medication = () => {
                   control={control}
                   defaultValue=""
                   render={({ field }) => (
-                    <input
+                    <textarea
                       type="text"
                       className="form-control"
                       placeholder="กรอกการใช้ยาจริง"
@@ -73,7 +87,7 @@ export const Medication = () => {
                   control={control}
                   defaultValue=""
                   render={({ field }) => (
-                    <input
+                    <textarea
                       type="text"
                       className="form-control"
                       placeholder="กรอกอาหารเสริม"
@@ -96,7 +110,7 @@ export const Medication = () => {
                   {...register("administration")}
                   value="selfAdministered"
                   checked={medicationData.administration === "selfAdministered"}
-                  onChange={(e) => setMedicationData({ ...medicationData, administration: e.target.value })}
+                  onChange={handleAdministrationChange}
                 /> จัดยาด้วยตนเอง
               </td>
               <td>
@@ -105,28 +119,28 @@ export const Medication = () => {
                   {...register("administration")}
                   value="administeredByOther"
                   checked={medicationData.administration === "administeredByOther"}
-                  onChange={(e) => setMedicationData({ ...medicationData, administration: e.target.value })}
+                  onChange={handleAdministrationChange}
                 /> มีคนจัดยาให้
               </td>
             </tr>
             <tr>
-              <td></td>
+              <td>การรับประทานยา: </td>
               <td>
                 <input
                   type="radio"
-                  {...register("administration")}
+                  {...register("intake")}
                   value="selfTaken"
-                  checked={medicationData.administration === "selfTaken"}
-                  onChange={(e) => setMedicationData({ ...medicationData, administration: e.target.value })}
-                /> กินยาด้วยตัวเอง
+                  checked={medicationData.intake === "selfTaken"}
+                  onChange={handleIntakeChange}
+                /> รับประทานยาด้วยตัวเอง
               </td>
               <td>
                 <input
                   type="radio"
-                  {...register("administration")}
+                  {...register("intake")}
                   value="preparedEachMeal"
-                  checked={medicationData.administration === "preparedEachMeal"}
-                  onChange={(e) => setMedicationData({ ...medicationData, administration: e.target.value })}
+                  checked={medicationData.intake === "preparedEachMeal"}
+                  onChange={handleIntakeChange}
                 /> มีคนเตรียมยาแต่ละมื้อให้
               </td>
             </tr>
@@ -138,7 +152,7 @@ export const Medication = () => {
                   {...register("consistency")}
                   value="consistent"
                   checked={medicationData.consistency === "consistent"}
-                  onChange={(e) => setMedicationData({ ...medicationData, consistency: e.target.value })}
+                  onChange={handleConsistencyChange}
                 /> สม่ำเสมอทุกวัน
               </td>
               <td>
@@ -147,7 +161,7 @@ export const Medication = () => {
                   {...register("consistency")}
                   value="occasionalMiss"
                   checked={medicationData.consistency === "occasionalMiss"}
-                  onChange={(e) => setMedicationData({ ...medicationData, consistency: e.target.value })}
+                  onChange={handleConsistencyChange}
                 /> หลงลืมบางครั้ง
               </td>
             </tr>
@@ -159,7 +173,7 @@ export const Medication = () => {
                   {...register("consistency")}
                   value="inconsistent"
                   checked={medicationData.consistency === "inconsistent"}
-                  onChange={(e) => setMedicationData({ ...medicationData, consistency: e.target.value })}
+                  onChange={handleConsistencyChange}
                 /> ไม่สม่ำเสมอ
               </td>
             </tr>

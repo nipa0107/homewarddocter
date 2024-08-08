@@ -5,8 +5,8 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { fetchAlerts } from './Alert/alert';
-import { renderAlerts } from './Alert/renderAlerts';
+import { fetchAlerts } from "./Alert/alert";
+import { renderAlerts } from "./Alert/renderAlerts";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -19,9 +19,7 @@ export default function AddEquipPatient() {
     const [validationMessage, setValidationMessage] = useState("");
     const [isActive, setIsActive] = useState(false);
     const [token, setToken] = useState("");
-    const [selectedEquipType1, setSelectedEquipType1] = useState("");
-    const [selectedEquipType2, setSelectedEquipType2] = useState("");
-    const [selectedEquipType3, setSelectedEquipType3] = useState("");
+    const [selectedEquipments, setSelectedEquipments] = useState([]);
     const [equipValidationMessages, setEquipValidationMessages] = useState({});
     const [userId, setUserId] = useState("");
     const [allUsers, setAllUsers] = useState([]);
@@ -33,7 +31,10 @@ export default function AddEquipPatient() {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+            if (
+                notificationsRef.current &&
+                !notificationsRef.current.contains(event.target)
+            ) {
                 setShowNotifications(false);
             }
         };
@@ -63,7 +64,7 @@ export default function AddEquipPatient() {
             .then((res) => res.json())
             .then((data) => {
                 setProfiledata(data.data);
-                if (data.data == "token expired") {
+                if (data.data === "token expired") {
                     window.localStorage.clear();
                     window.location.href = "./";
                 }
@@ -94,7 +95,7 @@ export default function AddEquipPatient() {
 
         if (token) {
             fetchUserData(token)
-                .then(user => {
+                .then((user) => {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
 
@@ -110,7 +111,6 @@ export default function AddEquipPatient() {
                 });
         }
     }, []);
-
 
     const markAllAlertsAsViewed = () => {
         fetch("http://localhost:5000/alerts/mark-all-viewed", {
@@ -139,9 +139,10 @@ export default function AddEquipPatient() {
         setFilterType(type);
     };
 
-    const filteredAlerts = filterType === "unread"
-        ? alerts.filter(alert => !alert.viewedBy.includes(userId))
-        : alerts;
+    const filteredAlerts =
+        filterType === "unread"
+            ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+            : alerts;
 
     useEffect(() => {
         getAllEquip();
@@ -160,29 +161,71 @@ export default function AddEquipPatient() {
             });
     };
 
+    const handleCheckboxChange = (e, equipmentName, equipmentType) => {
+        const isChecked = e.target.checked;
+        let updatedEquipments;
+
+        if (isChecked) {
+            updatedEquipments = [
+                ...selectedEquipments,
+                {
+                    equipmentname_forUser: equipmentName,
+                    equipmenttype_forUser: equipmentType,
+                },
+            ];
+        } else {
+            updatedEquipments = selectedEquipments.filter(
+                (equip) => equip.equipmentname_forUser !== equipmentName
+            );
+        }
+
+        setSelectedEquipments(updatedEquipments);
+
+        // Check for duplicates and update validation messages
+        const validationMessages = {};
+        updatedEquipments.forEach((equip, index) => {
+            const duplicates = updatedEquipments.filter(
+                (e) => e.equipmentname_forUser === equip.equipmentname_forUser
+            ).length;
+
+            if (duplicates > 1) {
+                validationMessages[equip.equipmentname_forUser] = "มีอุปกรณ์นี้อยู่แล้ว";
+            }
+        });
+
+        setEquipValidationMessages(validationMessages);
+        setValidationMessage(""); // Clear general validation message
+    };
+
+    const handleSelectAll = (equipmentType, isChecked) => {
+        let updatedEquipments = [...selectedEquipments];
+
+        data
+            .filter((equipment) => equipment.equipment_type === equipmentType)
+            .forEach((equipment) => {
+                if (isChecked) {
+                    if (
+                        !updatedEquipments.some(
+                            (equip) => equip.equipmentname_forUser === equipment.equipment_name
+                        )
+                    ) {
+                        updatedEquipments.push({
+                            equipmentname_forUser: equipment.equipment_name,
+                            equipmenttype_forUser: equipmentType,
+                        });
+                    }
+                } else {
+                    updatedEquipments = updatedEquipments.filter(
+                        (equip) => equip.equipmentname_forUser !== equipment.equipment_name
+                    );
+                }
+            });
+
+        setSelectedEquipments(updatedEquipments);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        const selectedEquipments = [];
-        const validationMessages = {};
-
-        if (selectedEquipType1) {
-            selectedEquipments.push({
-                equipmentname_forUser: selectedEquipType1,
-                equipmenttype_forUser: "อุปกรณ์ติดตัว",
-            });
-        }
-        if (selectedEquipType2) {
-            selectedEquipments.push({
-                equipmentname_forUser: selectedEquipType2,
-                equipmenttype_forUser: "อุปกรณ์เสริม",
-            });
-        }
-        if (selectedEquipType3) {
-            selectedEquipments.push({
-                equipmentname_forUser: selectedEquipType3,
-                equipmenttype_forUser: "อุปกรณ์อื่นๆ",
-            });
-        }
 
         if (selectedEquipments.length === 0) {
             setValidationMessage("โปรดเลือกอุปกรณ์อย่างน้อยหนึ่งรายการ");
@@ -193,21 +236,7 @@ export default function AddEquipPatient() {
             return;
         }
 
-        // Check for duplicate equipment
-        selectedEquipments.forEach((equip, index) => {
-            if (
-                selectedEquipments.filter(
-                    (e) => e.equipmentname_forUser === equip.equipmentname_forUser
-                ).length > 1
-            ) {
-                validationMessages[equip.equipmenttype_forUser] =
-                    "มีอุปกรณ์นี้อยู่แล้ว";
-            }
-        });
-
-        setEquipValidationMessages(validationMessages);
-
-        if (Object.keys(validationMessages).length > 0) {
+        if (Object.keys(equipValidationMessages).length > 0) {
             return;
         }
 
@@ -250,16 +279,6 @@ export default function AddEquipPatient() {
 
     const handleToggleSidebar = () => {
         setIsActive(!isActive);
-    };
-
-    const handleChange = (e, equipTypeSetter, equipType) => {
-        equipTypeSetter(e.target.value);
-        setEquipValidationMessages((prevMessages) => {
-            const newMessages = { ...prevMessages };
-            delete newMessages[equipType];
-            return newMessages;
-        });
-        setValidationMessage(""); // Clear general validation message
     };
 
     const formatDate = (dateTimeString) => {
@@ -342,44 +361,44 @@ export default function AddEquipPatient() {
 
     return (
         <main className="body">
-            <div className={`sidebar ${isActive ? 'active' : ''}`}>
-                <div class="logo_content">
-                    <div class="logo">
-                        <div class="logo_name" >
-                            <img src={logow} className="logow" alt="logo" ></img>
+            <div className={`sidebar ${isActive ? "active" : ""}`}>
+                <div className="logo_content">
+                    <div className="logo">
+                        <div className="logo_name">
+                            <img src={logow} className="logow" alt="logo"></img>
                         </div>
                     </div>
-                    <i class='bi bi-list' id="btn" onClick={handleToggleSidebar}></i>
+                    <i className="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
                 </div>
-                <ul class="nav-list">
+                <ul className="nav-list">
                     <li>
                         <a href="home">
-                            <i class="bi bi-house"></i>
-                            <span class="links_name" >หน้าหลัก</span>
+                            <i className="bi bi-house"></i>
+                            <span className="links_name">หน้าหลัก</span>
                         </a>
                     </li>
                     <li>
-                        <a href="assessment" >
-                            <i class="bi bi-clipboard2-pulse"></i>
-                            <span class="links_name" >ติดตาม/ประเมินอาการ</span>
+                        <a href="assessment">
+                            <i className="bi bi-clipboard2-pulse"></i>
+                            <span className="links_name">ติดตาม/ประเมินอาการ</span>
                         </a>
                     </li>
                     <li>
-                        <a href="allpatient" >
-                            <i class="bi bi-people"></i>
-                            <span class="links_name" >จัดการข้อมูลการดูแลผู้ป่วย</span>
+                        <a href="allpatient">
+                            <i className="bi bi-people"></i>
+                            <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
                         </a>
                     </li>
                     <li>
-                        <a href="assessreadiness" >
-                            <i class="bi bi-clipboard-check"></i>
-                            <span class="links_name" >ประเมินความพร้อมการดูแล</span>
+                        <a href="assessreadiness">
+                            <i className="bi bi-clipboard-check"></i>
+                            <span className="links_name">ประเมินความพร้อมการดูแล</span>
                         </a>
                     </li>
                     <li>
-                        <a href="assessinhomesss" >
-                            <i class="bi bi-house-check"></i>
-                            <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+                        <a href="assessinhomesss">
+                            <i className="bi bi-house-check"></i>
+                            <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
                         </a>
                     </li>
                     <li>
@@ -393,11 +412,15 @@ export default function AddEquipPatient() {
                             )}
                         </a>
                     </li>
-                    <div class="nav-logout">
+                    <div className="nav-logout">
                         <li>
                             <a href="./" onClick={logOut}>
-                                <i class='bi bi-box-arrow-right' id="log_out" onClick={logOut}></i>
-                                <span class="links_name" >ออกจากระบบ</span>
+                                <i
+                                    className="bi bi-box-arrow-right"
+                                    id="log_out"
+                                    onClick={logOut}
+                                ></i>
+                                <span className="links_name">ออกจากระบบ</span>
                             </a>
                         </li>
                     </div>
@@ -424,7 +447,11 @@ export default function AddEquipPatient() {
                                 <a href="profile">
                                     <i className="bi bi-person"></i>
                                     <span className="links_name">
-                                        {profiledata && profiledata.nametitle + profiledata.name + " " + profiledata.surname}
+                                        {profiledata &&
+                                            profiledata.nametitle +
+                                            profiledata.name +
+                                            " " +
+                                            profiledata.surname}
                                     </span>
                                 </a>
                             </li>
@@ -435,21 +462,38 @@ export default function AddEquipPatient() {
                     <div className="notifications-dropdown" ref={notificationsRef}>
                         <div className="notifications-head">
                             <h2 className="notifications-title">การแจ้งเตือน</h2>
-                            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+                            <p
+                                className="notifications-allread"
+                                onClick={markAllAlertsAsViewed}
+                            >
                                 ทำเครื่องหมายว่าอ่านทั้งหมด
                             </p>
                             <div className="notifications-filter">
-                                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                                <button
+                                    className={filterType === "all" ? "active" : ""}
+                                    onClick={() => handleFilterChange("all")}
+                                >
                                     ดูทั้งหมด
                                 </button>
-                                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                                <button
+                                    className={filterType === "unread" ? "active" : ""}
+                                    onClick={() => handleFilterChange("unread")}
+                                >
                                     ยังไม่อ่าน
                                 </button>
                             </div>
                         </div>
                         {filteredAlerts.length > 0 ? (
                             <>
-                                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+                                {renderAlerts(
+                                    filteredAlerts,
+                                    token,
+                                    userId,
+                                    navigate,
+                                    setAlerts,
+                                    setUnreadCount,
+                                    formatDate
+                                )}
                             </>
                         ) : (
                             <p className="no-notification">ไม่มีการแจ้งเตือน</p>
@@ -460,23 +504,30 @@ export default function AddEquipPatient() {
                     <ul>
                         <li>
                             <a href="home">
-                                <i class="bi bi-house-fill"></i>
+                                <i className="bi bi-house-fill"></i>
                             </a>
                         </li>
                         <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
+                            <i className="bi bi-chevron-double-right"></i>
                         </li>
                         <li>
                             <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
                         </li>
                         <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
+                            <i className="bi bi-chevron-double-right"></i>
                         </li>
                         <li>
-                            <a href="infopatient" onClick={() => navigate("/infopatient", { state: { id: id, user: user } })}>ข้อมูลการดูแลผู้ป่วย</a>
+                            <a
+                                href="infopatient"
+                                onClick={() =>
+                                    navigate("/infopatient", { state: { id: id, user: user } })
+                                }
+                            >
+                                ข้อมูลการดูแลผู้ป่วย
+                            </a>
                         </li>
                         <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
+                            <i className="bi bi-chevron-double-right"></i>
                         </li>
                         <li>
                             <a>เพิ่มอุปกรณ์สำหรับผู้ป่วย</a>
@@ -486,106 +537,88 @@ export default function AddEquipPatient() {
                 <h3>เพิ่มอุปกรณ์สำหรับผู้ป่วย</h3>
                 <div className="adminall card mb-1">
                     <form onSubmit={handleSubmit}>
-                        <div className="mb-1">
-                            <label>อุปกรณ์ติดตัว</label>
-                            <select
-                                className="form-select"
-                                value={selectedEquipType1}
-                                onChange={(e) =>
-                                    handleChange(e, setSelectedEquipType1, "อุปกรณ์ติดตัว")
-                                }
-                            >
-                                <option value="">เลือกอุปกรณ์ติดตัว</option>
-                                {Array.isArray(data) && data.length > 0 ? (
-                                    data
-                                        .filter(
-                                            (equipment) =>
-                                                equipment.equipment_type === "อุปกรณ์ติดตัว"
+                        {["อุปกรณ์ติดตัว", "อุปกรณ์เสริม", "อุปกรณ์อื่นๆ"].map(
+                            (equipmentType) => {
+                                const isAllSelected = data
+                                    .filter(
+                                        (equipment) => equipment.equipment_type === equipmentType
+                                    )
+                                    .every((equipment) =>
+                                        selectedEquipments.some(
+                                            (equip) =>
+                                                equip.equipmentname_forUser ===
+                                                equipment.equipment_name
                                         )
-                                        .map((equipment) => (
-                                            <option
-                                                key={equipment._id}
-                                                value={equipment.equipment_name}
-                                            >
-                                                {equipment.equipment_name}
-                                            </option>
-                                        ))
-                                ) : (
-                                    <option value="">ไม่มีข้อมูลอุปกรณ์ติดตัว</option>
-                                )}
-                            </select>
-                            {equipValidationMessages["อุปกรณ์ติดตัว"] && (
-                                <div style={{ color: "red" }}>
-                                    {equipValidationMessages["อุปกรณ์ติดตัว"]}
-                                </div>
-                            )}
-                        </div>
-                        <div className="mb-1">
-                            <label>อุปกรณ์เสริม</label>
-                            <select
-                                className="form-select"
-                                value={selectedEquipType2}
-                                onChange={(e) =>
-                                    handleChange(e, setSelectedEquipType2, "อุปกรณ์เสริม")
-                                }
-                            >
-                                <option value="">เลือกอุปกรณ์เสริม</option>
-                                {Array.isArray(data) && data.length > 0 ? (
-                                    data
-                                        .filter(
-                                            (equipment) => equipment.equipment_type === "อุปกรณ์เสริม"
-                                        )
-                                        .map((equipment) => (
-                                            <option
-                                                key={equipment._id}
-                                                value={equipment.equipment_name}
-                                            >
-                                                {equipment.equipment_name}
-                                            </option>
-                                        ))
-                                ) : (
-                                    <option value="">ไม่มีข้อมูลอุปกรณ์เสริม</option>
-                                )}
-                            </select>
-                            {equipValidationMessages["อุปกรณ์เสริม"] && (
-                                <div style={{ color: "red" }}>
-                                    {equipValidationMessages["อุปกรณ์เสริม"]}
-                                </div>
-                            )}
-                        </div>
-                        <div className="mb-1">
-                            <label>อุปกรณ์อื่นๆ</label>
-                            <select
-                                className="form-select"
-                                value={selectedEquipType3}
-                                onChange={(e) =>
-                                    handleChange(e, setSelectedEquipType3, "อุปกรณ์อื่นๆ")
-                                }
-                            >
-                                <option value="">เลือกอุปกรณ์อื่นๆ</option>
-                                {Array.isArray(data) && data.length > 0 ? (
-                                    data
-                                        .filter(
-                                            (equipment) => equipment.equipment_type === "อุปกรณ์อื่นๆ"
-                                        )
-                                        .map((equipment) => (
-                                            <option
-                                                key={equipment._id}
-                                                value={equipment.equipment_name}
-                                            >
-                                                {equipment.equipment_name}
-                                            </option>
-                                        ))
-                                ) : (
-                                    <option value=""> ไม่มีข้อมูลอุปกรณ์อื่นๆ</option>
-                                )}
-                            </select>
-                            {equipValidationMessages["อุปกรณ์อื่นๆ"] && (
-                                <div style={{ color: "red" }}>
-                                    {equipValidationMessages["อุปกรณ์อื่นๆ"]}
-                                </div>
-                            )}
-                        </div>
+                                    );
+
+                                return (
+                                    <div key={equipmentType} className="mb-1">
+                                        <h4 className="equipment-type-title">
+                                            <b>{equipmentType}</b>
+                                        </h4>
+                                        <table className="equipment-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={isAllSelected}
+                                                            onChange={(e) =>
+                                                                handleSelectAll(equipmentType, e.target.checked)
+                                                            }
+                                                        />
+                                                    </th>
+                                                    <th>ลำดับ</th>
+                                                    <th>ชื่ออุปกรณ์</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {Array.isArray(data) && data.length > 0 ? (
+                                                    data
+                                                        .filter(
+                                                            (equipment) =>
+                                                                equipment.equipment_type === equipmentType
+                                                        )
+                                                        .map((equipment, index) => (
+                                                            <tr key={equipment._id}>
+                                                                <td>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        value={equipment.equipment_name}
+                                                                        checked={selectedEquipments.some(
+                                                                            (equip) =>
+                                                                                equip.equipmentname_forUser ===
+                                                                                equipment.equipment_name
+                                                                        )}
+                                                                        onChange={(e) =>
+                                                                            handleCheckboxChange(
+                                                                                e,
+                                                                                equipment.equipment_name,
+                                                                                equipmentType
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </td>
+                                                                <td>{index + 1}</td>
+                                                                <td>{equipment.equipment_name}</td>
+                                                                {equipValidationMessages[equipment.equipment_name] && (
+                                                                    <td style={{ color: "red" }}>
+                                                                        {equipValidationMessages[equipment.equipment_name]}
+                                                                    </td>
+                                                                )}
+                                                            </tr>
+                                                        ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan="3">ไม่มีข้อมูล{equipmentType}</td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                );
+                            }
+                        )}
                         {validationMessage && (
                             <div style={{ color: "red" }}>{validationMessage}</div>
                         )}
@@ -601,6 +634,7 @@ export default function AddEquipPatient() {
                 <div className="btn-group">
                     <div className="btn-pre"></div>
                 </div>
+
             </div>
         </main>
     );
