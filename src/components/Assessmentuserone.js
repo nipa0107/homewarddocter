@@ -914,7 +914,7 @@ export default function Assessmentuserone({}) {
               </b>
             </div>
             <div className="content-in">
-              <p className="textheadSymptom">สัญญาณชีพ</p>
+              <b className="textheadSymptom">สัญญาณชีพ</b>
               <div className="inline-container-Vitalsigns">
                 <div className="patient-data">
                   <label className="title-Vitalsigns">ความดันตัวบน</label>
@@ -952,7 +952,7 @@ export default function Assessmentuserone({}) {
                 </div>
               </div>
 
-              <p className="textheadSymptom">อาการและอาการแสดง</p>
+              <b className="textheadSymptom">อาการและอาการแสดง</b>
 
               {patientFormsone.Symptoms &&
                 patientFormsone.Symptoms.map((symptom, index) => (

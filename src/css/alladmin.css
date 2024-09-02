@@ -138,7 +138,6 @@ tr.assessmentnull {
   width: 80%;
   margin: 0 auto;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
-  /* line-height: 50px;  */
   padding: 1%;
   border-collapse: collapse;
   border-spacing: 1;
@@ -162,22 +161,15 @@ tr.assessmentnull {
   gap: 10px;
   display: flex;
   justify-content: center;
-  /* margin-bottom: 30px; */
 }
 
 .btn-pre button {
   color: #000;
-  /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
   background-color: #fff;
-  /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
   border: 1px solid #ccc;
-  /* ตั้งค่าขอบเป็นสีเทา */
   padding: 10px 20px;
-  /* ตั้งค่าการระบุช่องว่างภายในปุ่ม */
   cursor: pointer;
-  /* เพิ่ม cursor เมื่อนำเมาส์ไปวางที่ปุ่ม */
   outline: none;
-  /* ลบเส้นขอบน้ำเงินเมื่อกด */
 }
 
 .btn-pre button:hover {
@@ -360,7 +352,7 @@ tr.assessmentnull {
   cursor: pointer;
 }
 .user-info {
-  display: flex;
+  /* display: flex; */
   justify-content: space-between;
   padding-left: 6%;
 
@@ -407,26 +399,19 @@ tr.assessmentnull {
 }
 
 .texthead {
-  font-size: 1.2em;
+
   font-weight: bold;
   color: #444;
   margin-bottom: 10px;
 }
 
-/* Symptom heading styles */
 .textheadSymptom {
-  font-size: 1.2em;
   font-weight: bold;
-  /* color: #ff6f61; */
-  margin-top: 20px;
-  margin-bottom: 10px;
+
 }
 
-/* General text styles */
 .text {
-  font-size: 1em;
   color: #555;
-  margin-bottom: 10px;
 }
 
 /* Styles for symptoms */
@@ -489,7 +474,7 @@ p .label {
   margin-right: 1rem;
   font-weight: bold;
   color: #333;
-  flex: 0 0 10%;
+  flex: 0 0 20%;
   display: flex;
 }
 
