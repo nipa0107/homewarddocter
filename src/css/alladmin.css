@@ -563,3 +563,12 @@ textarea {
 .diagnosis-legend{
   margin-top: 100px;
 }
+
+.editname {
+  cursor: pointer;
+  color: black;
+}
+
+.editname:hover {
+  color: #87CEFA;
+}
