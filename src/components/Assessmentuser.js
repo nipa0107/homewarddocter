@@ -575,9 +575,11 @@ const filteredAlerts = filterType === "unread"
                                   assessment.status_name === "ปกติ"
                                     ? "normal-status"
                                     : assessment.status_name === "ผิดปกติ"
-                                      ? "abnormal-status"
-                                      : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
-                                      "end-of-treatment-status"
+                                    ? "abnormal-status"
+                                    : assessment.status_name === "เคสฉุกเฉิน"
+                                    ? "Emergency-status"
+                                    : // assessment.status_name === "ผิดปกติ" ? "abnormal-status" :
+                                    "end-of-treatment-status"
                                 }
                               >
                                 {assessment.status_name}

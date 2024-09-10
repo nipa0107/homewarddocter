@@ -25,9 +25,7 @@
 
 .btn-pre button {
   color: #000;
-  /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
   background-color: #fff;
-  /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
   border: 1px solid #ccc;
   /* ตั้งค่าขอบเป็นสีเทา */
   padding: 10px 20px;
@@ -174,7 +172,6 @@ tr.assessmentnull {
 
 .btn-pre button:hover {
   background-color: #eee;
-  /* สีพื้นหลังเมื่อโฮเวอร์ปุ่ม */
 }
 
 .btn-next button {
@@ -251,12 +248,10 @@ tr.assessmentnull {
   padding: 15px;
   border: none;
   margin-left: 390px;
-  /* ปรับตำแหน่งของปุ่มลบ */
 }
 
 .no-equipment {
   margin-top: 20px;
-  /* ปรับระยะห่างของข้อความ "ไม่มีข้อมูลอุปกรณ์" */
   text-align: center;
 }
 
@@ -278,7 +273,6 @@ tr.assessmentnull {
 
 .adminall .card-body .deleteimg1 {
   float: none;
-  /* Remove float property */
 }
 
 .mb-3 {
@@ -302,27 +296,27 @@ tr.assessmentnull {
   text-overflow: ellipsis;
 }
 
-/* Outline button style */
 .btn-outline {
   border: 1px solid #ccc;
   background-color: transparent;
 }
 
-/* Normal status button style */
 .btn-normal {
   background-color: #72DA95;
   color: white;
 }
 
-/* Abnormal status button style */
 .btn-abnormal {
-  background-color: #FF6A6A;
+  background-color: #e7639a;
   color: white;
 }
 
-/* Completed status button style */
 .btn-completed {
   background-color: #FFCC80;
+  color: white;
+}
+.btn-Emergency{
+  background-color: #FF6A6A;
   color: white;
 }
 
@@ -334,8 +328,12 @@ tr.assessmentnull {
 
 }
 
-.abnormal-status {
+.Emergency-status{
   color: #FF6A6A;
+
+}
+.abnormal-status {
+  color: #e7639a;
 }
 
 .end-of-treatment-status {
@@ -524,7 +522,6 @@ textarea {
 
 .gray-text {
   color: rgba(214, 214, 214, 0.6);
-  /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
 }
 
 .no-notification{
@@ -536,7 +533,7 @@ textarea {
   margin-left: 5;
 }
 .evaluated {
-  color: rgb(7, 195, 7); /* Text color for evaluated */
+  color: rgb(7, 195, 7); 
 }
 .assessment-table {
   width: 100%;
@@ -571,4 +568,8 @@ textarea {
 
 .editname:hover {
   color: #87CEFA;
+}
+.btn:hover{
+  background-color: #87CEFA;
+  color: #000;
 }

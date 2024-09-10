@@ -229,7 +229,7 @@
 
 .chat-message.sent .message-content {
   background-color: #87CEFA;
-  color: white;
+  color: #000;
 }
 
 
@@ -278,6 +278,7 @@
 .chat-header span {
   font-weight: bold;
 }
+
 
 /* .last-message {
   overflow: hidden;
@@ -430,7 +431,7 @@ textarea{
 
 .chat-form button i {
   font-size: 1.5em;
-  color: #fff;
+  color: #000;
 }
 
 .file-input-wrapper {
@@ -464,7 +465,7 @@ textarea{
 
 .file-input-wrapper i {
   font-size: 1.5em;
-  color: #fff;
+  color: #000;
 }
 .image-preview {
   width: 100px; 

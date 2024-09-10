@@ -314,7 +314,7 @@ export default function Assessmentuserone({}) {
         status_name: statusName,
         PPS,
         MPersonnel: data._id,
-        PatientForm: id,
+        PatientForm: { _id: id },
       }),
     })
       .then((res) => res.json())
@@ -1541,6 +1541,14 @@ export default function Assessmentuserone({}) {
                         ผิดปกติ
                       </div>
                     )}
+                     {statusName === "เคสฉุกเฉิน" && (
+                      <div
+                        className="btnass btn-Emergency"
+                        onClick={() => handleButtonClick("เคสฉุกเฉิน")}
+                      >
+                        เคสฉุกเฉิน
+                      </div>
+                    )}
                     {statusName === "จบการรักษา" && (
                       <div
                         className="btnass btn-completed"
@@ -1601,6 +1609,16 @@ export default function Assessmentuserone({}) {
                         onClick={() => handleButtonClick("ผิดปกติ")}
                       >
                         ผิดปกติ
+                      </div>
+                      <div
+                        className={`btnass ${
+                          statusName === "เคสฉุกเฉิน"
+                            ? "btn-Emergency"
+                            : "btn-outline"
+                        }`}
+                        onClick={() => handleButtonClick("เคสฉุกเฉิน")}
+                      >
+                        เคสฉุกเฉิน
                       </div>
                       <div
                         className={`btnass ${

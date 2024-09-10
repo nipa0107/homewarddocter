@@ -348,6 +348,32 @@ const filteredAlerts = filterType === "unread"
       } น.`;
   };
 
+  const formatDatenotTime = (dateTimeString) => {
+    const dateTime = new Date(dateTimeString);
+    const day = dateTime.getDate();
+    const month = dateTime.getMonth() + 1;
+    const year = dateTime.getFullYear();
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+
+    const thaiMonths = [
+      "มกราคม",
+      "กุมภาพันธ์",
+      "มีนาคม",
+      "เมษายน",
+      "พฤษภาคม",
+      "มิถุนายน",
+      "กรกฎาคม",
+      "สิงหาคม",
+      "กันยายน",
+      "ตุลาคม",
+      "พฤศจิกายน",
+      "ธันวาคม",
+    ];
+
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } `;
+  };
   const formatTime = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
     const hours = dateTime.getHours();
@@ -396,14 +422,32 @@ const filteredAlerts = filterType === "unread"
   const handleToggleSidebar = () => {
     setIsActive(!isActive);
   };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const chatMessagesRef = useRef(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  
+  const handleScroll = () => {
+    if (chatMessagesRef.current) {
+      const { scrollHeight, clientHeight, scrollTop } = chatMessagesRef.current;
+      // ตรวจสอบว่าผู้ใช้กำลังอยู่ที่ด้านล่าง
+      setIsAtBottom(scrollHeight - scrollTop === clientHeight);
+    }
   };
-
+  
+  const scrollToBottom = () => {
+    if (chatMessagesRef.current) {
+      const { scrollHeight, clientHeight, scrollTop } = chatMessagesRef.current;
+      // ตรวจสอบว่าผู้ใช้กำลังอยู่ที่ด้านล่าง
+      if (scrollHeight - scrollTop === clientHeight) {
+        chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+      }
+    }
+  };
   useEffect(() => {
-    scrollToBottom();
+    if (isAtBottom) {
+      scrollToBottom();
+    }
   }, [recipientChats]);
+  
 
   return (
     <main className="bodychat">
@@ -601,7 +645,9 @@ const filteredAlerts = filterType === "unread"
                         : ""}
                     </span>
                   </div>
-                  <div className="chat-messages">
+                  <div className="chat-messages"
+                  ref={chatMessagesRef}
+                  onScroll={handleScroll}>
                     {recipientChats.map((chat, index) => (
                       <div
                         key={index}
@@ -615,7 +661,7 @@ const filteredAlerts = filterType === "unread"
                               recipientChats[index - 1].createdAt
                             ).getDate()) && (
                           <p className="chat-date">
-                            {formatDate(chat.createdAt)}
+                            {formatDatenotTime(chat.createdAt)}
                           </p>
                         )}
                         <div className="message-container">
@@ -685,7 +731,7 @@ const filteredAlerts = filterType === "unread"
                         </div>
                       </div>
                     ))}
-                    <div ref={messagesEndRef} />
+                    {/* <div ref={messagesEndRef} /> */}
                   </div>
                   {modalImage && (
                     <div className="modal" onClick={closeModal}>
