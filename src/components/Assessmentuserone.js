@@ -28,6 +28,8 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 
 import "../css/contentgraph.css";
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 export default function Assessmentuserone({}) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -73,6 +75,16 @@ export default function Assessmentuserone({}) {
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
   
+  useEffect(() => {
+    socket.on('newAlert', (alert) => {
+      setAlerts(prevAlerts => [...prevAlerts, alert]);
+      setUnreadCount(prevCount => prevCount + 1);
+    });
+
+    return () => {
+      socket.off('newAlert'); // Clean up the listener on component unmount
+    };
+  }, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -139,14 +151,7 @@ export default function Assessmentuserone({}) {
       fetchUserData(token)
         .then((user) => {
           setUserId(user._id);
-          fetchAndSetAlerts(token, user._id);
-
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id);
-            fetchAllUsers(user._id);
-          }, 1000);
-
-          return () => clearInterval(interval);
+          fetchAndSetAlerts(token, user._id);     
         })
         .catch((error) => {
           console.error("Error verifying token:", error);

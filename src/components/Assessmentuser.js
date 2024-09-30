@@ -6,7 +6,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts'; 
-
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 export default function Assessmentuser({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -36,6 +37,17 @@ export default function Assessmentuser({ }) {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
+
+  useEffect(() => {
+    socket.on('newAlert', (alert) => {
+      setAlerts(prevAlerts => [...prevAlerts, alert]);
+      setUnreadCount(prevCount => prevCount + 1);
+    });
+
+    return () => {
+      socket.off('newAlert'); // Clean up the listener on component unmount
+    };
+  }, []);
   const toggleNotifications = () => {
     setShowNotifications(!showNotifications);
   };
@@ -102,12 +114,6 @@ export default function Assessmentuser({ }) {
           setUserId(user._id); 
           fetchAndSetAlerts(token, user._id); 
           
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id); 
-            fetchAllUsers(user._id);
-          }, 1000);
-  
-          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);

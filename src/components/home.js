@@ -15,7 +15,8 @@ import CountUp from 'react-countup';
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
-
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 export default function Home() {
   const [data, setData] = useState([]);
   const [datauser, setDatauser] = useState([]);
@@ -31,6 +32,17 @@ export default function Home() {
   const notificationsRef = useRef(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [medicalData, setMedicalData] = useState({});
+
+  useEffect(() => {
+    socket.on('newAlert', (alert) => {
+      setAlerts(prevAlerts => [...prevAlerts, alert]);
+      setUnreadCount(prevCount => prevCount + 1);
+    });
+
+    return () => {
+      socket.off('newAlert'); // Clean up the listener on component unmount
+    };
+  }, []);
 
   useEffect(() => {
     getAllUser();
@@ -108,6 +120,7 @@ export default function Home() {
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token)
       .then((alerts) => {
+        console.log("เช็คhome:", alerts); 
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId) // ตรวจสอบว่า userId ไม่อยู่ใน viewedBy
@@ -128,12 +141,6 @@ export default function Home() {
         .then((user) => {
           setUserId(user._id); // ตั้งค่า userId
           fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
-
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
-            fetchAllUsers(user._id);
-          }, 1000);
-          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);

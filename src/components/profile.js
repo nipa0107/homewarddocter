@@ -6,6 +6,8 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 
 export default function Home({ }) {
   const [data, setData] = useState([]);
@@ -18,10 +20,22 @@ export default function Home({ }) {
   const [filterType, setFilterType] = useState("all");
   const [userId, setUserId] = useState("");
   const [allUsers, setAllUsers] = useState([]);
-  const [datauser, setDatauser] = useState([]);
+  // const [datauser, setDatauser] = useState([]);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [dataemail, setDataemail] = useState([]);
 
   const notificationsRef = useRef(null);
 
+  useEffect(() => {
+    socket.on('newAlert', (alert) => {
+      setAlerts(prevAlerts => [...prevAlerts, alert]);
+      setUnreadCount(prevCount => prevCount + 1);
+    });
+
+    return () => {
+      socket.off('newAlert'); // Clean up the listener on component unmount
+    };
+  }, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -53,6 +67,8 @@ export default function Home({ }) {
       .then((res) => res.json())
       .then((data) => {
         setData(data.data);
+        setDataemail(data.data);
+        setIsEmailVerified(data.data.isEmailVerified);
         if (data.data == "token expired") {
           window.localStorage.clear();
           window.location.href = "./";
@@ -89,12 +105,6 @@ export default function Home({ }) {
           setUserId(user._id); // ตั้งค่า userId
           fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
 
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
-            fetchAllUsers(user._id);
-          }, 1000);
-
-          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -226,6 +236,15 @@ export default function Home({ }) {
     setShowNotifications(!showNotifications);
   };
 
+  const handleEditClick = () => {
+    navigate("/emailverification", { state: { dataemail } });
+  };
+  
+
+  const handleChangeEmailClick = () => {
+    navigate("/updateemail", { state: { dataemail } });
+  };
+
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -341,59 +360,52 @@ export default function Home({ }) {
         <div className="formcontainerpf card mb-2">
           <div className="mb-2">
             <label>ชื่อผู้ใช้</label>
-            <input
-              type="text"
-              className="form-control gray-background"
-              readOnly
-              value={data.username}
-            //   onChange={(e) => setUsername(e.target.value)}
-            />
+            <div className="form-control gray-background">{data.username}</div>{" "}
           </div>
 
           <div className="mb-2">
             <label>คำนำหน้าชื่อ</label>
-            <input
-              className="form-control"
-              readOnly
-              value={data.nametitle}
-            />
-
+            <div className="form-control">{data.nametitle}</div>{" "}
           </div>
           <div className="mb-2">
             <label>ชื่อ</label>
-            <input
-              readOnly
-              type="text"
-              className="form-control"
-              value={data.name}
-            />
+            <div className="form-control">
+              <span>{data.name}</span>
+            </div>
           </div>
           <div className="mb-2">
             <label>นามสกุล</label>
-            <input
-              readOnly
-              type="text"
-              className="form-control"
-              value={data.surname}
-            />
+            <div className="form-control">
+              <span>{data.surname}</span>
+            </div>
           </div>
           <div className="mb-2">
             <label>อีเมล</label>
-            <input
-              type="text"
-              className="form-control gray-background"
-              readOnly
-              value={data.email}
-            //   onChange={(e) => setEmail(e.target.value)}
-            />
+            <div className="form-control">
+            {data.email}
+            {isEmailVerified ? (
+          <a
+            className="verify"
+            onClick={handleChangeEmailClick}
+          >
+            เปลี่ยนอีเมล
+          </a>
+        ) : (
+          <a
+            className="verify"
+            onClick={handleEditClick}
+          >
+            ยืนยันอีเมล
+          </a>
+        )}
+            </div>
           </div>
           <div className="mb-2">
             <label>เบอร์โทรศัพท์</label>
-            <input
-              type="text"
-              className="form-control"
-              value={data.tel}
-            />
+            
+            <div className="form-control">
+              <span>{data.tel}</span>
+            </div>
           </div>
 
 

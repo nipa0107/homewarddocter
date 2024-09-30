@@ -34,6 +34,11 @@ import Assessinhomesssuser from "./components/Assessinhomesssuser";
 import MultiStepForm from "./components/MultiStepForm";
 // import Immobility from "./components/Immobility";
 
+import Emailverification from "./components/email-verification";
+import VerifyOtp from "./components/VerifyOtp";
+import UpdateEmail from "./components/updateemail";
+import UpdateOTP from "./components/updateotp";
+
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
     element
@@ -224,6 +229,32 @@ function App() {
                 element={<MultiStepForm />}
                 isLoggedIn={isLoggedIn}
               />
+            }
+          />
+
+<Route
+            path="/emailverification"
+            element={
+              <PrivateRoute element={<Emailverification/>} isLoggedIn={isLoggedIn} />
+            }
+          />
+            <Route
+            path="/verifyotp"
+            element={
+              <PrivateRoute element={<VerifyOtp/>} isLoggedIn={isLoggedIn} />
+            }
+          />
+
+<Route
+            path="/updateemail"
+            element={
+              <PrivateRoute element={<UpdateEmail />} isLoggedIn={isLoggedIn} />
+            }
+          />
+          <Route
+            path="/updateotp"
+            element={
+              <PrivateRoute element={<UpdateOTP />} isLoggedIn={isLoggedIn} />
             }
           />
           {/* <Route

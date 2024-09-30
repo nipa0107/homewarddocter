@@ -573,3 +573,28 @@ textarea {
   background-color: #87CEFA;
   color: #000;
 }
+
+.verify {
+  margin-left: auto;
+  text-decoration: none; 
+  color: #007bff; 
+  cursor: pointer;
+}
+.form-control {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  position: relative; 
+}
+
+.error-messageotp {
+  display: inline-block; 
+  margin: 0;
+}
+
+.newotp {
+  display: inline-block; 
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
+}

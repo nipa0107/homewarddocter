@@ -1,3 +1,6 @@
+//แบบที่ช่องแชท realtime แต่อ่านแล้วไม่ขึ้น 
+//ตรงรายชื่อก็แสดงตลอดที่อยู่แชทคนนั้น 
+//แชทที่ส่งไปจะไปอยู่ฝั่งซ้ายก่อนแล้วเด้งไปขวา
 import React, { useState, useEffect, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/stylechat.css";
@@ -6,9 +9,10 @@ import Linkify from "linkify-it";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import { useNavigate } from "react-router-dom";
-import io from "socket.io-client";
-const socket = io("http://localhost:5000");
-export default function ChatComponent() {
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000'); 
+export default function  ChatComponent ()  {
   const [message, setMessage] = useState("");
   const [recipientId, setRecipientId] = useState("");
   const [recipientModel, setRecipientModel] = useState("");
@@ -36,17 +40,24 @@ export default function ChatComponent() {
   const [userId, setUserId] = useState("");
   const linkify = Linkify();
 
+
   useEffect(() => {
-    socket.on("newAlert", (alert) => {
-      setAlerts((prevAlerts) => [...prevAlerts, alert]);
-      setUnreadCount((prevCount) => prevCount + 1);
+    // เมื่อได้รับข้อความใหม่จากเซิร์ฟเวอร์
+    socket.on('newMessage', (newChat) => {
+      setRecipientChats((prevChats) => [...prevChats, newChat]);
     });
 
     return () => {
-      socket.off("newAlert"); // Clean up the listener on component unmount
+      socket.off('newMessage');
     };
   }, []);
-
+  
+  useEffect(() => {
+    if (selectedUserId) {
+      socket.emit('messageRead', { recipientId: selectedUserId, senderId: sender });
+    }
+  }, [selectedUserId, sender]);
+  
   const linkifyText = (text) => {
     const links = linkify.match(text);
     if (links) {
@@ -79,7 +90,7 @@ export default function ChatComponent() {
       reader.readAsDataURL(file);
     }
   };
-  const fetchUserData = (token) => {
+ const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
       crossDomain: true,
@@ -90,21 +101,22 @@ export default function ChatComponent() {
       },
       body: JSON.stringify({ token }),
     })
-      .then((res) => res.json())
-      .then((data) => {
-        setData(data.data);
-        setSender(data.data._id);
-        setSenderModel(data.data.role === "user" ? "User" : "MPersonnel");
-        fetchAllUsers(data.data._id);
-        if (data.data == "token expired") {
-          window.localStorage.clear();
-          window.location.href = "./";
-        }
-        return data.data;
-      })
-      .catch((error) => {
-        console.error("Error verifying token:", error);
-      });
+        .then((res) => res.json())
+        .then((data) => {
+          setData(data.data);
+          setSender(data.data._id);
+          setSenderModel(data.data.role === "user" ? "User" : "MPersonnel");
+          fetchAllUsers(data.data._id);
+          if (data.data == "token expired") {
+            window.localStorage.clear();
+            window.location.href = "./";
+          }
+          return data.data; 
+        })
+        .catch((error) => {
+          console.error("Error verifying token:", error);
+        });
+    
   };
 
   const toggleNotifications = () => {
@@ -143,18 +155,26 @@ export default function ChatComponent() {
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
-
+  
     if (token) {
       fetchUserData(token)
-        .then((user) => {
-          setUserId(user._id);
-          fetchAndSetAlerts(token, user._id);
+        .then(user => {
+          setUserId(user._id); 
+          fetchAndSetAlerts(token, user._id); 
+          
+          const interval = setInterval(() => {
+            fetchAndSetAlerts(token, user._id); 
+            fetchAllUsers(user._id);
+          }, 1000);
+  
+          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
         });
     }
   }, []);
+  
 
   const markAllAlertsAsViewed = () => {
     fetch("http://localhost:5000/alerts/mark-all-viewed", {
@@ -178,15 +198,14 @@ export default function ChatComponent() {
         console.error("Error marking all alerts as viewed:", error);
       });
   };
-
+  
   const handleFilterChange = (type) => {
     setFilterType(type);
   };
 
-  const filteredAlerts =
-    filterType === "unread"
-      ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
-      : alerts;
+const filteredAlerts = filterType === "unread"
+  ? alerts.filter(alert => !alert.viewedBy.includes(userId))
+  : alerts;
 
   const fetchAllUsers = async (userId) => {
     try {
@@ -221,12 +240,12 @@ export default function ChatComponent() {
     }
   };
   //polling
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchAllUsers(data._id);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [data]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     fetchAllUsers(data._id);
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [data]);
 
   const countUnreadUsers = () => {
     const unreadUsers = allUsers.filter((user) => {
@@ -278,7 +297,7 @@ export default function ChatComponent() {
           formData.append("image", uploadedImage);
         }
 
-        const response = await fetch("http://localhost:5000/sendchat", {
+        const response = await fetch("http://localhost:5000/chat", {
           method: "POST",
           body: formData,
         });
@@ -314,14 +333,14 @@ export default function ChatComponent() {
     }
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (selectedUserId) {
-        fetchRecipientChats(selectedUserId, recipientModel);
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [selectedUserId, recipientModel]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (selectedUserId) {
+  //       fetchRecipientChats(selectedUserId, recipientModel);
+  //     }
+  //   }, 1000);
+  //   return () => clearInterval(interval);
+  // }, [selectedUserId, recipientModel]);
 
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
@@ -346,11 +365,9 @@ export default function ChatComponent() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const formatDatenotTime = (dateTimeString) => {
@@ -376,9 +393,8 @@ export default function ChatComponent() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } `;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } `;
   };
   const formatTime = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
@@ -653,12 +669,10 @@ export default function ChatComponent() {
                         : ""}
                     </span>
                   </div>
-                  <div
-                    className="chat-messages"
-                    onScroll={handleScroll} // Detect scroll events
-                    ref={chatMessagesRef}
-                    style={{ overflowY: "scroll", maxHeight: "500px" }}
-                  >
+                  <div className="chat-messages"
+                   onScroll={handleScroll} // Detect scroll events
+                   ref={chatMessagesRef}
+                   style={{ overflowY: 'scroll', maxHeight: '500px' }} >
                     {recipientChats.map((chat, index) => (
                       <div
                         key={index}
@@ -742,8 +756,8 @@ export default function ChatComponent() {
                         </div>
                       </div>
                     ))}
-                    <div ref={messagesEndRef} />
-                  </div>
+            <div ref={messagesEndRef} />
+            </div>
                   {modalImage && (
                     <div className="modal" onClick={closeModal}>
                       <div
@@ -804,57 +818,42 @@ export default function ChatComponent() {
                     )}
                   </form>
                 </>
-              ) : (
-                <div className="start-chat-message">
-                  <p>เริ่มการแช็ต</p>
-                </div>
+                 ) : (
+                  <div className="start-chat-message">
+                    <p>เริ่มการแช็ต</p>
+                  </div>
               )}
             </div>
           </div>
         </div>
         {showNotifications && (
-          <div className="notifications-dropdown" ref={notificationsRef}>
-            <div className="notifications-head">
-              <h2 className="notifications-title">การแจ้งเตือน</h2>
-              <p
-                className="notifications-allread"
-                onClick={markAllAlertsAsViewed}
-              >
-                ทำเครื่องหมายว่าอ่านทั้งหมด
-              </p>
-              <div className="notifications-filter">
-                <button
-                  className={filterType === "all" ? "active" : ""}
-                  onClick={() => handleFilterChange("all")}
-                >
-                  ดูทั้งหมด
-                </button>
-                <button
-                  className={filterType === "unread" ? "active" : ""}
-                  onClick={() => handleFilterChange("unread")}
-                >
-                  ยังไม่อ่าน
-                </button>
-              </div>
+        <div className="notifications-dropdown" ref={notificationsRef}>
+          <div className="notifications-head">
+            <h2 className="notifications-title">การแจ้งเตือน</h2>
+            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+              ทำเครื่องหมายว่าอ่านทั้งหมด
+            </p>
+            <div className="notifications-filter">
+              <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                ดูทั้งหมด
+              </button>
+              <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                ยังไม่อ่าน
+              </button>
             </div>
-            {filteredAlerts.length > 0 ? (
-              <>
-                {renderAlerts(
-                  filteredAlerts,
-                  token,
-                  userId,
-                  navigate,
-                  setAlerts,
-                  setUnreadCount,
-                  formatDate
-                )}
-              </>
-            ) : (
-              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-            )}
           </div>
-        )}
+          {filteredAlerts.length > 0 ? (
+            <>
+                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+                </>
+          ) : (
+            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+          )}
+        </div>
+      )}
       </div>
     </main>
   );
-}
+};
+
+
