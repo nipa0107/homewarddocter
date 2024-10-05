@@ -467,10 +467,18 @@ textarea{
   font-size: 1.5em;
   color: #000;
 }
+.image-preview-outline{
+  margin: 2%;
+}
 .image-preview {
-  width: 100px; 
-  height: 100px; 
+  position: relative;
+  width: 150px; /* ปรับขนาดให้เหมาะสมกับดีไซน์ของคุณ */
+  height: 150px;
+  border-radius: 10px; /* มุมโค้งมน */
   overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* เพิ่มความลึก */
+  transition: transform 0.3s ease; /* ทำให้ภาพมีเอฟเฟกต์ตอน hover */
+
 }
 
 .image-preview img {
@@ -479,30 +487,27 @@ textarea{
   object-fit: cover; 
 }
 
-.image-preview {
-  position: relative;
-}
-
 .delete-button {
   position: absolute;
-  top: 1px;
-  right: 0px;
-  width: 20px;
-  height: 20px;
-  background-color: #fff;
+  top: 5px;
+  right: 5px;
+  background-color:  #000;
+  color: white;
+  border: none;
   border-radius: 50%;
+  font-size: 1.5em;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.3s, border-color 0.3s;
-}
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;}
 
 .delete-button:hover {
-  background-color: #000;
-  color: #fff;
-  border-color: #fff;
+  background-color: #fff;
+  color: rgb(0, 0, 0);
 }
 .message-img {
   width: 30vh;

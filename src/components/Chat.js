@@ -266,6 +266,9 @@ export default function ChatComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!message.trim() && !uploadedImage) {
+      return;
+    }
     try {
       if (data) {
         const formData = new FormData();
@@ -758,6 +761,7 @@ export default function ChatComponent() {
                     </div>
                   )}
                   {imagePreview && (
+                     <div className="image-preview-outline">
                     <div className="image-preview">
                       <img src={imagePreview} alt="Uploaded" />
                       <button
@@ -766,6 +770,7 @@ export default function ChatComponent() {
                       >
                         &times;
                       </button>
+                    </div>
                     </div>
                   )}
                   <form className="chat-form" onSubmit={(e) => handleSubmit(e)}>
@@ -793,12 +798,11 @@ export default function ChatComponent() {
                         }}
                       />
                     </div>
-                    {(message || uploadedImage) && (
+                    {(message.trim() || uploadedImage) && (
                       <button
                         className="send-button"
                         type="submit"
-                        disabled={!message && !uploadedImage}
-                      >
+                        disabled={!message.trim() && !uploadedImage}                      >
                         <i className="bi bi-send"></i>
                       </button>
                     )}
