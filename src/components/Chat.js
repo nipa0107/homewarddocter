@@ -35,7 +35,7 @@ export default function ChatComponent() {
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
   const linkify = Linkify();
-
+  const [nonImageFile, setNonImageFile] = useState(null);
   useEffect(() => {
     socket.on("newAlert", (alert) => {
       setAlerts((prevAlerts) => [...prevAlerts, alert]);
@@ -46,6 +46,43 @@ export default function ChatComponent() {
       socket.off("newAlert"); // Clean up the listener on component unmount
     };
   }, []);
+
+  function formatFileSize(bytes) {
+    if (!bytes) return ""; // ถ้า bytes เป็น null หรือ undefined ให้คืนค่าว่าง
+
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let unitIndex = 0;
+
+    while (bytes >= 1024 && unitIndex < units.length - 1) {
+      bytes /= 1024;
+      unitIndex++;
+    }
+
+    return `${bytes.toFixed(2)} ${units[unitIndex]}`;
+  }
+
+  const isImageFile = (url) => {
+    return (
+      url.endsWith(".jpg?alt=media") ||
+      url.endsWith(".png?alt=media") ||
+      url.endsWith(".jpeg?alt=media") ||
+      url.endsWith(".gif?alt=media")
+    );
+  };
+
+  function shortenFileName(fileName, maxLength = 15) {
+    if (fileName.length <= maxLength) {
+      return fileName; // หากความยาวน้อยกว่าหรือเท่ากับ maxLength ให้คืนค่าชื่อไฟล์เดิม
+    }
+
+    const extensionIndex = fileName.lastIndexOf(".");
+    const extension = fileName.slice(extensionIndex); // รับส่วนต่อท้าย (เช่น .pdf)
+
+    const nameWithoutExtension = fileName.slice(0, extensionIndex); // ชื่อไฟล์โดยไม่มีนามสกุล
+    const shortenedName = nameWithoutExtension.slice(0, maxLength - 3) + "..."; // ตัดชื่อไฟล์และเพิ่ม ...
+
+    return shortenedName + extension; // คืนค่าชื่อไฟล์ที่ตัดพร้อมนามสกุล
+  }
 
   const linkifyText = (text) => {
     const links = linkify.match(text);
@@ -71,12 +108,22 @@ export default function ChatComponent() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setUploadedImage(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
+
+    // เช็คประเภทไฟล์
     if (file) {
-      reader.readAsDataURL(file);
+      const reader = new FileReader();
+      // สำหรับไฟล์ที่เป็นภาพ
+      if (file.type.startsWith("image/")) {
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+          setNonImageFile(null); // ล้างไฟล์ที่ไม่ใช่ภาพ
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // สำหรับไฟล์ที่ไม่ใช่ภาพ
+        setNonImageFile(file);
+        setImagePreview(null); // ล้างภาพที่อัปโหลด
+      }
     }
   };
   const fetchUserData = (token) => {
@@ -246,7 +293,7 @@ export default function ChatComponent() {
     setMessage("");
     setUploadedImage(null);
     setImagePreview(null);
-
+    setNonImageFile(null);
     try {
       const recipientChatsResponse = await fetch(
         `http://localhost:5000/chat/${user._id}/User/${sender}/${senderModel}`
@@ -269,6 +316,13 @@ export default function ChatComponent() {
     if (!message.trim() && !uploadedImage) {
       return;
     }
+
+    const maxFileSize = 25 * 1024 * 1024; // 5 MB
+    if (uploadedImage && uploadedImage.size > maxFileSize) {
+      return alert(
+        "ไม่สามารถอัพโหลดไฟล์ ไฟล์ที่คุณเลือกมีขนาดใหญ่เกินไป ขนาดสูงสุดคือ 25 MB"
+      );
+    }
     try {
       if (data) {
         const formData = new FormData();
@@ -290,6 +344,7 @@ export default function ChatComponent() {
           setMessage("");
           setUploadedImage(null);
           setImagePreview(null);
+          setNonImageFile(null);
           fetchRecipientChats(recipientId, recipientModel);
           fetchAllUsers(data._id);
           document.getElementById("file-input").value = ""; // เคลียร์ค่าไฟล์ใน input
@@ -624,9 +679,11 @@ export default function ChatComponent() {
                                       : ""
                                   }
                                 >
-                                  {user.lastMessage.image
-                                    ? "ส่งรูปภาพ"
-                                    : user.lastMessage.message}
+                                    {user.lastMessage.image
+            ? /\.(jpg|jpeg|png|gif)$/.test(user.lastMessage.image)
+              ? "ส่งรูปภาพ"
+              : "ส่งไฟล์แนบ"
+            : user.lastMessage.message}
                                 </span>
                               </span>
                               <span className="message-timeuser">
@@ -658,7 +715,7 @@ export default function ChatComponent() {
                   </div>
                   <div
                     className="chat-messages"
-                    onScroll={handleScroll} // Detect scroll events
+                    onScroll={handleScroll}
                     ref={chatMessagesRef}
                     style={{ overflowY: "scroll", maxHeight: "500px" }}
                   >
@@ -694,16 +751,44 @@ export default function ChatComponent() {
                                 </div>
 
                                 {chat.image ? (
-                                  <div className="message-content-img">
-                                    <img
-                                      className="message-img"
-                                      src={chat.image}
-                                      alt="Chat Image"
-                                      onClick={() =>
-                                        handleImageClick(chat.image)
-                                      }
-                                    />
-                                  </div>
+                                  isImageFile(chat.image) ? (
+                                    <div className="message-content-img">
+                                      <img
+                                        className="message-img"
+                                        src={chat.image}
+                                        alt="Chat Image"
+                                        onClick={() =>
+                                          handleImageClick(chat.image)
+                                        }
+                                        style={{
+                                          maxWidth: "100%",
+                                          height: "auto",
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="message-content-file">
+                                      <a
+                                        href={chat.image}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="file-link"
+                                      >
+                                        <i
+                                          className="bi bi-file-earmark-text"
+                                          style={{ fontSize: "24px" }}
+                                        ></i>
+                                        <div className="file-info-box">
+                                          <span className="file-name">
+                                            {shortenFileName(chat.imageName)}
+                                          </span>
+                                          <span className="file-size">
+                                            {formatFileSize(chat.fileSize)}
+                                          </span>
+                                        </div>
+                                      </a>
+                                    </div>
+                                  )
                                 ) : (
                                   <div
                                     className="message-content"
@@ -718,16 +803,46 @@ export default function ChatComponent() {
                             <>
                               <div className="content-time-wrapper">
                                 {chat.image ? (
-                                  <div className="message-content-img">
-                                    <img
-                                      className="message-img"
-                                      src={chat.image}
-                                      alt="Chat Image"
-                                      onClick={() =>
-                                        handleImageClick(chat.image)
-                                      }
-                                    />
-                                  </div>
+                                  isImageFile(chat.image) ? (
+                                    <div className="message-content-img">
+                                      <img
+                                        className="message-img"
+                                        src={chat.image}
+                                        alt="Chat Image"
+                                        onClick={() =>
+                                          handleImageClick(chat.image)
+                                        }
+                                        style={{
+                                          maxWidth: "100%",
+                                          height: "auto",
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="message-content-file">
+                                      <a
+                                        href={chat.image}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="file-link"
+                                      >
+                                        <i
+                                          className="bi bi-file-earmark-text"
+                                          style={{ fontSize: "24px" }}
+                                        ></i>
+                                        <span className="file-name">
+                                          {/* {getShortFileName(getFileNameFromUrl(chat.image))}  */}
+                                          {shortenFileName(chat.imageName)}
+                                        </span>
+                                        {/* <span className="file-type">
+                            {getFileType(getFileNameFromUrl(chat.image))}
+                          </span> */}
+                                        <span className="file-size">
+                                          {formatFileSize(chat.fileSize)}
+                                        </span>
+                                      </a>
+                                    </div>
+                                  )
                                 ) : (
                                   <div
                                     className="message-content"
@@ -760,26 +875,50 @@ export default function ChatComponent() {
                       </div>
                     </div>
                   )}
-                  {imagePreview && (
-                     <div className="image-preview-outline">
-                    <div className="image-preview">
-                      <img src={imagePreview} alt="Uploaded" />
+                  {imagePreview ? (
+                    <div className="image-preview-outline">
+                      <div className="image-preview">
+                        <img src={imagePreview} alt="Uploaded" />
+                        <button
+                          className="delete-button"
+                          onClick={() => setImagePreview(null)}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    </div>
+                  ) : nonImageFile ? (
+                    <div className="file-preview-container">
+                      <div className="file-info" title={nonImageFile.name}>
+                        <i
+                          className="bi bi-file-earmark-text"
+                          style={{ fontSize: "24px", marginRight: "10px" }}
+                        ></i>
+                        <div>
+                          <p style={{ margin: 0 }}>
+                            {shortenFileName(nonImageFile.name)}
+                          </p>
+                          {/* <p style={{ margin: 0 }}>{(nonImageFile.size / 1024).toFixed(2)} KB</p>
+        <p style={{ margin: 0 }}>{nonImageFile.type}</p> */}
+                        </div>
+                      </div>
                       <button
-                        className="delete-button"
-                        onClick={() => setImagePreview(null)}
+                        className="delete-file-button"
+                        onClick={() => setNonImageFile(null)}
                       >
                         &times;
                       </button>
                     </div>
-                    </div>
-                  )}
+                  ) : null}
+
                   <form className="chat-form" onSubmit={(e) => handleSubmit(e)}>
                     <div className="file-input-wrapper">
                       <input
                         type="file"
                         id="file-input"
                         onChange={handleImageChange}
-                        accept="image/*"
+                        // accept="image/*"
+                        accept="*/*"
                       />
                       <label htmlFor="file-input">
                         <i className="bi bi-card-image"></i>
@@ -802,7 +941,8 @@ export default function ChatComponent() {
                       <button
                         className="send-button"
                         type="submit"
-                        disabled={!message.trim() && !uploadedImage}                      >
+                        disabled={!message.trim() && !uploadedImage}
+                      >
                         <i className="bi bi-send"></i>
                       </button>
                     )}

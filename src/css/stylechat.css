@@ -167,7 +167,7 @@
 .chat-message {
   display: flex;
   flex-direction: column;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
 }
 
 .chat-message p {
@@ -201,7 +201,7 @@
 .chat-message .message-container {
   display: flex;
   align-items: flex-end;
-  padding: 10px;
+  padding: 5px;
   border-radius: 20px;
   max-width: 50vh;
   flex-wrap: wrap;
@@ -227,6 +227,19 @@
   /* margin-right: 10px; */
 }
 
+.chat-message .message-content-file{
+  padding: 10px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  background-color: #f1f0f0;
+  color: black;
+  flex-grow: 1; 
+}
+.chat-message .message-content-file a{
+  color: black;
+  text-decoration: none;
+}
 .chat-message.sent .message-content {
   background-color: #87CEFA;
   color: #000;
@@ -581,7 +594,7 @@ textarea{
 
 
 .chat-message.sent .message-content .linkify{
-  color: white;
+  color: black;
 }
 
 .chat-message.received .message-content .linkify{
@@ -613,4 +626,78 @@ textarea{
   align-items: center;
   font-size: 20px;
   color: #888;
+}
+.file-preview-container {
+  border-radius: 10px; /* มุมโค้งมน */
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* เพิ่มความลึก */
+  transition: transform 0.3s ease; 
+  display: flex;
+  align-items: center;
+  border-radius: 8px; 
+  padding: 10px; 
+  margin: 5px 0; /* เว้นระยะด้านบนและล่าง */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* เงาเล็กน้อย */
+  max-width: 400px; /* ความกว้างสูงสุด */
+  width: fit-content; /* ทำให้กล่องพอดีกับเนื้อหา */
+}
+.file-info {
+  display: flex; /* ใช้ flex เพื่อจัดเรียงองค์ประกอบ */
+  align-items: center; /* จัดแนวกลางในแนวตั้ง */
+  flex-grow: 1; /* ขยายกล่องให้เต็มที่ */
+  white-space: nowrap; /* ไม่ให้ข้อความตัดบรรทัด */
+  overflow: hidden; /* ซ่อนข้อความที่เกิน */
+  text-overflow: ellipsis; /* แสดง ... ถ้ามีข้อความเกิน */
+}
+
+.file-info i {
+  font-size: 24px;
+  margin-right: 10px; 
+}
+
+.delete-file-button {
+  /* position: absolute; */
+  top: 5px;
+  right: 5px;
+  background-color:  #000;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.5em;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+  margin-left: 10px; 
+}
+.delete-file-button:hover {
+  background-color: #fff;
+  color: rgb(0, 0, 0);
+}
+
+.file-link {
+  display: inline-flex; 
+  align-items: center;  
+  max-width: 200px;      
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; 
+}
+
+.file-info-box{
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+/* .file-name {
+  margin-bottom: 5px; 
+} */
+
+.file-size {
+  font-size: 12px; 
+  color: #999;
 }

@@ -1,6 +1,3 @@
-//แบบที่ช่องแชท realtime แต่อ่านแล้วไม่ขึ้น 
-//ตรงรายชื่อก็แสดงตลอดที่อยู่แชทคนนั้น 
-//แชทที่ส่งไปจะไปอยู่ฝั่งซ้ายก่อนแล้วเด้งไปขวา
 import React, { useState, useEffect, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/stylechat.css";
@@ -9,10 +6,9 @@ import Linkify from "linkify-it";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import { useNavigate } from "react-router-dom";
-import io from 'socket.io-client';
-
-const socket = io('http://localhost:5000'); 
-export default function  ChatComponent ()  {
+import io from "socket.io-client";
+const socket = io("http://localhost:5000");
+export default function ChatComponent() {
   const [message, setMessage] = useState("");
   const [recipientId, setRecipientId] = useState("");
   const [recipientModel, setRecipientModel] = useState("");
@@ -39,25 +35,23 @@ export default function  ChatComponent ()  {
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
   const linkify = Linkify();
-
-
+  const [nonImageFile, setNonImageFile] = useState(null); 
   useEffect(() => {
-    // เมื่อได้รับข้อความใหม่จากเซิร์ฟเวอร์
-    socket.on('newMessage', (newChat) => {
-      setRecipientChats((prevChats) => [...prevChats, newChat]);
+    socket.on("newAlert", (alert) => {
+      setAlerts((prevAlerts) => [...prevAlerts, alert]);
+      setUnreadCount((prevCount) => prevCount + 1);
     });
 
     return () => {
-      socket.off('newMessage');
+      socket.off("newAlert"); // Clean up the listener on component unmount
     };
   }, []);
-  
-  useEffect(() => {
-    if (selectedUserId) {
-      socket.emit('messageRead', { recipientId: selectedUserId, senderId: sender });
-    }
-  }, [selectedUserId, sender]);
-  
+
+  const getFileNameFromUrl = (url) => {
+    const parts = url.split('/');
+    return parts[parts.length - 1].split('?')[0]; // แยกชื่อไฟล์ออกจาก query string
+};
+
   const linkifyText = (text) => {
     const links = linkify.match(text);
     if (links) {
@@ -82,15 +76,25 @@ export default function  ChatComponent ()  {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setUploadedImage(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
+    
+    // เช็คประเภทไฟล์
     if (file) {
-      reader.readAsDataURL(file);
+      const reader = new FileReader();
+      // สำหรับไฟล์ที่เป็นภาพ
+      if (file.type.startsWith("image/")) {
+        reader.onloadend = () => {
+          setImagePreview(reader.result);
+          setNonImageFile(null); // ล้างไฟล์ที่ไม่ใช่ภาพ
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // สำหรับไฟล์ที่ไม่ใช่ภาพ
+        setNonImageFile(file);
+        setImagePreview(null); // ล้างภาพที่อัปโหลด
+      }
     }
   };
- const fetchUserData = (token) => {
+  const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
       crossDomain: true,
@@ -101,22 +105,21 @@ export default function  ChatComponent ()  {
       },
       body: JSON.stringify({ token }),
     })
-        .then((res) => res.json())
-        .then((data) => {
-          setData(data.data);
-          setSender(data.data._id);
-          setSenderModel(data.data.role === "user" ? "User" : "MPersonnel");
-          fetchAllUsers(data.data._id);
-          if (data.data == "token expired") {
-            window.localStorage.clear();
-            window.location.href = "./";
-          }
-          return data.data; 
-        })
-        .catch((error) => {
-          console.error("Error verifying token:", error);
-        });
-    
+      .then((res) => res.json())
+      .then((data) => {
+        setData(data.data);
+        setSender(data.data._id);
+        setSenderModel(data.data.role === "user" ? "User" : "MPersonnel");
+        fetchAllUsers(data.data._id);
+        if (data.data == "token expired") {
+          window.localStorage.clear();
+          window.location.href = "./";
+        }
+        return data.data;
+      })
+      .catch((error) => {
+        console.error("Error verifying token:", error);
+      });
   };
 
   const toggleNotifications = () => {
@@ -155,26 +158,18 @@ export default function  ChatComponent ()  {
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
-  
+
     if (token) {
       fetchUserData(token)
-        .then(user => {
-          setUserId(user._id); 
-          fetchAndSetAlerts(token, user._id); 
-          
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id); 
-            fetchAllUsers(user._id);
-          }, 1000);
-  
-          return () => clearInterval(interval);
+        .then((user) => {
+          setUserId(user._id);
+          fetchAndSetAlerts(token, user._id);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
         });
     }
   }, []);
-  
 
   const markAllAlertsAsViewed = () => {
     fetch("http://localhost:5000/alerts/mark-all-viewed", {
@@ -198,14 +193,15 @@ export default function  ChatComponent ()  {
         console.error("Error marking all alerts as viewed:", error);
       });
   };
-  
+
   const handleFilterChange = (type) => {
     setFilterType(type);
   };
 
-const filteredAlerts = filterType === "unread"
-  ? alerts.filter(alert => !alert.viewedBy.includes(userId))
-  : alerts;
+  const filteredAlerts =
+    filterType === "unread"
+      ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+      : alerts;
 
   const fetchAllUsers = async (userId) => {
     try {
@@ -240,12 +236,12 @@ const filteredAlerts = filterType === "unread"
     }
   };
   //polling
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     fetchAllUsers(data._id);
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [data]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchAllUsers(data._id);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [data]);
 
   const countUnreadUsers = () => {
     const unreadUsers = allUsers.filter((user) => {
@@ -265,7 +261,7 @@ const filteredAlerts = filterType === "unread"
     setMessage("");
     setUploadedImage(null);
     setImagePreview(null);
-
+    setNonImageFile(null);
     try {
       const recipientChatsResponse = await fetch(
         `http://localhost:5000/chat/${user._id}/User/${sender}/${senderModel}`
@@ -285,6 +281,9 @@ const filteredAlerts = filterType === "unread"
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!message.trim() && !uploadedImage) {
+      return;
+    }
     try {
       if (data) {
         const formData = new FormData();
@@ -297,7 +296,7 @@ const filteredAlerts = filterType === "unread"
           formData.append("image", uploadedImage);
         }
 
-        const response = await fetch("http://localhost:5000/chat", {
+        const response = await fetch("http://localhost:5000/sendchat", {
           method: "POST",
           body: formData,
         });
@@ -306,6 +305,7 @@ const filteredAlerts = filterType === "unread"
           setMessage("");
           setUploadedImage(null);
           setImagePreview(null);
+          setNonImageFile(null);
           fetchRecipientChats(recipientId, recipientModel);
           fetchAllUsers(data._id);
           document.getElementById("file-input").value = ""; // เคลียร์ค่าไฟล์ใน input
@@ -333,14 +333,14 @@ const filteredAlerts = filterType === "unread"
     }
   };
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (selectedUserId) {
-  //       fetchRecipientChats(selectedUserId, recipientModel);
-  //     }
-  //   }, 1000);
-  //   return () => clearInterval(interval);
-  // }, [selectedUserId, recipientModel]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (selectedUserId) {
+        fetchRecipientChats(selectedUserId, recipientModel);
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [selectedUserId, recipientModel]);
 
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
@@ -365,9 +365,11 @@ const filteredAlerts = filterType === "unread"
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-      } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } เวลา ${hours < 10 ? "0" + hours : hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } น.`;
   };
 
   const formatDatenotTime = (dateTimeString) => {
@@ -393,8 +395,9 @@ const filteredAlerts = filterType === "unread"
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-      } `;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } `;
   };
   const formatTime = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
@@ -669,10 +672,12 @@ const filteredAlerts = filterType === "unread"
                         : ""}
                     </span>
                   </div>
-                  <div className="chat-messages"
-                   onScroll={handleScroll} // Detect scroll events
-                   ref={chatMessagesRef}
-                   style={{ overflowY: 'scroll', maxHeight: '500px' }} >
+                  <div
+                    className="chat-messages"
+                    onScroll={handleScroll} 
+                    ref={chatMessagesRef}
+                    style={{ overflowY: "scroll", maxHeight: "500px" }}
+                  >
                     {recipientChats.map((chat, index) => (
                       <div
                         key={index}
@@ -705,48 +710,67 @@ const filteredAlerts = filterType === "unread"
                                 </div>
 
                                 {chat.image ? (
-                                  <div className="message-content-img">
-                                    <img
-                                      className="message-img"
-                                      src={chat.image}
-                                      alt="Chat Image"
-                                      onClick={() =>
-                                        handleImageClick(chat.image)
-                                      }
-                                    />
-                                  </div>
-                                ) : (
-                                  <div
-                                    className="message-content"
-                                    dangerouslySetInnerHTML={{
-                                      __html: linkifyText(chat.message),
-                                    }}
-                                  />
-                                )}
+                    // ตรวจสอบประเภทไฟล์ภาพ
+                    (chat.image.endsWith('.jpg') ||
+                    chat.image.endsWith('.png') ||
+                    chat.image.endsWith('.jpeg') ||
+                    chat.image.endsWith('.gif')) ? (
+                      <div className="message-content-img">
+                        <img
+                          className="message-img"
+                          src={chat.image}
+                          alt="Chat Image"
+                          onClick={() => handleImageClick(chat.image)}
+                        />
+                      </div>
+                    ) : (
+                      <div className="message-content-file">
+                        <a href={chat.image} target="_blank" rel="noopener noreferrer">
+                          {getFileNameFromUrl(chat.image)} {/* แสดงชื่อไฟล์ */}
+                        </a>
+                      </div>
+                    )
+                  ) : (
+                    <div
+                      className="message-content"
+                      dangerouslySetInnerHTML={{
+                        __html: linkifyText(chat.message),
+                      }}
+                    />
+                  )}
                               </div>
                             </>
                           ) : (
                             <>
                               <div className="content-time-wrapper">
-                                {chat.image ? (
-                                  <div className="message-content-img">
-                                    <img
-                                      className="message-img"
-                                      src={chat.image}
-                                      alt="Chat Image"
-                                      onClick={() =>
-                                        handleImageClick(chat.image)
-                                      }
-                                    />
-                                  </div>
-                                ) : (
-                                  <div
-                                    className="message-content"
-                                    dangerouslySetInnerHTML={{
-                                      __html: linkifyText(chat.message),
-                                    }}
-                                  />
-                                )}
+                              {chat.image ? (
+                    (chat.image.endsWith('.jpg') ||
+                    chat.image.endsWith('.png') ||
+                    chat.image.endsWith('.jpeg') ||
+                    chat.image.endsWith('.gif')) ? (
+                      <div className="message-content-img">
+                        <img
+                          className="message-img"
+                          src={chat.image}
+                          alt="Chat Image"
+                          onClick={() => handleImageClick(chat.image)}
+                        />
+                      </div>
+                    ) : (
+                      <div className="message-content-file">
+                        <a href={chat.image} target="_blank" rel="noopener noreferrer">
+                          {getFileNameFromUrl(chat.image)} {/* แสดงชื่อไฟล์ */}
+                        </a>
+                      </div>
+                    )
+                  ) : (
+                    <div
+                      className="message-content"
+                      dangerouslySetInnerHTML={{
+                        __html: linkifyText(chat.message),
+                      }}
+                    />
+                  )}
                                 <span className="message-time">
                                   {formatTime(chat.createdAt)}
                                 </span>
@@ -756,8 +780,8 @@ const filteredAlerts = filterType === "unread"
                         </div>
                       </div>
                     ))}
-            <div ref={messagesEndRef} />
-            </div>
+                    <div ref={messagesEndRef} />
+                  </div>
                   {modalImage && (
                     <div className="modal" onClick={closeModal}>
                       <div
@@ -771,24 +795,46 @@ const filteredAlerts = filterType === "unread"
                       </div>
                     </div>
                   )}
-                  {imagePreview && (
-                    <div className="image-preview">
-                      <img src={imagePreview} alt="Uploaded" />
-                      <button
-                        className="delete-button"
-                        onClick={() => setImagePreview(null)}
-                      >
-                        &times;
-                      </button>
-                    </div>
-                  )}
+{imagePreview ? (
+  <div className="image-preview-outline">
+    <div className="image-preview">
+      <img src={imagePreview} alt="Uploaded" />
+      <button
+        className="delete-button"
+        onClick={() => setImagePreview(null)}
+      >
+        &times; {/* สัญลักษณ์ลบ */}
+      </button>
+    </div>
+  </div>
+) : nonImageFile ? (
+  <div className="file-preview-container">
+    <div className="file-info">
+      <i className="bi bi-file-earmark-text" style={{ fontSize: '24px', marginRight: '10px' }}></i>
+      <div>
+        <p style={{ margin: 0 }}>{nonImageFile.name}</p>
+        {/* <p style={{ margin: 0 }}>{(nonImageFile.size / 1024).toFixed(2)} KB</p>
+        <p style={{ margin: 0 }}>{nonImageFile.type}</p> */}
+      </div>
+    </div>
+    <button
+      className="delete-file-button"
+      onClick={() => setNonImageFile(null)} // ลบไฟล์ที่เลือก
+    >
+      &times; 
+    </button>
+  </div>
+) : null}
+
+
                   <form className="chat-form" onSubmit={(e) => handleSubmit(e)}>
                     <div className="file-input-wrapper">
                       <input
                         type="file"
                         id="file-input"
                         onChange={handleImageChange}
-                        accept="image/*"
+                        // accept="image/*"
+                        accept="*/*" 
                       />
                       <label htmlFor="file-input">
                         <i className="bi bi-card-image"></i>
@@ -807,53 +853,67 @@ const filteredAlerts = filterType === "unread"
                         }}
                       />
                     </div>
-                    {(message || uploadedImage) && (
+                    {(message.trim() || uploadedImage) && (
                       <button
                         className="send-button"
                         type="submit"
-                        disabled={!message && !uploadedImage}
-                      >
+                        disabled={!message.trim() && !uploadedImage}                      >
                         <i className="bi bi-send"></i>
                       </button>
                     )}
                   </form>
                 </>
-                 ) : (
-                  <div className="start-chat-message">
-                    <p>เริ่มการแช็ต</p>
-                  </div>
+              ) : (
+                <div className="start-chat-message">
+                  <p>เริ่มการแช็ต</p>
+                </div>
               )}
             </div>
           </div>
         </div>
         {showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
-            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-            <div className="notifications-filter">
-              <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                ดูทั้งหมด
-              </button>
-              <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                ยังไม่อ่าน
-              </button>
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
+              <p
+                className="notifications-allread"
+                onClick={markAllAlertsAsViewed}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+              <div className="notifications-filter">
+                <button
+                  className={filterType === "all" ? "active" : ""}
+                  onClick={() => handleFilterChange("all")}
+                >
+                  ดูทั้งหมด
+                </button>
+                <button
+                  className={filterType === "unread" ? "active" : ""}
+                  onClick={() => handleFilterChange("unread")}
+                >
+                  ยังไม่อ่าน
+                </button>
+              </div>
             </div>
+            {filteredAlerts.length > 0 ? (
+              <>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          {filteredAlerts.length > 0 ? (
-            <>
-                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                </>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
       </div>
     </main>
   );
-};
-
-
+}

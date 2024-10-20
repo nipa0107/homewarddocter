@@ -51,3 +51,43 @@
     padding: 7px;
     border-radius: 8px;
 }
+.button-group {
+
+    display: flex;
+    justify-content: center; 
+    gap: 10px; 
+    margin-top: 10px; 
+  }
+  
+  .custom-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .custom-btn:hover {
+    opacity: 0.9; 
+  }
+  
+  .edit-btn {
+    background-color: #ffc107; 
+    color: #000000;
+
+  }
+  
+  .edit-btn:hover {
+    background-color: #e0a800; 
+  }
+  
+.password-btn {
+  background-color: #007bff; 
+  color: white; /* สีน้ำเงินสำหรับ 'เปลี่ยนรหัสผ่าน' */
+}
+
+.password-btn:hover {
+  background-color: #0056b3; /* สีน้ำเงินเข้มขึ้นเมื่อ hover */
+}
+  

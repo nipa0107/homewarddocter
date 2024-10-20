@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
+import "../css/profile.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
@@ -407,14 +408,27 @@ export default function Home({ }) {
               <span>{data.tel}</span>
             </div>
           </div>
+          <div className="button-group">
+    <button
+      className="custom-btn edit-btn"
+      onClick={() => navigate("/updateprofile", { state: data })}
+    >
+      แก้ไขโปรไฟล์
+    </button>
+    <button
+      className="custom-btn password-btn"
+      onClick={() => navigate("/updatepassword", { state: data })}
+    >
+      เปลี่ยนรหัสผ่าน
+    </button>
+  </div>
 
-
-          <a className="editname" onClick={() => navigate("/updateprofile", { state: data })}>
+          {/* <a className="editname" onClick={() => navigate("/updateprofile", { state: data })}>
             แก้ไขโปรไฟล์
           </a>
           <a className="editname" onClick={() => navigate("/updatepassword", { state: data })}>
             เปลี่ยนรหัสผ่าน
-          </a>
+          </a> */}
         </div>
       </div>
 
