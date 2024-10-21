@@ -365,7 +365,7 @@ export default function Assessreadiness1() {
                 <label>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน มีความปลอดภัยใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_2" value="ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_2', { required: true })} />
+                        <input type="radio" name="question1_2" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_2', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ใช่ </span>
                     </label>
                 </div>
@@ -381,13 +381,13 @@ export default function Assessreadiness1() {
                 <label>3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน อยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_3" value="ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
+                        <input type="radio" name="question1_3" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ใช่ </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_3" value="ไม่ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
+                        <input type="radio" name="question1_3" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
                     </label>
                 </div>
@@ -397,13 +397,13 @@ export default function Assessreadiness1() {
                 <label>4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน สามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_4" value="ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
+                        <input type="radio" name="question1_4" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ใช่ </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_4" value="ไม่ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
+                        <input type="radio" name="question1_4" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
                     </label>
                 </div>
@@ -424,7 +424,7 @@ export default function Assessreadiness1() {
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Disease" value="ไม่ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Disease', { required: true })} />
+                        <input type="radio" name="Disease" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Disease', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
@@ -466,7 +466,7 @@ export default function Assessreadiness1() {
                 <label>4.Treatment : มีการฝึกทักษะที่จำเป็น</label>
                 <div>
                     <label>
-                        <input type="radio" name="Treatment" value="ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Treatment', { required: true })} />
+                        <input type="radio" name="Treatment" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Treatment', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
@@ -498,7 +498,7 @@ export default function Assessreadiness1() {
                 <label>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ</label>
                 <div>
                     <label>
-                        <input type="radio" name="Out_patient" value="ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Out_patient', { required: true })} />
+                        <input type="radio" name="Out_patient" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Out_patient', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
@@ -514,13 +514,13 @@ export default function Assessreadiness1() {
                 <label>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค</label>
                 <div>
                     <label>
-                        <input type="radio" name="Diet" value="ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
+                        <input type="radio" name="Diet" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Diet" value="ไม่ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
+                        <input type="radio" name="Diet" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
                         <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
@@ -550,7 +550,10 @@ export default function Assessreadiness1() {
             const data = await response.json();
             if (response.ok) {
                 toast.success("ประเมินข้อมูลสำเร็จ");
-                setShowMessage(true); // Show the success message and links
+                setTimeout(() => {
+                    navigate("/assessreadinessuser", { state: { id } });
+                }, 1000);
+                // Show the success message and links
             } else {
                 console.error("Error during ReadinessForm submission:", data);
                 toast.error("เกิดข้อผิดพลาดในการประเมิน");
@@ -729,10 +732,10 @@ export default function Assessreadiness1() {
                         <div className="success-message mt-2">
                             <h2>การประเมินเสร็จสิ้น</h2>
                             <br></br>
-                                <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id } })}>ดูคำตอบ</a>
-                                <br></br>
-                                <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id} })}>กลับไปหน้าประเมินความพร้อม</a>
-                            
+                            <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id: id } })}>ดูคำตอบ</a>
+                            <br></br>
+                            <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id } })}>กลับไปหน้าประเมินความพร้อม</a>
+
                         </div>
                     ) : (
                         <form onSubmit={handleSubmit(onSubmit)}>
