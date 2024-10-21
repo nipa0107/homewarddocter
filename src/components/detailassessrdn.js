@@ -728,9 +728,9 @@ export default function DetailAssessreadiness() {
             <p className="detail-info"><b>ผู้ประเมินความพร้อม :</b> {mpersonnel?.nametitle} {mpersonnel?.name} {mpersonnel?.surname}</p>
             <p className="detail-info"><b>วันที่ประเมินความพร้อม :</b> {formatDate(dateass)}</p>
             {/* แสดงวันที่อัปเดต */}
-            <button className="btn btn-warning mt-4" onClick={() => setIsEditing(true)}>
+            {/* <button className="btn btn-warning mt-4" onClick={() => setIsEditing(true)}>
               แก้ไขการประเมิน
-            </button>
+            </button> */}
           </div>
         ) : isEditing ? (
           <div className="info3 card mt-4">

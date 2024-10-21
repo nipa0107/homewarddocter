@@ -349,14 +349,14 @@ export default function Assessreadiness1() {
                 <label>1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยใน ที่บ้านจากแพทย์อย่างครบถ้วน และให้คำยินยอมก่อนรับบริการใช่หรือไม่?</label>
                 <div >
                     <label>
-                        <input type="radio" name="question1_1" value="ใช่" {...register('Readiness1.question1_1', { required: true })} />
-                        ใช่
+                        <input type="radio" name="question1_1" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_1', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_1" value="ไม่ใช่" {...register('Readiness1.question1_1', { required: true })} />
-                        ไม่ใช่
+                        <input type="radio" name="question1_1" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness1.question1_1', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
                     </label>
                 </div>
                 {errors.question1_1 && <span>This field is required</span>}
@@ -365,14 +365,14 @@ export default function Assessreadiness1() {
                 <label>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน มีความปลอดภัยใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_2" value="ใช่" {...register('Readiness1.question1_2', { required: true })} />
-                        ใช่
+                        <input type="radio" name="question1_2" value="ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_2', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_2" value="ไม่ใช่" {...register('Readiness1.question1_2', { required: true })} />
-                        ไม่ใช่
+                        <input type="radio" name="question1_2" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness1.question1_2', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
                     </label>
                 </div>
                 {errors.question1_2 && <span>This field is required</span>}
@@ -381,14 +381,14 @@ export default function Assessreadiness1() {
                 <label>3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน อยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_3" value="ใช่" {...register('Readiness1.question1_3', { required: true })} />
-                        ใช่
+                        <input type="radio" name="question1_3" value="ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_3" value="ไม่ใช่" {...register('Readiness1.question1_3', { required: true })} />
-                        ไม่ใช่
+                        <input type="radio" name="question1_3" value="ไม่ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
                     </label>
                 </div>
                 {errors.question1_3 && <span>This field is required</span>}
@@ -397,14 +397,14 @@ export default function Assessreadiness1() {
                 <label>4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน สามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?</label>
                 <div>
                     <label>
-                        <input type="radio" name="question1_4" value="ใช่" {...register('Readiness1.question1_4', { required: true })} />
-                        ใช่
+                        <input type="radio" name="question1_4" value="ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="question1_4" value="ไม่ใช่" {...register('Readiness1.question1_4', { required: true })} />
-                        ไม่ใช่
+                        <input type="radio" name="question1_4" value="ไม่ใช่"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
                     </label>
                 </div>
                 {errors.question1_4 && <span>This field is required</span>}
@@ -418,14 +418,14 @@ export default function Assessreadiness1() {
                 <label>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย</label>
                 <div>
                     <label>
-                        <input type="radio" name="Disease" value="ถูกต้อง" {...register('Readiness2.Disease', { required: true })} />
-                        ถูกต้อง
+                        <input type="radio" name="Disease" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Disease', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Disease" value="ไม่ถูกต้อง" {...register('Readiness2.Disease', { required: true })} />
-                        ไม่ถูกต้อง
+                        <input type="radio" name="Disease" value="ไม่ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Disease', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
                 {/* {errors.Disease && <span>This field is required</span>} */}
@@ -434,14 +434,14 @@ export default function Assessreadiness1() {
                 <label>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา</label>
                 <div>
                     <label>
-                        <input type="radio" name="Medication" value="ถูกต้อง" {...register('Readiness2.Medication', { required: true })} />
-                        ถูกต้อง
+                        <input type="radio" name="Medication" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Medication', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Medication" value="ไม่ถูกต้อง" {...register('Readiness2.Medication', { required: true })} />
-                        ไม่ถูกต้อง
+                        <input type="radio" name="Medication" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Medication', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
                 {/* {errors.Medication && <span>This field is required</span>} */}
@@ -450,14 +450,14 @@ export default function Assessreadiness1() {
                 <label>3. Environment : มีการเตรียมสิ่งแวดล้อม</label>
                 <div>
                     <label>
-                        <input type="radio" name="Environment" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })} />
-                        ถูกต้อง
+                        <input type="radio" name="Environment" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Environment', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Environment" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })} />
-                        ไม่ถูกต้อง
+                        <input type="radio" name="Environment" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Environment', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
                 {/* {errors.Environment && <span>This field is required</span>} */}
@@ -466,14 +466,14 @@ export default function Assessreadiness1() {
                 <label>4.Treatment : มีการฝึกทักษะที่จำเป็น</label>
                 <div>
                     <label>
-                        <input type="radio" name="Treatment" value="ถูกต้อง" {...register('Readiness2.Treatment', { required: true })} />
-                        ถูกต้อง
+                        <input type="radio" name="Treatment" value="ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Treatment', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Treatment" value="ไม่ถูกต้อง" {...register('Readiness2.Treatment', { required: true })} />
-                        ไม่ถูกต้อง
+                        <input type="radio" name="Treatment" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Treatment', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
                 {/* {errors.Treatment && <span>This field is required</span>} */}
@@ -482,14 +482,14 @@ export default function Assessreadiness1() {
                 <label>5. Health : รู้ข้อจำกัดด้านสุขภาพ</label>
                 <div>
                     <label>
-                        <input type="radio" name="Health" value="ถูกต้อง" {...register('Readiness2.Health', { required: true })} />
-                        ถูกต้อง
+                        <input type="radio" name="Health" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Health', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Health" value="ไม่ถูกต้อง" {...register('Readiness2.Health', { required: true })} />
-                        ไม่ถูกต้อง
+                        <input type="radio" name="Health" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Health', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
                 {/* {errors.Health && <span>This field is required</span>} */}
@@ -498,14 +498,14 @@ export default function Assessreadiness1() {
                 <label>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ</label>
                 <div>
                     <label>
-                        <input type="radio" name="Out_patient" value="ถูกต้อง" {...register('Readiness2.Out_patient', { required: true })} />
-                        ถูกต้อง
+                        <input type="radio" name="Out_patient" value="ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Out_patient', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Out_patient" value="ไม่ถูกต้อง" {...register('Readiness2.Out_patient', { required: true })} />
-                        ไม่ถูกต้อง
+                        <input type="radio" name="Out_patient" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Out_patient', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
                 {/* {errors.Out_patient && <span>This field is required</span>} */}
@@ -514,14 +514,14 @@ export default function Assessreadiness1() {
                 <label>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค</label>
                 <div>
                     <label>
-                        <input type="radio" name="Diet" value="ถูกต้อง" {...register('Readiness2.Diet', { required: true })} />
-                        ถูกต้อง
+                        <input type="radio" name="Diet" value="ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
                     </label>
                 </div>
                 <div>
                     <label>
-                        <input type="radio" name="Diet" value="ไม่ถูกต้อง" {...register('Readiness2.Diet', { required: true })} />
-                        ไม่ถูกต้อง
+                        <input type="radio" name="Diet" value="ไม่ถูกต้อง"style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
+                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
                     </label>
                 </div>
                 {/* {errors.Diet && <span>This field is required</span>} */}
