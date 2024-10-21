@@ -1,190 +1,262 @@
 import React from 'react'
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 
 export const SSS = () => {
-  const { register } = useFormContext();
+  const { control, register, setValue, getValues, watch } = useFormContext();
 
   return (
     <div>
-      <div className="info3 card mt-4">
-        <div className="header" align="center">
-          <b>S:Safety S:Spiritual S:Service</b>
+      <div className="info3 card">
+        <div className="header">
+          <b>SSS Assessment</b>
         </div>
+        <div style={{ marginLeft: '26px', marginTop: '20px', lineHeight: '25px' }}>
+          <p>S = Safety</p>
+          <p>S = Spiritual Health</p>
+          <p>S = Service</p>
+        </div>
+      </div>
+      <div className="info3 card mt-4">
         <div className='m-4'>
-          <b>Safety</b>
+          <b>Safety (ความปลอดภัย)</b>
           <table className='nutrition-table'>
+            <thead>
+              <tr>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th></th>
+                <th>ปลอดภัย</th>
+                <th>ไม่ปลอดภัย</th>
+              </tr>
+            </thead>
             <tbody>
               <tr>
                 <td>แสงไฟ</td>
-                <td><input type="radio" name="cleanliness" value="ปลอดภัย" {...register('cleanliness')} /> ปลอดภัย</td>
-                <td><input type="radio" name="cleanliness" value="ไม่ปลอดภัย" {...register('cleanliness')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="cleanliness" value="ปลอดภัย" {...register('cleanliness')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="cleanliness" value="ไม่ปลอดภัย" {...register('cleanliness')} /></td>
               </tr>
               <tr>
                 <td>พื้นต่างระดับ</td>
-                <td><input type="radio" name="floorSafety" value="ปลอดภัย" {...register('floorSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="floorSafety" value="ไม่ปลอดภัย" {...register('floorSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="floorSafety" value="ปลอดภัย" {...register('floorSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="floorSafety" value="ไม่ปลอดภัย" {...register('floorSafety')} /></td>
               </tr>
               <tr>
                 <td>บันได</td>
-                <td><input type="radio" name="stairsSafety" value="ปลอดภัย" {...register('stairsSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="stairsSafety" value="ไม่ปลอดภัย" {...register('stairsSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="stairsSafety" value="ปลอดภัย" {...register('stairsSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="stairsSafety" value="ไม่ปลอดภัย" {...register('stairsSafety')} /></td>
               </tr>
               <tr>
                 <td>ราวจับ</td>
-                <td><input type="radio" name="handrailSafety" value="ปลอดภัย" {...register('handrailSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="handrailSafety" value="ไม่ปลอดภัย" {...register('handrailSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="handrailSafety" value="ปลอดภัย" {...register('handrailSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="handrailSafety" value="ไม่ปลอดภัย" {...register('handrailSafety')} /></td>
               </tr>
               <tr>
                 <td>เหลี่ยมคม</td>
-                <td><input type="radio" name="sharpEdgesSafety" value="ปลอดภัย" {...register('sharpEdgesSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="sharpEdgesSafety" value="ไม่ปลอดภัย" {...register('sharpEdgesSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="sharpEdgesSafety" value="ปลอดภัย" {...register('sharpEdgesSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="sharpEdgesSafety" value="ไม่ปลอดภัย" {...register('sharpEdgesSafety')} /></td>
               </tr>
               <tr>
                 <td>ความลื่นของพื้น</td>
-                <td><input type="radio" name="slipperyFloorSafety" value="ปลอดภัย" {...register('slipperyFloorSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="slipperyFloorSafety" value="ไม่ปลอดภัย" {...register('slipperyFloorSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="slipperyFloorSafety" value="ปลอดภัย" {...register('slipperyFloorSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="slipperyFloorSafety" value="ไม่ปลอดภัย" {...register('slipperyFloorSafety')} /></td>
               </tr>
               <tr>
                 <td>ลักษณะโถส้วม</td>
-                <td><input type="radio" name="toiletSafety" value="ปลอดภัย" {...register('toiletSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="toiletSafety" value="ไม่ปลอดภัย" {...register('toiletSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="toiletSafety" value="ปลอดภัย" {...register('toiletSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="toiletSafety" value="ไม่ปลอดภัย" {...register('toiletSafety')} /></td>
               </tr>
               <tr>
                 <td>เตาที่ใช้หุงต้ม</td>
-                <td><input type="radio" name="stoveSafety" value="ปลอดภัย" {...register('stoveSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="stoveSafety" value="ไม่ปลอดภัย" {...register('stoveSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="stoveSafety" value="ปลอดภัย" {...register('stoveSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="stoveSafety" value="ไม่ปลอดภัย" {...register('stoveSafety')} /></td>
               </tr>
               <tr>
                 <td>การเก็บของ/การวางของในบ้าน เช่น มีด</td>
-                <td><input type="radio" name="storageSafety" value="ปลอดภัย" {...register('storageSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="storageSafety" value="ไม่ปลอดภัย" {...register('storageSafety')} /> ไม่ปลอดภัย</td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="storageSafety" value="ปลอดภัย" {...register('storageSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="storageSafety" value="ไม่ปลอดภัย" {...register('storageSafety')} /></td>
               </tr>
               <tr>
                 <td>น้ำที่ใช้ดื่ม</td>
-                <td><input type="radio" name="waterSafety" value="ปลอดภัย" {...register('waterSafety')} /> ปลอดภัย</td>
-                <td><input type="radio" name="waterSafety" value="ไม่ปลอดภัย" {...register('waterSafety')} /> ไม่ปลอดภัย</td>
-              </tr>
-              <tr>
-                <td>อันตรายอื่นๆ</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" placeholder="อื่นๆ" {...register('otherHazards')} />
-                </td>
-              </tr>
-              <tr>
-                <td>ภาวะฉุกเฉิน ติดต่อความช่วยเหลืออย่างไร</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('emergencyContact')} />
-                </td>
-              </tr>
-              <b>Spiritual</b>
-              <tr>
-                <td>Faith and belief:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('faithBelief')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Importance:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('importance')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Community:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('community')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Address in care:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('addressInCare')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Love:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('love')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Religion:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('religion')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Forgiveness:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('forgiveness')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Hope:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('hope')} />
-                </td>
-              </tr>
-              <tr>
-                <td>Meaning of life:</td>
-                <td colSpan="2">
-                  <input type="text" className="form-control" {...register('meaningOfLife')} />
-                </td>
-              </tr>
-              <b>Service</b>
-              <tr>
-                <td>เมื่อเจ็บป่วย ท่านรับบริการที่ใด:</td>
-                <td>
-                  <input type="checkbox" {...register('serviceLocation')} /> โรงพยาบาลรัฐ
-                </td>
-                <td>
-                  <input type="text" className="form-control" placeholder='ระบุชื่อโรงพยาบาล' {...register('serviceHospital')} />
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>
-                  <input type="checkbox" {...register('privateHospital')} /> โรงพยาบาลเอกชน
-                </td>
-                <td>
-                  <input type="text" className="form-control" placeholder='ระบุชื่อโรงพยาบาล' {...register('privateHospitalName')} />
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>
-                  <input type="checkbox" {...register('privateClinic')} /> คลินิกเอกชน
-                </td>
-                <td>
-                  <input type="text" className="form-control" placeholder='ระบุคลินิกเอกชน' {...register('privateClinicName')} />
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>
-                  <input type="checkbox" {...register('communityCenter')} /> ศูนย์ชุมชน
-                </td>
-                <td>
-                  <input type="text" className="form-control" placeholder='ระบุศูนย์ชุมชน' {...register('communityCenterName')} />
-                </td>
-              </tr>
-              <tr>
-                <td></td>
-                <td>
-                  <input type="checkbox" {...register('pharmacy')} /> ร้านขายยา
-                </td>
-                <td>
-                  <input type="text" className="form-control" placeholder='ระบุร้านขายยา' {...register('pharmacyName')} />
-                </td>
-              </tr>
-              <tr>
-                <td>อื่นๆ</td>
-                <td colSpan={2}>
-                  <input type="text" className="form-control"  placeholder="อื่นๆ"  {...register('otherServices')} />
-                </td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="waterSafety" value="ปลอดภัย" {...register('waterSafety')} /></td>
+                <td><input type="radio" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} name="waterSafety" value="ไม่ปลอดภัย" {...register('waterSafety')} /></td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">อันตรายอื่นๆ (ถ้ามี) :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('otherHazards')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">ภาวะฉุกเฉิน ติดต่อความช่วยเหลืออย่างไร :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('emergencyContact')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-4">
+        <div className="header">
+          <b>Spiritual Health</b>
+        </div>
+        <div style={{ marginLeft: '26px', marginTop: '20px', lineHeight: '25px' }}>
+          <p>จิตวิญญาณ</p>
+        </div>
+      </div>
+      {/* <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label"> :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('')} />
+          </div>
+        </div>
+      </div> */}
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Faith and belief :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('faithBelief')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Importance :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('importance')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Community :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('community')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Address in care :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('addressInCare')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Love :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('love')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Religion :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('religion')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Forgiveness :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('forgiveness')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Hope :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('hope')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">Meaning of life :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('meaningOfLife')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-4">
+        <div className="header">
+          <b>Service</b>
+        </div>
+        <div style={{ marginLeft: '26px', marginTop: '20px', lineHeight: '25px' }}>
+          <p>การรับบริการ เช่น โรงพยาบาล สถานพยาบาล คลินิก ร้านขายยา</p>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">เมื่อเจ็บป่วย ท่านรับบริการที่ใด  :</label><br></br>
+          <p style={{ color: 'gray' }}>(ให้ระบุชื่อสถานที่ สามารถกรอกได้มากกว่า 1 สถานที่)</p>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="ระบุชื่อสถานที่"
+              {...register('serviceLocation')} />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">อื่นๆ (ถ้ามี) :</label><br></br>
+          <div>
+            <input type="text"
+              className="google-form-input"
+              placeholder="กรอกคำตอบ"
+              {...register('otherServices')} />
+          </div>
         </div>
       </div>
     </div>

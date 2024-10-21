@@ -17,8 +17,6 @@ export default function DetailAssessreadiness() {
   const [medicalData, setMedicalData] = useState({});
   const location = useLocation();
   const { id } = location.state;
-  const userid = location.state.id;
-  const [assessmentData, setAssessmentData] = useState([]);
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
@@ -34,6 +32,10 @@ export default function DetailAssessreadiness() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
+  const [mpersonnel, setMPersonnel] = useState(null);
+  const [readinessForms, setReadinessForms] = useState([]);
+  const [readinessAssessments, setReadinessAssessments] = useState([]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -150,64 +152,6 @@ export default function DetailAssessreadiness() {
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
       : alerts;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/getuser/${id}`);
-        const data = await response.json();
-        setUserData(data);
-        setUsername(data.username);
-        setName(data.name);
-        setSurname(data.surname);
-        setGender(data.gender);
-        setBirthday(data.birthday);
-      } catch (error) {
-        console.error("Error fetching caremanual data:", error);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchAssessmentData = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/getAssessreadiness/${userid}`
-        );
-        const data = await response.json();
-
-        if (response.ok) {
-          setAssessmentData(data.data);
-        } else {
-          console.error(data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching assessment data:", error);
-      }
-    };
-
-    const fetchMedicalData = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/medicalInformation/${userid}`
-        );
-        const data = await response.json();
-
-        if (response.ok) {
-          setMedicalData(data.data);
-        } else {
-          console.error(data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching medical data:", error);
-      }
-    };
-
-    fetchAssessmentData();
-    fetchMedicalData();
-  }, [userid]);
-
   const currentDate = new Date();
 
   useEffect(() => {
@@ -251,11 +195,9 @@ export default function DetailAssessreadiness() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${
-      thaiMonths[month - 1]
-    } ${year + 543} เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]
+      } ${year + 543} เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const fetchAllUsers = async (userId) => {
@@ -330,78 +272,148 @@ export default function DetailAssessreadiness() {
     );
   };
 
-  const [statusName, setStatusName] = useState("");
-  const [detail, setDetail] = useState("");
-
-  const updateReadinessStatus = async (userid, readinessStatus, detail) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/updateReadinessStatus/${userid}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ readiness_status: readinessStatus, detail }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log("Readiness status updated successfully:", data);
-        navigate("/assessreadiness");
-      } else {
-        console.error("Failed to update readiness status:", data.message);
-      }
-    } catch (error) {
-      console.error("Error updating readiness status:", error);
-    }
-  };
-
   useEffect(() => {
-    const fetchReadinessStatus = async () => {
+    const fetchReadinessForm = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:5000/getReadinessStatus/${userid}`
-        );
+        const response = await fetch(`http://localhost:5000/getReadinessForm/${id}`);
         const data = await response.json();
 
         if (response.ok) {
-          setStatusName(data.readiness_status);
-          setDetail(data.detail);
+          setReadinessForms(data.data); 
         } else {
-          console.error("Failed to fetch readiness status:", data.message);
+          console.error(data.message);
         }
       } catch (error) {
-        console.error("Error fetching readiness status:", error);
+        console.error("Error fetching readiness form:", error);
       }
     };
+    fetchReadinessForm();
+  }, [id, token]);
 
-    if (userid) {
-      fetchReadinessStatus();
-    }
-  }, [userid]);
+  useEffect(() => {
+    if (readinessForms.user && readinessForms._id) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/getuser/${readinessForms.user}`
+          );
+          const data = await response.json();
+          setName(data.name);
+          setSurname(data.surname);
+          setGender(data.gender);
+          setBirthday(data.birthday);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
 
-  const handleUpdateReadinessStatus = (status) => {
-    if (userid) {
-      updateReadinessStatus(userid, status, detail);
-    } else {
-      console.error("User ID is not available.");
+      fetchData();
     }
+  }, [readinessForms.user]);
+
+  useEffect(() => {
+    if (readinessForms && readinessForms.user) {
+      const fetchMedicalInfo = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/medicalInformation/${readinessForms.user}`
+          );
+          const data = await response.json();
+          console.log("Medical Information:", data);
+          setMedicalData(data.data);
+          console.log("22:", medicalData);
+        } catch (error) {
+          console.error("Error fetching medical information:", error);
+        }
+      };
+
+      fetchMedicalInfo();
+    }
+  }, [readinessForms.user]);
+
+  const [readinessStatus, setReadinessStatus] = useState('');
+  const [detail, setDetail] = useState('');
+  const [isReadinessSubmitted, setIsReadinessSubmitted] = useState(false);
+  const [dateass, setDateass] = useState([]);
+
+  const handleStatusChange = (status) => {
+    setReadinessStatus(status); // ตรงนี้ควรจะอัปเดต readinessStatus
+  };
+  
+
+  const handleDetailChange = (e) => {
+    setDetail(e.target.value);
   };
 
-  const handleButtonClick = (status) => {
-    setStatusName(status);
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleUpdateReadinessStatus(statusName);
+
+    try {
+     
+
+      // ทำการบันทึกข้อมูล readiness_status, detail, mpersonnel, readinessForm ID
+      const response = await fetch(`http://localhost:5000/addReadinessAssessment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          readiness_status: readinessStatus,
+          detail,
+          MPersonnel: userId,
+          ReadinessForm: readinessForms._id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error updating data");
+      }
+
+      const data = await response.json();
+      toast.success("ประเมินความพร้อมสำเร็จ");
+      setTimeout(() => window.location.reload(), 1000); // Reload หลังจากบันทึกสำเร็จ
+    } catch (error) {
+      toast.error(`Error updating data: ${error.message}`);
+    }
   };
+  useEffect(() => {
+    const fetchReadinessAssessments = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/allReadinessAssessments`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+
+        const currentReadinessAssessment = data.data.find(
+          (readinessAssessment) => readinessAssessment.ReadinessForm === readinessForms._id
+        );
+        if (currentReadinessAssessment) {
+          setIsReadinessSubmitted(true);
+          setReadinessStatus(currentReadinessAssessment.readiness_status);
+          setDetail(currentReadinessAssessment.detail);
+          setMPersonnel(currentReadinessAssessment.MPersonnel);
+          setDateass(currentReadinessAssessment.createdAt);
+        }
+      } catch (error) {
+        console.error("Error fetching assessments:", error);
+      }
+    };
+    fetchReadinessAssessments();
+  }, [readinessForms._id]);
+
+  const handleBreadcrumbClick = () => {
+    navigate("/assessreadinessuser", { state: { id: readinessForms.user } });
+  };
+
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <main className="body">
+      <ToastContainer />
       <div className={`sidebar ${isActive ? "active" : ""}`}>
         <div className="logo_content">
           <div className="logo">
@@ -555,6 +567,12 @@ export default function DetailAssessreadiness() {
               <i className="bi bi-chevron-double-right"></i>
             </li>
             <li>
+              <a onClick={handleBreadcrumbClick} className="info">บันทึกการประเมิน</a>
+            </li>
+            <li className="arrow">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li>
               <a>รายละเอียดการประเมิน</a>
             </li>
           </ul>
@@ -588,18 +606,18 @@ export default function DetailAssessreadiness() {
               : "ไม่มีข้อมูล"}
           </p>
           <p>
-            {assessmentData.map((assessment, index) => (
-              <div key={index}>
+              
                 <p className="textassesment">
-                  <p className="evaluated">
-                    <label>สถานะ:</label>
-                    {assessment.status_name || "ไม่มีข้อมูล"}
+                  <p>
+                    <label>วันที่บันทึก:</label>
+                     {formatDate(readinessForms.createdAt)}
                   </p>
                 </p>
-              </div>
-            ))}
+              
           </p>
+          
         </div>
+
 
         <div className="info3 card mt-4">
           <div className="header">
@@ -614,39 +632,34 @@ export default function DetailAssessreadiness() {
                 </tr>
               </thead>
               <tbody>
-                {assessmentData.map((assessment, index) => (
-                  <React.Fragment key={index}>
-                    {assessment.Readiness1 && (
+                    {readinessForms.Readiness1 && (
                       <>
                         <tr>
                           <td>
                             1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน
                             และให้คำยินยอมก่อนรับบริการใช่หรือไม่?
                           </td>
-                          <td >{getAnswerElement(assessment.Readiness1.question1_1)}</td>
+                          <td >{getAnswerElement(readinessForms.Readiness1.question1_1)}</td>
                         </tr>
                         <tr>
                           <td>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่?</td>
-                          <td >{getAnswerElement(assessment.Readiness1.question1_2)}</td>
+                          <td >{getAnswerElement(readinessForms.Readiness1.question1_2)}</td>
                         </tr>
                         <tr>
                           <td>
                             3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20
                             กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?
                           </td>
-                          <td>{getAnswerElement(assessment.Readiness1.question1_3)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness1.question1_3)}</td>
                         </tr>
                         <tr>
                           <td>
                             4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?
                           </td>
-                          <td>{getAnswerElement(assessment.Readiness1.question1_4)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness1.question1_4)}</td>
                         </tr>
                       </>
                     )}
-                    
-                  </React.Fragment>
-                ))}
               </tbody>
             </table>
           </div>
@@ -655,99 +668,149 @@ export default function DetailAssessreadiness() {
           <div className="header">
             <b>ประเมินความรู้ ความเข้าใจ (ตาม D-METHOD)</b>
           </div>
-          <div className="m-4">
+          <div className="m-3">
             <table className="assessment-table">
               <thead>
                 <tr>
                   <th style={{ width: "90%" }}>คำถาม</th>
-                  <th style={{ width: "10%" }}>คำตอบ</th>
+                  <th style={{ width: "9%" }}>คำตอบ</th>
                 </tr>
               </thead>
               <tbody>
-                {assessmentData.map((assessment, index) => (
-                  <React.Fragment key={index}>
-                    {assessment.Readiness2 && (
+
+                    {readinessForms.Readiness2 && (
                       <>
                         <tr>
                           <td>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?</td>
-                          <td>{getAnswerElement(assessment.Readiness2.Disease)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness2.Disease)}</td>
                         </tr>
                         <tr>
                           <td>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?</td>
-                          <td>{getAnswerElement(assessment.Readiness2.Medication)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness2.Medication)}</td>
                         </tr>
                         <tr>
                           <td>3. Environment : มีการเตรียมสิ่งแวดล้อม ?</td>
-                          <td>{getAnswerElement(assessment.Readiness2.Environment)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness2.Environment)}</td>
                         </tr>
                         <tr>
                           <td>4. Treatment : มีการฝึกทักษะที่จำเป็น ?</td>
-                          <td>{getAnswerElement(assessment.Readiness2.Treatment)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness2.Treatment)}</td>
                         </tr>
                         <tr>
                           <td>5. Health : รู้ข้อจำกัดด้านสุขภาพ ?</td>
-                          <td>{getAnswerElement(assessment.Readiness2.Health)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness2.Health)}</td>
                         </tr>
                         <tr>
                           <td>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?</td>
-                          <td>{getAnswerElement(assessment.Readiness2.Out_patient)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness2.Out_patient)}</td>
                         </tr>
                         <tr>
                           <td>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?</td>
-                          <td>{getAnswerElement(assessment.Readiness2.Diet)}</td>
+                          <td>{getAnswerElement(readinessForms.Readiness2.Diet)}</td>
                         </tr>
                       </>
                     )}
-                  </React.Fragment>
-                ))}
               </tbody>
             </table>
           </div>
         </div>
-        <div className="info3 card mt-4">
-          <p className="texthead">ประเมินความพร้อม</p>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-5">
-              <div className="btn-group">
-                <div
-                  className={`btnass ${
-                    statusName === "มีความพร้อม" ? "btn-normal" : "btn-outline"
-                  }`}
-                  onClick={() => handleButtonClick("มีความพร้อม")}
-                >
-                  มีความพร้อม
-                </div>
-                <div
-                  className={`btnass ${
-                    statusName === "ยังไม่มีความพร้อม"
-                      ? "btn-abnormal"
-                      : "btn-outline"
-                  }`}
-                  onClick={() => handleButtonClick("ยังไม่มีความพร้อม")}
-                >
-                  ยังไม่มีความพร้อม
-                </div>
-              </div>
-              <div className="inline-container mt-5">
-                <label className="title-ass ">เพิ่มเติม: </label>
-                <textarea
-                  type="text"
-                  className="form-control ml-5"
-                  id="detail"
-                  value={detail}
-                  onChange={(e) => setDetail(e.target.value)}
-                />
-              </div>
-            </div>
+        {isReadinessSubmitted && !isEditing ? (
+          <div className="info3 card mt-4">
+            <h3>ประเมินความพร้อม</h3>
             <div className="btn-group">
-              <div className="btn-next mb-5">
-                <button type="submit" className="btn btn-outline py-2">
-                  บันทึก
-                </button>
+              {readinessStatus === "มีความพร้อม" ? (
+                <div className={`btnass btn-normal`}>มีความพร้อม</div>
+              ) : (
+                <div className={`btnass btn-abnormal`}>ยังไม่มีความพร้อม</div>
+              )}
+            </div> 
+            <p className="detail-info"><b>รายละเอียดเพิ่มเติม :</b> {detail ? detail : '-'}</p>
+            <p className="detail-info"><b>ผู้ประเมินความพร้อม :</b> {mpersonnel?.nametitle} {mpersonnel?.name} {mpersonnel?.surname}</p>
+            <p className="detail-info"><b>วันที่ประเมินความพร้อม :</b> {formatDate(dateass)}</p>
+            {/* แสดงวันที่อัปเดต */}
+            <button className="btn btn-warning mt-4" onClick={() => setIsEditing(true)}>
+              แก้ไขการประเมิน
+            </button>
+          </div>
+        ) : isEditing ? (
+          <div className="info3 card mt-4">
+            <p className="texthead">แก้ไขการประเมินความพร้อม</p>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-5">
+                <div className="btn-group">
+                  <div
+                    className={`btnass ${readinessStatus === "มีความพร้อม" ? "btn-normal" : "btn-outline"}`}
+                    onClick={() => handleStatusChange("มีความพร้อม")}
+                  >
+                    มีความพร้อม
+                  </div>
+                  <div
+                    className={`btnass ${readinessStatus === "ยังไม่มีความพร้อม" ? "btn-abnormal" : "btn-outline"}`}
+                    onClick={() => handleStatusChange("ยังไม่มีความพร้อม")}
+                  >
+                    ยังไม่มีความพร้อม
+                  </div>
+                </div>
+                <div className="inline-container mt-4">
+                  <label className="title-ass">เพิ่มเติม: </label>
+                  <textarea
+                    type="text"
+                    className="form-control ml-3"
+                    id="detail"
+                    value={detail}
+                    onChange={handleDetailChange}
+                  />
+                </div>
               </div>
-            </div>
-          </form>
-        </div>
+              <div className="btn-group">
+                <div className="btn-next mb-5">
+                  <button type="submit" className="btn btn-outline py-2">
+                    บันทึกการแก้ไข
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div className="info3 card mt-4">
+            <p className="texthead">ประเมินความพร้อม</p>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-5">
+                <div className="btn-group">
+                  <div
+                    className={`btnass ${readinessStatus === "มีความพร้อม" ? "btn-normal" : "btn-outline"}`}
+                    onClick={() => handleStatusChange("มีความพร้อม")}
+                  >
+                    มีความพร้อม
+                  </div>
+                  <div
+                    className={`btnass ${readinessStatus === "ยังไม่มีความพร้อม" ? "btn-abnormal" : "btn-outline"}`}
+                    onClick={() => handleStatusChange("ยังไม่มีความพร้อม")}
+                  >
+                    ยังไม่มีความพร้อม
+                  </div>
+                </div>
+                <div className="inline-container mt-4">
+                  <label className="title-ass">เพิ่มเติม: </label>
+                  <textarea
+                    type="text"
+                    className="form-control ml-3"
+                    id="detail"
+                    value={detail}
+                    onChange={handleDetailChange}
+                  />
+                </div>
+              </div>
+              <div className="btn-group">
+                <div className="btn-next mb-5">
+                  <button type="submit" className="btn btn-outline py-2">
+                    บันทึก
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </main>
   );

@@ -4,15 +4,7 @@ import { Collapse } from '@material-ui/core';
 
 export const Otherpeople = () => {
   const { control, register, getValues } = useFormContext();
-  const [selectedRole, setSelectedRole] = useState('');
-  const [customRole, setCustomRole] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedOccupation, setSelectedOccupation] = useState('');
-  const [customOccupation, setCustomOccupation] = useState('');
-  const [selectedEducation, setSelectedEducation] = useState('');
-  const [customEducation, setCustomEducation] = useState('');
-  const [selectedIncome, setSelectedIncome] = useState('');
-  const [selectedBenefit, setSelectedBenefit] = useState('');
+
   const { fields, append, remove } = useFieldArray({ control, name: "people" });
   const [openIndex, setOpenIndex] = useState(0); // Start with no index open
 
@@ -42,8 +34,8 @@ export const Otherpeople = () => {
 
   return (
     <div>
-      <div className="info3 card mt-4">
-        <div className="header" align="center">
+      <div className="info3 card ">
+        <div className="header">
           <b>Other people</b>
         </div>
         <div className='m-4'>

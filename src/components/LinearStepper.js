@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import "../css/sidebar.css";
-import "../css/alladmin.css"
+import "../css/form.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -14,10 +13,12 @@ import { SSS } from "./stepform/SSS"
 import { Otherassessment } from "./stepform/Otherassessment"
 import { Otherpeople } from "./stepform/Otherpeople"
 import { Medication } from "./stepform/Medication"
-import { Typography, Stepper, Step, StepLabel } from "@material-ui/core";
+import { Zarit } from "./stepform/Zaritburdeninterview"
+import { Typography, Stepper, Step, StepLabel, Wizard, WizardStep } from "@material-ui/core";
 import { useForm, FormProvider } from "react-hook-form";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
+
 
 export default function LinaerStepper({ }) {
     const navigate = useNavigate();
@@ -44,48 +45,49 @@ export default function LinaerStepper({ }) {
     const [unreadCount, setUnreadCount] = useState(0);
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
-  
+    const [showToTopButton, setShowToTopButton] = useState(false);
+
     useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-          setShowNotifications(false);
-        }
-      };
-  
-      document.addEventListener("mousedown", handleClickOutside);
-  
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
+        const handleClickOutside = (event) => {
+            if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+                setShowNotifications(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, [notificationsRef]);
-  
+
     const toggleNotifications = () => {
-      setShowNotifications(!showNotifications);
+        setShowNotifications(!showNotifications);
     };
-  
+
     const fetchUserData = (token) => {
-      return fetch("http://localhost:5000/profiledt", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({ token }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setData(data.data);
-          if (data.data == "token expired") {
-            window.localStorage.clear();
-            window.location.href = "./";
-          }
-          return data.data;
+        return fetch("http://localhost:5000/profiledt", {
+            method: "POST",
+            crossDomain: true,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({ token }),
         })
-        .catch((error) => {
-          console.error("Error verifying token:", error);
-        });
+            .then((res) => res.json())
+            .then((data) => {
+                setData(data.data);
+                if (data.data == "token expired") {
+                    window.localStorage.clear();
+                    window.location.href = "./";
+                }
+                return data.data;
+            })
+            .catch((error) => {
+                console.error("Error verifying token:", error);
+            });
     };
     useEffect(() => {
         const fetchData = async () => {
@@ -163,70 +165,70 @@ export default function LinaerStepper({ }) {
 
     const fetchAndSetAlerts = (token, userId) => {
         fetchAlerts(token)
-          .then((alerts) => {
-            setAlerts(alerts);
-            const unreadAlerts = alerts.filter(
-              (alert) => !alert.viewedBy.includes(userId)
-            ).length;
-            setUnreadCount(unreadAlerts);
-          })
-          .catch((error) => {
-            console.error("Error fetching alerts:", error);
-          });
-      };
-    
-      useEffect(() => {
-        const token = window.localStorage.getItem("token");
-        setToken(token);
-    
-        if (token) {
-          fetchUserData(token)
-            .then(user => {
-              setUserId(user._id);
-              fetchAndSetAlerts(token, user._id);
-    
-              const interval = setInterval(() => {
-                fetchAndSetAlerts(token, user._id);
-                fetchAllUsers(user._id);
-              }, 1000);
-    
-              return () => clearInterval(interval);
+            .then((alerts) => {
+                setAlerts(alerts);
+                const unreadAlerts = alerts.filter(
+                    (alert) => !alert.viewedBy.includes(userId)
+                ).length;
+                setUnreadCount(unreadAlerts);
             })
             .catch((error) => {
-              console.error("Error verifying token:", error);
+                console.error("Error fetching alerts:", error);
             });
+    };
+
+    useEffect(() => {
+        const token = window.localStorage.getItem("token");
+        setToken(token);
+
+        if (token) {
+            fetchUserData(token)
+                .then(user => {
+                    setUserId(user._id);
+                    fetchAndSetAlerts(token, user._id);
+
+                    const interval = setInterval(() => {
+                        fetchAndSetAlerts(token, user._id);
+                        fetchAllUsers(user._id);
+                    }, 1000);
+
+                    return () => clearInterval(interval);
+                })
+                .catch((error) => {
+                    console.error("Error verifying token:", error);
+                });
         }
-      }, []);
-    
-    
-      const markAllAlertsAsViewed = () => {
+    }, []);
+
+
+    const markAllAlertsAsViewed = () => {
         fetch("http://localhost:5000/alerts/mark-all-viewed", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ userId: userId }),
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ userId: userId }),
         })
-          .then((res) => res.json())
-          .then((data) => {
-            const updatedAlerts = alerts.map((alert) => ({
-              ...alert,
-              viewedBy: [...alert.viewedBy, userId],
-            }));
-            setAlerts(updatedAlerts);
-            setUnreadCount(0);
-          })
-          .catch((error) => {
-            console.error("Error marking all alerts as viewed:", error);
-          });
-      };
-    
-      const handleFilterChange = (type) => {
+            .then((res) => res.json())
+            .then((data) => {
+                const updatedAlerts = alerts.map((alert) => ({
+                    ...alert,
+                    viewedBy: [...alert.viewedBy, userId],
+                }));
+                setAlerts(updatedAlerts);
+                setUnreadCount(0);
+            })
+            .catch((error) => {
+                console.error("Error marking all alerts as viewed:", error);
+            });
+    };
+
+    const handleFilterChange = (type) => {
         setFilterType(type);
-      };
-    
-      const filteredAlerts = filterType === "unread"
+    };
+
+    const filteredAlerts = filterType === "unread"
         ? alerts.filter(alert => !alert.viewedBy.includes(userId))
         : alerts;
 
@@ -256,6 +258,7 @@ export default function LinaerStepper({ }) {
             "Examination",
             "SSS",
             "OtherAssessment",
+            "Zarit burden interview"
         ];
     }
 
@@ -278,29 +281,60 @@ export default function LinaerStepper({ }) {
             case 7:
                 return <Otherassessment />;
             case 8:
+                return <Zarit />;
+            case 9:
                 return;
             default:
                 return "unknown step";
         }
     }
+    const handleScroll = () => {
+        const formContent = document.querySelector('.form-content');
+        if (formContent.scrollTop > 200) {
+          setShowToTopButton(true);
+        } else {
+          setShowToTopButton(false);
+        }
+      };
+      
+      const scrollToTop = () => {
+        const formContent = document.querySelector('.form-content');
+        formContent.scrollTo({ top: 0, behavior: "smooth" });
+      };
+      
+      useEffect(() => {
+        const formContent = document.querySelector('.form-content');
+        formContent.addEventListener("scroll", handleScroll);
+        return () => {
+          formContent.removeEventListener("scroll", handleScroll);
+        };
+      }, []);
+      
 
     const [activeStep, setActiveStep] = useState(0);
 
 
     const handleNext = (data) => {
         console.log(data);
-        if (activeStep == steps.length - 1) {
+        setActiveStep(prevActiveStep => {
+            // Scroll to the top of the form content
+            const formContent = document.querySelector('.form-content');
+            formContent.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            return prevActiveStep + 1;
+        });
+        
+        // Simulating API call or data submission if on the last step
+        if (activeStep === steps.length - 1) {
             fetch("https://jsonplaceholder.typicode.com/comments")
                 .then((data) => data.json())
                 .then((res) => {
                     console.log(res);
                     setActiveStep(activeStep + 1);
                 });
-        } else {
-            setActiveStep(activeStep + 1);
-
         }
     };
+    
 
     const handleBack = () => {
         setActiveStep(activeStep - 1);
@@ -312,292 +346,227 @@ export default function LinaerStepper({ }) {
         const year = dateTime.getFullYear();
         const hours = dateTime.getHours();
         const minutes = dateTime.getMinutes();
-    
+
         const thaiMonths = [
-          "มกราคม",
-          "กุมภาพันธ์",
-          "มีนาคม",
-          "เมษายน",
-          "พฤษภาคม",
-          "มิถุนายน",
-          "กรกฎาคม",
-          "สิงหาคม",
-          "กันยายน",
-          "ตุลาคม",
-          "พฤศจิกายน",
-          "ธันวาคม",
+            "มกราคม",
+            "กุมภาพันธ์",
+            "มีนาคม",
+            "เมษายน",
+            "พฤษภาคม",
+            "มิถุนายน",
+            "กรกฎาคม",
+            "สิงหาคม",
+            "กันยายน",
+            "ตุลาคม",
+            "พฤศจิกายน",
+            "ธันวาคม",
         ];
-    
+
         return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-          } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-          } น.`;
-      };
-    
-      const fetchAllUsers = async (userId) => {
+            } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+            } น.`;
+    };
+
+    const fetchAllUsers = async (userId) => {
         try {
-          const response = await fetch(
-            `http://localhost:5000/alluserchat?userId=${userId}`
-          );
-          const data = await response.json();
-    
-          const usersWithLastMessage = await Promise.all(
-            data.data.map(async (user) => {
-              const lastMessageResponse = await fetch(
-                `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-              );
-              const lastMessageData = await lastMessageResponse.json();
-    
-              const lastMessage = lastMessageData.lastMessage;
-              return { ...user, lastMessage: lastMessage ? lastMessage : null };
-            })
-          );
-    
-          const sortedUsers = usersWithLastMessage.sort((a, b) => {
-            if (!a.lastMessage) return 1;
-            if (!b.lastMessage) return -1;
-            return (
-              new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+            const response = await fetch(
+                `http://localhost:5000/alluserchat?userId=${userId}`
             );
-          });
-    
-          setAllUsers(sortedUsers);
+            const data = await response.json();
+
+            const usersWithLastMessage = await Promise.all(
+                data.data.map(async (user) => {
+                    const lastMessageResponse = await fetch(
+                        `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
+                    );
+                    const lastMessageData = await lastMessageResponse.json();
+
+                    const lastMessage = lastMessageData.lastMessage;
+                    return { ...user, lastMessage: lastMessage ? lastMessage : null };
+                })
+            );
+
+            const sortedUsers = usersWithLastMessage.sort((a, b) => {
+                if (!a.lastMessage) return 1;
+                if (!b.lastMessage) return -1;
+                return (
+                    new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+                );
+            });
+
+            setAllUsers(sortedUsers);
         } catch (error) {
-          console.error("Error fetching all users:", error);
+            console.error("Error fetching all users:", error);
         }
-      };
-      //polling
-      useEffect(() => {
+    };
+    //polling
+    useEffect(() => {
         const interval = setInterval(() => {
-          fetchAllUsers(data._id);
+            fetchAllUsers(data._id);
         }, 1000);
         return () => clearInterval(interval);
-      }, [data]);
-    
-      const countUnreadUsers = () => {
+    }, [data]);
+
+    const countUnreadUsers = () => {
         const unreadUsers = allUsers.filter((user) => {
-          const lastMessage = user.lastMessage;
-          return (
-            lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-          );
+            const lastMessage = user.lastMessage;
+            return (
+                lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+            );
         });
         return unreadUsers.length;
-      };
-    
+    };
     return (
-        <main className="body">
-            <div className={`sidebar ${isActive ? "active" : ""}`}>
-                <div class="logo_content">
-                    <div class="logo">
-                        <div class="logo_name">
-                            <img src={logow} className="logow" alt="logo"></img>
-                        </div>
-                    </div>
-                    <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-                </div>
-                <ul class="nav-list">
-                    <li>
-                        <a href="home">
-                            <i class="bi bi-house"></i>
-                            <span class="links_name">หน้าหลัก</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessment">
-                            <i class="bi bi-clipboard2-pulse"></i>
-                            <span class="links_name">ติดตาม/ประเมินอาการ</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="allpatient">
-                            <i className="bi bi-people"></i>
-                            <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessreadiness">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span class="links_name">ประเมินความพร้อมการดูแล</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessinhomesss" >
-                            <i class="bi bi-house-check"></i>
-                            <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat" style={{ position: "relative" }}>
-                            <i className="bi bi-chat-dots"></i>
-                            <span className="links_name">แช็ต</span>
-                            {countUnreadUsers() !== 0 && (
-                                <span className="notification-countchat">
-                                    {countUnreadUsers()}
+        <main className="bodyform">
+            <div className="homeheaderform">
+                <div className="header">แบบประเมินเยี่ยมบ้าน</div>
+                <div className="profile_details">
+                    <ul className="nav-list">
+                        <li>
+                            <a className="bell-icon" onClick={toggleNotifications}>
+                                {showNotifications ? (
+                                    <i className="bi bi-bell-fill"></i>
+                                ) : (
+                                    <i className="bi bi-bell"></i>
+                                )}
+                                {unreadCount > 0 && (
+                                    <span className="notification-count">{unreadCount}</span>
+                                )}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="profile">
+                                <i className="bi bi-person"></i>
+                                <span className="links_name">
+                                    {data && data.nametitle + data.name + " " + data.surname}
                                 </span>
-                            )}
-                        </a>
-                    </li>
-                    <div class="nav-logout">
-                        <li>
-                            <a href="./" onClick={logOut}>
-                                <i
-                                    class="bi bi-box-arrow-right"
-                                    id="log_out"
-                                    onClick={logOut}
-                                ></i>
-                                <span class="links_name">ออกจากระบบ</span>
                             </a>
-                        </li>
-                    </div>
-                </ul>
-            </div>
-            <div className="home_content">
-                <div className="homeheader">
-                    <div className="header">แบบประเมินเยี่ยมบ้าน</div>
-                    <div className="profile_details">
-                        <ul className="nav-list">
-                            <li>
-                                <a className="bell-icon" onClick={toggleNotifications}>
-                                    {showNotifications ? (
-                                        <i className="bi bi-bell-fill"></i>
-                                    ) : (
-                                        <i className="bi bi-bell"></i>
-                                    )}
-                                    {unreadCount > 0 && (
-                                        <span className="notification-count">{unreadCount}</span>
-                                    )}
-                                </a>
-                            </li>
-                            <li>
-                                <a href="profile">
-                                    <i className="bi bi-person"></i>
-                                    <span className="links_name">
-                                        {data && data.nametitle + data.name + " " + data.surname}
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                {showNotifications && (
-                    <div className="notifications-dropdown" ref={notificationsRef}>
-                        <div className="notifications-head">
-                            <h2 className="notifications-title">การแจ้งเตือน</h2>
-                            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                                ทำเครื่องหมายว่าอ่านทั้งหมด
-                            </p>
-                            <div className="notifications-filter">
-                                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                                    ดูทั้งหมด
-                                </button>
-                                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                                    ยังไม่อ่าน
-                                </button>
-                            </div>
-                        </div>
-                        {filteredAlerts.length > 0 ? (
-                            <>
-                                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                            </>
-                        ) : (
-                            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                        )}
-                    </div>
-                )}
-                <div className="breadcrumbs mt-4">
-                    <ul>
-                        <li>
-                            <a href="home">
-                                <i class="bi bi-house-fill"></i>
-                            </a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="MultiStepForm">แบบประเมินเยี่ยมบ้าน</a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a>รายละเอียดการประเมิน</a>
                         </li>
                     </ul>
                 </div>
-                <br></br>
-                <Stepper alternativeLabel activeStep={activeStep}>
-                    {steps.map((step, index) => {
-                        const labelProps = {};
-                        const stepProps = {};
-                        return (
-                            <Step {...stepProps} key={index}>
-                                <StepLabel {...labelProps}>{step}</StepLabel>
-                            </Step>
-                        );
-                    })}
-                </Stepper>
-                <br></br>
-                <div className="">
-                    <p className="headerassesment">
-                        {name} {surname}
-                    </p>
-                    {birthday ? (
-                        <p className="textassesment">
-                            <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
+            </div>
+
+            {showNotifications && (
+                <div className="notifications-dropdown" ref={notificationsRef}>
+                    <div className="notifications-head">
+                        <h2 className="notifications-title">การแจ้งเตือน</h2>
+                        <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+                            ทำเครื่องหมายว่าอ่านทั้งหมด
                         </p>
+                        <div className="notifications-filter">
+                            <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                                ดูทั้งหมด
+                            </button>
+                            <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                                ยังไม่อ่าน
+                            </button>
+                        </div>
+                    </div>
+                    {filteredAlerts.length > 0 ? (
+                        <>
+                            {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+                        </>
                     ) : (
-                        <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
+                        <p className="no-notification">ไม่มีการแจ้งเตือน</p>
                     )}
-                    <p className="textassesment">
-                        <label>HN:</label>
-                        {medicalData && medicalData.HN
-                            ? medicalData.HN
-                            : "ไม่มีข้อมูล"}
-                        <label>AN:</label>
-                        {medicalData && medicalData.AN
-                            ? medicalData.AN
-                            : "ไม่มีข้อมูล"}
-                        <label>ผู้ป่วยโรค:</label>
-                        {medicalData && medicalData.Diagnosis
-                            ? medicalData.Diagnosis
-                            : "ไม่มีข้อมูล"}
-                    </p>
                 </div>
+            )}
+            <div className="sidebarform">
+                <div className="sideassessment">
+                    <div>
+                        <div className="nameassessment">
+                            <p className="headerassesmentinhome">
+                                {name} {surname}
+                            </p>
+                            {birthday ? (
+                                <p className="textassesmentinhome">
+                                    <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
+                                </p>
+                            ) : (
+                                <p className="textassesmentinhome"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
+                            )}
+                            <p className="textassesmentinhome">
+                                <label>HN: </label>
+                                {medicalData && medicalData.HN
+                                    ? medicalData.HN
+                                    : "ไม่มีข้อมูล"}
+                                <label> AN: </label>
+                                {medicalData && medicalData.AN
+                                    ? medicalData.AN
+                                    : "ไม่มีข้อมูล"}
+                                <br></br>
+                                <label>ผู้ป่วยโรค:</label>
+                                {medicalData && medicalData.Diagnosis
+                                    ? medicalData.Diagnosis
+                                    : "ไม่มีข้อมูล"}
+                            </p>
+                        </div>
+                        <Stepper className="stepper" activeStep={activeStep} orientation="vertical">
+                            {steps.map((label, index) => (
+                                <Step key={index}>
+                                    <StepLabel>{label}</StepLabel>
+                                </Step>
+                            ))}
+                        </Stepper>
+                    </div>
+                </div>
+            </div>
+            {/* Scrollable form content */}
+            <div className="form-content">
+                {/* <a href="assessinhomesssuser">บันทึกการประเมิน</a> */}
                 {activeStep === steps.length ? (
-                    <h3 variant="h3" align="center">
+                    <Typography variant="h3" align="center">
                         การประเมินเสร็จสิ้น
-                    </h3>
+                    </Typography>
+
                 ) : (
-                    <>
-                        <FormProvider {...methods}>
-                            <form onSubmit={methods.handleSubmit(handleNext)}>
-                                {getStepContent(activeStep)}
-                                <div className="btn-group">
-                                    <div className="btn-pre">
-                                        <button
-                                            className="btn btn-outline py-2"
-                                            disabled={activeStep === 0}
-                                            onClick={handleBack}
-                                            type="button"
-                                        >
-                                            ก่อนหน้า
-                                        </button>
-                                    </div>
-                                    <div className="btn-next">
-                                        <button
-                                            className="btn btn-outline-primary py-2"
-                                            type="submit"
-                                        >
-                                            {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"}
-                                        </button>
-                                    </div>
+                    <FormProvider {...methods}>
+                        <form onSubmit={methods.handleSubmit(handleNext)}>
+                            {getStepContent(activeStep)}
+                            <div className="btn-group">
+                                <div className="btn-pre">
+                                    <button
+                                        className="btn btn-outline py-2"
+                                        disabled={activeStep === 0}
+                                        onClick={handleBack}
+                                        type="button"
+                                    >
+                                        ก่อนหน้า
+                                    </button>
                                 </div>
-                            </form>
-                        </FormProvider>
-                    </>
+                                <div className="btn-next">
+                                    <button
+                                        className="btn btn-outline-primary py-2"
+                                        type="submit"
+                                    >
+                                        {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"}
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </FormProvider>
                 )}
             </div>
+            <a
+             onClick={scrollToTop}
+             className="btn btn-outline-primary py-2"
+             style={{
+               position: "fixed",
+               bottom: "20px",
+               right: "20px",
+               padding: "10px 20px",
+               backgroundColor: "#87CEFA",
+               color: "#fff",
+               border: "none",
+               borderRadius: "5px",
+               cursor: "pointer",
+               zIndex: "1000",
+             }}
+            >
+                ขึ้นไปด้านบน
+            </a>
         </main>
+
     );
 };
-

@@ -135,41 +135,11 @@
 	white-space: nowrap;
   }
 
-  .feedback-table {
-    border-collapse: collapse;
-    width: 100%;
-}
-
-.feedback-table th,
-.feedback-table td {
-    border: none; /* Remove borders */
-    padding: 8px;
-    text-align: center; /* Center align all td by default */
-}
-
-.feedback-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.feedback-table tr:nth-child(odd) {
-    background-color: #ffffff;
-}
-
-.feedback-table th:first-child,
-.feedback-table th:nth-child(n+2) {
-    border-bottom: 1px solid #87CEFA; /* Add bottom border to all th except the first one */
-}
-
-.feedback-table td:first-child {
-    text-align: left; /* Align first td to the left */
-}
+  
 
 /* Nutrition.css */
 
-.nutrition-table td {
-  padding: 5px;
-  vertical-align: middle;
-}
+
 
 .form-control {
   width: 100%;
@@ -191,17 +161,7 @@
   text-align: center;
 }
 
-.textnutrition {
-  margin: 0;
-}
 
-.nutrition-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.nutrition-table tr:nth-child(odd) {
-    background-color: #ffffff;
-}
 /* New style for the equipment table */
 .equipment-table {
     width: 100%; /* Full width of the container */
@@ -281,4 +241,3 @@
 	text-align: right; /* Ensure answers within the column are right-aligned */
 	font-weight: bold; /* Optional: Makes the answer text bold */
   }
-  

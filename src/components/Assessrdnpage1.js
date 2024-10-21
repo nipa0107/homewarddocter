@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef  } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -36,117 +36,118 @@ export default function Assessreadiness1() {
     const [unreadCount, setUnreadCount] = useState(0);
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
-
+    const [showMessage, setShowMessage] = useState(false);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-          if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-            setShowNotifications(false);
-          }
-        };
-    
-        document.addEventListener("mousedown", handleClickOutside);
-    
-        return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
-        };
-      }, [notificationsRef]);
-    
-      const toggleNotifications = () => {
-        setShowNotifications(!showNotifications);
-      };
-    
-      const fetchUserData = (token) => {
-        return fetch("http://localhost:5000/profiledt", {
-          method: "POST",
-          crossDomain: true,
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-          body: JSON.stringify({ token }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            setData(data.data);
-            if (data.data == "token expired") {
-              window.localStorage.clear();
-              window.location.href = "./";
+            if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+                setShowNotifications(false);
             }
-            return data.data;
-          })
-          .catch((error) => {
-            console.error("Error verifying token:", error);
-          });
-      };
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [notificationsRef]);
+
+    const toggleNotifications = () => {
+        setShowNotifications(!showNotifications);
+    };
+
+    const fetchUserData = (token) => {
+        return fetch("http://localhost:5000/profiledt", {
+            method: "POST",
+            crossDomain: true,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({ token }),
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                setData(data.data);
+                if (data.data == "token expired") {
+                    window.localStorage.clear();
+                    window.location.href = "./";
+                }
+                return data.data;
+            })
+            .catch((error) => {
+                console.error("Error verifying token:", error);
+            });
+    };
 
     const fetchAndSetAlerts = (token, userId) => {
         fetchAlerts(token)
-          .then((alerts) => {
-            setAlerts(alerts);
-            const unreadAlerts = alerts.filter(
-              (alert) => !alert.viewedBy.includes(userId)
-            ).length;
-            setUnreadCount(unreadAlerts);
-          })
-          .catch((error) => {
-            console.error("Error fetching alerts:", error);
-          });
-      };
-    
-      useEffect(() => {
-        const token = window.localStorage.getItem("token");
-        setToken(token);
-    
-        if (token) {
-          fetchUserData(token)
-            .then(user => {
-              setUserId(user._id);
-              fetchAndSetAlerts(token, user._id);
-    
-              const interval = setInterval(() => {
-                fetchAndSetAlerts(token, user._id);
-                fetchAllUsers(user._id);
-              }, 1000);
-    
-              return () => clearInterval(interval);
+            .then((alerts) => {
+                setAlerts(alerts);
+                const unreadAlerts = alerts.filter(
+                    (alert) => !alert.viewedBy.includes(userId)
+                ).length;
+                setUnreadCount(unreadAlerts);
             })
             .catch((error) => {
-              console.error("Error verifying token:", error);
+                console.error("Error fetching alerts:", error);
             });
+    };
+
+    useEffect(() => {
+        const token = window.localStorage.getItem("token");
+        setToken(token);
+
+        if (token) {
+            fetchUserData(token)
+                .then(user => {
+                    setUserId(user._id);
+                    setMPersonnel(user._id);
+                    fetchAndSetAlerts(token, user._id);
+
+                    const interval = setInterval(() => {
+                        fetchAndSetAlerts(token, user._id);
+                        fetchAllUsers(user._id);
+                    }, 1000);
+
+                    return () => clearInterval(interval);
+                })
+                .catch((error) => {
+                    console.error("Error verifying token:", error);
+                });
         }
-      }, []);
-    
-    
-      const markAllAlertsAsViewed = () => {
+    }, []);
+
+
+    const markAllAlertsAsViewed = () => {
         fetch("http://localhost:5000/alerts/mark-all-viewed", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ userId: userId }),
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ userId: userId }),
         })
-          .then((res) => res.json())
-          .then((data) => {
-            const updatedAlerts = alerts.map((alert) => ({
-              ...alert,
-              viewedBy: [...alert.viewedBy, userId],
-            }));
-            setAlerts(updatedAlerts);
-            setUnreadCount(0);
-          })
-          .catch((error) => {
-            console.error("Error marking all alerts as viewed:", error);
-          });
-      };
-    
-      const handleFilterChange = (type) => {
+            .then((res) => res.json())
+            .then((data) => {
+                const updatedAlerts = alerts.map((alert) => ({
+                    ...alert,
+                    viewedBy: [...alert.viewedBy, userId],
+                }));
+                setAlerts(updatedAlerts);
+                setUnreadCount(0);
+            })
+            .catch((error) => {
+                console.error("Error marking all alerts as viewed:", error);
+            });
+    };
+
+    const handleFilterChange = (type) => {
         setFilterType(type);
-      };
-    
-      const filteredAlerts = filterType === "unread"
+    };
+
+    const filteredAlerts = filterType === "unread"
         ? alerts.filter(alert => !alert.viewedBy.includes(userId))
         : alerts;
 
@@ -234,25 +235,7 @@ export default function Assessreadiness1() {
     useEffect(() => {
         fetchAssessments();
     }, []);
-    const fetchMpersonnel = async () => {
-        try {
-            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            setMPersonnel(data.data);
-            console.log("Mpersonnel:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
-    };
 
-    useEffect(() => {
-        fetchMpersonnel();
-    }, []);
 
     const currentDate = new Date();
 
@@ -290,76 +273,76 @@ export default function Assessreadiness1() {
         const year = dateTime.getFullYear();
         const hours = dateTime.getHours();
         const minutes = dateTime.getMinutes();
-    
+
         const thaiMonths = [
-          "มกราคม",
-          "กุมภาพันธ์",
-          "มีนาคม",
-          "เมษายน",
-          "พฤษภาคม",
-          "มิถุนายน",
-          "กรกฎาคม",
-          "สิงหาคม",
-          "กันยายน",
-          "ตุลาคม",
-          "พฤศจิกายน",
-          "ธันวาคม",
+            "มกราคม",
+            "กุมภาพันธ์",
+            "มีนาคม",
+            "เมษายน",
+            "พฤษภาคม",
+            "มิถุนายน",
+            "กรกฎาคม",
+            "สิงหาคม",
+            "กันยายน",
+            "ตุลาคม",
+            "พฤศจิกายน",
+            "ธันวาคม",
         ];
-    
+
         return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-          } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-          } น.`;
-      };
-    
-      const fetchAllUsers = async (userId) => {
+            } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+            } น.`;
+    };
+
+    const fetchAllUsers = async (userId) => {
         try {
-          const response = await fetch(
-            `http://localhost:5000/alluserchat?userId=${userId}`
-          );
-          const data = await response.json();
-    
-          const usersWithLastMessage = await Promise.all(
-            data.data.map(async (user) => {
-              const lastMessageResponse = await fetch(
-                `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-              );
-              const lastMessageData = await lastMessageResponse.json();
-    
-              const lastMessage = lastMessageData.lastMessage;
-              return { ...user, lastMessage: lastMessage ? lastMessage : null };
-            })
-          );
-    
-          const sortedUsers = usersWithLastMessage.sort((a, b) => {
-            if (!a.lastMessage) return 1;
-            if (!b.lastMessage) return -1;
-            return (
-              new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+            const response = await fetch(
+                `http://localhost:5000/alluserchat?userId=${userId}`
             );
-          });
-    
-          setAllUsers(sortedUsers);
+            const data = await response.json();
+
+            const usersWithLastMessage = await Promise.all(
+                data.data.map(async (user) => {
+                    const lastMessageResponse = await fetch(
+                        `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
+                    );
+                    const lastMessageData = await lastMessageResponse.json();
+
+                    const lastMessage = lastMessageData.lastMessage;
+                    return { ...user, lastMessage: lastMessage ? lastMessage : null };
+                })
+            );
+
+            const sortedUsers = usersWithLastMessage.sort((a, b) => {
+                if (!a.lastMessage) return 1;
+                if (!b.lastMessage) return -1;
+                return (
+                    new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+                );
+            });
+
+            setAllUsers(sortedUsers);
         } catch (error) {
-          console.error("Error fetching all users:", error);
+            console.error("Error fetching all users:", error);
         }
-      };
-      //polling
-      useEffect(() => {
+    };
+    //polling
+    useEffect(() => {
         const interval = setInterval(() => {
-          fetchAllUsers(data._id);
+            fetchAllUsers(data._id);
         }, 1000);
         return () => clearInterval(interval);
-      }, [data]);
-    
-      const countUnreadUsers = () => {
+    }, [data]);
+
+    const countUnreadUsers = () => {
         const unreadUsers = allUsers.filter((user) => {
-          const lastMessage = user.lastMessage;
-          return (
-            lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-          );
+            const lastMessage = user.lastMessage;
+            return (
+                lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
+            );
         });
         return unreadUsers.length;
-      };
+    };
     const Readiness1 = ({ register, errors, watch }) => (
         <div>
             <div className="mb-1">
@@ -550,7 +533,7 @@ export default function Assessreadiness1() {
 
     const onSubmit = async (formData) => {
         try {
-            const response = await fetch(`http://localhost:5000/submitAssessreadiness/${id}`, {
+            const response = await fetch(`http://localhost:5000/submitReadinessForm/${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -560,22 +543,20 @@ export default function Assessreadiness1() {
                     Readiness1: formData.Readiness1,
                     Readiness2: formData.Readiness2,
                     status_name: 'ประเมินแล้ว',
+                    MPersonnel: mpersonnel
                 }),
             });
 
             const data = await response.json();
             if (response.ok) {
-                console.log("ประเมินความพร้อมสำเร็จ:", data);
                 toast.success("ประเมินข้อมูลสำเร็จ");
-                setTimeout(() => {
-                    navigate("/assessreadiness");
-                }, 1000);
+                setShowMessage(true); // Show the success message and links
             } else {
-                console.error("Error during Assessreadiness submission:", data);
+                console.error("Error during ReadinessForm submission:", data);
                 toast.error("เกิดข้อผิดพลาดในการประเมิน");
             }
         } catch (error) {
-            console.error("Error updating Assessreadiness:", error);
+            console.error("Error updating ReadinessForm:", error);
             toast.error("เกิดข้อผิดพลาดในการประเมิน");
         }
     };
@@ -744,28 +725,40 @@ export default function Assessreadiness1() {
                     </p>
                 </div>
                 <div className="adminall card mb-1">
-                    <form onSubmit={handleSubmit(onSubmit)}>
-                        {step === 1 && <Readiness1 register={register} errors={errors} />}
-                        {step === 2 && <Readiness2 register={register} errors={errors} />}
-                        <div className="btn-group">
-                            {step > 1 && (
-                                <div className="btn-pre">
-                                    <button type="button" onClick={handlePrevious} className="btn btn-outline py-2">ก่อนหน้า</button>
-                                </div>
-                            )}
-                            {step < 2 && (
-                                <div className="btn-next">
-                                    <button type="button" onClick={handleNext} className="btn btn-outline-primary py-2">ถัดไป</button>
-                                </div>
-                            )}
-                            {step === 2 && (
-                                <div className="btn-next">
-                                    <button type="submit" className="btn btn-outline-primary py-2">บันทึก</button>
-                                </div>
-                            )}
+                    {showMessage ? ( // Show message if assessment is completed
+                        <div className="success-message">
+                            <h2>การประเมินเสร็จสิ้น</h2>
+                            
+                                <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id } })}>ดูคำตอบ</a>
+                            
+                                <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id} })}>กลับไปหน้าประเมินความพร้อม</a>
+                            
                         </div>
-                    </form>
+                    ) : (
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            {step === 1 && <Readiness1 register={register} errors={errors} />}
+                            {step === 2 && <Readiness2 register={register} errors={errors} />}
+                            <div className="btn-group">
+                                {step > 1 && (
+                                    <div className="btn-pre">
+                                        <button type="button" onClick={handlePrevious} className="btn btn-outline py-2">ก่อนหน้า</button>
+                                    </div>
+                                )}
+                                {step < 2 && (
+                                    <div className="btn-next">
+                                        <button type="button" onClick={handleNext} className="btn btn-outline-primary py-2">ถัดไป</button>
+                                    </div>
+                                )}
+                                {step === 2 && (
+                                    <div className="btn-next">
+                                        <button type="submit" className="btn btn-outline-primary py-2">บันทึก</button>
+                                    </div>
+                                )}
+                            </div>
+                        </form>
+                    )}
                 </div>
+
                 <ToastContainer />
             </div>
         </main>

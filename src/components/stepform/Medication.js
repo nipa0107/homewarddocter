@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useForm, Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 
 export const Medication = () => {
   const { register, control } = useFormContext();
@@ -7,178 +7,168 @@ export const Medication = () => {
     prescribedMedication: '',
     actualMedication: '',
     supplements: '',
-    administration: '', 
-    consistency: '',
-    intake: '', 
+    administration: '',
+    intake: '',
     consistency: ''
   });
-  const handleAdministrationChange = (e) => {
-    setMedicationData({ ...medicationData, administration: e.target.value });
-  };
 
-  const handleIntakeChange = (e) => {
-    setMedicationData({ ...medicationData, intake: e.target.value });
-  };
-
-  // Handler for consistency changes
-  const handleConsistencyChange = (e) => {
-    setMedicationData({ ...medicationData, consistency: e.target.value });
+  const handleRadioChange = (e, fieldName) => {
+    setMedicationData({ ...medicationData, [fieldName]: e.target.value });
   };
 
   return (
-    <div className="info3 card mt-4">
-      <div className="header" align="center">
-        <b>Medication</b>
+    <div>
+      {/* Text input: Prescribed medication */}
+      <div className="info3 card">
+        <div className="header">
+          <b>Medication</b>
+        </div>
+        <div className="m-4">
+          <label className="form-label">ยาที่แพทย์สั่ง :</label><br></br>
+          <div>
+            <Controller
+              name="prescribedMedication"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <textarea
+                  className="google-form-input"
+                  placeholder="กรอกยาที่แพทย์สั่ง"
+                  {...field}
+                />
+              )}
+            />
+          </div>
+        </div>
       </div>
-      <div className='m-4'>
-        <table className='nutrition-table'>
-          <tbody>
-            <tr>
-              <td>ยาที่แพทย์สั่ง:</td>
-              <td colSpan="2">
-                <Controller
-                  name="prescribedMedication"
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <textarea
-                      type="text"
-                      className="form-control"
-                      placeholder="กรอกยาที่แพทย์สั่ง"
-                      {...field}
-                      value={medicationData.prescribedMedication}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setMedicationData({ ...medicationData, prescribedMedication: e.target.value });
-                      }}
-                    />
-                  )}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>การใช้ยาจริง:</td>
-              <td colSpan="2">
-                <Controller
-                  name="actualMedication"
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <textarea
-                      type="text"
-                      className="form-control"
-                      placeholder="กรอกการใช้ยาจริง"
-                      {...field}
-                      value={medicationData.actualMedication}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setMedicationData({ ...medicationData, actualMedication: e.target.value });
-                      }}
-                    />
-                  )}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>อาหารเสริม:</td>
-              <td colSpan="2">
-                <Controller
-                  name="supplements"
-                  control={control}
-                  defaultValue=""
-                  render={({ field }) => (
-                    <textarea
-                      type="text"
-                      className="form-control"
-                      placeholder="กรอกอาหารเสริม"
-                      {...field}
-                      value={medicationData.supplements}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setMedicationData({ ...medicationData, supplements: e.target.value });
-                      }}
-                    />
-                  )}
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>การบริหารยา:</td>
-              <td>
-                <input
-                  type="radio"
-                  {...register("administration")}
-                  value="selfAdministered"
-                  checked={medicationData.administration === "selfAdministered"}
-                  onChange={handleAdministrationChange}
-                /> จัดยาด้วยตนเอง
-              </td>
-              <td>
-                <input
-                  type="radio"
-                  {...register("administration")}
-                  value="administeredByOther"
-                  checked={medicationData.administration === "administeredByOther"}
-                  onChange={handleAdministrationChange}
-                /> มีคนจัดยาให้
-              </td>
-            </tr>
-            <tr>
-              <td>การรับประทานยา: </td>
-              <td>
-                <input
-                  type="radio"
-                  {...register("intake")}
-                  value="selfTaken"
-                  checked={medicationData.intake === "selfTaken"}
-                  onChange={handleIntakeChange}
-                /> รับประทานยาด้วยตัวเอง
-              </td>
-              <td>
-                <input
-                  type="radio"
-                  {...register("intake")}
-                  value="preparedEachMeal"
-                  checked={medicationData.intake === "preparedEachMeal"}
-                  onChange={handleIntakeChange}
-                /> มีคนเตรียมยาแต่ละมื้อให้
-              </td>
-            </tr>
-            <tr>
-              <td>ความสม่ำเสมอ:</td>
-              <td>
-                <input
-                  type="radio"
-                  {...register("consistency")}
-                  value="consistent"
-                  checked={medicationData.consistency === "consistent"}
-                  onChange={handleConsistencyChange}
-                /> สม่ำเสมอทุกวัน
-              </td>
-              <td>
-                <input
-                  type="radio"
-                  {...register("consistency")}
-                  value="occasionalMiss"
-                  checked={medicationData.consistency === "occasionalMiss"}
-                  onChange={handleConsistencyChange}
-                /> หลงลืมบางครั้ง
-              </td>
-            </tr>
-            <tr>
-              <td></td>
-              <td colSpan="2">
-                <input
-                  type="radio"
-                  {...register("consistency")}
-                  value="inconsistent"
-                  checked={medicationData.consistency === "inconsistent"}
-                  onChange={handleConsistencyChange}
-                /> ไม่สม่ำเสมอ
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+      {/* Text input: Actual medication */}
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">การใช้ยาจริง :</label><br></br>
+          <Controller
+            name="actualMedication"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <textarea
+                className="google-form-input"
+                placeholder="กรอกการใช้ยาจริง"
+                {...field}
+              />
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Text input: Supplements */}
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">อาหารเสริม :</label><br></br>
+          <Controller
+            name="supplements"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <textarea
+                className="google-form-input"
+                placeholder="กรอกอาหารเสริม"
+                {...field}
+              />
+            )}
+          />
+        </div>
+      </div>
+
+      {/* Radio buttons: Administration */}
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">การบริหารยา :</label><br></br>
+          <div>
+            <input
+              type="radio"
+              {...register("administration")}
+              value="selfAdministered"
+              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+              checked={medicationData.administration === "selfAdministered"}
+              onChange={(e) => handleRadioChange(e, 'administration')}
+            /><span style={{ marginLeft: '10px' }}> จัดยาด้วยตนเอง </span> 
+          </div>
+          <div>
+            <input
+              type="radio"
+              {...register("administration")}
+              value="administeredByOther"
+              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+              checked={medicationData.administration === "administeredByOther"}
+              onChange={(e) => handleRadioChange(e, 'administration')}
+            /><span style={{ marginLeft: '10px' }}> มีคนจัดยาให้ </span> 
+          </div>
+        </div>
+      </div>
+
+      {/* Radio buttons: Intake */}
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">การรับประทานยา :</label><br></br>
+          <div>
+            <input
+              type="radio"
+              {...register("intake")}
+              value="selfTaken"
+              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+              checked={medicationData.intake === "selfTaken"}
+              onChange={(e) => handleRadioChange(e, 'intake')}
+            /><span style={{ marginLeft: '10px' }}> รับประทานยาด้วยตัวเอง </span> 
+          </div>
+          <div>
+            <input
+              type="radio"
+              {...register("intake")}
+              value="preparedEachMeal"
+              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+              checked={medicationData.intake === "preparedEachMeal"}
+              onChange={(e) => handleRadioChange(e, 'intake')}
+            /><span style={{ marginLeft: '10px' }}> มีคนเตรียมยาแต่ละมื้อให้ </span> 
+          </div>
+        </div>
+      </div>
+
+      {/* Radio buttons: Consistency */}
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">ความสม่ำเสมอ :</label><br></br>
+          <div>
+            <input
+              type="radio"
+              {...register("consistency")}
+              value="consistent"
+              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+              checked={medicationData.consistency === "consistent"}
+              onChange={(e) => handleRadioChange(e, 'consistency')}
+            /><span style={{ marginLeft: '10px' }}>สม่ำเสมอทุกวัน</span> 
+          </div>
+          <div>
+            <input
+              type="radio"
+              {...register("consistency")}
+              value="occasionalMiss"
+              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+              checked={medicationData.consistency === "occasionalMiss"}
+              onChange={(e) => handleRadioChange(e, 'consistency')}
+            /><span style={{ marginLeft: '10px' }}> หลงลืมบางครั้ง </span> 
+          </div>
+          <div>
+            <input
+              type="radio"
+              {...register("consistency")}
+              value="inconsistent"
+              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+              checked={medicationData.consistency === "inconsistent"}
+              onChange={(e) => handleRadioChange(e, 'consistency')}
+            /><span style={{ marginLeft: '10px' }}> ไม่สม่ำเสมอ </span> 
+          </div>
+        </div>
       </div>
     </div>
   );

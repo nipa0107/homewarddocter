@@ -5,7 +5,7 @@ import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
-import { renderAlerts } from './Alert/renderAlerts'; 
+import { renderAlerts } from './Alert/renderAlerts';
 
 export default function Assessmentuser({ }) {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ export default function Assessmentuser({ }) {
     setShowNotifications(!showNotifications);
   };
 
-  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
@@ -72,7 +72,7 @@ export default function Assessmentuser({ }) {
           window.localStorage.clear();
           window.location.href = "./";
         }
-        return data.data; 
+        return data.data;
       })
       .catch((error) => {
         console.error("Error verifying token:", error);
@@ -83,7 +83,7 @@ export default function Assessmentuser({ }) {
       .then((alerts) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
-          (alert) => !alert.viewedBy.includes(userId) 
+          (alert) => !alert.viewedBy.includes(userId)
         ).length;
         setUnreadCount(unreadAlerts);
       })
@@ -91,22 +91,22 @@ export default function Assessmentuser({ }) {
         console.error("Error fetching alerts:", error);
       });
   };
-  
+
   useEffect(() => {
     const token = window.localStorage.getItem("token");
     setToken(token);
-  
+
     if (token) {
       fetchUserData(token)
         .then(user => {
-          setUserId(user._id); 
-          fetchAndSetAlerts(token, user._id); 
-          
+          setUserId(user._id);
+          fetchAndSetAlerts(token, user._id);
+
           const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id); 
+            fetchAndSetAlerts(token, user._id);
             fetchAllUsers(user._id);
           }, 1000);
-  
+
           return () => clearInterval(interval);
         })
         .catch((error) => {
@@ -114,7 +114,7 @@ export default function Assessmentuser({ }) {
         });
     }
   }, []);
-  
+
 
   const markAllAlertsAsViewed = () => {
     fetch("http://localhost:5000/alerts/mark-all-viewed", {
@@ -138,14 +138,14 @@ export default function Assessmentuser({ }) {
         console.error("Error marking all alerts as viewed:", error);
       });
   };
-  
+
   const handleFilterChange = (type) => {
     setFilterType(type);
   };
 
-const filteredAlerts = filterType === "unread"
-  ? alerts.filter(alert => !alert.viewedBy.includes(userId))
-  : alerts;
+  const filteredAlerts = filterType === "unread"
+    ? alerts.filter(alert => !alert.viewedBy.includes(userId))
+    : alerts;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -213,7 +213,7 @@ const filteredAlerts = filterType === "unread"
       fetchpatientForms();
     }
   }, [id]);
-  
+
 
   const fetchAssessments = async () => {
     try {
@@ -234,12 +234,6 @@ const filteredAlerts = filterType === "unread"
   useEffect(() => {
     fetchAssessments();
   }, []);
-
-  // const hasAssessment = (patientFormId) => {
-  //   return assessments.some(
-  //     (assessment) => assessment.PatientForm === patientFormId
-  //   );
-  // };
 
   const fetchMpersonnel = async () => {
     try {
@@ -331,7 +325,7 @@ const filteredAlerts = filterType === "unread"
       } น.`;
   };
 
-// แช็ตยังไม่อ่าน
+  // แช็ตยังไม่อ่าน
   const fetchAllUsers = async (userId) => {
     try {
       const response = await fetch(
@@ -424,7 +418,7 @@ const filteredAlerts = filterType === "unread"
             </a>
           </li>
           <li>
-          <a href="chat" style={{ position: "relative" }}>
+            <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
               {countUnreadUsers() !== 0 && (
@@ -450,10 +444,10 @@ const filteredAlerts = filterType === "unread"
       </div>
 
       <div className="home_content">
-      <div className="homeheader">
+        <div className="homeheader">
 
-        <div className="header">ติดตาม/ประเมินอาการ</div>
-        <div className="profile_details">
+          <div className="header">ติดตาม/ประเมินอาการ</div>
+          <div className="profile_details">
             <ul className="nav-list">
               <li>
                 <a className="bell-icon" onClick={toggleNotifications}>
@@ -616,40 +610,40 @@ const filteredAlerts = filterType === "unread"
                   ))
               ) : (
                 <tr>
-                <td colSpan="4" className="assessmentnull" style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                  ยังไม่มีการบันทึกอาการ
-                </td>
-              </tr>
-              
+                  <td colSpan="4" className="assessmentnull" style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                    ยังไม่มีการบันทึกอาการ
+                  </td>
+                </tr>
+
               )}
             </tbody>
           </table>
         </div>
         {showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
-            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-            <div className="notifications-filter">
-              <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                ดูทั้งหมด
-              </button>
-              <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                ยังไม่อ่าน
-              </button>
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
+              <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+              <div className="notifications-filter">
+                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                  ดูทั้งหมด
+                </button>
+                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                  ยังไม่อ่าน
+                </button>
+              </div>
             </div>
+            {filteredAlerts.length > 0 ? (
+              <>
+                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+              </>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          {filteredAlerts.length > 0 ? (
-            <>
-              {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-            </>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
       </div>
     </main>
   );

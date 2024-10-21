@@ -7,12 +7,11 @@ import { useParams } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
 
-export default function Assessinhomesssuser({ }) {
+export default function Assessreadinessuser({ }) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [isActive, setIsActive] = useState(false);
     const [token, setToken] = useState("");
-    const [patientForms, setPatientForms] = useState("");
     const location = useLocation();
     const { id } = location.state;
     const [username, setUsername] = useState("");
@@ -20,8 +19,8 @@ export default function Assessinhomesssuser({ }) {
     const [surname, setSurname] = useState("");
     const [gender, setGender] = useState("");
     const [birthday, setBirthday] = useState("");
-    const [assessments, setAssessments] = useState([]);
-    const [mpersonnel, setMPersonnel] = useState([]);
+    const [readinessAssessments, setReadinessAssessments] = useState([]);
+    const [MPersonnel, setMPersonnel] = useState([]);
     const [userAge, setUserAge] = useState(0);
     const [userAgeInMonths, setUserAgeInMonths] = useState(0);
     const [userData, setUserData] = useState(null);
@@ -34,6 +33,8 @@ export default function Assessinhomesssuser({ }) {
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
     const [userId, setUserId] = useState("");
+    const [readinessForms, setReadinessForms] = useState([]);
+
     const toggleNotifications = () => {
         setShowNotifications(!showNotifications);
     };
@@ -185,28 +186,6 @@ export default function Assessinhomesssuser({ }) {
         }
     }, [userData]);
 
-
-
-    const fetchMpersonnel = async () => {
-        try {
-            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            setMPersonnel(data.data);
-            console.log("Mpersonnel:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchMpersonnel();
-    }, []);
-
     const currentDate = new Date();
 
     const userBirthday = new Date(birthday);
@@ -315,6 +294,72 @@ export default function Assessinhomesssuser({ }) {
         });
         return unreadUsers.length;
     };
+
+    const fetchreadinessForms = async () => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/getReadinessForms/${id}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const data = await response.json();
+            setReadinessForms(data.data);
+            console.log("Patient Forms:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (id) {
+            fetchreadinessForms();
+        }
+    }, [id]);
+
+    const fetchMpersonnel = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setMPersonnel(data.data);
+            console.log("Mpersonnel:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchMpersonnel();
+    }, []);
+
+    const fetchReadinessAssessments = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/allReadinessAssessment`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setReadinessAssessments(data.data);
+            console.log("AssessmentForms:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchReadinessAssessments();
+    }, []);
+
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -385,8 +430,7 @@ export default function Assessinhomesssuser({ }) {
 
             <div className="home_content">
                 <div className="homeheader">
-
-                    <div className="header">แบบประเมินเยี่ยมบ้าน</div>
+                    <div className="header">ประเมินความพร้อมการดูแล</div>
                     <div className="profile_details">
                         <ul className="nav-list">
                             <li>
@@ -448,8 +492,8 @@ export default function Assessinhomesssuser({ }) {
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
                         <li>
-                            <a href="assessinhomesss" className="info">
-                                แบบประเมินเยี่ยมบ้าน
+                            <a href="assessreadiness" className="info">
+                                ประเมินความพร้อมการดูแล
                             </a>
                         </li>
                         <li className="arrow">
@@ -460,7 +504,6 @@ export default function Assessinhomesssuser({ }) {
                         </li>
                     </ul>
                 </div>
-                <div className="toolbar"></div>
                 <div className="content">
                     <div className="">
                         <p className="headerassesment">
@@ -488,35 +531,82 @@ export default function Assessinhomesssuser({ }) {
                                 ? medicalData.Diagnosis
                                 : "ไม่มีข้อมูล"}
                         </p>
-
                     </div>
-                    <table className="table">
+                    <div className="toolbar">
+                        {readinessForms.length > 0 && (
+                            <button
+                                className="btn btn-primary add-assessment-btn"
+                                onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}
+                            >
+                                เพิ่มการประเมิน
+                            </button>
+                        )}
+                    </div>
+                    <br></br>
+                    <table className="table mt-5">
                         <thead>
                             <tr>
+                                <th>ประเมินครั้งที่</th>
                                 <th>วันที่บันทึก</th>
-                                <th>ผลการประเมิน</th>
-                                <th>ผู้ประเมิน</th>
+                                <th>ผลการประเมินความพร้อม</th>
+                                <th>ผู้บันทึก</th>
                             </tr>
-
                         </thead>
                         <tbody>
-                            <tr>
-                                <td colSpan="3" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                    <a
-                                        className="info"
-                                        onClick={() =>
-                                            navigate("/LinearStepper", { state: { id: userData._id } })
-                                        }
-                                    >
-                                        <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
+                            {readinessForms.length > 0 ? (
+                                readinessForms
+                                    // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                                    .map((form, index) => (
+                                        <tr
+                                            key={form._id}
+                                            onClick={() => navigate("/detailassessreadiness", { state: { id: form._id } })}
+                                            style={{ cursor: "pointer" }} // Add cursor pointer to indicate it's clickable
+                                        >
+                                            <td>{index + 1}</td>
+                                            <td>{formatDate(form.createdAt)}</td>
+                                            <td>
+                                                {readinessAssessments.some(
+                                                    (readinessassessment) => readinessassessment.ReadinessForm === form._id
+                                                ) ? (
+                                                    readinessAssessments.map((readinessassessment) =>
+                                                        readinessassessment.ReadinessForm === form._id ? (
+                                                            <span
+                                                                key={readinessassessment._id}
+                                                                className={
+                                                                    readinessassessment.readiness_status === "มีความพร้อม"
+                                                                        ? "normal-status"
+                                                                        : readinessassessment.readiness_status === "ยังไม่มีความพร้อม"
+                                                                            ? "abnormal-status"
+                                                                            : // readinessassessment.status_name === "ผิดปกติ" ? "abnormal-status" :
+                                                                            "end-of-treatment-status"
+                                                                }
+                                                            >
+                                                                {readinessassessment.readiness_status}
+                                                            </span>
+                                                        ) : null
+                                                    )
+                                                ) : (
+                                                    <span className="not-evaluated">
+                                                        ยังไม่ได้ประเมินความพร้อม
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ยังไม่ได้รับการประเมิน"}</td>
 
+                                        </tr>
+                                    ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="3" style={{ textAlign: "center" }}>
+                                        <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}>
+                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
                     </table>
                 </div>
-
             </div>
         </main>
     );

@@ -1,0 +1,792 @@
+.add {
+    border-style: solid 1px;
+    border-radius: 5px;
+}
+
+/* .form_content {
+    position: relative;
+    height: 100%;
+    transition: all 0.5s ease;
+    margin-bottom: 2%;
+} */
+.sidebarform {
+    position: fixed;
+    border-right: 1px solid #87CEFA;
+    /* background: #11101D; */
+    /* background-color: #87CEFA; */
+    /* background: #30a9f4; */
+    /* margin-left: 80px; */
+    display: flex;
+    overflow: hidden;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.add:hover {
+    background-color: #87CEFA;
+    color: #ffffff;
+    border-color: #87CEFA;
+}
+
+.deleteimg {
+    border-radius: 10px;
+    width: 5vh;
+    /* float: right; */
+    margin: auto auto;
+}
+
+.btn-pre button {
+    color: #000;
+    /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
+    background-color: #fff;
+    /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
+    border: 1px solid #ccc;
+    /* ตั้งค่าขอบเป็นสีเทา */
+    padding: 10px 20px;
+    /* ตั้งค่าการระบุช่องว่างภายในปุ่ม */
+    cursor: pointer;
+    /* เพิ่ม cursor เมื่อนำเมาส์ไปวางที่ปุ่ม */
+    outline: none;
+    /* ลบเส้นขอบน้ำเงินเมื่อกด */
+}
+
+.btn-pre button:hover {
+    background-color: #eee;
+    /* สีพื้นหลังเมื่อโฮเวอร์ปุ่ม */
+}
+
+.btn-next button {
+    padding: 10px 30px;
+    background-color: #87CEFA;
+    border-color: #87CEFA;
+}
+
+.adminall .card-body .deleteimg {
+    float: right;
+}
+
+.adminall {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+    line-height: 50px;
+    padding: 20px;
+}
+
+.adminall form {
+    padding: 20px;
+}
+
+.editimg {
+    border-radius: 10px;
+    width: 5vh;
+    float: right;
+    margin: auto auto;
+}
+
+.content {
+    margin-top: 10px;
+}
+
+.form {
+    align-items: center;
+}
+
+.btn {
+    background-color: #87CEFA;
+    color: white;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.cardall {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+    line-height: 50px;
+    padding: 20px;
+}
+
+.filename a {
+    text-decoration: none;
+    color: rgb(72, 72, 72);
+    border: 1px solid rgb(228, 228, 228);
+    padding: 7px;
+    border-radius: 8px;
+}
+
+.filename a:hover {
+    background-color: #7e7e7e;
+    color: white;
+}
+
+.gray-background {
+    background-color: #e9ecef;
+}
+
+.success {
+    text-align: center;
+}
+
+tr.assessmentnull {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.headerassesment {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.textassesment {
+    text-align: center;
+}
+
+.contentinass {
+    width: 80%;
+    margin: 0 auto;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+    /* line-height: 50px;  */
+    padding: 1%;
+    border-collapse: collapse;
+    border-spacing: 1;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+
+}
+
+.texthead {
+    text-align: center;
+    font-weight: bold;
+
+}
+
+.textheadSymptom {
+    font-weight: bold;
+}
+
+.btn-group {
+    gap: 10px;
+    display: flex;
+    justify-content: center;
+    /* margin-bottom: 30px; */
+}
+
+.btn-pre button {
+    color: #000;
+    /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
+    background-color: #fff;
+    /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
+    border: 1px solid #ccc;
+    /* ตั้งค่าขอบเป็นสีเทา */
+    padding: 10px 20px;
+    /* ตั้งค่าการระบุช่องว่างภายในปุ่ม */
+    cursor: pointer;
+    /* เพิ่ม cursor เมื่อนำเมาส์ไปวางที่ปุ่ม */
+    outline: none;
+    /* ลบเส้นขอบน้ำเงินเมื่อกด */
+}
+
+.btn-pre button:hover {
+    background-color: #eee;
+    /* สีพื้นหลังเมื่อโฮเวอร์ปุ่ม */
+}
+
+.btn-next button {
+    padding: 10px 30px;
+}
+
+.right-info {
+    margin-top: 21px;
+    margin-left: 21px;
+    word-spacing: 10px;
+    flex: 1;
+}
+
+.right-info1 {
+    margin-top: 21px;
+    margin-left: 25px;
+    word-spacing: 10px;
+    flex: 1;
+}
+
+.left-info {
+    margin-top: 12px;
+    word-spacing: 12px;
+    padding: 10px;
+    margin-left: 30px;
+}
+
+.user-info p {
+    line-height: 15px;
+}
+
+.deleteimg1 button {
+    border-radius: 5px;
+    width: 10vh;
+    background-color: rgb(236, 78, 78);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.editimg1 button {
+    border-radius: 5px;
+    width: 10vh;
+    background-color: #ffde59;
+    color: black;
+    border: none;
+    cursor: pointer;
+
+}
+
+.adddata {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.adddata button {
+    border-radius: 5px;
+    width: 11vh;
+    background-color: #87CEFA;
+    color: white;
+    border: none;
+}
+
+.adddata button:hover {
+    background-color: #5cb3fd;
+    /* Darker blue on hover */
+}
+
+.delete-btn {
+    color: rgb(255, 255, 255);
+    background: rgb(236, 78, 78);
+    border-radius: 3px;
+    width: 10vh;
+    padding: 15px;
+    border: none;
+    margin-left: 390px;
+    /* ปรับตำแหน่งของปุ่มลบ */
+}
+
+.no-equipment {
+    margin-top: 20px;
+    /* ปรับระยะห่างของข้อความ "ไม่มีข้อมูลอุปกรณ์" */
+    text-align: center;
+}
+
+.equip-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.equipment-item {
+    display: flex;
+    align-items: center;
+}
+
+.equipment-item input {
+    margin-right: 10px;
+    margin-top: 8px;
+}
+
+.adminall .card-body .deleteimg1 {
+    float: none;
+    /* Remove float property */
+}
+
+.mb-3 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btnass {
+    flex: 1;
+    padding: 0.5rem 1.3rem;
+    cursor: pointer;
+    margin: 5px;
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Outline button style */
+.btn-outline {
+    border: 1px solid #ccc;
+    background-color: transparent;
+}
+
+/* Normal status button style */
+.btn-normal {
+    background-color: #72DA95;
+    color: white;
+}
+
+/* Abnormal status button style */
+.btn-abnormal {
+    background-color: #FF6A6A;
+    color: white;
+}
+
+/* Completed status button style */
+.btn-completed {
+    background-color: #FFCC80;
+    color: white;
+}
+
+
+.normal-status {
+    /* color: #72DA95; */
+    color: #1fc657;
+
+
+}
+
+.abnormal-status {
+    color: #FF6A6A;
+}
+
+.end-of-treatment-status {
+    color: #FFCC80;
+}
+
+.not-evaluated {
+    color: #B2B2B2;
+    text-align: center;
+}
+
+.info {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.user-info {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 6%;
+
+}
+
+.info3 .header {
+    background-color: #95d7ff;
+    /* สีฟ้า */
+    color: #000;
+    /* ตัวหนังสือสีดำ */
+    padding: 5px 0px 5px 25px;
+    margin: 0;
+    border-radius: 3px 3px 0 0;
+}
+
+.info3 .header b {
+    font-size: 20px;
+}
+
+.info3.card {
+    padding: 0;
+}
+
+/* In stylechat.css or form.css */
+.bodyform {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    /* Full viewport height */
+    background-color: #e7f5fe;
+}
+
+.homeheaderform {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    background-color: #ffffff;
+}
+
+.sidebarform {
+    position: fixed;
+    top: 110px;
+    /* Offset for the fixed header */
+    left: 250px;
+    width: 390px;
+    height: calc(89vh - 50px);
+    /* Full height minus the header */
+    border: 1px solid #ddd;
+    background-color: white;
+    overflow-y: auto;
+}
+
+.form-label {
+    font-size: 18px;
+    /* หรือขนาดที่คุณต้องการ */
+    /* font-weight: bold; */
+}
+
+.form-content {
+    margin-left: 500px;
+    /* Sidebar width */
+    margin-top: 100px;
+    /* Offset for the header */
+    padding: 20px;
+    height: calc(100vh - 60px);
+    /* Full height minus the header */
+    overflow-y: auto;
+    /* Scrollable content */
+}
+
+.info3 {
+    width: 55%;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 50px;
+}
+
+.headerassesmentinhome {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.textassesmentinhome {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.textassesmentinhome label {
+    font-weight: bold;
+    color: #323232;
+}
+
+.sideassessment {
+    /* margin-left: 65px; */
+
+}
+
+.nameassessment {
+    border-bottom: 1px solid #ddd;
+    margin-top: 10px;
+    margin-left: 25px;
+}
+
+.contentinass {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.texthead {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #444;
+    margin-bottom: 10px;
+}
+
+.homeheaderform {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem;
+}
+
+/* Symptom heading styles */
+.textheadSymptom {
+    font-size: 1.2em;
+    font-weight: bold;
+    /* color: #ff6f61; */
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* General text styles */
+.text {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Styles for symptoms */
+/* .contentinass p {
+    margin: 5px 5px;
+  } */
+
+.text p {
+    color: #333;
+}
+
+.textheadSymptom p {
+    color: #ff6f61;
+}
+
+.contentinass p:nth-child(odd) {
+    /* background: #f1f1f1; */
+    /* padding: 0.5rem; */
+    border-radius: 4px;
+}
+
+.contentinass p:nth-child(even) {
+    /* background: #e9e9e9 ;  */
+    /* padding: 5px; */
+    border-radius: 4px;
+}
+
+.form-controls {
+    font-size: 2vh;
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+
+p .label {
+    font-weight: bold;
+    display: block;
+    color: #333;
+}
+
+.inline-container {
+    display: flex;
+    align-items: center;
+}
+
+.inline-container .title-ptf {
+    margin-left: 3%;
+    margin-right: 1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.inline-container .title-ass {
+    margin-left: 3%;
+    margin-right: 1rem;
+    font-weight: bold;
+    color: #333;
+    flex: 0 0 10%;
+    display: flex;
+}
+
+.textassesment label {
+    margin-left: 1%;
+    margin-right: 0.5rem;
+    font-size: 16;
+    font-weight: bold;
+    color: #333;
+
+}
+
+
+.inline-container .text {
+    flex: 1;
+    margin: 0;
+    color: #555;
+}
+
+.inline-container textarea {
+    flex: 1;
+    padding: 8px;
+    margin-top: 8px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.inline-container textarea:focus {
+    border-color: #87CEFA;
+    box-shadow: 0 0 5px rgba(13, 124, 242, 0.5);
+}
+
+textarea {
+    resize: none;
+    height: auto;
+    min-height: 100px;
+    height: 50%;
+}
+
+.select {
+    width: 20%;
+}
+
+.custom-legend {
+    font-size: 100px;
+    color: #fff;
+}
+
+.gray-text {
+    color: rgba(214, 214, 214, 0.6);
+    /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
+}
+
+.no-notification {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.symtoms-count {
+    margin-left: 5;
+}
+
+.evaluated {
+    color: rgb(7, 195, 7);
+    /* Text color for evaluated */
+}
+
+.assessment-table {
+    width: 100%;
+    border-collapse: collapse;
+
+
+}
+
+.assessment-table th,
+.assessment-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.assessment-table th {
+    background-color: #f4f4f4;
+    color: #333;
+    font-weight: bold;
+}
+
+.assessment-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.diagnosis-legend {
+    margin-top: 100px;
+}
+
+.linear-stepper-container {
+    display: flex;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.stepper-container {
+    margin-left: 10rem;
+}
+
+.form-container {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+/* .btn-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.btn {
+    padding: 0.8rem 2rem;
+    border: none;
+    cursor: pointer;
+} */
+.stepper {
+    margin-left: 5rem;
+    color: #f9f9f9;
+}
+
+.homeheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-form-input {
+    border: none;
+    border-bottom: 2px solid #ccc;
+    font-size: 16px;
+    transition: border-color 0.3s ease-in-out;
+    width: 100%;
+}
+
+.google-form-input:focus {
+    outline: none;
+    border-bottom: 2px solid #4285f4;
+    /* Google Forms blue */
+}
+
+.google-form-input::placeholder {
+    color: #ccc;
+}
+
+/* .form-input-other {
+    border-bottom: 1px solid #4285f4;
+    outline: none;
+    margin-left: 10px;
+    width: 200px;
+} */
+.feedback-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.feedback-table th,
+.feedback-table td {
+    border: none;
+    /* Remove borders */
+    padding-left: 1px;
+    line-height: 45px;
+}
+
+.feedback-table tbody tr {
+    border-bottom: 4px solid #ffffff;
+    border-top: 4px solid #ffffff;
+}
+
+.feedback-table tbody tr {
+    background-color: #f8f8f8;
+}
+
+.nutrition-table td {
+    padding: 5px;
+    vertical-align: middle;
+}
+
+.textnutrition {
+    margin: 0;
+}
+
+.nutrition-table tbody tr {
+    border-bottom: 4px solid #ffffff;
+    border-top: 4px solid #ffffff;
+}
+
+.nutrition-table tbody tr {
+    background-color: #f8f8f8;
+}
+
+.textassesmentinhome label {
+    margin-right: 10px; /* ระยะห่างทางขวาจาก label */
+}

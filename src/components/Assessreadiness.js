@@ -533,15 +533,11 @@ export default function Assessreadiness() {
                         </span>
                       </td>
                       <td>
-                        {assessmentStatuses[user._id] === 'ประเมินแล้ว' ? (
-                          <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id: user._id } })}>
-                            <span className="evaluated">ประเมินแล้ว</span>
-                          </a>
-                        ) : (
-                          <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: user._id } })}>
-                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                          </a>
-                        )}
+                        
+                          <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id: user._id } })}>
+                          รายละเอียด
+                        </a>
+                        
                       </td>
                     </tr>
                   );

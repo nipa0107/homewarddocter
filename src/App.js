@@ -31,6 +31,7 @@ import Assessreadiness1 from "./components/Assessrdnpage1";
 import DetailAssessreadiness from "./components/detailassessrdn";
 import Assessinhomesss from "./components/Assessinhomesss";
 import Assessinhomesssuser from "./components/Assessinhomesssuser";
+import Assessreadinessuser from "./components/Assessreadinessuser";
 import MultiStepForm from "./components/MultiStepForm";
 // import Immobility from "./components/Immobility";
 
@@ -177,6 +178,15 @@ function App() {
             element={
               <PrivateRoute
                 element={<Assessreadiness />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/assessreadinessuser"
+            element={
+              <PrivateRoute
+                element={<Assessreadinessuser />}
                 isLoggedIn={isLoggedIn}
               />
             }

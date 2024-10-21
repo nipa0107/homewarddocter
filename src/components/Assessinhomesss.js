@@ -525,7 +525,7 @@ export default function Assessinhomesss({ }) {
                         <a
                           className="info"
                           onClick={() =>
-                            navigate("/LinearStepper", {
+                            navigate("/assessinhomesssuser", {
                               state: { id: i._id },
                             })
                           }

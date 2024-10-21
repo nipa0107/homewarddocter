@@ -4,7 +4,7 @@ import CountUp from 'react-countup';
 
 
 export const Immobility = () => {
-  const { control, getValues } = useFormContext();
+  const { control, getValues, setValue } = useFormContext();
   const [totalScore, setTotalScore] = useState(null);
   const [group, setGroup] = useState('');
 
@@ -35,6 +35,7 @@ export const Immobility = () => {
     });
 
     setTotalScore(total);
+    setValue('totalScore', total);  // Update the form's totalScore field
 
     if (total >= 16 && total <= 20) {
       setGroup('กลุ่มที่ 1 (ช่วยเหลือตัวเองดี)');
@@ -53,7 +54,7 @@ export const Immobility = () => {
       if (totalScore >= 36) {
         return 'text-danger'; // Red for group 3
       } else if (totalScore >= 21) {
-        return 'text-warning'; // Orange for group 2
+        return 'text-primary'; // Orange for group 2
       } else if (totalScore >= 16) {
         return 'text-success'; // Green for group 1
       }
@@ -63,12 +64,12 @@ export const Immobility = () => {
 
   return (
     <div>
-      <div className="info3 card mt-4">
-        <div className="header" align="center">
+      <div className="info3 card ">
+        <div className="header">
           <b>Immobility</b>
         </div>
         <div className='m-4'>
-          <b>กิจวัตรประจำวันพื้นฐาน</b>
+          <b>กิจวัตรประจำวันพื้นฐาน</b><span style={{ color: 'red' }}> *</span>
           <div className='grid' align="center">
             <div className='col'>
               <p>1 = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
@@ -80,20 +81,16 @@ export const Immobility = () => {
               <p>3 = ทำด้วยตนเองไม่ได้เลย</p>
             </div>
           </div>
-        </div>
-      </div>
-      <div className="adminall card mt-3 mb-4">
-        <table className="feedback-table">
+          <table className="feedback-table">
           <thead>
             <tr>
               <th></th>
               <th></th>
-              <th colSpan="2">คะแนนความสามารถในการทำกิจกรรม</th>
             </tr>
           </thead>
           <thead>
             <tr>
-              <th>รายการกิจกรรม</th>
+              <th></th>
               <th>1</th>
               <th>2</th>
               <th>3</th>
@@ -120,6 +117,7 @@ export const Immobility = () => {
                       render={({ field }) => (
                         <input
                           type="radio"
+                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
                           value={value}
                           checked={field.value === String(value)}
                           onChange={() => field.onChange(String(value))}
@@ -154,6 +152,7 @@ export const Immobility = () => {
                       render={({ field }) => (
                         <input
                           type="radio"
+                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
                           value={value}
                           checked={field.value === String(value)}
                           onChange={() => field.onChange(String(value))}
@@ -166,10 +165,13 @@ export const Immobility = () => {
             ))}
           </tbody>
         </table>
+        </div>
+        
       </div>
-      <div className="info3 card mt-4">
+
+      <div className="info3 card mt-3">
         <div className='m-4'>
-          <b>กิจวัตรที่ซับซ้อน</b>
+          <b>กิจวัตรที่ซับซ้อน</b><span style={{ color: 'red' }}> *</span>
           <div className='grid' align="center">
             <div className='col'>
               <p>1 = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
@@ -181,20 +183,17 @@ export const Immobility = () => {
               <p>3 = ทำด้วยตนเองไม่ได้เลย</p>
             </div>
           </div>
-        </div>
-      </div>
-      <div className="adminall card mt-3 mb-4">
-        <table className="feedback-table">
+          <table className="feedback-table">
           <thead>
             <tr>
               <th></th>
               <th></th>
-              <th colSpan="2">คะแนนความสามารถในการทำกิจกรรม</th>
+              <th></th>
             </tr>
           </thead>
           <thead>
             <tr>
-              <th>รายการกิจกรรม</th>
+              <th></th>
               <th>1</th>
               <th>2</th>
               <th>3</th>
@@ -220,6 +219,7 @@ export const Immobility = () => {
                         <input
                           type="radio"
                           value={value}
+                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
                           checked={field.value === String(value)}
                           onChange={() => field.onChange(String(value))}
                         />
@@ -231,32 +231,33 @@ export const Immobility = () => {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
-      <div className="info3 card mt-4">
-      <div className="header" align="center">
+      <div className="info3 card mt-3">
+        <div className="header">
           <b>การประเมินผล</b>
         </div>
         <div className='m-4'>
-          <div className='grid' align="center">
+          {/* <div className='grid' align="center">
             <div className='col'>
-              <p className='text-success'>16-20 คะแนน =  <br/>  กลุ่ม 1 (ช่วยเหลือตัวเองได้ดี)</p>
+              <p className='text-success'>16-20 คะแนน =  <br />  กลุ่ม 1 (ช่วยเหลือตัวเองได้ดี)</p>
             </div>
             <div className='col'>
-              <p className='text-warning'>21-35 คะแนน =  <br/>  กลุ่ม 2 (ช่วยเหลือตัวเองได้ปานกลาง)</p>
+              <p className='text-warning'>21-35 คะแนน =  <br />  กลุ่ม 2 (ช่วยเหลือตัวเองได้ปานกลาง)</p>
             </div>
             <div className='col'>
-              <p className='text-danger'>36-48 คะแนน =  <br/>  กลุ่ม 3 (ช่วยเหลือตัวเองได้น้อย)</p>
+              <p className='text-danger'>36-48 คะแนน =  <br />  กลุ่ม 3 (ช่วยเหลือตัวเองได้น้อย)</p>
             </div>
-          </div>
-          <hr></hr>
+          </div> */}
+          {/* <hr></hr> */}
           <div className='grid' align="center">
             <div className='col'>
               <b>คะแนนรวม = </b>
             </div>
             <div className='col'>
-              <b>{totalScore !== null  && (
+              <b>{totalScore !== null && (
                 <div className={`text-center mt-1 ${getGroupStyle()}`}>
-                  <h4><CountUp end={totalScore} duration={2}/></h4>
+                  <h4><CountUp end={totalScore} duration={2} /> คะแนน</h4>
                   <p>{group}</p>
                 </div>
               )}</b>
@@ -267,6 +268,20 @@ export const Immobility = () => {
               </button>
             </div>
           </div>
+
+          {/* Hidden input to store the total score in the form */}
+          <Controller
+            name="totalScore"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <input
+                type="hidden"
+                {...field}
+                value={totalScore !== null ? totalScore : ''}
+              />
+            )}
+          />
         </div>
       </div>
     </div>
