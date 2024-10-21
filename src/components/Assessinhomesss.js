@@ -530,7 +530,7 @@ export default function Assessinhomesss({ }) {
                             })
                           }
                         >
-                          <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                          รายละเอียด
                         </a>
                       </td>
                     </tr>

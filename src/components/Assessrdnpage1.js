@@ -726,11 +726,11 @@ export default function Assessreadiness1() {
                 </div>
                 <div className="adminall card mb-1">
                     {showMessage ? ( // Show message if assessment is completed
-                        <div className="success-message">
+                        <div className="success-message mt-2">
                             <h2>การประเมินเสร็จสิ้น</h2>
-                            
+                            <br></br>
                                 <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id } })}>ดูคำตอบ</a>
-                            
+                                <br></br>
                                 <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id} })}>กลับไปหน้าประเมินความพร้อม</a>
                             
                         </div>
