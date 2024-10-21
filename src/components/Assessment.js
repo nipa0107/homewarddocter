@@ -5,7 +5,8 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
-
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 export default function Assessment({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState("");
@@ -21,7 +22,16 @@ export default function Assessment({ }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
+  useEffect(() => {
+    socket.on('newAlert', (alert) => {
+      setAlerts(prevAlerts => [...prevAlerts, alert]);
+      setUnreadCount(prevCount => prevCount + 1);
+    });
 
+    return () => {
+      socket.off('newAlert'); // Clean up the listener on component unmount
+    };
+  }, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
@@ -148,13 +158,6 @@ export default function Assessment({ }) {
         .then(user => {
           setUserId(user._id);
           fetchAndSetAlerts(token, user._id);
-
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id);
-            fetchAllUsers(user._id);
-          }, 1000);
-
-          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);

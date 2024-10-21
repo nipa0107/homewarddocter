@@ -42,7 +42,7 @@ export default class Reset extends Component {
           <img src={logo} className="logoreset" alt="logo"></img>
         </div>
         <div className="header1">ลืมรหัสผ่าน</div>
-        <div className="formcontainerpf card mb-3">
+        <div className="formcontainerpf card">
       
 
         <form onSubmit={this.hanleSubmit}>
@@ -58,7 +58,7 @@ export default class Reset extends Component {
           </div>
 
           <div className="d-grid">
-            <button type="submit" className="btn btn-outline py-2">
+            <button type="submit" className="btn py-2">
             รีเซ็ทรหัสผ่าน
             </button>
             <br />

@@ -1,18 +1,20 @@
 import React, { useEffect, useState, useRef } from "react";
-import "../css/sidebar.css";
 import "../css/alladmin.css";
-import "../css/profile.css";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import "../css/sidebar.css";
 import logow from "../img/logow.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
+
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
-
-export default function Home({ }) {
-  const [data, setData] = useState([]);
+export default function VerifyOtp() {
+  // const [email, setEmail] = useState('');
+  // const [username, setUsername] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState("");
   const [alerts, setAlerts] = useState([]);
@@ -21,11 +23,13 @@ export default function Home({ }) {
   const [filterType, setFilterType] = useState("all");
   const [userId, setUserId] = useState("");
   const [allUsers, setAllUsers] = useState([]);
-  // const [datauser, setDatauser] = useState([]);
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [dataemail, setDataemail] = useState([]);
-
   const notificationsRef = useRef(null);
+  const [data, setData] = useState([]);
+
+  const [otp, setOtp] = useState("");
+  const { username, email } = location.state || {}; // รับ username และ email
+  const [timer, setTimer] = useState(300); // นับถอยหลัง 5 นาที (300 วินาที)
+  const [isOtpExpired, setIsOtpExpired] = useState(false);
 
   useEffect(() => {
     socket.on('newAlert', (alert) => {
@@ -37,6 +41,89 @@ export default function Home({ }) {
       socket.off('newAlert'); // Clean up the listener on component unmount
     };
   }, []);
+
+  useEffect(() => {
+    // ตั้งค่าการนับถอยหลัง
+    let countdown;
+    if (timer > 0) {
+      countdown = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      // เมื่อหมดเวลา
+      setIsOtpExpired(true);
+      setErrorMessage("OTP หมดอายุ");
+      setSuccessMessage("");
+    }
+    return () => clearInterval(countdown); // ล้าง interval เมื่อ component unmount หรือ timer เปลี่ยน
+  }, [timer]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (isOtpExpired) {
+      setErrorMessage("OTP หมดอายุ");
+      return;
+    }
+    fetch("http://localhost:5000/verify-otp2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, otp, newEmail: email }), // ส่ง username, otp และ newEmail
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setSuccessMessage("ยืนยันอีเมลสำเร็จ");
+          setTimeout(() => {
+            navigate("/profile"); // เปลี่ยนเส้นทางไปยังโปรไฟล์หลังจากยืนยัน
+          }, 1000);
+        } else {
+          setErrorMessage("OTP ไม่ถูกต้องหรือหมดอายุ");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage("เกิดข้อผิดพลาด: " + error.message);
+        console.error("Error:", error);
+      });
+  };
+
+  const handleRequestNewOtp = () => {
+    fetch("http://localhost:5000/send-otp2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username, email }), // ส่ง username และ newEmail
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setSuccessMessage("ส่ง OTP ใหม่เรียบร้อย");
+          setTimer(300); // รีเซ็ต timer
+          setIsOtpExpired(false);
+        } else {
+          setErrorMessage("เกิดข้อผิดพลาดในการส่ง OTP ใหม่");
+        }
+      })
+      .catch((error) => {
+        setErrorMessage("เกิดข้อผิดพลาด: " + error.message);
+        console.error("Error:", error);
+      });
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
+  };
+  // useEffect(() => {
+  //     if (dataemail) {
+  //       setEmail(dataemail.email);
+  //       setUsername(dataemail.username);
+  //     }
+  //   }, [dataemail]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -68,8 +155,6 @@ export default function Home({ }) {
       .then((res) => res.json())
       .then((data) => {
         setData(data.data);
-        setDataemail(data.data);
-        setIsEmailVerified(data.data.isEmailVerified);
         if (data.data == "token expired") {
           window.localStorage.clear();
           window.location.href = "./";
@@ -80,7 +165,6 @@ export default function Home({ }) {
         console.error("Error verifying token:", error);
       });
   };
-
 
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token)
@@ -105,7 +189,7 @@ export default function Home({ }) {
         .then((user) => {
           setUserId(user._id); // ตั้งค่า userId
           fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
-
+        
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -168,9 +252,11 @@ export default function Home({ }) {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-      } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } เวลา ${hours < 10 ? "0" + hours : hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } น.`;
   };
 
   const fetchAllUsers = async (userId) => {
@@ -237,13 +323,8 @@ export default function Home({ }) {
     setShowNotifications(!showNotifications);
   };
 
-  const handleEditClick = () => {
-    navigate("/emailverification", { state: { dataemail } });
-  };
-  
-
-  const handleChangeEmailClick = () => {
-    navigate("/updateemail", { state: { dataemail } });
+  const handleBreadcrumbClick = () => {
+    navigate("/emailverification", { state: { username, email } });
   };
 
   return (
@@ -265,7 +346,7 @@ export default function Home({ }) {
             </a>
           </li>
           <li>
-            <a href="assessment" >
+            <a href="assessment">
               <i class="bi bi-clipboard2-pulse"></i>
               <span class="links_name">ติดตาม/ประเมินอาการ</span>
             </a>
@@ -283,9 +364,9 @@ export default function Home({ }) {
             </a>
           </li>
           <li>
-            <a href="assessinhomesss" >
+            <a href="assessinhomesss">
               <i class="bi bi-house-check"></i>
-              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+              <span class="links_name">แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
@@ -315,7 +396,6 @@ export default function Home({ }) {
       </div>
       <div className="home_content">
         <div className="homeheader">
-
           <div className="header">โปรไฟล์</div>
           <div className="profile_details">
             <ul className="nav-list">
@@ -353,82 +433,73 @@ export default function Home({ }) {
               <i class="bi bi-chevron-double-right"></i>
             </li>
             <li>
-              <a>โปรไฟล์</a>
+              <a href="profile">โปรไฟล์</a>
+            </li>
+            <li className="arrow">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li>
+              <a className="info" onClick={handleBreadcrumbClick}>ยืนยันอีเมล</a>
+            </li>
+            <li className="arrow">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li>
+              <a>กรอกรหัสยืนยัน</a>
             </li>
           </ul>
         </div>
-        {/* <h3>โปรไฟล์</h3> */}
+        <h3>กรอกรหัสยืนยัน</h3>
         <div className="formcontainerpf card mb-2">
-          <div className="mb-2">
-            <label>ชื่อผู้ใช้</label>
-            <div className="form-control gray-background">{data.username}</div>{" "}
-          </div>
+        <div className="mb-2">
+            <div className="mb-2 label-container">
+              <label className="label-inline">
+                คุณจะได้รับรหัสยืนยันตัวตนที่
+              </label>
+              <h5>{email}</h5>
+            </div>
 
-          <div className="mb-2">
-            <label>คำนำหน้าชื่อ</label>
-            <div className="form-control">{data.nametitle}</div>{" "}
-          </div>
-          <div className="mb-2">
-            <label>ชื่อ</label>
-            <div className="form-control">
-              <span>{data.name}</span>
-            </div>
-          </div>
-          <div className="mb-2">
-            <label>นามสกุล</label>
-            <div className="form-control">
-              <span>{data.surname}</span>
-            </div>
-          </div>
-          <div className="mb-2">
-            <label>อีเมล</label>
-            <div className="form-control">
-            {data.email}
-            {isEmailVerified ? (
-          <a
-            className="verify"
-            onClick={handleChangeEmailClick}
-          >
-            เปลี่ยนอีเมล
-          </a>
-        ) : (
-          <a
-            className="verify"
-            onClick={handleEditClick}
-          >
-            ยืนยันอีเมล
-          </a>
-        )}
-            </div>
-          </div>
-          <div className="mb-2">
-            <label>เบอร์โทรศัพท์</label>
-            
-            <div className="form-control">
-              <span>{data.tel}</span>
-            </div>
-          </div>
-          <div className="button-group">
-    <button
-      className="custom-btn edit-btn"
-      onClick={() => navigate("/updateprofile", { state: data })}
-    >
-      แก้ไขโปรไฟล์
-    </button>
-    <button
-      className="custom-btn password-btn"
-      onClick={() => navigate("/updatepassword", { state: data })}
-    >
-      เปลี่ยนรหัสผ่าน
-    </button>
-  </div>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-2">
+                <label htmlFor="otp">กรอก OTP ที่ได้รับ</label>
+                <input
+                  type="text"
+                  id="otp"
+                  className="form-control"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  required
+                />
+              </div>
 
-          {/* <a className="editname" onClick={() => navigate("/updateprofile", { state: data })}>
-            แก้ไขโปรไฟล์
-          </a>
-          <a className="editname" onClick={() => navigate("/updatepassword", { state: data })}>
-            เปลี่ยนรหัสผ่าน
-          </a> */}
+              {timer > 0 && (
+                <p className="timer">
+                  กรุณากรอก OTP ภายในเวลา {formatTime(timer)}
+                </p>
+              )}
+              {isOtpExpired && (
+                <>
+                  <p className="error-messageotp">{errorMessage}</p>{" "}
+                  <a
+                    className="newotp"
+                    type="button"
+                    onClick={handleRequestNewOtp}
+                  >
+                    ขอ OTP ใหม่
+                  </a>
+                </>
+              )}
+              {/* {errorMessage && <p className="error-message">{errorMessage}</p>} */}
+              {successMessage && (
+                <p className="success-message">{successMessage}</p>
+              )}
+              <div className="d-grid">
+                <button type="submit" className="btn" disabled={isOtpExpired}>
+                  ยืนยัน OTP
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
 

@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 // import 'react-toastify/dist/ReactToastify.css';
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 function Updatepassword() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -26,6 +28,17 @@ function Updatepassword() {
   const [userId, setUserId] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   const [datauser, setDatauser] = useState([]);
+
+  useEffect(() => {
+    socket.on('newAlert', (alert) => {
+      setAlerts(prevAlerts => [...prevAlerts, alert]);
+      setUnreadCount(prevCount => prevCount + 1);
+    });
+
+    return () => {
+      socket.off('newAlert'); // Clean up the listener on component unmount
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -93,13 +106,6 @@ function Updatepassword() {
         .then((user) => {
           setUserId(user._id); // ตั้งค่า userId
           fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
-
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
-            fetchAllUsers(user._id);
-          }, 1000);
-
-          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);

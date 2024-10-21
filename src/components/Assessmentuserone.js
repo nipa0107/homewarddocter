@@ -28,6 +28,8 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 
 import "../css/contentgraph.css";
+import io from "socket.io-client";
+const socket = io("http://localhost:5000");
 export default function Assessmentuserone({}) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -72,7 +74,17 @@ export default function Assessmentuserone({}) {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
-  
+
+  useEffect(() => {
+    socket.on("newAlert", (alert) => {
+      setAlerts((prevAlerts) => [...prevAlerts, alert]);
+      setUnreadCount((prevCount) => prevCount + 1);
+    });
+
+    return () => {
+      socket.off("newAlert"); // Clean up the listener on component unmount
+    };
+  }, []);
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -140,13 +152,6 @@ export default function Assessmentuserone({}) {
         .then((user) => {
           setUserId(user._id);
           fetchAndSetAlerts(token, user._id);
-
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id);
-            fetchAllUsers(user._id);
-          }, 1000);
-
-          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -314,7 +319,7 @@ export default function Assessmentuserone({}) {
         status_name: statusName,
         PPS,
         MPersonnel: data._id,
-        PatientForm: id,
+        PatientForm: { _id: id },
       }),
     })
       .then((res) => res.json())
@@ -914,45 +919,50 @@ export default function Assessmentuserone({}) {
               </b>
             </div>
             <div className="content-in">
-              <p className="textheadSymptom">สัญญาณชีพ</p>
-              <div className="inline-container-Vitalsigns">
-                <div className="patient-data">
-                  <label className="title-Vitalsigns">ความดันตัวบน</label>
-                  <p className="text">{patientFormsone.SBP || "-"} mmHg</p>
+              <p className="textheadSymptom-center">สัญญาณชีพ</p>
+              <div className="container">
+                <div className="left-column">
+                  <div className="patient-data">
+                    <label className="title-Vitalsigns">ความดันตัวบน</label>
+                    <p className="text">{patientFormsone.SBP || "-"} mmHg</p>
+                  </div>
+                  <div className="patient-data">
+                    <label className="title-Vitalsigns">ความดันตัวล่าง</label>
+                    <p className="text">{patientFormsone.DBP || "-"} mmHg</p>
+                  </div>
+                  <div className="patient-data">
+                    <label className="title-Vitalsigns">ชีพจร</label>
+                    <p className="text">
+                      {patientFormsone.PulseRate || "-"} ครั้ง/นาที
+                    </p>
+                  </div>
+                  <div className="patient-data">
+                    <label className="title-Vitalsigns">การหายใจ</label>
+                    <p className="text">
+                      {patientFormsone.Respiration || "-"} ครั้ง/นาที
+                    </p>
+                  </div>
                 </div>
-                <div className="patient-data">
-                  <label className="title-Vitalsigns">ความดันตัวล่าง</label>
-                  <p className="text">{patientFormsone.DBP || "-"} mmHg</p>
-                </div>
-                <div className="patient-data">
-                  <label className="title-Vitalsigns">ชีพจร</label>
-                  <p className="text">
-                    {patientFormsone.DBP || "-"} ครั้ง/นาที
-                  </p>
-                </div>
-                <div className="patient-data">
-                  <label className="title-Vitalsigns">การหายใจ</label>
-                  <p className="text">
-                    {patientFormsone.PulseRate || "-"} ครั้ง/นาที
-                  </p>
-                </div>
-                <div className="patient-data">
-                  <label className="title-Vitalsigns">อุณหภูมิ</label>
-                  <p className="text">
-                    {patientFormsone.Temperature || "-"} °C
-                  </p>
-                </div>
-                <div className="patient-data">
-                  <label className="title-Vitalsigns">ระดับความเจ็บปวด</label>
-                  <p className="text">{patientFormsone.Painscore || "-"}</p>
-                </div>
-                <div className="patient-data">
-                  <label className="title-Vitalsigns">DTX</label>
-                  <p className="text">{patientFormsone.DTX || "-"} mg/dL</p>
+
+                <div className="right-column">
+                  <div className="patient-data">
+                    <label className="title-Vitalsigns">อุณหภูมิ</label>
+                    <p className="text">
+                      {patientFormsone.Temperature || "-"} °C
+                    </p>
+                  </div>
+                  <div className="patient-data">
+                    <label className="title-Vitalsigns">ระดับความเจ็บปวด</label>
+                    <p className="text">{patientFormsone.Painscore || "-"}</p>
+                  </div>
+                  <div className="patient-data">
+                    <label className="title-Vitalsigns">DTX</label>
+                    <p className="text">{patientFormsone.DTX || "-"} mg/dL</p>
+                  </div>
                 </div>
               </div>
 
-              <p className="textheadSymptom">อาการและอาการแสดง</p>
+              <p className="textheadSymptom-center">อาการและอาการแสดง</p>
 
               {patientFormsone.Symptoms &&
                 patientFormsone.Symptoms.map((symptom, index) => (
@@ -964,10 +974,10 @@ export default function Assessmentuserone({}) {
                   </div>
                 ))}
 
-              <label className="textheadSymptom">
+              <p className="textheadSymptom-center">
                 ความถี่ของอาการ
                 <span className="bracket">(นับรวมการบันทึกปัจจุบัน)</span>:
-              </label>
+              </p>
               <div className="inline-containersymtoms-count">
                 {symptomsCount.map((symptom) => (
                   <p className="symtoms-count" key={symptom._id}>
@@ -1251,14 +1261,12 @@ export default function Assessmentuserone({}) {
                           : { fontSize: 10, lineHeight: 1.5 }
                       }
                     />{" "}
-                      <YAxis
+                    <YAxis
                       tick={{ fontSize: 10 }}
                       ticks={[0, 10, 20, 30, 40]}
                       hide={timeRange !== "1month"}
                     />
-                  
                     <Tooltip content={<CustomTooltipRespiration />} />
-                    
                     <Area
                       type="monotone"
                       dataKey="Respiration"
@@ -1405,7 +1413,7 @@ export default function Assessmentuserone({}) {
 
                     <YAxis
                       tick={{ fontSize: 10 }}
-                      ticks={[0, 2, 4, 6, 8, 10,12]}
+                      ticks={[0, 2, 4, 6, 8, 10, 12]}
                       hide={timeRange !== "1month"}
                     />
 
@@ -1521,7 +1529,7 @@ export default function Assessmentuserone({}) {
 
           {isAssessed ? (
             <div className="contentinass">
-              <p className="texthead">การประเมินอาการ</p>
+              <p className="textheadSymptom-center">การประเมินอาการ</p>
               <div className="mb-1">
                 <div className="mb-3">
                   <div className="btn-group">
@@ -1539,6 +1547,14 @@ export default function Assessmentuserone({}) {
                         onClick={() => handleButtonClick("ผิดปกติ")}
                       >
                         ผิดปกติ
+                      </div>
+                    )}
+                    {statusName === "เคสฉุกเฉิน" && (
+                      <div
+                        className="btnass btn-Emergency"
+                        onClick={() => handleButtonClick("เคสฉุกเฉิน")}
+                      >
+                        เคสฉุกเฉิน
                       </div>
                     )}
                     {statusName === "จบการรักษา" && (
@@ -1579,7 +1595,7 @@ export default function Assessmentuserone({}) {
             </div>
           ) : (
             <div className="contentinass">
-              <p className="texthead">ประเมินอาการ</p>
+              <p className="textheadSymptom-center">ประเมินอาการ</p>
               <form onSubmit={handleSubmit}>
                 <div className="mb-1">
                   <div className="mb-3">
@@ -1601,6 +1617,16 @@ export default function Assessmentuserone({}) {
                         onClick={() => handleButtonClick("ผิดปกติ")}
                       >
                         ผิดปกติ
+                      </div>
+                      <div
+                        className={`btnass ${
+                          statusName === "เคสฉุกเฉิน"
+                            ? "btn-Emergency"
+                            : "btn-outline"
+                        }`}
+                        onClick={() => handleButtonClick("เคสฉุกเฉิน")}
+                      >
+                        เคสฉุกเฉิน
                       </div>
                       <div
                         className={`btnass ${

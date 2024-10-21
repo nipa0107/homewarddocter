@@ -25,9 +25,7 @@
 
 .btn-pre button {
   color: #000;
-  /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
   background-color: #fff;
-  /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
   border: 1px solid #ccc;
   /* ตั้งค่าขอบเป็นสีเทา */
   padding: 10px 20px;
@@ -138,7 +136,6 @@ tr.assessmentnull {
   width: 80%;
   margin: 0 auto;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
-  /* line-height: 50px;  */
   padding: 1%;
   border-collapse: collapse;
   border-spacing: 1;
@@ -162,27 +159,19 @@ tr.assessmentnull {
   gap: 10px;
   display: flex;
   justify-content: center;
-  /* margin-bottom: 30px; */
 }
 
 .btn-pre button {
   color: #000;
-  /* ตั้งค่าสีของตัวหนังสือเป็นสีดำ */
   background-color: #fff;
-  /* ตั้งค่าสีพื้นหลังเป็นสีขาว */
   border: 1px solid #ccc;
-  /* ตั้งค่าขอบเป็นสีเทา */
   padding: 10px 20px;
-  /* ตั้งค่าการระบุช่องว่างภายในปุ่ม */
   cursor: pointer;
-  /* เพิ่ม cursor เมื่อนำเมาส์ไปวางที่ปุ่ม */
   outline: none;
-  /* ลบเส้นขอบน้ำเงินเมื่อกด */
 }
 
 .btn-pre button:hover {
   background-color: #eee;
-  /* สีพื้นหลังเมื่อโฮเวอร์ปุ่ม */
 }
 
 .btn-next button {
@@ -261,12 +250,10 @@ tr.assessmentnull {
   padding: 15px;
   border: none;
   margin-left: 390px;
-  /* ปรับตำแหน่งของปุ่มลบ */
 }
 
 .no-equipment {
   margin-top: 20px;
-  /* ปรับระยะห่างของข้อความ "ไม่มีข้อมูลอุปกรณ์" */
   text-align: center;
 }
 
@@ -288,7 +275,6 @@ tr.assessmentnull {
 
 .adminall .card-body .deleteimg1 {
   float: none;
-  /* Remove float property */
 }
 
 .mb-3 {
@@ -312,27 +298,27 @@ tr.assessmentnull {
   text-overflow: ellipsis;
 }
 
-/* Outline button style */
 .btn-outline {
   border: 1px solid #ccc;
   background-color: transparent;
 }
 
-/* Normal status button style */
 .btn-normal {
   background-color: #72DA95;
   color: white;
 }
 
-/* Abnormal status button style */
 .btn-abnormal {
-  background-color: #FF6A6A;
+  background-color: #e7639a;
   color: white;
 }
 
-/* Completed status button style */
 .btn-completed {
   background-color: #FFCC80;
+  color: #000000;
+}
+.btn-Emergency{
+  background-color: #FF6A6A;
   color: white;
 }
 
@@ -344,8 +330,12 @@ tr.assessmentnull {
 
 }
 
-.abnormal-status {
+.Emergency-status{
   color: #FF6A6A;
+
+}
+.abnormal-status {
+  color: #e7639a;
 }
 
 .end-of-treatment-status {
@@ -363,7 +353,7 @@ tr.assessmentnull {
 }
 
 .user-info {
-  display: flex;
+  /* display: flex; */
   justify-content: space-between;
   padding-left: 6%;
 
@@ -416,26 +406,19 @@ tr.assessmentnull {
 }
 
 .texthead {
-  font-size: 1.2em;
+
   font-weight: bold;
   color: #444;
   margin-bottom: 10px;
 }
 
-/* Symptom heading styles */
 .textheadSymptom {
-  font-size: 1.2em;
   font-weight: bold;
-  /* color: #ff6f61; */
-  margin-top: 20px;
-  margin-bottom: 10px;
+
 }
 
-/* General text styles */
 .text {
-  font-size: 1em;
   color: #555;
-  margin-bottom: 10px;
 }
 
 /* Styles for symptoms */
@@ -498,7 +481,7 @@ p .label {
   margin-right: 1rem;
   font-weight: bold;
   color: #333;
-  flex: 0 0 10%;
+  flex: 0 0 20%;
   display: flex;
 }
 
@@ -548,7 +531,6 @@ textarea {
 
 .gray-text {
   color: rgba(214, 214, 214, 0.6);
-  /* เลือกสีเทาใดๆ ที่คุณต้องการที่มีค่าความโปร่งแสงต่ำกว่า 100% */
 }
 
 .no-notification {
@@ -560,7 +542,9 @@ textarea {
 .symtoms-count {
   margin-left: 5;
 }
-
+.evaluated {
+  color: rgb(7, 195, 7); /* Text color for evaluated */
+}
 .assessment-table {
   width: 100%;
   border-collapse: collapse;
@@ -720,4 +704,42 @@ textarea {
 
 .add-assessment-btn:hover {
   background-color: #0056b3; /* เปลี่ยนสีเมื่อ hover */
+}
+
+.editname {
+  cursor: pointer;
+  color: black;
+}
+
+.editname:hover {
+  color: #87CEFA;
+}
+.btn:hover{
+  background-color: #87CEFA;
+  color: #000;
+}
+
+.verify {
+  margin-left: auto;
+  text-decoration: none; 
+  color: #007bff; 
+  cursor: pointer;
+}
+.form-control {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  position: relative; 
+}
+
+.error-messageotp {
+  display: inline-block; 
+  margin: 0;
+}
+
+.newotp {
+  display: inline-block; 
+  text-decoration: underline;
+  color: blue;
+  cursor: pointer;
 }
