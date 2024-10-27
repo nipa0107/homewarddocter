@@ -485,6 +485,10 @@ export default function UpdateProfile() {
               <option value="">กรุณาเลือก</option>
               <option value="แพทย์หญิง">แพทย์หญิง</option>
               <option value="นายแพทย์">นายแพทย์</option>
+              <option value="พยาบาลวิชาชีพ">พยาบาลวิชาชีพ</option>
+                <option value="นาย">นาย</option>
+                <option value="นาง">นาง</option>
+                <option value="นางสาว">นางสาว</option>
             </select>
           </div>
           <div className="mb-2">

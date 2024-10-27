@@ -308,7 +308,7 @@ export default function Assessreadinessuser({ }) {
             );
             const data = await response.json();
             setReadinessForms(data.data);
-            console.log("Patient Forms:", data.data);
+            console.log("Patient Forms1:", data.data);
         } catch (error) {
             console.error("Error fetching patient forms:", error);
         }
@@ -533,7 +533,8 @@ export default function Assessreadinessuser({ }) {
                         </p>
                     </div>
                     <div className="toolbar">
-                        {readinessForms.length > 0 && (
+                    {readinessForms && readinessForms.length > 0 && (
+                        
                             <button
                                 className="btn btn-primary add-assessment-btn"
                                 onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}

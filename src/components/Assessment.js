@@ -73,6 +73,7 @@ export default function Assessment({ }) {
       .catch((error) => {
         console.error("Error verifying token:", error);
       });
+      
   };
 
   const getAllUser = () => {
@@ -86,6 +87,7 @@ export default function Assessment({ }) {
       .then((data) => {
         console.log(data, "AllUser");
         setDatauser(data.data);
+        console.log(datauser, "Datauser");
       });
   };
 
@@ -158,6 +160,7 @@ export default function Assessment({ }) {
         .then(user => {
           setUserId(user._id);
           fetchAndSetAlerts(token, user._id);
+          getAllUser();
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -465,8 +468,7 @@ export default function Assessment({ }) {
             </thead>
             <tbody>
               {datauser
-
-                .filter(user => user.deletedAt === null)
+                .filter((user) => user.deletedAt === null)
                 .map((i, index) => {
                   const userBirthday = i.birthday ? new Date(i.birthday) : null;
                   let userAge = "";

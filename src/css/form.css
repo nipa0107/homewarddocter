@@ -378,7 +378,7 @@ tr.assessmentnull {
 }
 
 .user-info {
-    display: flex;
+    /* display: flex; */
     justify-content: space-between;
     padding-left: 6%;
 

@@ -149,7 +149,7 @@ export default function Allpatient({ }) {
         .then(user => {
           setUserId(user._id);
           fetchAndSetAlerts(token, user._id);
-
+          getAllUser();
           const interval = setInterval(() => {
             fetchAndSetAlerts(token, user._id);
             fetchAllUsers(user._id);
