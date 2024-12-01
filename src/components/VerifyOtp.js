@@ -24,6 +24,8 @@ export default function VerifyOtp() {
   const [userId, setUserId] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   const notificationsRef = useRef(null);
+  const bellRef = useRef(null);
+
   const [data, setData] = useState([]);
 
   const [otp, setOtp] = useState("");
@@ -124,22 +126,48 @@ export default function VerifyOtp() {
   //     }
   //   }, [dataemail]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [notificationsRef]);
+  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       notificationsRef.current &&
+  //       !notificationsRef.current.contains(event.target)
+  //     ) {
+  //       setShowNotifications(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [notificationsRef]);
 
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
@@ -319,9 +347,9 @@ export default function VerifyOtp() {
     setIsActive(!isActive);
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
+  // const toggleNotifications = () => {
+  //   setShowNotifications(!showNotifications);
+  // };
 
   const handleBreadcrumbClick = () => {
     navigate("/emailverification", { state: { username, email } });
@@ -400,7 +428,7 @@ export default function VerifyOtp() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (

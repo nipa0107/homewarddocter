@@ -33,6 +33,8 @@ export default function ChatComponent() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
+  const bellRef = useRef(null);
+
   const [userId, setUserId] = useState("");
   const linkify = Linkify();
   const [nonImageFile, setNonImageFile] = useState(null);
@@ -154,25 +156,32 @@ export default function ChatComponent() {
       });
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
   };
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [notificationsRef]);
+  }, []);
 
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token)
@@ -590,7 +599,7 @@ export default function ChatComponent() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (

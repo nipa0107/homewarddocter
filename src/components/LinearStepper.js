@@ -18,7 +18,8 @@ import { Typography, Stepper, Step, StepLabel, Wizard, WizardStep } from "@mater
 import { useForm, FormProvider } from "react-hook-form";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
-
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 
 export default function LinaerStepper({ }) {
     const navigate = useNavigate();
@@ -46,25 +47,44 @@ export default function LinaerStepper({ }) {
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
     const [showToTopButton, setShowToTopButton] = useState(false);
+    const bellRef = useRef(null);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-                setShowNotifications(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
+        socket.on('newAlert', (alert) => {
+          setAlerts(prevAlerts => [...prevAlerts, alert]);
+          setUnreadCount(prevCount => prevCount + 1);
+        });
+    
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+          socket.off('newAlert'); // Clean up the listener on component unmount
         };
-    }, [notificationsRef]);
-
-    const toggleNotifications = () => {
-        setShowNotifications(!showNotifications);
-    };
-
+      }, []);
+      const toggleNotifications = (e) => {
+        e.stopPropagation();
+        if (showNotifications) {
+          setShowNotifications(false);
+        } else {
+          setShowNotifications(true);
+        }
+        // setShowNotifications(prev => !prev);
+      };
+    
+      const handleClickOutside = (e) => {
+        if (
+          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+          !bellRef.current.contains(e.target)
+        ) {
+          setShowNotifications(false);
+        }
+      };
+    
+      useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+    
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+        };
+      }, []);
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -187,12 +207,7 @@ export default function LinaerStepper({ }) {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
 
-                    const interval = setInterval(() => {
-                        fetchAndSetAlerts(token, user._id);
-                        fetchAllUsers(user._id);
-                    }, 1000);
-
-                    return () => clearInterval(interval);
+                 
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
@@ -423,7 +438,7 @@ export default function LinaerStepper({ }) {
                 <div className="profile_details">
                     <ul className="nav-list">
                         <li>
-                            <a className="bell-icon" onClick={toggleNotifications}>
+                            <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                                 {showNotifications ? (
                                     <i className="bi bi-bell-fill"></i>
                                 ) : (

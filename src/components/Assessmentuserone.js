@@ -74,6 +74,7 @@ export default function Assessmentuserone({}) {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
+  const bellRef = useRef(null);
 
   useEffect(() => {
     socket.on("newAlert", (alert) => {
@@ -85,26 +86,51 @@ export default function Assessmentuserone({}) {
       socket.off("newAlert"); // Clean up the listener on component unmount
     };
   }, []);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       notificationsRef.current &&
+  //       !notificationsRef.current.contains(event.target)
+  //     ) {
+  //       setShowNotifications(false);
+  //     }
+  //   };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  //   document.addEventListener("mousedown", handleClickOutside);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [notificationsRef]);
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [notificationsRef]);
+  // const toggleNotifications = () => {
+  //   setShowNotifications(!showNotifications);
+  // };
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
   };
 
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -830,7 +856,7 @@ export default function Assessmentuserone({}) {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (

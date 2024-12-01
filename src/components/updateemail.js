@@ -23,6 +23,8 @@ export default function UpdateEmail() {
     const [userId, setUserId] = useState("");
     const [allUsers, setAllUsers] = useState([]);
     const notificationsRef = useRef(null);
+    const bellRef = useRef(null);
+
     const [data, setData] = useState([]);
     useEffect(() => {
       socket.on('newAlert', (alert) => {
@@ -42,22 +44,48 @@ export default function UpdateEmail() {
         }
       }, [dataemail]);
 
-    useEffect(() => {
-      const handleClickOutside = (event) => {
+      const toggleNotifications = (e) => {
+        e.stopPropagation();
+        if (showNotifications) {
+          setShowNotifications(false);
+        } else {
+          setShowNotifications(true);
+        }
+        // setShowNotifications(prev => !prev);
+      };
+    
+      const handleClickOutside = (e) => {
         if (
-          notificationsRef.current &&
-          !notificationsRef.current.contains(event.target)
+          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+          !bellRef.current.contains(e.target)
         ) {
           setShowNotifications(false);
         }
       };
+    
+      useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+    
+        return () => {
+          document.removeEventListener('mousedown', handleClickOutside);
+        };
+      }, []);
+    // useEffect(() => {
+    //   const handleClickOutside = (event) => {
+    //     if (
+    //       notificationsRef.current &&
+    //       !notificationsRef.current.contains(event.target)
+    //     ) {
+    //       setShowNotifications(false);
+    //     }
+    //   };
   
-      document.addEventListener("mousedown", handleClickOutside);
+    //   document.addEventListener("mousedown", handleClickOutside);
   
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [notificationsRef]);
+    //   return () => {
+    //     document.removeEventListener("mousedown", handleClickOutside);
+    //   };
+    // }, [notificationsRef]);
   
     const fetchUserData = (token) => {
       return fetch("http://localhost:5000/profiledt", {
@@ -266,9 +294,9 @@ export default function UpdateEmail() {
         setIsActive(!isActive);
       };
 
-      const toggleNotifications = () => {
-        setShowNotifications(!showNotifications);
-      };
+      // const toggleNotifications = () => {
+      //   setShowNotifications(!showNotifications);
+      // };
       return (
         <main className="body">
           <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -343,7 +371,7 @@ export default function UpdateEmail() {
               <div className="profile_details">
                 <ul className="nav-list">
                   <li>
-                    <a className="bell-icon" onClick={toggleNotifications}>
+                    <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                       {showNotifications ? (
                         <i className="bi bi-bell-fill"></i>
                       ) : (

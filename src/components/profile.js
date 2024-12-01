@@ -26,6 +26,7 @@ export default function Home({ }) {
   const [dataemail, setDataemail] = useState([]);
 
   const notificationsRef = useRef(null);
+  const bellRef = useRef(null);
 
   useEffect(() => {
     socket.on('newAlert', (alert) => {
@@ -37,22 +38,54 @@ export default function Home({ }) {
       socket.off('newAlert'); // Clean up the listener on component unmount
     };
   }, []);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
+
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [notificationsRef]);
+  }, []);
+
+  // const toggleNotifications = () => {
+  //   setShowNotifications(!showNotifications);
+  // };
+
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       notificationsRef.current &&
+  //       !notificationsRef.current.contains(event.target)
+  //     ) {
+  //       setShowNotifications(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [notificationsRef]);
 
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
@@ -233,9 +266,6 @@ export default function Home({ }) {
     setIsActive(!isActive);
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
 
   const handleEditClick = () => {
     navigate("/emailverification", { state: { dataemail } });
@@ -320,7 +350,7 @@ export default function Home({ }) {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (

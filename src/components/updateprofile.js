@@ -29,6 +29,8 @@ export default function UpdateProfile() {
   const [datauser, setDatauser] = useState([]);
   const [nametitle, setNameTitle] = useState("");
   const notificationsRef = useRef(null);
+  const bellRef = useRef(null);
+
   useEffect(() => {
     socket.on('newAlert', (alert) => {
       setAlerts(prevAlerts => [...prevAlerts, alert]);
@@ -39,23 +41,52 @@ export default function UpdateProfile() {
       socket.off('newAlert'); // Clean up the listener on component unmount
     };
   }, []);
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
+
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [notificationsRef]);
+  }, []);
+
+  // const toggleNotifications = () => {
+  //   setShowNotifications(!showNotifications);
+  // };
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       notificationsRef.current &&
+  //       !notificationsRef.current.contains(event.target)
+  //     ) {
+  //       setShowNotifications(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [notificationsRef]);
 
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
@@ -300,9 +331,7 @@ export default function UpdateProfile() {
     return unreadUsers.length;
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
+
 
   return (
     <main className="body">
@@ -378,7 +407,7 @@ export default function UpdateProfile() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (

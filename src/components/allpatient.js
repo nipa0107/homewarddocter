@@ -6,7 +6,8 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts'; 
-
+import io from 'socket.io-client';
+const socket = io("http://localhost:5000");
 export default function Allpatient({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState("");
@@ -22,25 +23,60 @@ export default function Allpatient({ }) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
-
+  const bellRef = useRef(null);
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
+    socket.on('newAlert', (alert) => {
+      setAlerts(prevAlerts => [...prevAlerts, alert]);
+      setUnreadCount(prevCount => prevCount + 1);
+    });
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      socket.off('newAlert'); // Clean up the listener on component unmount
     };
-  }, [notificationsRef]);
+  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+  //       setShowNotifications(false);
+  //     }
+  //   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+  //   document.addEventListener("mousedown", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [notificationsRef]);
+
+  // const toggleNotifications = () => {
+  //   setShowNotifications(!showNotifications);
+  // };
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
   };
 
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -150,12 +186,6 @@ export default function Allpatient({ }) {
           setUserId(user._id);
           fetchAndSetAlerts(token, user._id);
           getAllUser();
-          const interval = setInterval(() => {
-            fetchAndSetAlerts(token, user._id);
-            fetchAllUsers(user._id);
-          }, 1000);
-
-          return () => clearInterval(interval);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -389,7 +419,7 @@ export default function Allpatient({ }) {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (

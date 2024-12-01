@@ -24,10 +24,11 @@ export default function UpdateOTP() {
   const [allUsers, setAllUsers] = useState([]);
   const notificationsRef = useRef(null);
   const [data, setData] = useState([]);
+  const bellRef = useRef(null);
 
   const [otp, setOtp] = useState("");
   const { username, email } = location.state || {}; // รับ username และ email
-  const [timer, setTimer] = useState(20); // นับถอยหลัง 5 นาที (20 วินาที)
+  const [timer, setTimer] = useState(300); // นับถอยหลัง 5 นาที (20 วินาที)
   const [isOtpExpired, setIsOtpExpired] = useState(false);
   useEffect(() => {
     socket.on('newAlert', (alert) => {
@@ -122,22 +123,48 @@ export default function UpdateOTP() {
   //     }
   //   }, [dataemail]);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [notificationsRef]);
+  }, []);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (
+  //       notificationsRef.current &&
+  //       !notificationsRef.current.contains(event.target)
+  //     ) {
+  //       setShowNotifications(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [notificationsRef]);
 
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
@@ -318,9 +345,9 @@ export default function UpdateOTP() {
     setIsActive(!isActive);
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
-  };
+  // const toggleNotifications = () => {
+  //   setShowNotifications(!showNotifications);
+  // };
 
   const handleBreadcrumbClick = () => {
     navigate("/emailverification", { state: { username, email } });
@@ -399,7 +426,7 @@ export default function UpdateOTP() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (
