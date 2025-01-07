@@ -1,16 +1,133 @@
 import React, { useState, useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const Physicalexamination = () => {
-  const { register, control, getValues } = useFormContext();
-  const [otherText, setOtherText] = useState("");
+export const Physicalexamination = ({ onDataChange }) => {
+  const { control, setValue, getValues } = useFormContext();
+  const [otherTexts, setOtherTexts] = useState({});
 
   useEffect(() => {
-    const savedValue = getValues("otherOptionText"); // Get the saved value from the form state
-    if (savedValue) {
-      setOtherText(savedValue); // Set the saved value to the input
-    }
+    const initialOtherTexts = {};
+    const fieldsWithOther = [
+      "moodandaffect",
+      "appearanceAndBehavior",
+      "eyeContact",
+      "attention",
+      "orientation",
+      "thoughtProcess",
+      "thoughtContent",
+    ];
+    fieldsWithOther.forEach((field) => {
+      const otherValue = getValues(`${field}Other`);
+      if (otherValue) {
+        initialOtherTexts[field] = otherValue;
+      }
+    });
+    setOtherTexts(initialOtherTexts);
   }, [getValues]);
+
+  const handleCheckboxChange = (name, value, isChecked) => {
+    const currentValues = getValues(name) || [];
+    const updatedValues = isChecked
+      ? [...currentValues, value]
+      : currentValues.filter((item) => item !== value);
+    setValue(name, updatedValues);
+    onDataChange(getValues());
+  };
+
+  const handleOtherInputChange = (name, value) => {
+    const currentValues = getValues(name) || [];
+    const updatedValues = value
+      ? [...currentValues.filter((item) => item !== otherTexts[name]), value]
+      : currentValues.filter((item) => item !== otherTexts[name]);
+
+    setOtherTexts((prev) => ({ ...prev, [name]: value }));
+    setValue(name, updatedValues);
+    setValue(`${name}Other`, value);
+    onDataChange(getValues());
+  };
+
+  const handleInputChange = (name, value) => {
+    setValue(name, value);
+    onDataChange(getValues());
+  };
+
+  // Reusable field with checkboxes and an "Other" input
+  const renderCheckboxGroupWithOther = (fieldName, options, label) => (
+    <div className="info3 card mt-3">
+      <div className="m-4">
+        <label className="form-label">{label} :</label>
+        <p style={{ color: "gray", marginTop: "-20px", marginBottom: "10px" }}>
+          (เลือกได้มากกว่า 1 ข้อ)
+        </p>
+        {options.map((option) => (
+          <div key={option}>
+            <Controller
+              name={fieldName}
+              control={control}
+              defaultValue={[]} // ค่าเริ่มต้นเป็น array ว่าง
+              render={({ field }) => (
+                <input
+                  type="checkbox"
+                  value={option}
+                  checked={field.value.includes(option)}
+                  style={{ transform: "scale(1.3)", marginLeft: "5px" }}
+                  onChange={(e) => {
+                    handleCheckboxChange(fieldName, option, e.target.checked);
+                    field.onChange(
+                      e.target.checked
+                        ? [...field.value, option]
+                        : field.value.filter((item) => item !== option)
+                    );
+                  }}
+                />
+              )}
+            />
+            <span style={{ marginLeft: "10px" }}>{option}</span>
+          </div>
+        ))}
+        {/* Input field for 'Other' */}
+        <div style={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
+          <span style={{ marginLeft: "4px" }}> อื่นๆ</span>
+          <Controller
+            name={fieldName}
+            control={control}
+            defaultValue={[]}
+            render={({ field }) => (
+              <input
+                type="text"
+                placeholder="กรอกคำตอบอื่นๆ"
+                className="google-form-input"
+                value={otherTexts[fieldName] || ""}
+                onChange={(e) => {
+                  handleOtherInputChange(fieldName, e.target.value);
+                  field.onChange(
+                    e.target.value
+                      ? [
+                          ...field.value.filter(
+                            (item) => item !== otherTexts[fieldName]
+                          ),
+                          e.target.value,
+                        ]
+                      : field.value.filter(
+                          (item) => item !== otherTexts[fieldName]
+                        )
+                  );
+                }}
+                style={{
+                  borderBottom: "1px solid #4285f4",
+                  outline: "none",
+                  marginLeft: "30px",
+                  width: "85%",
+                }}
+              />
+            )}
+          />
+        </div>
+      </div>
+    </div>
+  );
+
+
 
   return (
     <div>
@@ -39,6 +156,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("temperature", e.target.value);
+                  }}
                 />
               )}
             />
@@ -59,6 +180,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("bloodPressure", e.target.value);
+                  }}
                 />
               )}
             />
@@ -79,6 +204,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("pulse", e.target.value);
+                  }}
                 />
               )}
             />
@@ -99,6 +228,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("respiratoryRate", e.target.value);
+                  }}
                 />
               )}
             />
@@ -122,6 +255,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("generalAppearance", e.target.value);
+                  }}
                 />
               )}
             />
@@ -142,6 +279,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("cardiovascularSystem", e.target.value);
+                  }}
                 />
               )}
             />
@@ -162,6 +303,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("respiratorySystem", e.target.value);
+                  }}
                 />
               )}
             />
@@ -182,6 +327,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("abdominal", e.target.value);
+                  }}
                 />
               )}
             />
@@ -202,6 +351,10 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("nervousSystem", e.target.value);
+                  }}
                 />
               )}
             />
@@ -222,767 +375,48 @@ export const Physicalexamination = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("extremities", e.target.value);
+                  }}
                 />
               )}
             />
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
-        <div className="header">
-          <b>Metal status examination</b>
-        </div>
-        <div className='m-4'>
-          <label className="form-label">Appearance and Behavior :</label><br></br>
-          <p style={{ color: 'gray'  , marginTop: '-20px' , marginBottom: '1px'  }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Cooperative </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Guarded </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Candid </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Defensive </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}> Relaxed</span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Irritable </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}> Open</span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}> Shy</span>
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Eye contact :</label><br></br>
-          <p style={{ color: 'gray'  , marginTop: '-20px' , marginBottom: '1px' }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Good </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Sporadic </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Fleeting </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>none </span>
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Mood and affect :</label><br></br>
-          <p style={{ color: 'gray'  , marginTop: '-20px' , marginBottom: '1px' }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Euthymia </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Depressed </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Apathetic </span>
-          </div>
-          <div>
-            <Controller
-              name="otherOptionText" // Name for the form value
-              control={control}
-              defaultValue={getValues("otherOptionText") || ""} // Use the saved value as default
-              render={({ field }) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}> {/* Flexbox for horizontal alignment */}
-                  {/* Text input for 'Other' */}
-                  <span style={{ marginLeft: '4px' }}> อื่นๆ</span>
-                  <input
-                    type="text"
-                    placeholder="กรอกคำตอบอื่นๆ"
-                    className="google-form-input"
-                    value={otherText}
-                    onChange={(e) => {
-                      setOtherText(e.target.value); // Update the local state
-                      field.onChange(e.target.value); // Sync with form state
-                    }}
-                    style={{
-                      borderBottom: '1px solid #4285f4', // Google Forms-like underline
-                      outline: 'none',
-                      marginLeft: '30px', // Space between label and input
-                      width: '85%' // Adjust width as needed
-                    }}
-                  />
-                </div>
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Attention :</label><br></br>
-          <p style={{ color: 'gray'  , marginTop: '-20px' , marginBottom: '1px' }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Adequate </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Inadequate </span>
-          </div>
-          <div>
-            <Controller
-              name="otherOptionText" // Name for the form value
-              control={control}
-              defaultValue={getValues("otherOptionText") || ""} // Use the saved value as default
-              render={({ field }) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}> {/* Flexbox for horizontal alignment */}
-                  {/* Text input for 'Other' */}
-                  <span style={{ marginLeft: '4px' }}> อื่นๆ</span>
-                  <input
-                    type="text"
-                    placeholder="กรอกคำตอบอื่นๆ"
-                    className="google-form-input"
-                    value={otherText}
-                    onChange={(e) => {
-                      setOtherText(e.target.value); // Update the local state
-                      field.onChange(e.target.value); // Sync with form state
-                    }}
-                    style={{
-                      borderBottom: '1px solid #4285f4', // Google Forms-like underline
-                      outline: 'none',
-                      marginLeft: '30px', // Space between label and input
-                      width: '85%' // Adjust width as needed
-                    }}
-                  />
-                </div>
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Orientation :</label>
-          <p style={{ color: 'gray' , marginTop: '-20px' , marginBottom: '1px' }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div >
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Place </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Time </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Person </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Situation </span>
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Thought process :</label><br></br>
-          <p style={{ color: 'gray'  , marginTop: '-20px' , marginBottom: '-1px'  }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Coherence </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Tangential </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Disorganized </span>
-          </div>
-          <div>
-            <Controller
-              name="otherOptionText" // Name for the form value
-              control={control}
-              defaultValue={getValues("otherOptionText") || ""} // Use the saved value as default
-              render={({ field }) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}> {/* Flexbox for horizontal alignment */}
-                  {/* Text input for 'Other' */}
-                  <span style={{ marginLeft: '4px' }}> อื่นๆ </span>
-                  <input
-                    type="text"
-                    placeholder="กรอกคำตอบอื่นๆ"
-                    className="google-form-input"
-                    value={otherText}
-                    onChange={(e) => {
-                      setOtherText(e.target.value); // Update the local state
-                      field.onChange(e.target.value); // Sync with form state
-                    }}
-                    style={{
-                      borderBottom: '1px solid #4285f4', // Google Forms-like underline
-                      outline: 'none',
-                      marginLeft: '40px', // Space between label and input
-                      width: '85%' // Adjust width as needed
-                    }}
-                  />
-                </div>
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Thought content :</label><br></br>
-          <p style={{ color: 'gray'  , marginTop: '-20px' , marginBottom: '1px' }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Reality </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Obsession </span>
-          </div>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}>Delusion </span>
-          </div>
-          <div>
-            <Controller
-              name="otherOptionText" // Name for the form value
-              control={control}
-              defaultValue={getValues("otherOptionText") || ""} // Use the saved value as default
-              render={({ field }) => (
-                <div style={{ display: 'flex', alignItems: 'center' }}> {/* Flexbox for horizontal alignment */}
-                  {/* Text input for 'Other' */}
-                  <span style={{ marginLeft: '4px' }}> อื่นๆ</span>
-                  <input
-                    type="text"
-                    placeholder="กรอกคำตอบอื่นๆ"
-                    className="google-form-input"
-                    value={otherText}
-                    onChange={(e) => {
-                      setOtherText(e.target.value); // Update the local state
-                      field.onChange(e.target.value); // Sync with form state
-                    }}
-                    style={{
-                      borderBottom: '1px solid #4285f4', // Google Forms-like underline
-                      outline: 'none',
-                      marginLeft: '40px', // Space between label and input
-                      width: '85%' // Adjust width as needed
-                    }}
-                  />
-                </div>
-              )}
-            />
-          </div>
-        </div>
-      </div>
+
+      {renderCheckboxGroupWithOther("moodandaffect", ["Euthymia", "Depressed", "Apathetic"], "Mood and affect")}
+      {renderCheckboxGroupWithOther(
+        "appearanceAndBehavior",
+        ["Cooperative", "Guarded", "Candid", "Defensive"],
+        "Appearance and Behavior"
+      )}
+      {renderCheckboxGroupWithOther(
+        "eyeContact",
+        ["Good", "Sporadic", "Fleeting", "None"],
+        "Eye contact"
+      )}
+      {renderCheckboxGroupWithOther(
+        "attention",
+        ["Adequate", "Inadequate"],
+        "Attention"
+      )}
+      {renderCheckboxGroupWithOther(
+        "orientation",
+        ["Place", "Time", "Person", "Situation"],
+        "Orientation"
+      )}
+      {renderCheckboxGroupWithOther(
+        "thoughtProcess",
+        ["Coherence", "Tangential", "Disorganized"],
+        "Thought process"
+      )}
+      {renderCheckboxGroupWithOther(
+        "thoughtContent",
+        ["Reality", "Obsession", "Delusion"],
+        "Thought content"
+      )}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
+
 export default function Assessinhomesssuser({ }) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
@@ -39,40 +40,40 @@ export default function Assessinhomesssuser({ }) {
 
     useEffect(() => {
         socket.on('newAlert', (alert) => {
-          setAlerts(prevAlerts => [...prevAlerts, alert]);
-          setUnreadCount(prevCount => prevCount + 1);
+            setAlerts(prevAlerts => [...prevAlerts, alert]);
+            setUnreadCount(prevCount => prevCount + 1);
         });
-    
+
         return () => {
-          socket.off('newAlert'); // Clean up the listener on component unmount
+            socket.off('newAlert'); // Clean up the listener on component unmount
         };
-      }, []);
-      const toggleNotifications = (e) => {
+    }, []);
+    const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         } else {
-          setShowNotifications(true);
+            setShowNotifications(true);
         }
         // setShowNotifications(prev => !prev);
-      };
-    
-      const handleClickOutside = (e) => {
+    };
+
+    const handleClickOutside = (e) => {
         if (
-          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
-          !bellRef.current.contains(e.target)
+            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+            !bellRef.current.contains(e.target)
         ) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
-    
+
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-      }, []);
+    }, []);
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -121,7 +122,7 @@ export default function Assessinhomesssuser({ }) {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
 
-                  
+
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
@@ -331,6 +332,61 @@ export default function Assessinhomesssuser({ }) {
         });
         return unreadUsers.length;
     };
+
+    const [AssessinhomeForms, setAssessinhomeForms] = useState({});
+
+    const fetchAssessinhomeForms = async () => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/getAssessinhomeForms/${id}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const data = await response.json();
+            setAssessinhomeForms(data.data);
+            console.log("Patient Forms1:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (id) {
+            fetchAssessinhomeForms();
+        }
+    }, [id]);
+
+    const [AgendaForms, setAgendaForms] = useState({});
+
+    const fetchAgendaForms = async () => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/getAgendaForms/${id}`,
+                {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            const data = await response.json();
+            setAgendaForms(data.data);
+            console.log("Patient Forms1:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (id) {
+            fetchAgendaForms();
+        }
+    }, [id]);
+
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -506,9 +562,86 @@ export default function Assessinhomesssuser({ }) {
                         </p>
 
                     </div>
+                    <div className="toolbar ">
+                    {AgendaForms && AgendaForms.length > 0 && (
+
+                        <button
+                            className="btn btn-primary add-assessment-btn"
+                            onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
+                        >
+                            <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                            เพิ่มการประเมิน
+                        </button>
+                    )}
+                </div>
+                <div className="nameass mt-5">
+                    <h4>
+                        ประเมิน Agenda
+                    </h4>
+                </div>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th>ครั้งที่ประเมิน</th>
+                            <th>วันที่บันทึก</th>
+                            <th>ผลการประเมิน</th>
+                            <th>ผู้ประเมิน</th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        {AgendaForms.length > 0 ? (
+                            AgendaForms.map((form, index) => (
+                                <tr key={form._id}
+                                    onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <td>{index + 1}</td>
+                                    <td>{formatDate(form.createdAt)}</td>
+                                    <td> <span className="normal-status">{form.status_agenda}</span></td>
+                                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            // แสดงข้อความเมื่อไม่มีข้อมูล
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                                    <a
+                                        className="info"
+                                        onClick={() =>
+                                            navigate("/agendaform", { state: { id: userData._id } })
+                                        }
+                                    >
+                                        <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+
+                </table>
+                    <div className="toolbar mt-4">
+                        {AssessinhomeForms && AssessinhomeForms.length > 0 && (
+
+                            <button
+                                className="btn btn-primary add-assessment-btn"
+                                onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
+                            >
+                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                                เพิ่มการประเมิน
+                            </button>
+                        )}
+                    </div>
+                    <div className="nameass mt-5">
+                        <h4>
+                            ประเมิน IN-HOME-SSS
+                        </h4>
+                    </div>
+
                     <table className="table">
                         <thead>
                             <tr>
+                                <th>ครั้งที่ประเมิน</th>
                                 <th>วันที่บันทึก</th>
                                 <th>ผลการประเมิน</th>
                                 <th>ผู้ประเมิน</th>
@@ -516,23 +649,38 @@ export default function Assessinhomesssuser({ }) {
 
                         </thead>
                         <tbody>
-                            <tr>
-                                <td colSpan="3" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                    <a
-                                        className="info"
-                                        onClick={() =>
-                                            navigate("/LinearStepper", { state: { id: userData._id } })
-                                        }
+                            {AssessinhomeForms.length > 0 ? (
+                                AssessinhomeForms.map((form, index) => (
+                                    <tr key={form._id}
+                                        onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
+                                        style={{ cursor: "pointer" }}
                                     >
-                                        <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                                    </a>
-                                </td>
-                            </tr>
+                                        <td>{index + 1}</td>
+                                        <td>{formatDate(form.createdAt)}</td>
+                                        <td> <span className="normal-status">{form.status_inhome}</span></td>
+                                        <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                // แสดงข้อความเมื่อไม่มีข้อมูล
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                                        <a
+                                            className="info"
+                                            onClick={() =>
+                                                navigate("/assessinhomesssform", { state: { id: userData._id } })
+                                            }
+                                        >
+                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
-
                     </table>
-                </div>
 
+                </div>
+                
             </div>
         </main>
     );

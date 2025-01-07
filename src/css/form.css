@@ -12,10 +12,6 @@
 .sidebarform {
     position: fixed;
     border-right: 1px solid #87CEFA;
-    /* background: #11101D; */
-    /* background-color: #87CEFA; */
-    /* background: #30a9f4; */
-    /* margin-left: 80px; */
     display: flex;
     overflow: hidden;
     display: flex;
@@ -24,7 +20,29 @@
     border-radius: 8px;
     overflow: hidden;
 }
+.agendaform{
+    position: fixed;
+    top: 110px;
+    /* Offset for the fixed header */
+    left: 250px;
+    width: 390px;
+    height: calc(25vh - 50px);
+    /* Full height minus the header */
+    border: 1px solid #ddd;
+    background-color: white;
+    overflow-y: auto;
+    border-radius: 8px;
+}
+.textassesmentagenda {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 0px;
+}
 
+.textassesmentagenda label {
+    font-weight: bold;
+    color: #323232;
+}
 .add:hover {
     background-color: #87CEFA;
     color: #ffffff;
@@ -485,6 +503,11 @@ tr.assessmentnull {
     border-bottom: 1px solid #ddd;
     margin-top: 10px;
     margin-left: 25px;
+}
+.nameagenda {
+    margin-top: 10px;
+    margin-left: 35px;
+    line-height: 30px;
 }
 
 .contentinass {

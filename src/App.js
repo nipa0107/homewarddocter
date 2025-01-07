@@ -1,6 +1,6 @@
 import React from "react";
 import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import LinearStepper from "./components/LinearStepper";
+import AssessinhomesssForm from "./components/AssessinhomesssForm";
 
 
 import {
@@ -33,12 +33,16 @@ import Assessinhomesss from "./components/Assessinhomesss";
 import Assessinhomesssuser from "./components/Assessinhomesssuser";
 import Assessreadinessuser from "./components/Assessreadinessuser";
 import MultiStepForm from "./components/MultiStepForm";
+import DetailAssessinhomesss from "./components/DetailAssessinhomeForm";
+import DetailAgenda from "./components/DetailAgendaForm";
+
 // import Immobility from "./components/Immobility";
 
 import Emailverification from "./components/email-verification";
 import VerifyOtp from "./components/VerifyOtp";
 import UpdateEmail from "./components/updateemail";
 import UpdateOTP from "./components/updateotp";
+import AgendaForm from "./components/AgendaForm";
 
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
@@ -142,10 +146,19 @@ function App() {
             }
           />
           <Route
-            path="/LinearStepper"
+            path="/assessinhomesssform"
             element={
               <PrivateRoute
-                element={<LinearStepper />}
+                element={<AssessinhomesssForm />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/agendaform"
+            element={
+              <PrivateRoute
+                element={<AgendaForm/>}
                 isLoggedIn={isLoggedIn}
               />
             }
@@ -237,6 +250,24 @@ function App() {
             element={
               <PrivateRoute
                 element={<MultiStepForm />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/detailAssessinhomeForm"
+            element={
+              <PrivateRoute
+                element={<DetailAssessinhomesss />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/detailAgendaForm"
+            element={
+              <PrivateRoute
+                element={<DetailAgenda/>}
                 isLoggedIn={isLoggedIn}
               />
             }

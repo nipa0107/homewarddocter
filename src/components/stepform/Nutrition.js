@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Controller, useFormContext } from 'react-hook-form';
 import CountUp from 'react-countup';
 
-export const Nutrition = () => {
+export const Nutrition = ({ onDataChange }) => {
   const { control, getValues, setValue } = useFormContext();
   const [gender, setGender] = useState("");
   const [birthday, setBirthday] = useState("");
@@ -11,9 +11,33 @@ export const Nutrition = () => {
   const { id } = location.state;
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
-  const [activityLevel, setActivityLevel] = useState("sedentary");
+  const [activityLevel, setActivityLevel] = useState("");
   const [bmr, setBmr] = useState(0);
   const [tdee, setTdee] = useState(0);
+
+  const [nutritionData, setNutritionData] = useState({
+    weight: 0,
+    height: 0,
+    bmr: 0,
+    tdee: 0,
+    activityLevel: '',
+    intakeMethod: [],
+    foodTypes: [],
+    medicalFood: '',
+    otherFood: '',
+    favoriteFood: '',
+    cooks: [],
+    nutritionStatus: '',
+  });
+
+  useEffect(() => {
+    if (gender) {
+      setNutritionData((prev) => ({
+        ...prev,
+        gender: gender,
+      }));
+    }
+  }, [gender]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,7 +46,6 @@ export const Nutrition = () => {
         const data = await response.json();
         setGender(data.gender);
         setBirthday(data.birthday);
-
         // Update form values with fetched data
         Object.keys(data).forEach(key => {
           setValue(key, data[key]);
@@ -56,40 +79,74 @@ export const Nutrition = () => {
     }
   }, [birthday]);
 
-  const calculateBmr = () => {
-    const weight = parseFloat(getValues('weight'));
-    const height = parseFloat(getValues('height'));
+  useEffect(() => {
+    const calculateBmr = () => {
+      const weight = parseFloat(getValues('weight'));
+      const height = parseFloat(getValues('height'));
 
-    if (isNaN(weight) || isNaN(height)) {
-      alert("กรุณากรอกน้ำหนักและส่วนสูงเป็นตัวเลขที่ถูกต้อง");
-      return;
-    }
+      if (isNaN(weight) || isNaN(height) || !userAge || !gender) {
+        return; // ถ้ามีข้อมูลไม่ครบ ให้ข้ามการคำนวณ
+      }
 
-    let calculatedBmr = 0;
+      let calculatedBmr = 0;
 
-    if (gender === "ชาย") {
-      calculatedBmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * userAge);
-    } else if (gender === "หญิง") {
-      calculatedBmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * userAge);
-    }
+      if (gender === "ชาย") {
+        calculatedBmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * userAge);
+      } else if (gender === "หญิง") {
+        calculatedBmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * userAge);
+      }
 
-    setBmr(calculatedBmr);
-    setValue('bmr', calculatedBmr);
-  };
-
-  const calculateTdee = () => {
-    const activityFactors = {
-      sedentary: 1.2,
-      lightly_active: 1.375,
-      moderately_active: 1.55,
-      very_active: 1.725,
-      super_active: 1.9
+      setBmr(Math.round(calculatedBmr));
+      setValue('bmr', Math.round(calculatedBmr));
+      setNutritionData((prev) => ({
+        ...prev,
+        bmr: Math.round(calculatedBmr),
+      }));
     };
 
-    const calculatedTdee = bmr * activityFactors[activityLevel];
-    setTdee(calculatedTdee);
-    setValue('tdee', calculatedTdee);
+    calculateBmr();
+  }, [getValues('weight'), getValues('height'), userAge, gender]); // คำนวณใหม่เมื่อ weight, height, userAge หรือ gender เปลี่ยน
+
+
+  useEffect(() => {
+    const calculateTdee = () => {
+      const activityFactors = {
+        sedentary: 1.2,
+        lightly_active: 1.375,
+        moderately_active: 1.55,
+        very_active: 1.725,
+        super_active: 1.9
+      };
+
+      if (!bmr || !activityLevel || !activityFactors[activityLevel]) {
+        return; // ถ้า BMR หรือ activityLevel ไม่ครบ ให้ข้ามการคำนวณ
+      }
+
+      const calculatedTdee = bmr * activityFactors[activityLevel];
+      setTdee(Math.round(calculatedTdee));
+      setValue('tdee', Math.round(calculatedTdee));
+      setNutritionData((prev) => ({
+        ...prev,
+        tdee: Math.round(calculatedTdee),
+      }));
+    };
+
+    calculateTdee();
+  }, [bmr, activityLevel]); // คำนวณใหม่เมื่อ BMR หรือ activityLevel เปลี่ยน
+
+
+  const handleInputChange = (name, value) => {
+    const updatedValue = value || (typeof nutritionData[name] === 'number' ? 0 : "");
+    const updatedData = {
+      ...nutritionData,
+      [name]: updatedValue,
+      bmr: Math.round(bmr),
+      tdee: Math.round(tdee),
+    };
+    setNutritionData(updatedData);
+    onDataChange(updatedData); // ส่งข้อมูลไปยัง parent
   };
+
 
   return (
     <div>
@@ -133,13 +190,17 @@ export const Nutrition = () => {
             <Controller
               name="weight"
               control={control}
-              defaultValue=""
+              defaultValue={0}
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
                   className="google-form-input"
                   placeholder="กรอกน้ำหนัก"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange('weight', e.target.value);
+                  }}
                 />
               )}
             />
@@ -158,10 +219,14 @@ export const Nutrition = () => {
               defaultValue=""
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
                   className="google-form-input"
                   placeholder="กรอกส่วนสูง"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange('height', e.target.value);
+                  }}
                 />
               )}
             />
@@ -174,12 +239,10 @@ export const Nutrition = () => {
           <span style={{ color: 'red' }}> *</span>
           <span
             style={{ color: 'blue', cursor: 'pointer', textDecoration: 'underline', marginLeft: '15px' }}
-            onClick={calculateBmr}
           >
-            คลิกเพื่อคำนวณ
           </span>
           <div>
-            <h5>= <CountUp end={bmr.toFixed(0)} duration={0.5} /> </h5>
+            <h5>= <CountUp end={bmr ? bmr.toFixed(0) : 0} duration={0.5} /> </h5>
           </div>
         </div>
       </div>
@@ -191,16 +254,18 @@ export const Nutrition = () => {
             <Controller
               name="activityLevel"
               control={control}
-              defaultValue="sedentary"
+              defaultValue=""
               render={({ field }) => (
                 <select
                   className="form-select"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
-                    setActivityLevel(e.target.value);
+                    setActivityLevel(e.target.value); // อัปเดต activityLevel
+                    handleInputChange('activityLevel', e.target.value); // อัปเดตใน useForm
                   }}
                 >
+                  <option value="">เลือกกิจกรรม</option>
                   <option value="sedentary">1. Sedentary: little or no exercise</option>
                   <option value="lightly_active">2. Lightly active: light exercise or sports 1-3 days a week</option>
                   <option value="moderately_active">3. Moderately active: moderate exercise or sports 3-5 days a week</option>
@@ -218,12 +283,10 @@ export const Nutrition = () => {
           <span style={{ color: 'red' }}> *</span>
           <span
             style={{ color: 'blue', cursor: 'pointer', textDecoration: 'underline', marginLeft: '15px' }}
-            onClick={calculateTdee}
           >
-            คลิกเพื่อคำนวณ
           </span>
           <div>
-            <h5>= <CountUp end={tdee.toFixed(2)} duration={0.5} /> </h5>
+            <h5>= <CountUp end={tdee ? tdee.toFixed(0) : 0} duration={0.5} /> </h5>
           </div>
         </div>
       </div>
@@ -242,11 +305,11 @@ export const Nutrition = () => {
                   value="กินเอง"
                   checked={field.value.includes("กินเอง")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "กินเอง"]);
-                    } else {
-                      field.onChange(field.value.filter((item) => item !== "กินเอง"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "กินเอง"]
+                      : field.value.filter((item) => item !== "กินเอง");
+                    field.onChange(newValue);
+                    handleInputChange("intakeMethod", newValue);
                   }}
                 />
               )}
@@ -265,11 +328,11 @@ export const Nutrition = () => {
                   value="ผู้ดูแลป้อน"
                   checked={field.value.includes("ผู้ดูแลป้อน")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "ผู้ดูแลป้อน"]);
-                    } else {
-                      field.onChange(field.value.filter((item) => item !== "ผู้ดูแลป้อน"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "ผู้ดูแลป้อน"]
+                      : field.value.filter((item) => item !== "ผู้ดูแลป้อน");
+                    field.onChange(newValue);
+                    handleInputChange("intakeMethod", newValue);
                   }}
                 />
               )}
@@ -288,11 +351,11 @@ export const Nutrition = () => {
                   value="NG tube"
                   checked={field.value.includes("NG tube")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "NG tube"]);
-                    } else {
-                      field.onChange(field.value.filter((item) => item !== "NG tube"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "NG tube"]
+                      : field.value.filter((item) => item !== "NG tube");
+                    field.onChange(newValue);
+                    handleInputChange("intakeMethod", newValue);
                   }}
                 />
               )}
@@ -311,11 +374,11 @@ export const Nutrition = () => {
                   value="OG tube"
                   checked={field.value.includes("OG tube")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "OG tube"]);
-                    } else {
-                      field.onChange(field.value.filter((item) => item !== "OG tube"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "OG tube"]
+                      : field.value.filter((item) => item !== "OG tube");
+                    field.onChange(newValue);
+                    handleInputChange("intakeMethod", newValue);
                   }}
                 />
               )}
@@ -334,11 +397,11 @@ export const Nutrition = () => {
                   value="PEG"
                   checked={field.value.includes("PEG")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "PEG"]);
-                    } else {
-                      field.onChange(field.value.filter((item) => item !== "PEG"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "PEG"]
+                      : field.value.filter((item) => item !== "PEG");
+                    field.onChange(newValue);
+                    handleInputChange("intakeMethod", newValue);
                   }}
                 />
               )}
@@ -357,17 +420,16 @@ export const Nutrition = () => {
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
                   checked={field.value.includes("IV")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "IV"]);
-                    } else {
-                      field.onChange(field.value.filter((item) => item !== "IV"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "IV"]
+                      : field.value.filter((item) => item !== "IV");
+                    field.onChange(newValue);
+                    handleInputChange("intakeMethod", newValue);
                   }}
                 />
               )}
             />
             <span style={{ marginLeft: '10px' }}>IV</span>
-
           </div>
         </div>
       </div>
@@ -386,16 +448,15 @@ export const Nutrition = () => {
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
                   checked={field.value.includes("อาหารธรรมดา")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "อาหารธรรมดา"]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== "อาหารธรรมดา"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "อาหารธรรมดา"]
+                      : field.value.filter((item) => item !== "อาหารธรรมดา");
+                    field.onChange(newValue);
+                    handleInputChange("foodTypes", newValue);
                   }}
                 />
               )}
             /> <span style={{ marginLeft: '10px' }}>อาหารธรรมดา </span>
-
           </div>
           <div>
             <Controller
@@ -409,11 +470,11 @@ export const Nutrition = () => {
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
                   checked={field.value.includes("อาหารอ่อน")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "อาหารอ่อน"]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== "อาหารอ่อน"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "อาหารอ่อน"]
+                      : field.value.filter((item) => item !== "อาหารอ่อน");
+                    field.onChange(newValue);
+                    handleInputChange("foodTypes", newValue);
                   }}
                 />
               )}
@@ -431,11 +492,11 @@ export const Nutrition = () => {
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
                   checked={field.value.includes("อาหารเหลว")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "อาหารเหลว"]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== "อาหารเหลว"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "อาหารเหลว"]
+                      : field.value.filter((item) => item !== "อาหารเหลว");
+                    field.onChange(newValue);
+                    handleInputChange("foodTypes", newValue);
                   }}
                 />
               )}
@@ -457,26 +518,10 @@ export const Nutrition = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">อื่นๆ (ถ้ามี) :</label><br></br>
-          <div>
-            <Controller
-              name="otherFood"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input
-                  type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("medicalFood", e.target.value);
+                  }}
                 />
               )}
             />
@@ -497,6 +542,34 @@ export const Nutrition = () => {
                   className="google-form-input"
                   placeholder="กรอกคำตอบ"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("favoriteFood", e.target.value);
+                  }}
+                />
+              )}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="info3 card mt-3">
+        <div className='m-4'>
+          <label className="form-label">อาหารอื่นๆ (ถ้ามี) :</label><br></br>
+          <div>
+            <Controller
+              name="otherFood"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <input
+                  type="text"
+                  className="google-form-input"
+                  placeholder="กรอกคำตอบ"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("otherFood", e.target.value);
+                  }}
                 />
               )}
             />
@@ -518,11 +591,11 @@ export const Nutrition = () => {
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
                   checked={field.value.includes("ปรุงเอง")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "ปรุงเอง"]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== "ปรุงเอง"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "ปรุงเอง"]
+                      : field.value.filter((item) => item !== "ปรุงเอง");
+                    field.onChange(newValue);
+                    handleInputChange("cooks", newValue);
                   }}
                 />
               )}
@@ -540,11 +613,11 @@ export const Nutrition = () => {
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
                   checked={field.value.includes("คนดูแลปรุงให้")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "คนดูแลปรุงให้"]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== "คนดูแลปรุงให้"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "คนดูแลปรุงให้"]
+                      : field.value.filter((item) => item !== "คนดูแลปรุงให้");
+                    field.onChange(newValue);
+                    handleInputChange("cooks", newValue);
                   }}
                 />
               )}
@@ -562,67 +635,16 @@ export const Nutrition = () => {
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
                   checked={field.value.includes("ซื้อจากร้านอาหาร")}
                   onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, "ซื้อจากร้านอาหาร"]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== "ซื้อจากร้านอาหาร"));
-                    }
+                    const newValue = e.target.checked
+                      ? [...field.value, "ซื้อจากร้านอาหาร"]
+                      : field.value.filter((item) => item !== "ซื้อจากร้านอาหาร");
+                    field.onChange(newValue);
+                    handleInputChange("cooks", newValue);
                   }}
                 />
               )}
             /><span style={{ marginLeft: '10px' }}> ซื้อจากร้านอาหาร </span>
           </div>
-          {/* <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}> </span>
-          </div>
-          
-          <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label"> :</label><br></br>
-          <p style={{ color: 'gray' }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-          <div>
-            <Controller
-              name=""
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <input
-                  type="checkbox"
-                  value=""
-                  style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-                  checked={field.value.includes("")}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      field.onChange([...field.value, ""]);
-                    } else {
-                      field.onChange(field.value.filter(item => item !== ""));
-                    }
-                  }}
-                />
-              )}
-            /> <span style={{ marginLeft: '10px' }}> </span>
-          </div>
-        </div>
-      </div>*/}
         </div>
       </div>
       <div className="info3 card mt-3">
@@ -640,14 +662,17 @@ export const Nutrition = () => {
             <Controller
               name="nutritionStatus"
               control={control}
-              defaultValue=""
+              defaultValue=" "
               render={({ field }) => (
                 <input
                   type="radio"
                   value="ปกติ"
                   style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
                   checked={field.value === "ปกติ"}
-                  onChange={() => field.onChange("ปกติ")}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    handleInputChange("nutritionStatus", e.target.value);
+                  }}
                 />
               )}
             /> <span style={{ marginLeft: '10px' }}>ปกติ </span>
@@ -656,14 +681,16 @@ export const Nutrition = () => {
             <Controller
               name="nutritionStatus"
               control={control}
-              defaultValue=""
               render={({ field }) => (
                 <input
                   type="radio"
                   value="เกินเกณฑ์"
                   style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
                   checked={field.value === "เกินเกณฑ์"}
-                  onChange={() => field.onChange("เกินเกณฑ์")}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    handleInputChange("nutritionStatus", e.target.value);
+                  }}
                 />
               )}
             /> <span style={{ marginLeft: '10px' }}>เกินเกณฑ์ </span>
@@ -672,14 +699,16 @@ export const Nutrition = () => {
             <Controller
               name="nutritionStatus"
               control={control}
-              defaultValue=""
               render={({ field }) => (
                 <input
                   type="radio"
                   value="ต่ำกว่าเกณฑ์"
                   style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
                   checked={field.value === "ต่ำกว่าเกณฑ์"}
-                  onChange={() => field.onChange("ต่ำกว่าเกณฑ์")}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    handleInputChange("nutritionStatus", e.target.value);
+                  }}
                 />
               )}
             /><span style={{ marginLeft: '10px' }}> ต่ำกว่าเกณฑ์ </span>

@@ -47,14 +47,14 @@ export default function Updatepatient() {
     const bellRef = useRef(null);
     useEffect(() => {
         socket.on('newAlert', (alert) => {
-          setAlerts(prevAlerts => [...prevAlerts, alert]);
-          setUnreadCount(prevCount => prevCount + 1);
+            setAlerts(prevAlerts => [...prevAlerts, alert]);
+            setUnreadCount(prevCount => prevCount + 1);
         });
-    
+
         return () => {
-          socket.off('newAlert'); // Clean up the listener on component unmount
+            socket.off('newAlert'); // Clean up the listener on component unmount
         };
-      }, []);
+    }, []);
     const FormatDate = (date) => {
         const formattedDate = new Date(date);
         // ตรวจสอบว่า date เป็น NaN หรือไม่
@@ -124,29 +124,29 @@ export default function Updatepatient() {
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         } else {
-          setShowNotifications(true);
+            setShowNotifications(true);
         }
         // setShowNotifications(prev => !prev);
-      };
-    
-      const handleClickOutside = (e) => {
+    };
+
+    const handleClickOutside = (e) => {
         if (
-          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
-          !bellRef.current.contains(e.target)
+            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+            !bellRef.current.contains(e.target)
         ) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
-    
+
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-      }, []);
+    }, []);
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -196,7 +196,7 @@ export default function Updatepatient() {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
 
-                   
+
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
@@ -253,13 +253,13 @@ export default function Updatepatient() {
                 nationality,
                 Address,
                 user: id, // เชื่อมโยงกับผู้ใช้
-                caregiverName,
-                caregiverSurname,
-                caregiverTel,
+                caregivername: caregiverName, // เปลี่ยนเป็น lowercase ตาม Backend
+                caregiversurname: caregiverSurname,
+                caregivertel: caregiverTel,
                 Relationship
             };
 
-            const response = await fetch(`http://localhost:5000/updateuserinfo/${id}`, {
+            const response = await fetch(`http://localhost:5000/updateuserinfo`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

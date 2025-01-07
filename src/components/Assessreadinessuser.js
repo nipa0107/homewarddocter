@@ -39,40 +39,40 @@ export default function Assessreadinessuser({ }) {
 
     useEffect(() => {
         socket.on('newAlert', (alert) => {
-          setAlerts(prevAlerts => [...prevAlerts, alert]);
-          setUnreadCount(prevCount => prevCount + 1);
+            setAlerts(prevAlerts => [...prevAlerts, alert]);
+            setUnreadCount(prevCount => prevCount + 1);
         });
-    
+
         return () => {
-          socket.off('newAlert'); // Clean up the listener on component unmount
+            socket.off('newAlert'); // Clean up the listener on component unmount
         };
-      }, []);
+    }, []);
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         } else {
-          setShowNotifications(true);
+            setShowNotifications(true);
         }
         // setShowNotifications(prev => !prev);
-      };
-    
-      const handleClickOutside = (e) => {
+    };
+
+    const handleClickOutside = (e) => {
         if (
-          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
-          !bellRef.current.contains(e.target)
+            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+            !bellRef.current.contains(e.target)
         ) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
-    
+
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-      }, []);
+    }, []);
     // const toggleNotifications = () => {
     //     setShowNotifications(!showNotifications);
     // };
@@ -139,7 +139,7 @@ export default function Assessreadinessuser({ }) {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
 
-                   
+
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
@@ -566,12 +566,13 @@ export default function Assessreadinessuser({ }) {
                         </p>
                     </div>
                     <div className="toolbar">
-                    {readinessForms && readinessForms.length > 0 && (
-                        
+                        {readinessForms && readinessForms.length > 0 && (
+
                             <button
                                 className="btn btn-primary add-assessment-btn"
                                 onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}
                             >
+                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
                                 เพิ่มการประเมิน
                             </button>
                         )}
@@ -580,7 +581,7 @@ export default function Assessreadinessuser({ }) {
                     <table className="table mt-5">
                         <thead>
                             <tr>
-                                <th>ประเมินครั้งที่</th>
+                                <th>ครั้งที่ประเมิน</th>
                                 <th>วันที่บันทึก</th>
                                 <th>ผลการประเมินความพร้อม</th>
                                 <th>ผู้บันทึก</th>
@@ -631,7 +632,7 @@ export default function Assessreadinessuser({ }) {
                                     ))
                             ) : (
                                 <tr>
-                                    <td colSpan="3" style={{ textAlign: "center" }}>
+                                    <td colSpan="5" style={{ textAlign: "center" }}>
                                         <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}>
                                             <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
                                         </a>

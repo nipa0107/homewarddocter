@@ -1,19 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const Medication = () => {
-  const { register, control } = useFormContext();
-  const [medicationData, setMedicationData] = useState({
-    prescribedMedication: '',
-    actualMedication: '',
-    supplements: '',
-    administration: '',
-    intake: '',
-    consistency: ''
-  });
+export const Medication = ({ onDataChange }) => {
+  const { register, control, setValue, getValues } = useFormContext();
+  useEffect(() => {
+    onDataChange(getValues()); // ส่งค่าเริ่มต้นให้ Parent Component
+  }, []);
 
-  const handleRadioChange = (e, fieldName) => {
-    setMedicationData({ ...medicationData, [fieldName]: e.target.value });
+  const handleInputChange = (name, value) => {
+    setValue(name, value);
+    onDataChange({ ...getValues() });
   };
 
   return (
@@ -35,6 +31,10 @@ export const Medication = () => {
                   className="google-form-input"
                   placeholder="กรอกยาที่แพทย์สั่ง"
                   {...field}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    handleInputChange("prescribedMedication", e.target.value);
+                  }}
                 />
               )}
             />
@@ -55,6 +55,10 @@ export const Medication = () => {
                 className="google-form-input"
                 placeholder="กรอกการใช้ยาจริง"
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e.target.value);
+                  handleInputChange("actualMedication", e.target.value);
+                }}
               />
             )}
           />
@@ -74,100 +78,100 @@ export const Medication = () => {
                 className="google-form-input"
                 placeholder="กรอกอาหารเสริม"
                 {...field}
+                onChange={(e) => {
+                  field.onChange(e.target.value);
+                  handleInputChange("supplements", e.target.value);
+                }}
               />
             )}
           />
         </div>
       </div>
 
-      {/* Radio buttons: Administration */}
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">การบริหารยา :</label><br></br>
-          <div>
-            <input
-              type="radio"
-              {...register("administration")}
-              value="selfAdministered"
-              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-              checked={medicationData.administration === "selfAdministered"}
-              onChange={(e) => handleRadioChange(e, 'administration')}
-            /><span style={{ marginLeft: '10px' }}> จัดยาด้วยตนเอง </span> 
-          </div>
-          <div>
-            <input
-              type="radio"
-              {...register("administration")}
-              value="administeredByOther"
-              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-              checked={medicationData.administration === "administeredByOther"}
-              onChange={(e) => handleRadioChange(e, 'administration')}
-            /><span style={{ marginLeft: '10px' }}> มีคนจัดยาให้ </span> 
-          </div>
+       {/* Radio: Administration */}
+       <div className="info3 card mt-3">
+        <div className="m-4">
+          <label className="form-label">การบริหารยา :</label>
+          {['จัดยาด้วยตนเอง', 'มีคนจัดยาให้'].map((option) => (
+            <div key={option}>
+              <Controller
+                name="administration"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <input
+                    type="radio"
+                    value={option}
+                    checked={field.value === option}
+                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      handleInputChange("administration", e.target.value);
+                    }}
+                  />
+                )}
+              />
+              <span style={{ marginLeft: '10px' }}>{option}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Radio buttons: Intake */}
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">การรับประทานยา :</label><br></br>
-          <div>
-            <input
-              type="radio"
-              {...register("intake")}
-              value="selfTaken"
-              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-              checked={medicationData.intake === "selfTaken"}
-              onChange={(e) => handleRadioChange(e, 'intake')}
-            /><span style={{ marginLeft: '10px' }}> รับประทานยาด้วยตัวเอง </span> 
-          </div>
-          <div>
-            <input
-              type="radio"
-              {...register("intake")}
-              value="preparedEachMeal"
-              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-              checked={medicationData.intake === "preparedEachMeal"}
-              onChange={(e) => handleRadioChange(e, 'intake')}
-            /><span style={{ marginLeft: '10px' }}> มีคนเตรียมยาแต่ละมื้อให้ </span> 
-          </div>
+       {/* Radio: Intake */}
+       <div className="info3 card mt-3">
+        <div className="m-4">
+          <label className="form-label">การรับประทานยา :</label>
+          {['รับประทานยาด้วยตัวเอง', 'มีคนเตรียมยาแต่ละมื้อให้'].map((option) => (
+            <div key={option}>
+              <Controller
+                name="intake"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <input
+                    type="radio"
+                    value={option}
+                    checked={field.value === option}
+                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      handleInputChange("intake", e.target.value);
+                    }}
+                  />
+                )}
+              />
+              <span style={{ marginLeft: '10px' }}>{option}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Radio buttons: Consistency */}
+      {/* Radio: Consistency */}
       <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ความสม่ำเสมอ :</label><br></br>
-          <div>
-            <input
-              type="radio"
-              {...register("consistency")}
-              value="consistent"
-              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-              checked={medicationData.consistency === "consistent"}
-              onChange={(e) => handleRadioChange(e, 'consistency')}
-            /><span style={{ marginLeft: '10px' }}>สม่ำเสมอทุกวัน</span> 
-          </div>
-          <div>
-            <input
-              type="radio"
-              {...register("consistency")}
-              value="occasionalMiss"
-              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-              checked={medicationData.consistency === "occasionalMiss"}
-              onChange={(e) => handleRadioChange(e, 'consistency')}
-            /><span style={{ marginLeft: '10px' }}> หลงลืมบางครั้ง </span> 
-          </div>
-          <div>
-            <input
-              type="radio"
-              {...register("consistency")}
-              value="inconsistent"
-              style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
-              checked={medicationData.consistency === "inconsistent"}
-              onChange={(e) => handleRadioChange(e, 'consistency')}
-            /><span style={{ marginLeft: '10px' }}> ไม่สม่ำเสมอ </span> 
-          </div>
+        <div className="m-4">
+          <label className="form-label">ความสม่ำเสมอ :</label>
+          {['สม่ำเสมอทุกวัน', 'หลงลืมบางครั้ง', 'ไม่สม่ำเสมอ'].map((option) => (
+            <div key={option}>
+              <Controller
+                name="consistency"
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <input
+                    type="radio"
+                    value={option}
+                    checked={field.value === option}
+                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      handleInputChange("consistency", e.target.value);
+                    }}
+                  />
+                )}
+              />
+              <span style={{ marginLeft: '10px' }}>{option}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

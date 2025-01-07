@@ -598,6 +598,7 @@ export default function Assessreadiness1() {
 
     const handleNext = () => setStep(prevStep => prevStep + 1);
     const handlePrevious = () => setStep(prevStep => prevStep - 1);
+    
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? 'active' : ''}`}>

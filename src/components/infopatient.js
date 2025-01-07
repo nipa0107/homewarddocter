@@ -9,6 +9,7 @@ import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
+
 export default function Infopatient({ }) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
@@ -47,14 +48,14 @@ export default function Infopatient({ }) {
 
     useEffect(() => {
         socket.on('newAlert', (alert) => {
-          setAlerts(prevAlerts => [...prevAlerts, alert]);
-          setUnreadCount(prevCount => prevCount + 1);
+            setAlerts(prevAlerts => [...prevAlerts, alert]);
+            setUnreadCount(prevCount => prevCount + 1);
         });
-    
+
         return () => {
-          socket.off('newAlert'); // Clean up the listener on component unmount
+            socket.off('newAlert'); // Clean up the listener on component unmount
         };
-      }, []);
+    }, []);
     // useEffect(() => {
     //     const handleClickOutside = (event) => {
     //         if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
@@ -75,29 +76,29 @@ export default function Infopatient({ }) {
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         } else {
-          setShowNotifications(true);
+            setShowNotifications(true);
         }
         // setShowNotifications(prev => !prev);
-      };
-    
-      const handleClickOutside = (e) => {
+    };
+
+    const handleClickOutside = (e) => {
         if (
-          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
-          !bellRef.current.contains(e.target)
+            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+            !bellRef.current.contains(e.target)
         ) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
-    
+
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-      }, []);
+    }, []);
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -767,13 +768,13 @@ export default function Infopatient({ }) {
                                                     style={{ color: "grey" }}
                                                     href=""
                                                     onClick={() => {
-                                                        const filePath = medicalInfo.fileP.replace(/\\/g, "/");
-                                                        const fileName = filePath.split("/").pop();
-                                                        console.log("fileName:", fileName);
-                                                        window.open(`http://localhost:5000/file/${fileName}`, "_blank");
+                                                        // const filePath = medicalInfo.fileP.replace(/\\/g, "/");
+                                                        // const fileName = filePath.split("/").pop();
+                                                        // console.log("fileName:", fileName);
+                                                        window.open(`${medicalInfo.fileP}`, "_blank");
                                                     }}
                                                 >
-                                                    {medicalInfo.fileP.split("/").pop().split("\\").pop()}
+                                                    {medicalInfo.fileP.replace("?alt=media", "").split("/").pop().split("\\").pop()}
                                                 </a>
                                             ) : (
                                                 "-"
@@ -789,13 +790,13 @@ export default function Infopatient({ }) {
                                                     style={{ color: "grey" }}
                                                     href=""
                                                     onClick={() => {
-                                                        const filePath = medicalInfo.fileM.replace(/\\/g, "/");
-                                                        const fileName = filePath.split("/").pop();
-                                                        console.log("fileName:", fileName);
-                                                        window.open(`http://localhost:5000/file/${fileName}`, "_blank");
+                                                        // const filePath = medicalInfo.fileM.replace(/\\/g, "/");
+                                                        // const fileName = filePath.split("/").pop();
+                                                        // console.log("fileName:", fileName);
+                                                        window.open(`${medicalInfo.fileM}`, "_blank");
                                                     }}
                                                 >
-                                                    {medicalInfo.fileM.split("/").pop().split("\\").pop()}
+                                                    {medicalInfo.fileM.replace("?alt=media", "").split("/").pop().split("\\").pop()}
                                                 </a>
                                             ) : (
                                                 "-"
@@ -810,13 +811,13 @@ export default function Infopatient({ }) {
                                                     style={{ color: "grey" }}
                                                     href=""
                                                     onClick={() => {
-                                                        const filePath = medicalInfo.filePhy.replace(/\\/g, "/");
-                                                        const fileName = filePath.split("/").pop();
-                                                        console.log("fileName:", fileName);
-                                                        window.open(`http://localhost:5000/file/${fileName}`, "_blank");
+                                                        // const filePath = medicalInfo.filePhy.replace(/\\/g, "/");
+                                                        // const fileName = filePath.split("/").pop();
+                                                        // console.log("fileName:", fileName);
+                                                        window.open(`${medicalInfo.filePhy}`, "_blank");
                                                     }}
                                                 >
-                                                    {medicalInfo.filePhy.split("/").pop().split("\\").pop()}
+                                                    {medicalInfo.filePhy.replace("?alt=media", "").split("/").pop().split("\\").pop()}
                                                 </a>
                                             ) : (
                                                 "-"

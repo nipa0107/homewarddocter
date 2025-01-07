@@ -5,23 +5,19 @@ import logow from "../img/logow.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { Immobility } from "./stepform/Immobility";
-import { Nutrition } from "./stepform/Nutrition";
-import { Housing } from "./stepform/Housing"
-import { Physicalexamination } from "./stepform/Physicalexamination"
-import { SSS } from "./stepform/SSS"
-import { Otherassessment } from "./stepform/Otherassessment"
-import { Otherpeople } from "./stepform/Otherpeople"
-import { Medication } from "./stepform/Medication"
-import { Zarit } from "./stepform/Zaritburdeninterview"
 import { Typography, Stepper, Step, StepLabel, Wizard, WizardStep } from "@material-ui/core";
 import { useForm, FormProvider } from "react-hook-form";
+import { useFormContext } from 'react-hook-form';
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
+import { PatientAgenda } from './stepform/PatientAgenda';
+import { CaregiverAgenda } from './stepform/CaregiverAgenda';
+import { CaregiverAssessment } from './stepform/CaregiverAssessment';
+import { Zarit } from './stepform/Zaritburdeninterview';
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
 
-export default function LinaerStepper({ }) {
+export default function AgendaForm({ }) {
     const navigate = useNavigate();
     const [data, setData] = useState("");
     const [isActive, setIsActive] = useState(false);
@@ -30,7 +26,9 @@ export default function LinaerStepper({ }) {
     const location = useLocation();
     const { id } = location.state;
     const userid = location.state.id; // Get user ID from the navigation state
-    const [assessmentData, setAssessmentData] = useState([]);
+    const [caregiver, setCaregiver] = useState([]);
+    const [newCaregivers, setNewCaregivers] = useState([]);
+    const [mpersonnel, setMPersonnel] = useState([]);
     const [username, setUsername] = useState("");
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
@@ -49,42 +47,43 @@ export default function LinaerStepper({ }) {
     const [showToTopButton, setShowToTopButton] = useState(false);
     const bellRef = useRef(null);
 
+
     useEffect(() => {
         socket.on('newAlert', (alert) => {
-          setAlerts(prevAlerts => [...prevAlerts, alert]);
-          setUnreadCount(prevCount => prevCount + 1);
+            setAlerts(prevAlerts => [...prevAlerts, alert]);
+            setUnreadCount(prevCount => prevCount + 1);
         });
-    
+
         return () => {
-          socket.off('newAlert'); // Clean up the listener on component unmount
+            socket.off('newAlert'); // Clean up the listener on component unmount
         };
-      }, []);
-      const toggleNotifications = (e) => {
+    }, []);
+    const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         } else {
-          setShowNotifications(true);
+            setShowNotifications(true);
         }
         // setShowNotifications(prev => !prev);
-      };
-    
-      const handleClickOutside = (e) => {
+    };
+
+    const handleClickOutside = (e) => {
         if (
-          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
-          !bellRef.current.contains(e.target)
+            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+            !bellRef.current.contains(e.target)
         ) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
-    
+
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
-      }, []);
+    }, []);
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -110,6 +109,24 @@ export default function LinaerStepper({ }) {
             });
     };
     useEffect(() => {
+        const token = window.localStorage.getItem("token");
+        setToken(token);
+
+        if (token) {
+            fetchUserData(token)
+                .then(user => {
+                    setUserId(user._id);
+                    setMPersonnel(user._id);
+                    fetchAndSetAlerts(token, user._id);
+
+                })
+                .catch((error) => {
+                    console.error("Error verifying token:", error);
+                });
+        }
+    }, []);
+
+    useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch(`http://localhost:5000/getuser/${id}`);
@@ -129,21 +146,6 @@ export default function LinaerStepper({ }) {
     }, [id]);
 
     useEffect(() => {
-        const fetchAssessmentData = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/getAssessreadiness/${userid}`);
-                const data = await response.json();
-
-                if (response.ok) {
-                    setAssessmentData(data.data); // Store assessment data
-                } else {
-                    console.error(data.message);
-                }
-            } catch (error) {
-                console.error('Error fetching assessment data:', error);
-            }
-        };
-
         const fetchMedicalData = async () => {
             try {
                 const response = await fetch(`http://localhost:5000/medicalInformation/${userid}`);
@@ -159,7 +161,6 @@ export default function LinaerStepper({ }) {
             }
         };
 
-        fetchAssessmentData();
         fetchMedicalData();
     }, [userid]);
 
@@ -207,7 +208,7 @@ export default function LinaerStepper({ }) {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
 
-                 
+
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
@@ -256,104 +257,29 @@ export default function LinaerStepper({ }) {
         setIsActive(!isActive);
     };
 
-    const methods = useForm({
-        defaultValues: {
-        },
-    });
-
-    const steps = getSteps();
-
-    function getSteps() {
-        return [
-            "Immobility",
-            "Nutrition",
-            "Housing",
-            "Other people",
-            "Medication",
-            "Examination",
-            "SSS",
-            "OtherAssessment",
-            "Zarit burden interview"
-        ];
-    }
-
-    function getStepContent(step) {
-        switch (step) {
-            case 0:
-                return <Immobility />;
-            case 1:
-                return <Nutrition />;
-            case 2:
-                return <Housing />;
-            case 3:
-                return <Otherpeople />;
-            case 4:
-                return <Medication />;
-            case 5:
-                return <Physicalexamination />;
-            case 6:
-                return <SSS />;
-            case 7:
-                return <Otherassessment />;
-            case 8:
-                return <Zarit />;
-            case 9:
-                return;
-            default:
-                return "unknown step";
-        }
-    }
     const handleScroll = () => {
         const formContent = document.querySelector('.form-content');
         if (formContent.scrollTop > 200) {
-          setShowToTopButton(true);
+            setShowToTopButton(true);
         } else {
-          setShowToTopButton(false);
+            setShowToTopButton(false);
         }
-      };
-      
-      const scrollToTop = () => {
+    };
+
+    const scrollToTop = () => {
         const formContent = document.querySelector('.form-content');
         formContent.scrollTo({ top: 0, behavior: "smooth" });
-      };
-      
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         const formContent = document.querySelector('.form-content');
         formContent.addEventListener("scroll", handleScroll);
         return () => {
-          formContent.removeEventListener("scroll", handleScroll);
+            formContent.removeEventListener("scroll", handleScroll);
         };
-      }, []);
-      
-
-    const [activeStep, setActiveStep] = useState(0);
+    }, []);
 
 
-    const handleNext = (data) => {
-        console.log(data);
-        setActiveStep(prevActiveStep => {
-            // Scroll to the top of the form content
-            const formContent = document.querySelector('.form-content');
-            formContent.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            return prevActiveStep + 1;
-        });
-        
-        // Simulating API call or data submission if on the last step
-        if (activeStep === steps.length - 1) {
-            fetch("https://jsonplaceholder.typicode.com/comments")
-                .then((data) => data.json())
-                .then((res) => {
-                    console.log(res);
-                    setActiveStep(activeStep + 1);
-                });
-        }
-    };
-    
-
-    const handleBack = () => {
-        setActiveStep(activeStep - 1);
-    };
     const formatDate = (dateTimeString) => {
         const dateTime = new Date(dateTimeString);
         const day = dateTime.getDate();
@@ -431,10 +357,138 @@ export default function LinaerStepper({ }) {
         });
         return unreadUsers.length;
     };
+
+    const steps = getSteps();
+    function getSteps() {
+        return [
+            "Patient Agenda", "Caregiver Agenda", "Caregiver Assessment", "Zarit burden interview"
+        ];
+    }
+    const [activeStep, setActiveStep] = useState(0);
+    const methods = useForm({
+        defaultValues: {
+        },
+    });
+    useEffect(() => {
+        const fetchCaregiverData = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/getCaregiversByUser/${userid}`);
+                const caregiverData = await response.json();
+                if (caregiverData.status === 'ok') {
+                    setCaregiver(caregiverData.data);
+                }
+            } catch (error) {
+                console.error("Error fetching caregiver data:", error);
+            }
+        };
+        fetchCaregiverData();
+    }, [id]);
+
+    useEffect(() => {
+        const fetchNewCaregivers = async () => {
+          try {
+            const response = await fetch(`http://localhost:5000/getcaregivesotherpeople/${id}`);
+            const data = await response.json();
+            console.log("Fetched new caregivers:", data); // ตรวจสอบข้อมูลใน console
+            if (data.status === "ok") {
+              setNewCaregivers(data.data); // อัปเดต state newCaregivers
+            } else {
+              console.error("Failed to fetch new caregivers:", data.message);
+            }
+          } catch (error) {
+            console.error("Error fetching new caregivers:", error);
+          }
+        };
+      
+        if (id) fetchNewCaregivers();
+      }, [id]);
+      
+
+    const handleNext = async (data) => {
+        console.log("Form data at step", activeStep, data);
+
+        if (activeStep === 0) {
+            setPatientAgendaData(PatientAgendaData);
+        } else if (activeStep === 1) {
+            setCaregiverAgendaData(CaregiverAgendaData)
+        } else if (activeStep === 2) {
+            setCaregiverAssessmentData(CaregiverAssessmentData)
+        } else if (activeStep === 3) {
+            setZaritData(ZaritData)
+        }
+
+        // เมื่อถึงหน้าสุดท้าย ให้ส่งข้อมูลไปยัง backend
+        if (activeStep === steps.length - 1) {
+            try {
+                const response = await fetch(`http://localhost:5000/submitagenda/${userid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userId: userid,
+                        MPersonnel: mpersonnel,
+                        Caregiver: caregiver,
+                        newCaregivers: newCaregivers.map(cg => cg.id), 
+                        PatientAgenda: PatientAgendaData,
+                        CaregiverAgenda: { Care_Agenda: CaregiverAgendaData },
+                        CaregiverAssessment: { Care_Assessment: CaregiverAssessmentData },
+                        Zaritburdeninterview: ZaritData,
+                        status_agenda: 'ประเมินแล้ว',
+                    }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    toast.success("บันทึกข้อมูลสำเร็จ");
+                    setTimeout(() => {
+                        navigate("/assessinhomesssuser", { state: { id } });
+                    }, 1000);
+                    // Show the success message and links
+                } else {
+                    console.error("Error during ReadinessForm submission:", data);
+                    toast.error("เกิดข้อผิดพลาดในการประเมิน");
+                }
+                console.log('Data saved:', result);
+                // หลังบันทึกสามารถเพิ่มการแจ้งเตือนได้ เช่น การนำทางไปยังหน้าอื่น
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        } else {
+            // หากไม่ใช่หน้าสุดท้าย ให้เลื่อนไปยังหน้าถัดไป
+            setActiveStep((prevActiveStep) => prevActiveStep + 1);
+        }
+    };
+
+    const handleBack = () => {
+        setActiveStep(activeStep - 1);
+    };
+
+    const [PatientAgendaData, setPatientAgendaData] = useState({});
+    const [CaregiverAgendaData, setCaregiverAgendaData] = useState({});
+    const [CaregiverAssessmentData, setCaregiverAssessmentData] = useState({});
+    const [ZaritData, setZaritData] = useState({
+        question_1: "0",
+        question_2: "0",
+        question_3: "0",
+        question_4: "0",
+        question_5: "0",
+        question_6: "0",
+        question_7: "0",
+        question_8: "0",
+        question_9: "0",
+        question_10: "0",
+        question_11: "0",
+        question_12: "0",
+        totalScore: 0,
+    });
+
+
     return (
         <main className="bodyform">
+            <ToastContainer />
             <div className="homeheaderform">
-                <div className="header">แบบประเมินเยี่ยมบ้าน</div>
+                <div className="header">ประเมิน Agenda</div>
                 <div className="profile_details">
                     <ul className="nav-list">
                         <li>
@@ -516,6 +570,7 @@ export default function LinaerStepper({ }) {
                                     : "ไม่มีข้อมูล"}
                             </p>
                         </div>
+
                         <Stepper className="stepper" activeStep={activeStep} orientation="vertical">
                             {steps.map((label, index) => (
                                 <Step key={index}>
@@ -526,7 +581,6 @@ export default function LinaerStepper({ }) {
                     </div>
                 </div>
             </div>
-            {/* Scrollable form content */}
             <div className="form-content">
                 {/* <a href="assessinhomesssuser">บันทึกการประเมิน</a> */}
                 {activeStep === steps.length ? (
@@ -537,7 +591,19 @@ export default function LinaerStepper({ }) {
                 ) : (
                     <FormProvider {...methods}>
                         <form onSubmit={methods.handleSubmit(handleNext)}>
-                            {getStepContent(activeStep)}
+                            {activeStep === 0 && (
+                                <PatientAgenda onDataChange={(data) => setPatientAgendaData(data)} />
+                            )}
+                            {activeStep === 1 && (
+                                <CaregiverAgenda onDataChange={(data) => setCaregiverAgendaData(data)} />
+                            )}
+                            {activeStep === 2 && (
+                                <CaregiverAssessment onDataChange={(data) => setCaregiverAssessmentData(data)} />
+                            )}
+                            {activeStep === 3 && (
+                                <Zarit ZaritData={ZaritData} setZaritData={setZaritData} />
+                            )}
+
                             <div className="btn-group">
                                 <div className="btn-pre">
                                     <button
@@ -554,7 +620,9 @@ export default function LinaerStepper({ }) {
                                         className="btn btn-outline-primary py-2"
                                         type="submit"
                                     >
-                                        {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"}
+                                        {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"
+                                        }
+
                                     </button>
                                 </div>
                             </div>
@@ -564,20 +632,20 @@ export default function LinaerStepper({ }) {
                 )}
             </div>
             <a
-             onClick={scrollToTop}
-             className="btn btn-outline-primary py-2"
-             style={{
-               position: "fixed",
-               bottom: "20px",
-               right: "20px",
-               padding: "10px 20px",
-               backgroundColor: "#87CEFA",
-               color: "#fff",
-               border: "none",
-               borderRadius: "5px",
-               cursor: "pointer",
-               zIndex: "1000",
-             }}
+                onClick={scrollToTop}
+                className="btn btn-outline-primary py-2"
+                style={{
+                    position: "fixed",
+                    bottom: "20px",
+                    right: "20px",
+                    padding: "10px 20px",
+                    backgroundColor: "#87CEFA",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    zIndex: "1000",
+                }}
             >
                 ขึ้นไปด้านบน
             </a>
