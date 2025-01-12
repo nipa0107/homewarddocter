@@ -1,6 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;500&family=Noto+Sans+Thai+Looped&family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&family=Trirong:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-* {
-	font-family: "Sarabun", serif;
+@import url('https://fonts.googleapis.com/css2?family=Prompt&display=swap');* {
+	font-family: "Prompt", serif;
 }
 
 .add {
@@ -750,4 +749,27 @@ textarea {
 }
 .nameass{
   margin-left: 110px;
+}
+.custom-accordion-header {
+  background-color: #f0f8ff; /* ตัวอย่างสีพื้นหลัง */
+  color: #333; /* สีข้อความ */
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between; /* กระจายเนื้อหาให้เว้นที่ */
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  border: none; /* เอาเส้นขอบออก */
+}
+
+.custom-accordion-header:focus {
+  box-shadow: none; /* เอาเงาออกเมื่อต้องการโฟกัส */
+}
+
+.custom-accordion-header .bi-chevron-down {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.custom-accordion-header.collapsed .bi-chevron-down {
+  transform: rotate(-90deg); /* หมุนลูกศรเมื่อปิด */
 }

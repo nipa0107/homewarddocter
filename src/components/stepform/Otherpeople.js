@@ -220,9 +220,9 @@ export const Otherpeople = ({ onDataChange }) => {
                         >
                           <option value="">เลือกบทบาท</option>
                           <option value="ลูก">ลูก</option>
-                          <option value="พ่อ">บิดา</option>
-                          <option value="แม่">มารดา</option>
-                          <option value="คู่สมรส">คู่สมรส (สามี/ภรรยา)</option>
+                          <option value="บิดา">บิดา</option>
+                          <option value="มารดา">มารดา</option>
+                          <option value="คู่สมรส (สามี/ภรรยา)">คู่สมรส (สามี/ภรรยา)</option>
                           <option value="ญาติ">ญาติ</option>
                           <option value="ปู่/ย่า/ตา/ยาย">ปู่/ย่า/ตา/ยาย</option>
                           <option value="พี่ชาย/พี่สาว">พี่ชาย/พี่สาว</option>

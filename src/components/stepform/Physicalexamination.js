@@ -30,6 +30,7 @@ export const Physicalexamination = ({ onDataChange }) => {
     const updatedValues = isChecked
       ? [...currentValues, value]
       : currentValues.filter((item) => item !== value);
+
     setValue(name, updatedValues);
     onDataChange(getValues());
   };
@@ -37,14 +38,13 @@ export const Physicalexamination = ({ onDataChange }) => {
   const handleOtherInputChange = (name, value) => {
     const currentValues = getValues(name) || [];
     const updatedValues = value
-      ? [...currentValues.filter((item) => item !== otherTexts[name]), value]
-      : currentValues.filter((item) => item !== otherTexts[name]);
+      ? [...currentValues.filter((item) => !item.startsWith("อื่นๆ:")), `อื่นๆ: ${value}`]
+      : currentValues.filter((item) => !item.startsWith("อื่นๆ:"));
 
-    setOtherTexts((prev) => ({ ...prev, [name]: value }));
     setValue(name, updatedValues);
-    setValue(`${name}Other`, value);
     onDataChange(getValues());
   };
+
 
   const handleInputChange = (name, value) => {
     setValue(name, value);
@@ -64,7 +64,7 @@ export const Physicalexamination = ({ onDataChange }) => {
             <Controller
               name={fieldName}
               control={control}
-              defaultValue={[]} // ค่าเริ่มต้นเป็น array ว่าง
+              defaultValue={[]}
               render={({ field }) => (
                 <input
                   type="checkbox"
@@ -85,7 +85,6 @@ export const Physicalexamination = ({ onDataChange }) => {
             <span style={{ marginLeft: "10px" }}>{option}</span>
           </div>
         ))}
-        {/* Input field for 'Other' */}
         <div style={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
           <span style={{ marginLeft: "4px" }}> อื่นๆ</span>
           <Controller
@@ -97,20 +96,22 @@ export const Physicalexamination = ({ onDataChange }) => {
                 type="text"
                 placeholder="กรอกคำตอบอื่นๆ"
                 className="google-form-input"
-                value={otherTexts[fieldName] || ""}
+                value={
+                  (field.value.find((item) => item.startsWith("อื่นๆ:")) || "").replace(
+                    "อื่นๆ: ",
+                    ""
+                  )
+                }
                 onChange={(e) => {
-                  handleOtherInputChange(fieldName, e.target.value);
+                  const otherValue = e.target.value;
+                  handleOtherInputChange(fieldName, otherValue);
                   field.onChange(
-                    e.target.value
+                    otherValue
                       ? [
-                          ...field.value.filter(
-                            (item) => item !== otherTexts[fieldName]
-                          ),
-                          e.target.value,
-                        ]
-                      : field.value.filter(
-                          (item) => item !== otherTexts[fieldName]
-                        )
+                        ...field.value.filter((item) => !item.startsWith("อื่นๆ:")),
+                        `อื่นๆ: ${otherValue}`,
+                      ]
+                      : field.value.filter((item) => !item.startsWith("อื่นๆ:"))
                   );
                 }}
                 style={{
@@ -126,8 +127,6 @@ export const Physicalexamination = ({ onDataChange }) => {
       </div>
     </div>
   );
-
-
 
   return (
     <div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
+import "../css/form.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -8,9 +9,16 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import PatientAgendaForm from "./UpdateAssessinhomesss/updatePatientAgenda.js";
+import CaregiverAgendaForm from "./UpdateAssessinhomesss/updateCaregiverAgenda.js";
+import CaregiverAssessmentForm from "./UpdateAssessinhomesss/updateCaregiverAssessment.js";
+import ZaritburdeninterviewForm from "./UpdateAssessinhomesss/updateZaritburdeninterview.js";
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
-export default function DetailAssessinhomeForm() {
+
+
+
+export default function DetailAgendaForm() {
   const navigate = useNavigate();
   const [data, setData] = useState("");
   const [isActive, setIsActive] = useState(false);
@@ -18,14 +26,12 @@ export default function DetailAssessinhomeForm() {
   const [medicalData, setMedicalData] = useState({});
   const location = useLocation();
   const { id } = location.state;
-  const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [surname, setSurname] = useState("");
   const [gender, setGender] = useState("");
   const [birthday, setBirthday] = useState("");
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
-  const [userData, setUserData] = useState(null);
   const [userId, setUserId] = useState("");
   const [allUsers, setAllUsers] = useState([]);
   const [alerts, setAlerts] = useState([]);
@@ -33,9 +39,6 @@ export default function DetailAssessinhomeForm() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
-  const [mpersonnel, setMPersonnel] = useState(null);
-  const [readinessForms, setReadinessForms] = useState([]);
-  const [readinessAssessments, setReadinessAssessments] = useState([]);
   const bellRef = useRef(null);
 
   useEffect(() => {
@@ -209,6 +212,31 @@ export default function DetailAssessinhomeForm() {
       } น.`;
   };
 
+  const formatThaiDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const thaiMonths = [
+      "มกราคม",
+      "กุมภาพันธ์",
+      "มีนาคม",
+      "เมษายน",
+      "พฤษภาคม",
+      "มิถุนายน",
+      "กรกฎาคม",
+      "สิงหาคม",
+      "กันยายน",
+      "ตุลาคม",
+      "พฤศจิกายน",
+      "ธันวาคม",
+    ];
+
+    return `${day} ${thaiMonths[month - 1]} ${year + 543}`; // Convert year to Thai calendar
+  };
+
+
   const fetchAllUsers = async (userId) => {
     try {
       const response = await fetch(
@@ -268,27 +296,16 @@ export default function DetailAssessinhomeForm() {
     setIsActive(!isActive);
   };
 
-  const getAnswerElement = (answer) => {
-    const isPositive = answer === "ใช่" || answer === "ถูกต้อง";
-    const color = isPositive ? "rgb(0, 172, 0)" : "red";
-    const iconClass = isPositive ? "bi bi-check-circle" : "bi bi-x-circle";
-
-    return (
-      <span style={{ color }}>
-        <i className={iconClass} style={{ marginRight: "8px" }}></i>
-        {answer}
-      </span>
-    );
-  };
+  const [AgendaForms, setAgendaForms] = useState([]);
 
   useEffect(() => {
-    const fetchReadinessForm = async () => {
+    const fetchAgendaForms = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getReadinessForm/${id}`);
+        const response = await fetch(`http://localhost:5000/getAgendaForm/${id}`);
         const data = await response.json();
 
         if (response.ok) {
-          setReadinessForms(data.data); 
+          setAgendaForms(data.data);
         } else {
           console.error(data.message);
         }
@@ -296,15 +313,15 @@ export default function DetailAssessinhomeForm() {
         console.error("Error fetching readiness form:", error);
       }
     };
-    fetchReadinessForm();
+    fetchAgendaForms();
   }, [id, token]);
 
   useEffect(() => {
-    if (readinessForms.user && readinessForms._id) {
+    if (AgendaForms.user && AgendaForms._id) {
       const fetchData = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/getuser/${readinessForms.user}`
+            `http://localhost:5000/getuser/${AgendaForms.user}`
           );
           const data = await response.json();
           setName(data.name);
@@ -318,14 +335,14 @@ export default function DetailAssessinhomeForm() {
 
       fetchData();
     }
-  }, [readinessForms.user]);
+  }, [AgendaForms.user]);
 
   useEffect(() => {
-    if (readinessForms && readinessForms.user) {
+    if (AgendaForms && AgendaForms.user) {
       const fetchMedicalInfo = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/medicalInformation/${readinessForms.user}`
+            `http://localhost:5000/medicalInformation/${AgendaForms.user}`
           );
           const data = await response.json();
           console.log("Medical Information:", data);
@@ -338,87 +355,137 @@ export default function DetailAssessinhomeForm() {
 
       fetchMedicalInfo();
     }
-  }, [readinessForms.user]);
+  }, [AgendaForms.user]);
 
-  const [readinessStatus, setReadinessStatus] = useState('');
-  const [detail, setDetail] = useState('');
-  const [isReadinessSubmitted, setIsReadinessSubmitted] = useState(false);
-  const [dateass, setDateass] = useState([]);
 
-  const handleStatusChange = (status) => {
-    setReadinessStatus(status); // ตรงนี้ควรจะอัปเดต readinessStatus
-  };
-  
-
-  const handleDetailChange = (e) => {
-    setDetail(e.target.value);
+  const handleBreadcrumbClick = () => {
+    navigate("/assessinhomesssuser", { state: { id: AgendaForms.user } });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // ฟังก์ชันสำหรับกำหนดสีตามกลุ่มคะแนน
+  const getGroupStyle = (totalScore) => {
+    if (totalScore !== null) {
+      if (totalScore > 20) {
+        return 'text-danger'; // สีแดงสำหรับภาระหนัก
+      } else if (totalScore >= 11) {
+        return 'text-primary'; // สีน้ำเงินสำหรับภาระปานกลาง
+      } else if (totalScore >= 0) {
+        return 'text-success'; // สีเขียวสำหรับไม่มีภาระ
+      }
+    }
+    return 'text-dark'; // ค่าเริ่มต้น (สีดำ) หากไม่มีคะแนน
+  };
 
+  // ฟังก์ชันสำหรับข้อความการประเมินผล
+  const getGroupMessage = (totalScore) => {
+    if (totalScore <= 10) {
+      return 'ไม่มีภาระทางใจ';
+    } else if (totalScore >= 11 && totalScore <= 20) {
+      return 'มีภาระปานกลาง';
+    } else if (totalScore > 20) {
+      return 'มีภาระหนัก';
+    }
+    return 'ไม่มีข้อมูล'; // กรณีไม่มีคะแนน
+  };
+
+  const activityLevelMapping = {
+    sedentary: "ออกกำลังกายน้อยมาก หรือไม่ออกเลย",
+    lightly_active: "ออกกำลังกาย 1-3 ครั้งต่อสัปดาห์",
+    moderately_active: "ออกกำลังกาย 4-5 ครั้งต่อสัปดาห์",
+    very_active: "ออกกำลังกาย 6-7 ครั้งต่อสัปดาห์",
+    super_active: "ออกกำลังกายวันละ 2 ครั้งขึ้นไป"
+  };
+
+
+  const [currentEditSection, setCurrentEditSection] = useState("");
+  const [modalContent, setModalContent] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const modalRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (AgendaForms.user) {
+      setUserId(AgendaForms.user);
+    }
+  }, [AgendaForms.user]);
+
+  const handleEditClick = (section) => {
+    setCurrentEditSection(section);
+    if (section === "Patient Agenda Form") {
+      setModalContent(
+        <PatientAgendaForm formData={AgendaForms.PatientAgenda}
+          onSave={(data) => handleSaveChanges({ PatientAgenda: data })}
+        />
+      );
+      setIsModalOpen(true);
+    } else if (section === "Caregiver Agenda Form") {
+      setModalContent(
+        <CaregiverAgendaForm
+          formData={AgendaForms.CaregiverAgenda}
+          onSave={(data) => handleSaveChanges({ CaregiverAgenda: data })}
+        />
+      );
+      setIsModalOpen(true);
+    } else if (section === "Caregiver Assessment Form") {
+      setModalContent(
+        <CaregiverAssessmentForm
+          formData={AgendaForms.CaregiverAssessment}
+          onSave={(data) => handleSaveChanges({ CaregiverAssessment: data })}
+        />
+      );
+      setIsModalOpen(true);
+    } else if (section === "Zaritburdeninterview Form") {
+      setModalContent(
+        <ZaritburdeninterviewForm
+          formData={AgendaForms.Zaritburdeninterview}
+          onSave={(data) => handleSaveChanges({ Zaritburdeninterview: data })}
+        />
+      );
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setModalContent(null);
+    setCurrentEditSection("");
+  };
+
+  const handleSaveChanges = async (updatedSection) => {
     try {
-     
+      const updatedData = {
+        ...AgendaForms, // Existing data
+        ...updatedSection,   // Updated section (PhysicalExamination or Immobility)
+      };
 
-      // ทำการบันทึกข้อมูล readiness_status, detail, mpersonnel, readinessForm ID
-      const response = await fetch(`http://localhost:5000/addReadinessAssessment`, {
+      const response = await fetch(`http://localhost:5000/updateAgenda/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          readiness_status: readinessStatus,
-          detail,
-          MPersonnel: userId,
-          ReadinessForm: readinessForms._id,
-        }),
+        body: JSON.stringify(updatedData),
       });
 
+      const result = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Error updating data");
+        throw new Error(result.message || "Failed to update data");
       }
 
-      const data = await response.json();
-      toast.success("ประเมินความพร้อมสำเร็จ");
-      setTimeout(() => window.location.reload(), 1000); // Reload หลังจากบันทึกสำเร็จ
+      console.log("Updated successfully:", result.data);
+      toast.success("ข้อมูลได้รับการแก้ไขเรียบร้อย"
+      );
+
+      // ให้ modal ปิดหลังจาก toast แสดงข้อความสำเร็จ
+      setTimeout(() => {
+        setModalContent(null);
+        window.location.reload();
+      }, 1100); // รอ 2 วินาที (ปรับตามความเหมาะสม)
     } catch (error) {
-      toast.error(`Error updating data: ${error.message}`);
+      console.error("Error updating data:", error);
+      toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
   };
-  useEffect(() => {
-    const fetchReadinessAssessments = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/allReadinessAssessments`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
 
-        const currentReadinessAssessment = data.data.find(
-          (readinessAssessment) => readinessAssessment.ReadinessForm === readinessForms._id
-        );
-        if (currentReadinessAssessment) {
-          setIsReadinessSubmitted(true);
-          setReadinessStatus(currentReadinessAssessment.readiness_status);
-          setDetail(currentReadinessAssessment.detail);
-          setMPersonnel(currentReadinessAssessment.MPersonnel);
-          setDateass(currentReadinessAssessment.createdAt);
-        }
-      } catch (error) {
-        console.error("Error fetching assessments:", error);
-      }
-    };
-    fetchReadinessAssessments();
-  }, [readinessForms._id]);
-
-  const handleBreadcrumbClick = () => {
-    navigate("/assessreadinessuser", { state: { id: readinessForms.user } });
-  };
-
-  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <main className="body">
@@ -491,7 +558,7 @@ export default function DetailAssessinhomeForm() {
 
       <div className="home_content">
         <div className="homeheader">
-          <div className="header">ประเมินความพร้อมการดูแล</div>
+          <div className="header">แบบประเมินเยี่ยมบ้าน</div>
           <div className="profile_details">
             <ul className="nav-list">
               <li>
@@ -570,7 +637,7 @@ export default function DetailAssessinhomeForm() {
               <i className="bi bi-chevron-double-right"></i>
             </li>
             <li>
-              <a href="assessreadiness">ประเมินความพร้อมการดูแล</a>
+              <a href="assessreadiness">แบบประเมินเยี่ยมบ้าน</a>
             </li>
             <li className="arrow">
               <i className="bi bi-chevron-double-right"></i>
@@ -615,212 +682,412 @@ export default function DetailAssessinhomeForm() {
               : "ไม่มีข้อมูล"}
           </p>
           <p>
-              
-                <p className="textassesment">
-                  <p>
-                    <label>วันที่บันทึก:</label>
-                     {formatDate(readinessForms.createdAt)}
-                  </p>
-                </p>
-              
+
+            <p className="textassesment">
+              <p>
+                <label>วันที่บันทึก:</label>
+                {formatDate(AgendaForms.createdAt)}
+              </p>
+            </p>
           </p>
-          
         </div>
-
-
+        {/* <h4>รายละเอียดการประเมิน Agenda</h4> */}
         <div className="info3 card mt-4">
-          <div className="header">
-            <b>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในที่บ้าน</b>
-          </div>
-          <div className="m-4">
-            <table className="assessment-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "90%" }}>คำถาม</th>
-                  <th style={{ width: "10%" }}>คำตอบ</th>
-                </tr>
-              </thead>
-              <tbody>
-                    {readinessForms.Readiness1 && (
-                      <>
-                        <tr>
-                          <td>
-                            1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน
-                            และให้คำยินยอมก่อนรับบริการใช่หรือไม่?
-                          </td>
-                          <td >{getAnswerElement(readinessForms.Readiness1.question1_1)}</td>
-                        </tr>
-                        <tr>
-                          <td>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่?</td>
-                          <td >{getAnswerElement(readinessForms.Readiness1.question1_2)}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20
-                            กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?
-                          </td>
-                          <td>{getAnswerElement(readinessForms.Readiness1.question1_3)}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?
-                          </td>
-                          <td>{getAnswerElement(readinessForms.Readiness1.question1_4)}</td>
-                        </tr>
-                      </>
-                    )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="info3 card mt-4">
-          <div className="header">
-            <b>ประเมินความรู้ ความเข้าใจ (ตาม D-METHOD)</b>
-          </div>
-          <div className="m-3">
-            <table className="assessment-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "90%" }}>คำถาม</th>
-                  <th style={{ width: "9%" }}>คำตอบ</th>
-                </tr>
-              </thead>
-              <tbody>
-
-                    {readinessForms.Readiness2 && (
-                      <>
-                        <tr>
-                          <td>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Disease)}</td>
-                        </tr>
-                        <tr>
-                          <td>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Medication)}</td>
-                        </tr>
-                        <tr>
-                          <td>3. Environment : มีการเตรียมสิ่งแวดล้อม ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Environment)}</td>
-                        </tr>
-                        <tr>
-                          <td>4. Treatment : มีการฝึกทักษะที่จำเป็น ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Treatment)}</td>
-                        </tr>
-                        <tr>
-                          <td>5. Health : รู้ข้อจำกัดด้านสุขภาพ ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Health)}</td>
-                        </tr>
-                        <tr>
-                          <td>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Out_patient)}</td>
-                        </tr>
-                        <tr>
-                          <td>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Diet)}</td>
-                        </tr>
-                      </>
-                    )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        {isReadinessSubmitted && !isEditing ? (
-          <div className="info3 card mt-4">
-            <h3>ประเมินความพร้อม</h3>
-            <div className="btn-group">
-              {readinessStatus === "มีความพร้อม" ? (
-                <div className={`btnass btn-normal`}>มีความพร้อม</div>
-              ) : (
-                <div className={`btnass btn-abnormal`}>ยังไม่มีความพร้อม</div>
-              )}
-            </div> 
-            <p className="detail-info"><b>รายละเอียดเพิ่มเติม :</b> {detail ? detail : '-'}</p>
-            <p className="detail-info"><b>ผู้ประเมินความพร้อม :</b> {mpersonnel?.nametitle} {mpersonnel?.name} {mpersonnel?.surname}</p>
-            <p className="detail-info"><b>วันที่ประเมินความพร้อม :</b> {formatDate(dateass)}</p>
-            {/* แสดงวันที่อัปเดต */}
-            {/* <button className="btn btn-warning mt-4" onClick={() => setIsEditing(true)}>
-              แก้ไขการประเมิน
-            </button> */}
-          </div>
-        ) : isEditing ? (
-          <div className="info3 card mt-4">
-            <p className="texthead">แก้ไขการประเมินความพร้อม</p>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-5">
-                <div className="btn-group">
-                  <div
-                    className={`btnass ${readinessStatus === "มีความพร้อม" ? "btn-normal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("มีความพร้อม")}
-                  >
-                    มีความพร้อม
+          {/* <div className="header">
+            <b>การประเมิน Agenda</b>
+          </div> */}
+          <div class="accordion" id="accordionExample">
+            {/* Patient Agenda */}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  <b>1. Patient Agenda</b>
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                <div className="accordion-body mt-2" style={{ lineHeight: "20px" }}>
+                  <div class="row ">
+                    <div class="col-sm-2">
+                      <strong>Idea :</strong>
+                    </div>
+                    <div class="col-sm-9">
+                      <div class="row ">
+                        <div class="col-8 col-sm-6">
+                          <p>{AgendaForms.PatientAgenda?.patient_idea || "-"}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div
-                    className={`btnass ${readinessStatus === "ยังไม่มีความพร้อม" ? "btn-abnormal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("ยังไม่มีความพร้อม")}
-                  >
-                    ยังไม่มีความพร้อม
+                  <div class="row ">
+                    <div class="col-sm-2">
+                      <strong>Feeling :</strong>
+                    </div>
+                    <div class="col-sm-9">
+                      <div class="row ">
+                        <div class="col-8 col-sm-6">
+                          <p>{AgendaForms.PatientAgenda?.patient_feeling || "-"}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="inline-container mt-4">
-                  <label className="title-ass">เพิ่มเติม: </label>
-                  <textarea
-                    type="text"
-                    className="form-control ml-3"
-                    id="detail"
-                    value={detail}
-                    onChange={handleDetailChange}
-                  />
+                  <div class="row ">
+                    <div class="col-sm-2">
+                      <strong>Function :</strong>
+                    </div>
+                    <div class="col-sm-9">
+                      <div class="row ">
+                        <div class="col-8 col-sm-6">
+                          <p>{AgendaForms.PatientAgenda?.patient_funtion || "-"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row ">
+                    <div class="col-sm-2">
+                      <strong>Expectation :</strong>
+                    </div>
+                    <div class="col-sm-9">
+                      <div class="row ">
+                        <div class="col-8 col-sm-6">
+                          <p>{AgendaForms.PatientAgenda?.patient_expectation || "-"}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="d-grid gap-2 d-md-block"
+                    style={{ padding: "2px 5px" }}>
+                    <button
+                      className="btn m-2"
+                      onClick={() => handleEditClick('Patient Agenda Form')}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div className="btn-group">
-                <div className="btn-next mb-5">
-                  <button type="submit" className="btn btn-outline py-2">
-                    บันทึกการแก้ไข
+            </div>
+            {/* Caregiver Agenda */}
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  <b>2. Caregiver Agenda</b>
+                </button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                <div className="accordion-body" style={{ lineHeight: "20px" }}>
+                  {AgendaForms.CaregiverAgenda?.Care_Agenda?.map((agenda, index) => (
+                    <div key={index}>
+                      <div className="row">
+                        <div className="col-sm-2">
+                          <strong>ชื่อ-นามสกุล:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.firstName} {agenda.lastName || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-2">
+                          <strong>Idea:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.caregiver_idea || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-2">
+                          <strong>Feeling:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.caregiver_feeling || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-2">
+                          <strong>Function:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.caregiver_funtion || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-2">
+                          <strong>Expectation:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.caregiver_expectation || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr />
+                    </div>
+                  )) || "-"}
+                </div>
+                <div class="d-grid gap-2 d-md-block"
+                  style={{ padding: "2px 5px" }}>
+                  <button
+                    className="btn m-4"
+                    onClick={() => handleEditClick('Caregiver Agenda Form')}
+                  >
+                    แก้ไขข้อมูล
                   </button>
                 </div>
               </div>
-            </form>
-          </div>
-        ) : (
-          <div className="info3 card mt-4">
-            <p className="texthead">ประเมินความพร้อม</p>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-5">
-                <div className="btn-group">
-                  <div
-                    className={`btnass ${readinessStatus === "มีความพร้อม" ? "btn-normal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("มีความพร้อม")}
-                  >
-                    มีความพร้อม
-                  </div>
-                  <div
-                    className={`btnass ${readinessStatus === "ยังไม่มีความพร้อม" ? "btn-abnormal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("ยังไม่มีความพร้อม")}
-                  >
-                    ยังไม่มีความพร้อม
-                  </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                  <b>3. Caregiver Assessments</b>
+                </button>
+              </h2>
+              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                <div className="accordion-body mt-3" style={{ lineHeight: "20px" }}>
+                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map((agenda, index) => (
+                    <div key={index}>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>ชื่อ-นามสกุล:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.firstName} {agenda.lastName || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Care:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.care || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Affection:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.affection || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Rest:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.rest || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Empathy:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.empathy || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Goal Of Care:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.goalOfCare || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Information:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.information || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Ventilation:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.ventilation || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Empowerment:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.empowerment || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-3">
+                          <strong>Resource:</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p>{agenda.resource || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <hr />
+                    </div>
+                  )) || "ไม่มีข้อมูล"}
                 </div>
-                <div className="inline-container mt-4">
-                  <label className="title-ass">เพิ่มเติม: </label>
-                  <textarea
-                    type="text"
-                    className="form-control ml-3"
-                    id="detail"
-                    value={detail}
-                    onChange={handleDetailChange}
-                  />
-                </div>
-              </div>
-              <div className="btn-group">
-                <div className="btn-next mb-5">
-                  <button type="submit" className="btn btn-outline py-2">
-                    บันทึก
+                <div class="d-grid gap-2 d-md-block"
+                  style={{ padding: "2px 5px" }}>
+                  <button
+                    className="btn m-4"
+                    onClick={() => handleEditClick('Caregiver Assessment Form')}
+                  >
+                    แก้ไขข้อมูล
                   </button>
                 </div>
               </div>
-            </form>
+            </div>
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="headingFour">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseFour"
+                  aria-expanded="false"
+                  aria-controls="collapseFour"
+                >
+                  <b>4. Zarit Burden Interview</b>
+                </button>
+              </h2>
+              <div
+                id="collapseFour"
+                className="accordion-collapse collapse"
+                aria-labelledby="headingFour"
+              >
+                <div className="accordion-body mt-2" style={{ lineHeight: "20px" }}>
+                  {AgendaForms.Zaritburdeninterview ? (
+                    <div>
+                      <div className="row">
+                        <div className="col-sm-2">
+                          <strong >คะแนนรวม :</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p className={getGroupStyle(AgendaForms.Zaritburdeninterview.totalScore)}>
+                                {AgendaForms.Zaritburdeninterview.totalScore || '0'} คะแนน
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-sm-2">
+                          <strong>ประเมินผล :</strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <div className="row">
+                            <div className="col-8 col-sm-6">
+                              <p className={getGroupStyle(AgendaForms.Zaritburdeninterview.totalScore)}>
+                                {getGroupMessage(AgendaForms.Zaritburdeninterview.totalScore)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p>ไม่มีข้อมูล</p>
+                  )}
+                  <script>
+                    window.location.reload();
+                  </script>
+                </div>
+                <div class="d-grid gap-2 d-md-block"
+                  style={{ padding: "2px 5px" }}>
+                  <button
+                    className="btn m-4"
+                    onClick={() => handleEditClick('Zaritburdeninterview Form')}
+                  >
+                    แก้ไขข้อมูล
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Zarit Burden Interview */}
+
+        </div>
       </div>
+      {isModalOpen && modalContent && (
+        <div className="modal show d-block">
+          <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Edit {currentEditSection}</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={handleCloseModal}
+                ></button>
+              </div>
+              <div className="modal-body">{modalContent}</div>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

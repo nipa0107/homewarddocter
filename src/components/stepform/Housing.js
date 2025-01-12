@@ -88,7 +88,7 @@ export const Housing = ({ onDataChange }) => {
       </div>
       <div className="info3 card mt-3">
         <div className='m-4'>
-          <label className="form-label">มีกี่ชั้น :</label><br></br>
+          <label className="form-label">จำนวนชั้น :</label><br></br>
           <div>
             <Controller
               name="numFloors"
@@ -111,7 +111,7 @@ export const Housing = ({ onDataChange }) => {
       </div>
       <div className="info3 card mt-3">
         <div className='m-4'>
-          <label className="form-label">มีกี่ห้อง :</label><br></br>
+          <label className="form-label">จำนวนห้อง :</label><br></br>
           <div>
             <Controller
               name="numRooms"
@@ -289,7 +289,7 @@ export const Housing = ({ onDataChange }) => {
       </div>
       <div className="info3 card mt-3">
         <div className='m-4'>
-          <label className="form-label">อากาศภายในบ้าน :</label>
+          <label className="form-label">การระบายอากาศ :</label>
           <div>
             <Controller
               name="ventilation"
@@ -481,9 +481,7 @@ export const Housing = ({ onDataChange }) => {
         </div>
       </div>
       <div className="info3 card mt-4">
-        <div className="header">
-          <b>Neighbors</b>
-        </div>
+        
         <div className='m-4'>
           <label className="form-label">ความสัมพันธ์กับเพื่อนบ้าน :</label><br></br>
           <div>

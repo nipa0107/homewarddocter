@@ -422,8 +422,34 @@ export default function AssessinhomesssForm({ }) {
             setMedicationData(medicationData);
         } else if (activeStep === 4) {
             setOtherpeopleData(OtherpeopleData);
-        } else if (activeStep === 5) {
-            setPhysicalexaminationData(PhysicalexaminationData);
+        } else if (activeStep === 5) { // Physical Examination Step
+            const updatedPhysicalExamination = { ...PhysicalexaminationData };
+    
+            // รวมค่าของ "Other" ในแต่ละฟิลด์
+            const fieldsWithOther = [
+                "moodandaffect",
+                "appearanceAndBehavior",
+                "eyeContact",
+                "attention",
+                "orientation",
+                "thoughtProcess",
+                "thoughtContent"
+            ];
+    
+            fieldsWithOther.forEach((field) => {
+                const values = updatedPhysicalExamination[field] || [];
+                updatedPhysicalExamination[field] = values.map((item) => {
+                    if (item.startsWith("อื่นๆ:")) {
+                        return {
+                            value: item.replace("อื่นๆ: ", ""),
+                            isOther: true,
+                        };
+                    }
+                    return { value: item, isOther: false };
+                });
+            });
+    
+            setPhysicalexaminationData(updatedPhysicalExamination);
         } else if (activeStep === 6) {
             setsssData(data);
         }
@@ -441,7 +467,12 @@ export default function AssessinhomesssForm({ }) {
                         MPersonnel: mpersonnel,
                         Caregiver: caregiver,
                         Immobility: Immobilitydata,
-                        Nutrition: nutritionData,
+                        Nutrition: {
+                            ...nutritionData,
+                            gender: nutritionData.gender || gender, // ตรวจสอบ gender ก่อนส่ง
+                            userAge: nutritionData.userAge || userAge,
+                            userAgeInMonths: nutritionData.userAgeInMonths || userAgeInMonths,
+                        },
                         Housing: HousingData,
                         OtherPeople: {
                             existingCaregivers: OtherpeopleData.existingCaregivers,

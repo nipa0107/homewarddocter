@@ -16,6 +16,9 @@ export const Nutrition = ({ onDataChange }) => {
   const [tdee, setTdee] = useState(0);
 
   const [nutritionData, setNutritionData] = useState({
+    gender: '',
+    userAge: 0,
+    userAgeInMonths: 0,
     weight: 0,
     height: 0,
     bmr: 0,
@@ -44,20 +47,43 @@ export const Nutrition = ({ onDataChange }) => {
       try {
         const response = await fetch(`http://localhost:5000/getuser/${id}`);
         const data = await response.json();
-        setGender(data.gender);
-        setBirthday(data.birthday);
-        // Update form values with fetched data
-        Object.keys(data).forEach(key => {
-          setValue(key, data[key]);
-        });
 
+        // ตั้งค่า gender และ birthday
+        setGender(data.gender || "");
+        setBirthday(data.birthday || "");
+
+        // คำนวณ userAge และ userAgeInMonths
+        if (data.birthday) {
+          const userBirthday = new Date(data.birthday);
+          const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
+          const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
+
+          const calculatedMonths = monthDiff >= 0 ? monthDiff : 12 + monthDiff;
+          const calculatedYears =
+            monthDiff < 0 ||
+              (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
+              ? ageDiff - 1
+              : ageDiff;
+
+          setUserAge(calculatedYears);
+          setUserAgeInMonths(calculatedMonths);
+
+          // อัปเดต nutritionData
+          setNutritionData((prev) => ({
+            ...prev,
+            gender: data.gender || "",
+            userAge: calculatedYears,
+            userAgeInMonths: calculatedMonths,
+          }));
+        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
 
     fetchData();
-  }, [id, setValue]);
+  }, [id]);
+
 
   const currentDate = new Date();
 
@@ -66,18 +92,26 @@ export const Nutrition = ({ onDataChange }) => {
       const userBirthday = new Date(birthday);
       const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
       const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
-      setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
 
-      if (
+      const calculatedMonths = monthDiff >= 0 ? monthDiff : 12 + monthDiff;
+      const calculatedYears =
         monthDiff < 0 ||
-        (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
-      ) {
-        setUserAge(ageDiff - 1);
-      } else {
-        setUserAge(ageDiff);
-      }
+          (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
+          ? ageDiff - 1
+          : ageDiff;
+
+      setUserAge(calculatedYears);
+      setUserAgeInMonths(calculatedMonths);
+      setNutritionData((prev) => ({
+        ...prev,
+        userAge: calculatedYears,
+        userAgeInMonths: calculatedMonths,
+      }));
     }
   }, [birthday]);
+
+
+
 
   useEffect(() => {
     const calculateBmr = () => {
@@ -136,16 +170,21 @@ export const Nutrition = ({ onDataChange }) => {
 
 
   const handleInputChange = (name, value) => {
-    const updatedValue = value || (typeof nutritionData[name] === 'number' ? 0 : "");
+    const updatedValue = value || (typeof nutritionData[name] === 'number' ? 0 : nutritionData[name]);
     const updatedData = {
       ...nutritionData,
       [name]: updatedValue,
+      gender: gender || nutritionData.gender, // ใช้ gender จาก state ถ้ายังไม่มีการแก้ไข
+      userAge: userAge || nutritionData.userAge, // ใช้ userAge ที่คำนวณแล้ว
+      userAgeInMonths: userAgeInMonths || nutritionData.userAgeInMonths, // ใช้ userAgeInMonths ที่คำนวณแล้ว
       bmr: Math.round(bmr),
       tdee: Math.round(tdee),
     };
+
     setNutritionData(updatedData);
-    onDataChange(updatedData); // ส่งข้อมูลไปยัง parent
+    onDataChange(updatedData);
   };
+
 
 
   return (
@@ -178,7 +217,7 @@ export const Nutrition = ({ onDataChange }) => {
               disabled
               style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
             />
-            <label style={{ marginLeft: '10px' }}>{userAge} ปี {userAgeInMonths} เดือน</label>
+            <label style={{ marginLeft: '10px' }}>{userAge}ปี {userAgeInMonths} เดือน</label>
           </div>
         </div>
       </div>
@@ -266,11 +305,11 @@ export const Nutrition = ({ onDataChange }) => {
                   }}
                 >
                   <option value="">เลือกกิจกรรม</option>
-                  <option value="sedentary">1. Sedentary: little or no exercise</option>
-                  <option value="lightly_active">2. Lightly active: light exercise or sports 1-3 days a week</option>
-                  <option value="moderately_active">3. Moderately active: moderate exercise or sports 3-5 days a week</option>
-                  <option value="very_active">4. Very active: hard exercise or sports 6-7 days a week</option>
-                  <option value="super_active">5. Super active: very hard exercise, physical job, or training twice a day</option>
+                  <option value="sedentary">1. ออกกำลังกายน้อยมาก หรือไม่ออกเลย</option>
+                  <option value="lightly_active">2. ออกกำลังกาย 1-3 ครั้งต่อสัปดาห์</option>
+                  <option value="moderately_active">3. ออกกำลังกาย 4-5 ครั้งต่อสัปดาห์</option>
+                  <option value="very_active">4. ออกกำลังกาย 6-7 ครั้งต่อสัปดาห์</option>
+                  <option value="super_active">5. ออกกำลังกายวันละ 2 ครั้งขึ้นไป</option>
                 </select>
               )}
             />

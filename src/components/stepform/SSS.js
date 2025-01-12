@@ -44,16 +44,16 @@ export const SSS = ({ onDataChange }) => {
             </thead>
             <tbody>
               {[
-                { name: "cleanliness", label: "แสงไฟ" },
-                { name: "floorSafety", label: "พื้นต่างระดับ" },
-                { name: "stairsSafety", label: "บันได" },
-                { name: "handrailSafety", label: "ราวจับ" },
-                { name: "sharpEdgesSafety", label: "เหลี่ยมคม" },
-                { name: "slipperyFloorSafety", label: "ความลื่นของพื้น" },
-                { name: "toiletSafety", label: "ลักษณะโถส้วม" },
-                { name: "stoveSafety", label: "เตาที่ใช้หุงต้ม" },
-                { name: "storageSafety", label: "การเก็บของ/การวางของในบ้าน เช่น มีด" },
-                { name: "waterSafety", label: "น้ำที่ใช้ดื่ม" },
+                { name: "cleanliness", label: "1. แสงไฟ" },
+                { name: "floorSafety", label: "2. พื้นต่างระดับ" },
+                { name: "stairsSafety", label: "3. บันได" },
+                { name: "handrailSafety", label: "4. ราวจับ" },
+                { name: "sharpEdgesSafety", label: "5. เหลี่ยมคม" },
+                { name: "slipperyFloorSafety", label: "6. ความลื่นของพื้น" },
+                { name: "toiletSafety", label: "7. ลักษณะโถส้วม" },
+                { name: "stoveSafety", label: "8. เตาที่ใช้หุงต้ม" },
+                { name: "storageSafety", label: "9. การเก็บของในบ้าน" },
+                { name: "waterSafety", label: "10. น้ำที่ใช้ดื่ม" },
               ].map((item) => (
                 <tr key={item.name}>
                   <td>{item.label}</td>
@@ -108,7 +108,7 @@ export const SSS = ({ onDataChange }) => {
           <label className="form-label">อันตรายอื่นๆ (ถ้ามี) :</label><br></br>
           <div>
             <Controller
-              name="Safety.otherHazards"
+              name="Safety.otherHealthHazards"
               control={control}
               defaultValue=""
               render={({ field }) => (
@@ -119,7 +119,7 @@ export const SSS = ({ onDataChange }) => {
                   placeholder="กรอกคำตอบ"
                   onChange={(e) => {
                     field.onChange(e.target.value);
-                    handleInputChange("Safety", "otherHazards", e.target.value);
+                    handleInputChange("Safety", "otherHealthHazards", e.target.value);
                   }}
                 />
               )}

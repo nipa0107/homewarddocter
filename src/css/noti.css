@@ -94,7 +94,7 @@
   
   .notifications-allread,
   h2 {
-    display: inline-block; 
+    /* display: inline-block;  */
     vertical-align: middle; 
     margin: 0;
   }

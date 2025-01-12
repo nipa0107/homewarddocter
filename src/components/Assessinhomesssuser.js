@@ -7,6 +7,7 @@ import { useParams } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
 import io from 'socket.io-client';
+
 const socket = io("http://localhost:5000");
 
 export default function Assessinhomesssuser({ }) {
