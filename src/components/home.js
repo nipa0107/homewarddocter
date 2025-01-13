@@ -77,7 +77,7 @@ export default function Home() {
     };
   }, []);
 
-  
+
   // const toggleNotifications = () => {
   //   setShowNotifications(!showNotifications);
   // };
@@ -149,7 +149,7 @@ export default function Home() {
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token)
       .then((alerts) => {
-        console.log("เช็คhome:", alerts); 
+        console.log("เช็คhome:", alerts);
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId) // ตรวจสอบว่า userId ไม่อยู่ใน viewedBy
@@ -413,6 +413,27 @@ export default function Home() {
 
   const COLOR = ['#0088FE', '#FF8042', '#0088FE'];
 
+  //Immobility
+  const [group3Users, setGroup3Users] = useState([]); // เก็บข้อมูลผู้ใช้อยู่ในกลุ่มที่ 3
+
+  useEffect(() => {
+    const fetchGroup3Users = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/immobility/group3");
+        const result = await response.json();
+        if (response.ok) {
+          setGroup3Users(result.data); // เก็บข้อมูลที่ดึงมา
+        } else {
+          console.error("Failed to fetch group 3 data:", result.error);
+        }
+      } catch (error) {
+        console.error("Error fetching group 3 users:", error);
+      }
+    };
+
+    fetchGroup3Users(); // เรียกฟังก์ชันดึงข้อมูล
+  }, []);
+
   return (
 
     <main className="body">
@@ -479,11 +500,11 @@ export default function Home() {
       </div>
       <div className="home_content">
         <div className="homeheader">
-          <div className="header">ภาพรวมระบบ</div>
+          <div className="header">Dashboard</div>
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a  ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (
@@ -505,20 +526,6 @@ export default function Home() {
             </ul>
           </div>
         </div>
-        {/* <div className="breadcrumbs mt-4">
-          <ul>
-            <li>
-              <a href="home">
-                <i className="bi bi-house-fill"></i>
-              </a>
-            </li>
-            <li className="arrow">
-              <i className="bi bi-chevron-double-right"></i>
-            </li>
-            <li><a>ภาพรวมระบบ</a></li>
-          </ul>
-        </div> */}
-
         {showNotifications && (
           <div className="notifications-dropdown" ref={notificationsRef}>
             <div className="notifications-head">
@@ -561,262 +568,313 @@ export default function Home() {
             )}
           </div>
         )}
-        <div className="dashboardcontent">
-          <div className="row px-5">
-            <div className="grid">
-              <div className="item">
-                <div className="countcontent">
-                  <div className="row align-items-center">
-                    <div className="color-strip "></div>
-                    <div className="col">
-                      <div className="bg-icon">
-                        <img src={Pt2} className="patient" alt="patient" />
-                      </div>
-                    </div>
-                    <div className="col">
-                      <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
-                      <p className="name fs-5">ผู้ป่วยทั้งหมด</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item">
-                <div className="countcontent">
-                  <div className="row align-items-center">
-                    <div className="color-strip"></div>
-                    <div className="col">
-                      <div className="bg-icon">
-                        <img src={Pt} className="patient" alt="patient" />
-                      </div>
-                    </div>
-                    <div className="col">
-                      <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
-                      <p className="name fs-5">ผู้ป่วยที่กำลังรักษา</p>
-                    </div>
-                  </div>
-                </div>
+        <div class="container-fluid">
 
-              </div>
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
+              class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+          </div>
 
-              <div className="item">
-                <div className="countcontent">
-                  <div className="row align-items-center">
-                    <div className="color-strip"></div>
-                    <div className="col">
-                      <div className="bg-icon">
-                        <img src={Bh} className="patient" alt="patient" />
+          <div class="row">
+
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                        Earnings (Monthly)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                        Earnings (Annual)</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
+                      </div>
+                      <div class="row no-gutters align-items-center">
+                        <div class="col-auto">
+                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
+                        </div>
+                        <div class="col">
+                          <div class="progress progress-sm mr-2">
+                            <div class="progress-bar bg-info" role="progressbar"
+                            style={{width:"50%"}}
+                              // style="width: 50%" aria-valuenow="50" aria-valuemin="0"
+                              aria-valuemax="100"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="col">
-                      <p className="num mt-2"><CountUp end={completedCount} /></p>
-                      <p className="name fs-5">ผู้ป่วยที่ปิดเคสแล้ว</p>
+                    <div class="col-auto">
+                      <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="item">
-                <div className="countcontent">
-                  <div className="row align-items-center">
-                    <div className="color-strip "></div>
-                    <div className="col">
-                      {/* <div className="bg-icon">
-                        <img src={Pt2} className="patient" alt="patient" />
-                      </div> */}
-                      <h5> <b>โรคของผู้ป่วยทั้งหมด</b></h5>
-                    </div>
-                    {/* <div className="col">
-                      <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
-                      <p className="name fs-5">ผู้ป่วยทั้งหมด</p>
-                    </div> */}
-                  </div>
-                  <div className="chart-container" style={{ marginLeft: '25px' }}>
-                    <PieChart width={400} height={300}>
-                      <Pie
-                        dataKey="value"
-                        isAnimationActive={true}
-                        data={diagnosisData}
-                        cx="40%"
-                        cy="40%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        label={renderCustomizedLabel} // Call the custom label rendering function
-                        labelLine={false} // Disable label lines that point outside the pie
-                      >
-                        {diagnosisData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value, name) => [`ผู้ป่วย${name}`]} />
-                    </PieChart>
-                  </div>
-                  <div className="legend-content">
-                    <div className="diagnosis-legend">
-                      <ul>
-                        {diagnosisData.map((entry, index) => (
-                          <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center' }}>
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                width: '20px',
-                                height: '20px',
-                                backgroundColor: COLORS[index % COLORS.length],
-                                marginRight: '10px',
-                              }}
-                            ></span>
-                            <span style={{ color: 'black' }}>
-                              ผู้ป่วย{entry.name} : {entry.value} cases
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item">
-                <div className="countcontent">
-                  <div className="row align-items-center">
-                    <div className="color-strip "></div>
-                    <div className="col">
-                      {/* <div className="bg-icon">
-                        <img src={Pt2} className="patient" alt="patient" />
-                      </div> */}
-                      <h5> <b>โรคของผู้ป่วยที่กำลังรักษา</b></h5>
-                    </div>
-                    {/* <div className="col">
-                      <p className="num mt-2"><CountUp end={datauser.filter((user) => user.deletedAt === null).length} /></p>
-                      <p className="name fs-5">ผู้ป่วยทั้งหมด</p>
-                    </div> */}
-                  </div>
-                  <div className="chart-container" style={{ marginLeft: '25px' }}>
-                    <PieChart width={400} height={300}>
-                      <Pie
-                        dataKey="value"
-                        isAnimationActive={true}
-                        data={diagnosisData}
-                        cx="40%"
-                        cy="40%"
-                        outerRadius={100}
-                        fill="#8884d8"
-                        label={renderCustomizedLabel} // Call the custom label rendering function
-                        labelLine={false} // Disable label lines that point outside the pie
-                      >
-                        {diagnosisData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value, name) => [`ผู้ป่วย${name}`]} />
-                    </PieChart>
-                  </div>
-                  <div className="legend-content">
-                    <div className="diagnosis-legend">
-                      <ul>
-                        {diagnosisData.map((entry, index) => (
-                          <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center' }}>
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                width: '20px',
-                                height: '20px',
-                                backgroundColor: COLORS[index % COLORS.length],
-                                marginRight: '10px',
-                              }}
-                            ></span>
-                            <span style={{ color: 'black' }}>
-                              ผู้ป่วย{entry.name} : {entry.value} cases
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="item">
+            </div>
 
-                <div className="mt-2"style={{textAlign:'center'}}>
-                  <h5 ><b>สัดส่วนเพศของผู้ป่วย</b></h5>
-                </div>
-                <div className="chart-container" style={{ marginTop: '-15px' }}>
-                  <PieChart width={400} height={300}>
-                    <Pie
-                      data={genderData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={renderCustomizedLabel}
-                    >
-                      {genderData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLOR.length]} />
-                      ))}
-                    </Pie>
-                    <Legend />
-                  </PieChart>
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                        Pending Requests</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                    </div>
+                    <div class="col-auto">
+                      <i class="fas fa-comments fa-2x text-gray-300"></i>
+                    </div>
                   </div>
-                <div className="gender-summary">
-                  <ul>
-                    <li style={{ display: 'flex', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          width: '20px',
-                          height: '20px',
-                          backgroundColor: COLORS[0],
-                          marginRight: '10px',
-                        }}
-                      ></span>
-                      <span style={{ color: 'black' }}>ผู้ป่วยเพศชายทั้งหมด: {genderCount.male} คน</span>
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          width: '20px',
-                          height: '20px',
-                          backgroundColor: COLORS[1],
-                          marginRight: '10px',
-                        }}
-                      ></span>
-                      <span style={{ color: 'black' }}>ผู้ป่วยเพศหญิงทั้งหมด: {genderCount.female} คน</span>
-                    </li>
-                    <li style={{ display: 'flex', alignItems: 'center' }}>
-                      <span
-                        style={{
-                          display: 'inline-block',
-                          width: '20px',
-                          height: '20px',
-                          backgroundColor: COLORS[2],
-                          marginRight: '10px',
-                        }}
-                      ></span>
-                      <span style={{ color: 'black' }}>ผู้ป่วยไม่ระบุเพศ: {genderCount.unspecified} คน</span>
-                    </li>
-                  </ul>
                 </div>
               </div>
-              {/* <div className="item">
-                <div className="countcontent">
-                  <div className="row align-items-center">
-                    <div className="color-strip"></div>
-                    <div className="col">
-                      <div className="bg-icon">
-                        <img src={Noti} className="patient" alt="patient" />
-                      </div>
-                    </div>
-                    <div className="col">
-                      <p className="num mt-2"><CountUp end={0} duration={2} /></p>
-                      <p className="name fs-5">เคสที่มีแจ้งเตือน</p>
-                    </div>
-                  </div>
-                </div>
-              </div> */}
             </div>
           </div>
+
+
+          <div class="row">
+
+            <div class="col-xl-8 col-lg-7">
+              <div class="card shadow mb-4">
+                <div
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
+                  <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                      aria-labelledby="dropdownMenuLink">
+                      <div class="dropdown-header">Dropdown Header:</div>
+                      <a class="dropdown-item" href="#">Action</a>
+                      <a class="dropdown-item" href="#">Another action</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="chart-area">
+                    <canvas id="myAreaChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-5">
+              <div class="card shadow mb-4">
+                <div
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
+                  <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
+                      aria-labelledby="dropdownMenuLink">
+                      <div class="dropdown-header">Dropdown Header:</div>
+                      <a class="dropdown-item" href="#">Action</a>
+                      <a class="dropdown-item" href="#">Another action</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div class="chart-pie pt-4 pb-2">
+                    <canvas id="myPieChart"></canvas>
+                  </div>
+                  <div class="mt-4 text-center small">
+                    <span class="mr-2">
+                      <i class="fas fa-circle text-primary"></i> Direct
+                    </span>
+                    <span class="mr-2">
+                      <i class="fas fa-circle text-success"></i> Social
+                    </span>
+                    <span class="mr-2">
+                      <i class="fas fa-circle text-info"></i> Referral
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+
+            <div class="col-lg-6 mb-4">
+
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
+                </div>
+                <div class="card-body">
+                  <h4 class="small font-weight-bold">Server Migration <span
+                    class="float-right">20%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar bg-danger" role="progressbar" 
+                      aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Sales Tracking <span
+                    class="float-right">40%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                      aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Customer Database <span
+                    class="float-right">60%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar" role="progressbar" 
+                      aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Payout Details <span
+                    class="float-right">80%</span></h4>
+                  <div class="progress mb-4">
+                    <div class="progress-bar bg-info" role="progressbar" 
+                      aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                  <h4 class="small font-weight-bold">Account Setup <span
+                    class="float-right">Complete!</span></h4>
+                  <div class="progress">
+                    <div class="progress-bar bg-success" role="progressbar"
+                      aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-primary text-white shadow">
+                    <div class="card-body">
+                      Primary
+                      <div class="text-white-50 small">#4e73df</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-success text-white shadow">
+                    <div class="card-body">
+                      Success
+                      <div class="text-white-50 small">#1cc88a</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-info text-white shadow">
+                    <div class="card-body">
+                      Info
+                      <div class="text-white-50 small">#36b9cc</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-warning text-white shadow">
+                    <div class="card-body">
+                      Warning
+                      <div class="text-white-50 small">#f6c23e</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-danger text-white shadow">
+                    <div class="card-body">
+                      Danger
+                      <div class="text-white-50 small">#e74a3b</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-secondary text-white shadow">
+                    <div class="card-body">
+                      Secondary
+                      <div class="text-white-50 small">#858796</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-light text-black shadow">
+                    <div class="card-body">
+                      Light
+                      <div class="text-black-50 small">#f8f9fc</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                  <div class="card bg-dark text-white shadow">
+                    <div class="card-body">
+                      Dark
+                      <div class="text-white-50 small">#5a5c69</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="col-lg-6 mb-4">
+
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
+                </div>
+                <div class="card-body">
+                  <div class="text-center">
+                  </div>
+                  <p>Add some quality, svg illustrations to your project courtesy of <a
+                    target="_blank" rel="nofollow" href="https://undraw.co/">unDraw</a>, a
+                    constantly updated collection of beautiful svg images that you can use
+                    completely free and without attribution!</p>
+                  <a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
+                    unDraw &rarr;</a>
+                </div>
+              </div>
+
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
+                </div>
+                <div class="card-body">
+                  <p>SB Admin 2 makes extensive use of Bootstrap 4 utility classes in order to reduce
+                    CSS bloat and poor page performance. Custom CSS classes are used to create
+                    custom components and custom utility classes.</p>
+                  <p class="mb-0">Before working with this theme, you should become familiar with the
+                    Bootstrap framework, especially the utility classes.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
-    </main>
+    </main >
   );
 } 

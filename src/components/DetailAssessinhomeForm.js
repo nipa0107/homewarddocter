@@ -728,6 +728,12 @@ export default function DetailAssessinhomeForm() {
                                 <label>วันที่บันทึก:</label>
                                 {formatDate(AssessinhomeForms.createdAt)}
                             </p>
+                            {AssessinhomeForms.updatedAt && (
+                                <p>
+                                    <label>วันที่แก้ไขล่าสุด:</label>
+                                    {formatDate(AssessinhomeForms.updatedAt)}
+                                </p>
+                            )}
                         </p>
                     </p>
                 </div>
@@ -1106,12 +1112,12 @@ export default function DetailAssessinhomeForm() {
                         </div>
 
                         <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingfour">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsefour" aria-expanded="false" aria-controls="collapsefour">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
                                     <b>4. Other People</b>
                                 </button>
                             </h2>
-                            <div id="collapsefour" class="accordion-collapse collapse" aria-labelledby="headingfour" data-bs-parent="#accordionExample">
+                            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample">
                                 <div className="accordion-body " style={{ lineHeight: "20px" }}>
                                     {AssessinhomeForms.OtherPeople ? (
                                         <>

@@ -583,8 +583,9 @@ export default function Assessinhomesssuser({ }) {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>ครั้งที่ประเมิน</th>
+                            <th>#</th>
                             <th>วันที่บันทึก</th>
+                            <th>วันที่แก้ไขล่าสุด</th>
                             <th>ผลการประเมิน</th>
                             <th>ผู้ประเมิน</th>
                         </tr>
@@ -599,6 +600,7 @@ export default function Assessinhomesssuser({ }) {
                                 >
                                     <td>{index + 1}</td>
                                     <td>{formatDate(form.createdAt)}</td>
+                                    <td>{formatDate(form.updatedAt)}</td>
                                     <td> <span className="normal-status">{form.status_agenda}</span></td>
                                     <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                                 </tr>
@@ -644,6 +646,7 @@ export default function Assessinhomesssuser({ }) {
                             <tr>
                                 <th>ครั้งที่ประเมิน</th>
                                 <th>วันที่บันทึก</th>
+                                <th>วันที่แก้ไขล่าสุด</th>
                                 <th>ผลการประเมิน</th>
                                 <th>ผู้ประเมิน</th>
                             </tr>
@@ -658,6 +661,7 @@ export default function Assessinhomesssuser({ }) {
                                     >
                                         <td>{index + 1}</td>
                                         <td>{formatDate(form.createdAt)}</td>
+                                        <td>{formatDate(form.updatedAt)}</td>
                                         <td> <span className="normal-status">{form.status_inhome}</span></td>
                                         <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                                     </tr>

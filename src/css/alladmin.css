@@ -773,3 +773,6 @@ textarea {
 .custom-accordion-header.collapsed .bi-chevron-down {
   transform: rotate(-90deg); /* หมุนลูกศรเมื่อปิด */
 }
+.border-left {
+  border-left: 4px solid #64b5f6; /* Replace with your blue color */
+}
