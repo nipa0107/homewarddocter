@@ -33,9 +33,11 @@ export default function ChatComponent() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
+  const bellRef = useRef(null);
+
   const [userId, setUserId] = useState("");
   const linkify = Linkify();
-  const [nonImageFile, setNonImageFile] = useState(null); 
+  const [nonImageFile, setNonImageFile] = useState(null);
   useEffect(() => {
     socket.on("newAlert", (alert) => {
       setAlerts((prevAlerts) => [...prevAlerts, alert]);
@@ -47,10 +49,42 @@ export default function ChatComponent() {
     };
   }, []);
 
-  const getFileNameFromUrl = (url) => {
-    const parts = url.split('/');
-    return parts[parts.length - 1].split('?')[0]; // แยกชื่อไฟล์ออกจาก query string
-};
+  function formatFileSize(bytes) {
+    if (!bytes) return ""; // ถ้า bytes เป็น null หรือ undefined ให้คืนค่าว่าง
+
+    const units = ["B", "KB", "MB", "GB", "TB"];
+    let unitIndex = 0;
+
+    while (bytes >= 1024 && unitIndex < units.length - 1) {
+      bytes /= 1024;
+      unitIndex++;
+    }
+
+    return `${bytes.toFixed(2)} ${units[unitIndex]}`;
+  }
+
+  const isImageFile = (url) => {
+    return (
+      url.endsWith(".jpg?alt=media") ||
+      url.endsWith(".png?alt=media") ||
+      url.endsWith(".jpeg?alt=media") ||
+      url.endsWith(".gif?alt=media")
+    );
+  };
+
+  function shortenFileName(fileName, maxLength = 15) {
+    if (fileName.length <= maxLength) {
+      return fileName; // หากความยาวน้อยกว่าหรือเท่ากับ maxLength ให้คืนค่าชื่อไฟล์เดิม
+    }
+
+    const extensionIndex = fileName.lastIndexOf(".");
+    const extension = fileName.slice(extensionIndex); // รับส่วนต่อท้าย (เช่น .pdf)
+
+    const nameWithoutExtension = fileName.slice(0, extensionIndex); // ชื่อไฟล์โดยไม่มีนามสกุล
+    const shortenedName = nameWithoutExtension.slice(0, maxLength - 3) + "..."; // ตัดชื่อไฟล์และเพิ่ม ...
+
+    return shortenedName + extension; // คืนค่าชื่อไฟล์ที่ตัดพร้อมนามสกุล
+  }
 
   const linkifyText = (text) => {
     const links = linkify.match(text);
@@ -76,7 +110,7 @@ export default function ChatComponent() {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setUploadedImage(file);
-    
+
     // เช็คประเภทไฟล์
     if (file) {
       const reader = new FileReader();
@@ -122,25 +156,32 @@ export default function ChatComponent() {
       });
   };
 
-  const toggleNotifications = () => {
-    setShowNotifications(!showNotifications);
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
   };
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target)
-      ) {
-        setShowNotifications(false);
-      }
-    };
 
-    document.addEventListener("mousedown", handleClickOutside);
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [notificationsRef]);
+  }, []);
 
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token)
@@ -283,6 +324,13 @@ export default function ChatComponent() {
     e.preventDefault();
     if (!message.trim() && !uploadedImage) {
       return;
+    }
+
+    const maxFileSize = 25 * 1024 * 1024; // 5 MB
+    if (uploadedImage && uploadedImage.size > maxFileSize) {
+      return alert(
+        "ไม่สามารถอัพโหลดไฟล์ ไฟล์ที่คุณเลือกมีขนาดใหญ่เกินไป ขนาดสูงสุดคือ 25 MB"
+      );
     }
     try {
       if (data) {
@@ -551,7 +599,7 @@ export default function ChatComponent() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (
@@ -640,9 +688,11 @@ export default function ChatComponent() {
                                       : ""
                                   }
                                 >
-                                  {user.lastMessage.image
-                                    ? "ส่งรูปภาพ"
-                                    : user.lastMessage.message}
+                                    {user.lastMessage.image
+                                       ? /\.(jpg|jpeg|png|gif)$/.test(user.lastMessage.image)
+                                       ? "ส่งรูปภาพ"
+                                       : "ส่งไฟล์แนบ"
+                                     : user.lastMessage.message}
                                 </span>
                               </span>
                               <span className="message-timeuser">
@@ -674,7 +724,7 @@ export default function ChatComponent() {
                   </div>
                   <div
                     className="chat-messages"
-                    onScroll={handleScroll} 
+                    onScroll={handleScroll}
                     ref={chatMessagesRef}
                     style={{ overflowY: "scroll", maxHeight: "500px" }}
                   >
@@ -710,67 +760,106 @@ export default function ChatComponent() {
                                 </div>
 
                                 {chat.image ? (
-                    // ตรวจสอบประเภทไฟล์ภาพ
-                    (chat.image.endsWith('.jpg') ||
-                    chat.image.endsWith('.png') ||
-                    chat.image.endsWith('.jpeg') ||
-                    chat.image.endsWith('.gif')) ? (
-                      <div className="message-content-img">
-                        <img
-                          className="message-img"
-                          src={chat.image}
-                          alt="Chat Image"
-                          onClick={() => handleImageClick(chat.image)}
-                        />
-                      </div>
-                    ) : (
-                      <div className="message-content-file">
-                        <a href={chat.image} target="_blank" rel="noopener noreferrer">
-                          {getFileNameFromUrl(chat.image)} {/* แสดงชื่อไฟล์ */}
-                        </a>
-                      </div>
-                    )
-                  ) : (
-                    <div
-                      className="message-content"
-                      dangerouslySetInnerHTML={{
-                        __html: linkifyText(chat.message),
-                      }}
-                    />
-                  )}
+                                  isImageFile(chat.image) ? (
+                                    <div className="message-content-img">
+                                      <img
+                                        className="message-img"
+                                        src={chat.image}
+                                        alt="Chat Image"
+                                        onClick={() =>
+                                          handleImageClick(chat.image)
+                                        }
+                                        style={{
+                                          maxWidth: "100%",
+                                          height: "auto",
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="message-content-file">
+                                      <a
+                                        href={chat.image}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="file-link"
+                                      >
+                                        <i
+                                          className="bi bi-file-earmark-text"
+                                          style={{ fontSize: "24px" }}
+                                        ></i>
+                                        <div className="file-info-box">
+                                          <span className="file-name">
+                                            {shortenFileName(chat.imageName)}
+                                          </span>
+                                          <span className="file-size">
+                                            {formatFileSize(chat.fileSize)}
+                                          </span>
+                                        </div>
+                                      </a>
+                                    </div>
+                                  )
+                                ) : (
+                                  <div
+                                    className="message-content"
+                                    dangerouslySetInnerHTML={{
+                                      __html: linkifyText(chat.message),
+                                    }}
+                                  />
+                                )}
                               </div>
                             </>
                           ) : (
                             <>
                               <div className="content-time-wrapper">
-                              {chat.image ? (
-                    (chat.image.endsWith('.jpg') ||
-                    chat.image.endsWith('.png') ||
-                    chat.image.endsWith('.jpeg') ||
-                    chat.image.endsWith('.gif')) ? (
-                      <div className="message-content-img">
-                        <img
-                          className="message-img"
-                          src={chat.image}
-                          alt="Chat Image"
-                          onClick={() => handleImageClick(chat.image)}
-                        />
-                      </div>
-                    ) : (
-                      <div className="message-content-file">
-                        <a href={chat.image} target="_blank" rel="noopener noreferrer">
-                          {getFileNameFromUrl(chat.image)} {/* แสดงชื่อไฟล์ */}
-                        </a>
-                      </div>
-                    )
-                  ) : (
-                    <div
-                      className="message-content"
-                      dangerouslySetInnerHTML={{
-                        __html: linkifyText(chat.message),
-                      }}
-                    />
-                  )}
+                                {chat.image ? (
+                                  isImageFile(chat.image) ? (
+                                    <div className="message-content-img">
+                                      <img
+                                        className="message-img"
+                                        src={chat.image}
+                                        alt="Chat Image"
+                                        onClick={() =>
+                                          handleImageClick(chat.image)
+                                        }
+                                        style={{
+                                          maxWidth: "100%",
+                                          height: "auto",
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <div className="message-content-file">
+                                      <a
+                                        href={chat.image}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="file-link"
+                                      >
+                                        <i
+                                          className="bi bi-file-earmark-text"
+                                          style={{ fontSize: "24px" }}
+                                        ></i>
+                                        <span className="file-name">
+                                          {/* {getShortFileName(getFileNameFromUrl(chat.image))}  */}
+                                          {shortenFileName(chat.imageName)}
+                                        </span>
+                                        {/* <span className="file-type">
+                            {getFileType(getFileNameFromUrl(chat.image))}
+                          </span> */}
+                                        <span className="file-size">
+                                          {formatFileSize(chat.fileSize)}
+                                        </span>
+                                      </a>
+                                    </div>
+                                  )
+                                ) : (
+                                  <div
+                                    className="message-content"
+                                    dangerouslySetInnerHTML={{
+                                      __html: linkifyText(chat.message),
+                                    }}
+                                  />
+                                )}
                                 <span className="message-time">
                                   {formatTime(chat.createdAt)}
                                 </span>
@@ -795,37 +884,41 @@ export default function ChatComponent() {
                       </div>
                     </div>
                   )}
-{imagePreview ? (
-  <div className="image-preview-outline">
-    <div className="image-preview">
-      <img src={imagePreview} alt="Uploaded" />
-      <button
-        className="delete-button"
-        onClick={() => setImagePreview(null)}
-      >
-        &times; {/* สัญลักษณ์ลบ */}
-      </button>
-    </div>
-  </div>
-) : nonImageFile ? (
-  <div className="file-preview-container">
-    <div className="file-info">
-      <i className="bi bi-file-earmark-text" style={{ fontSize: '24px', marginRight: '10px' }}></i>
-      <div>
-        <p style={{ margin: 0 }}>{nonImageFile.name}</p>
-        {/* <p style={{ margin: 0 }}>{(nonImageFile.size / 1024).toFixed(2)} KB</p>
+                  {imagePreview ? (
+                    <div className="image-preview-outline">
+                      <div className="image-preview">
+                        <img src={imagePreview} alt="Uploaded" />
+                        <button
+                          className="delete-button"
+                          onClick={() => setImagePreview(null)}
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    </div>
+                  ) : nonImageFile ? (
+                    <div className="file-preview-container">
+                      <div className="file-info" title={nonImageFile.name}>
+                        <i
+                          className="bi bi-file-earmark-text"
+                          style={{ fontSize: "24px", marginRight: "10px" }}
+                        ></i>
+                        <div>
+                          <p style={{ margin: 0 }}>
+                            {shortenFileName(nonImageFile.name)}
+                          </p>
+                          {/* <p style={{ margin: 0 }}>{(nonImageFile.size / 1024).toFixed(2)} KB</p>
         <p style={{ margin: 0 }}>{nonImageFile.type}</p> */}
-      </div>
-    </div>
-    <button
-      className="delete-file-button"
-      onClick={() => setNonImageFile(null)} // ลบไฟล์ที่เลือก
-    >
-      &times; 
-    </button>
-  </div>
-) : null}
-
+                        </div>
+                      </div>
+                      <button
+                        className="delete-file-button"
+                        onClick={() => setNonImageFile(null)}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ) : null}
 
                   <form className="chat-form" onSubmit={(e) => handleSubmit(e)}>
                     <div className="file-input-wrapper">
@@ -834,7 +927,7 @@ export default function ChatComponent() {
                         id="file-input"
                         onChange={handleImageChange}
                         // accept="image/*"
-                        accept="*/*" 
+                        accept="*/*"
                       />
                       <label htmlFor="file-input">
                         <i className="bi bi-card-image"></i>
@@ -857,7 +950,8 @@ export default function ChatComponent() {
                       <button
                         className="send-button"
                         type="submit"
-                        disabled={!message.trim() && !uploadedImage}                      >
+                        disabled={!message.trim() && !uploadedImage}
+                      >
                         <i className="bi bi-send"></i>
                       </button>
                     )}

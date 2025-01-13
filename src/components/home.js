@@ -36,13 +36,21 @@ export default function Home() {
   const [completedDiagnosisData, setCompletedDiagnosisData] = useState([]);
 
   useEffect(() => {
-    socket.on('newAlert', (alert) => {
+    socket?.on('newAlert', (alert) => {
       setAlerts(prevAlerts => [...prevAlerts, alert]);
       setUnreadCount(prevCount => prevCount + 1);
     });
 
+    socket.on('deletedAlert', (data) => {
+      setAlerts((prevAlerts) =>
+        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
+      );
+      setUnreadCount((prevCount) => prevCount - 1); // ลดจำนวน unread เมื่อ alert ถูกลบ
+    });
+
     return () => {
-      socket.off('newAlert'); // Clean up the listener on component unmount
+      socket?.off('newAlert'); // Clean up the listener on component unmount
+      socket.off('deletedAlert');
     };
   }, []);
 

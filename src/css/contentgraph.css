@@ -7,13 +7,97 @@
 	padding: 2%; 
 	border-collapse: collapse; 
 	border-spacing: 1; 
-	border-radius: 10px; 
+	border-radius: 0.625rem; 
 	position: relative;
 	overflow: hidden;
   border: 1px solid #eaeaea;
 
 }
 
+.inline-container-ass{
+  display: flex; /* จัดเรียงเป็นแถว */
+  justify-content: center; /* จัดให้กึ่งกลางแนวนอน */
+  align-items: center; /* จัดให้อยู่ตรงกลางแนวตั้ง */
+  position: relative; /* สำหรับจัดตำแหน่งปุ่ม */
+  width: 100%; /* ให้ครอบคลุมเต็มจอ */
+  margin-bottom: 0.625rem;
+}
+.textheadSymptom-center-ass{
+  margin: 0; /* ลบระยะห่างจากข้อความ */
+  font-size: 18px;
+  font-weight: bold;
+}
+.ellipsis-menu {
+  position: absolute; /* ใช้ absolute เพื่อให้เมนูอยู่ในตำแหน่งสัมพันธ์กับ .contentinass */
+  top: 0;
+  right: 0; /* อยู่ที่มุมขวาของ contentinass */
+  display: inline-block;
+}
+
+.ellipsis-btn {
+  position: absolute; /* จัดปุ่มไว้ที่มุมขวา */
+  right: 0.625rem; /* ระยะห่างจากขอบขวา */
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.icon {
+  font-size: 24px;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.ellipsis-btn:hover .icon {
+  color: #007bff;
+}
+
+.menu-content {
+  position: absolute;
+  width: 10rem;
+  top: 3rem;
+  right: 2rem;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  /* gap: 8px; */
+  animation: slideUp 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(0.625rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-item {
+  padding: 1px 8px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.menu-item .icon {
+  font-size: 18px;
+  color: #000;
+}
 .contentgraphs {
   margin: 1rem auto;
   width: 80%;
@@ -32,7 +116,7 @@
   padding: 2%;
   margin: auto;
   background-color: #fff;
-  border-radius: 10px;
+  border-radius: 0.625rem;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
   border: 1px solid #eaeaea;
 }
@@ -47,7 +131,7 @@
 .custom-tooltip {
   background-color: white;
   border: 1px solid #ccc;
-  padding: 10px;
+  padding: 0.625rem;
   border-radius: 3px;
 }
 
@@ -80,9 +164,9 @@
   justify-content: space-between;
   background-color: #fff;
   padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin-bottom: 10px;
+  border-radius: 0.625rem;
+  box-shadow: 0 2px 0.625rem rgba(0, 0, 0, 0.05);
+  margin-bottom: 0.625rem;
 }
 
 .patient-data label {
@@ -101,7 +185,7 @@
 .title-Vitalsigns {
   font-weight: bold;
   color: #333;
-  margin-right: 10px;
+  margin-right: 0.625rem;
 }
 
 .text {
@@ -148,7 +232,7 @@
   color: #333333;
   margin: 0;
   /* border-left: 4px solid #007bff; */
-  padding-left: 10px;
+  padding-left: 0.625rem;
 }
 .textheadSymptom-center{
   text-align: center;
@@ -157,14 +241,14 @@
   color: #444;
   /* margin-bottom: 20px;
   margin: 0; */
-  /* padding-left: 10px; */
+  /* padding-left: 0.625rem; */
 }
 
 .symptom-item {
   padding: 15px;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
   border-radius: 8px;
   background-color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -197,7 +281,7 @@
 
 /* 
   .contentgraph .h3 {
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
     color: #333;
     text-align: center;
     font-size: 1rem;
@@ -208,7 +292,7 @@
   color: #333;
   text-align: center;
   font-weight: bold;
-  margin-left: 10px;
+  margin-left: 0.625rem;
 }
 
 .contentgraph .text {
@@ -226,7 +310,7 @@
 }
 
 .contentgraph .h3 {
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
   color: #333;
   text-align: center;
   font-size: 1rem;
@@ -242,7 +326,7 @@
 
 
 .contentgraph .h3 {
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
   color: #333;
   text-align: center;
   font-size: 1rem;
@@ -265,14 +349,22 @@
 }
 
 .chart-containerass1 {
-  display: grid;
+  /* display: grid;
   width: 100%;
   height: auto;
   border-radius: 12px;
   justify-items: center;
   align-items: center;
   margin-left: auto;
-  margin-right: auto;
+  margin-right: auto; */
+  display: flex;
+  justify-content: center;
+  align-items: center; 
+  width: 100%;
+  /* max-width: 50rem;  */
+  margin: 0 auto; /* ตั้งให้อยู่ตรงกลาง */
+  padding: 0;
+  box-sizing: border-box; 
 }
 
 /*ภาพรวม*/
@@ -322,7 +414,7 @@
   text-align: center;
   box-sizing: border-box;
   height: 100%;
-  padding: 10px;
+  padding: 0.625rem;
   box-shadow: 2px 2px 8px 4px rgba(0, 0, 0, 0.13);
 }
 
@@ -380,8 +472,8 @@
   left: 0;
   top: 0;
   bottom: 0;
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-top-left-radius: 0.625rem;
+  border-bottom-left-radius: 0.625rem;
 }
 
 .bg-primary {
@@ -420,7 +512,7 @@
 
 /* @media (min-width: 768px) {
     .contentgraphs.select-1month .contentgraph {
-      width: calc(50% - 10px);
+      width: calc(50% - 0.625rem);
     }
   } */
 
@@ -429,44 +521,44 @@
     font-weight: normal;
   }
   .SBP{
-    width: 10px;
-    height: 10px;
-    background-color: #5ec1ff;
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color: rgb(93, 93, 233);
     align-items: center;
   }
   .DBP{
-    width: 10px;
-    height: 10px;
-    background-color: rgb(44, 223, 71);
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color:#5ec1ff ;
     align-items: center;
   }
   .PulseRate{
-    width: 10px;
-    height: 10px;
+    width: 0.625rem;
+    height: 0.625rem;
     background-color: rgb(224, 44, 98);
     align-items: center;
   }
   .Respiration{
-    width: 10px;
-    height: 10px;
-    background-color: rgb(229, 113, 63);
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color: rgb(44, 223, 71);
     align-items: center;
   }
   .Temperature{
-    width: 10px;
-    height: 10px;
-    background-color: rgb(197, 44, 224);
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color:rgb(229, 113, 63);
     align-items: center;
   }
   .Painscore{
-    width: 10px;
-    height: 10px;
-    background-color: rgb(93, 93, 233);
+    width: 0.625rem;
+    height: 0.625rem;
+    background-color: rgb(197, 44, 224) ;
     align-items: center;
   }
   .dtx{
-    width: 10px;
-    height: 10px;
+    width: 0.625rem;
+    height: 0.625rem;
     background-color: rgb(237, 219, 51);
     align-items: center;
   }
@@ -483,7 +575,7 @@
   .inline-containersymtoms-count {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 0.625rem;
     margin-left: auto;
     margin-right: auto;
     padding: 0 2%;
@@ -496,7 +588,7 @@
     color: #333;
   }
   .symtoms-count {
-    /* margin-right: 10px;
+    /* margin-right: 0.625rem;
     margin-bottom: 5px; */
     background-color: #e0f7fa;
     padding: 8px 15px;
@@ -508,7 +600,7 @@
   .graph-label {
     display: flex;
     align-items: center;
-    margin: 0 10px; 
+    margin: 0 0.625rem; 
   }
  
  .inline-container .title-ptf1{
@@ -538,9 +630,9 @@
   justify-content: space-between;
   background-color: #fff;
   padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  margin-bottom: 10px;
+  border-radius: 0.625rem;
+  box-shadow: 0 2px 0.625rem rgba(0, 0, 0, 0.05);
+  margin-bottom: 0.625rem;
 }
 
 .patient-data label {
@@ -559,7 +651,7 @@
 .title-Vitalsigns {
   font-weight: bold;
   color: #333;
-  margin-right: 10px;
+  margin-right: 0.625rem;
 }
 
 .text {
@@ -583,7 +675,7 @@
 	margin :0 auto;
 	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
 	border-spacing: 1; 
-	border-radius: 10px; 
+	border-radius: 0.625rem; 
 	position: relative;
 	overflow: hidden;
   border: 1px solid #eaeaea;
@@ -610,7 +702,7 @@
   color: #333333;
   margin: 0;
   /* border-left: 4px solid #007bff; */
-  padding-left: 10px;
+  padding-left: 0.625rem;
 }
 .textheadSymptom-center{
   text-align: center;
@@ -619,14 +711,14 @@
   color: #444;
   /* margin-bottom: 20px;
   margin: 0; */
-  /* padding-left: 10px; */
+  /* padding-left: 0.625rem; */
 }
 
 .symptom-item {
   padding: 15px;
   margin-left: auto;
   margin-right: auto;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
   border-radius: 8px;
   background-color: #ffffff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -645,4 +737,292 @@
 .symptom-item .text {
   color: #666;
   font-size: 1em;
+}
+.btn-group-ass{
+  gap: 8px;
+  display: flex;
+  justify-content: center;
+}
+.btn-ass{
+  flex: 1;
+  padding: 0.5rem 1.3rem;
+  cursor: pointer;
+  margin: 5px;
+  border-radius: 5px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.up-normal-status-LevelSymptom {
+  color: #1fc657;
+}
+.normal-status-LevelSymptom {
+  color: #000000;
+}
+.abnormal-status-LevelSymptom {
+  color: #FF6A6A;
+}
+.end-of-treatment-status {
+  color: #303030;
+}
+
+
+/* ปุ่มแก้ไขด้วยสีฟ้าเข้ม */
+/* .button-group-edit{
+  gap: 8px;
+  display: flex;
+  justify-content: center;
+  padding: 0.3rem 0.6rem;
+  position: absolute;
+  top: 0.625rem; 
+  right: 0.625rem;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+} */
+
+/* .button-group{
+  flex: 1;
+  padding: 0.5rem 1.3rem;
+  cursor: pointer;
+  margin: 5px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 0.2rem; 
+
+} */
+/* .btn-edit {
+  background-color: #1E3A8A;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+} */
+
+/* เมื่อ hover สีจะเข้มขึ้น */
+/* .btn-edit:hover {
+  background-color: #2563EB; 
+} */
+
+/* .btn-history {
+  background-color: #d3d3d3; 
+  color: black;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-history:hover {
+  background-color: #7d7d7d;
+} */
+
+.button-group-EditMode{
+  gap: 0.625rem;
+  display: flex;
+  justify-content: center;
+}
+.btn-EditMode{
+  flex: 1;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  margin: 5px;
+  border-radius: 5px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: none;
+
+}
+.btn-EditMode.btnsave {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  margin: 5px;
+  border-radius: 5px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: none;
+
+}
+.btn-EditMode.btnsave:disabled {
+  background-color: #e4e6eb; /* สีเทาอ่อน */
+  color: #a3a3a3; /* สีเทาเข้ม */
+  cursor: not-allowed;
+  border: none;
+}
+
+
+
+/* สำหรับพื้นหลังของ Modal */
+.edit-modal-overlay,
+.history-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* เพิ่มความมืดให้พื้นหลัง */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.history-modal-header{
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0.6rem 0rem 0.6rem;
+}
+.edit-modal-header{
+  gap: 8px;
+  display: flex;
+  justify-content: center;
+}
+/* ตัว Modal */
+.edit-modal,
+.history-modal {
+  background-color: white;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+}
+.edit-modal{
+  padding: 1rem;
+}
+.history-modal {
+  max-height: 90vh; 
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.close-btn { 
+  position: absolute;
+  top: 60%;
+  right: 1rem;
+  transform: translateY(-50%);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%; /* ทำให้เป็นวงกลม */
+  background-color: #e4e6eb; /* สีพื้นหลังเทาอ่อน */
+  color: #050505; /* สีไอคอนเข้ม */
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+.close-btn:hover {
+  background-color: #d8dadf; /* เปลี่ยนเป็นเทาเข้มเมื่อ Hover */
+}
+.seccond-history-modal{
+  max-height: 80vh; 
+  overflow-y: auto; 
+  padding: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.history-list {
+  list-style-type: none;
+  padding: 0;
+}
+.history-item {
+  padding: 1rem;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.history-item-header {
+  margin-bottom: 0.625rem;
+  /* border-bottom: 2px solid #ddd; */
+}
+.btn-group-history {
+  gap: 0.625rem;
+  display: flex;
+  justify-content: center;
+}
+.history-item-body {
+  margin-top: 0.625rem;
+}
+.date {
+  color: #6c757d;
+}
+
+.pps,
+.detail,
+.suggestion,
+.updatedBy {
+  font-style: italic;
+}
+
+
+.history-separator {
+  margin: 0.8rem 0 0.2rem 0 ;
+  border: 0;
+  border-top: 1px solid #ddd;
+}
+/* ปุ่มปิด */
+.btn-close {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  padding: 5px 0.625rem;
+  cursor: pointer;
+}
+
+.btn-close:hover {
+  background-color: #ff1f1f;
+}
+
+/* ปุ่มอื่นๆ เช่น บันทึก, ยกเลิก */
+.btnsave {
+  background-color: #87CEFA;
+  color: #ffffff;
+}
+
+.btnsave:hover {
+  background-color: #49adeb;
+}
+
+.status-name{
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-group-status-name{
+  display: flex;
 }

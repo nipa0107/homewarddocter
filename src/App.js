@@ -17,7 +17,7 @@ import Profile from "./components/profile";
 import Updatepassword from "./components/updatepassword";
 import UpdateProfile from "./components/updateprofile";
 import Success from "./components/success";
-import Chat from "./components/Chat";
+import Chat from "./components/chat/Chat";
 import Allpatient from "./components/allpatient";
 import Infopatient from "./components/infopatient";
 import Updatepatient from "./components/updatepatient";
@@ -33,6 +33,7 @@ import Assessinhomesss from "./components/Assessinhomesss";
 import Assessinhomesssuser from "./components/Assessinhomesssuser";
 import Assessreadinessuser from "./components/Assessreadinessuser";
 import MultiStepForm from "./components/MultiStepForm";
+import ChatComponent from "./components/Chat200967"
 // import Immobility from "./components/Immobility";
 
 import Emailverification from "./components/email-verification";
@@ -76,6 +77,12 @@ function App() {
             path="/chat"
             element={
               <PrivateRoute element={<Chat />} isLoggedIn={isLoggedIn} />
+            }
+          />
+           <Route
+            path="/c"
+            element={
+              <PrivateRoute element={<ChatComponent />} isLoggedIn={isLoggedIn} />
             }
           />
           <Route
