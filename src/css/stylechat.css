@@ -28,23 +28,24 @@
 }
 .home_contentchat h3{
   text-align: center;
-  font-size: 25px;
+  font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 30px;
-  margin-top: 30px;
+  padding: 0.5rem;
+  /* margin-bottom: 10px;
+  margin-top: 10px; */
 }
 .home_contentchat .breadcrumbs{
   margin-left: 28px;
 }
 
 .home_contentchat .header{
-  font-size: 25px;
+  font-size:1.2rem;
   font-weight: 600;
-  margin: 20px;
+  margin:0.3rem;
 }
 .header {
   padding: 10px;
-  font-size: 24px;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
@@ -381,13 +382,16 @@
 }
 
 .message-time {
-  font-size: 12px;
+  font-size: .8rem;
   color: #999;
   white-space: nowrap;
   flex-shrink: 0;
   justify-content: flex-end;
 }
+.message-chat{
+  font-size: .8rem;
 
+}
 
 /* Chat form styling */
 
@@ -407,22 +411,10 @@
   width: 100%;
 }
 
-.chat-form textarea {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 20px;
-  outline: none;
-  transition: border-color 0.3s ease-in-out;
-  width: 100%;
-  box-sizing: border-box;
-  resize: none; /* Disable the default resize handle */
-}
 
 textarea{
   width: 100%;
   background-color: #fff;
-  min-height: 1em; 
   /* max-height: 4em;  */
   /* overflow-y: auto; */
 
@@ -481,6 +473,7 @@ textarea{
   font-size: 1.5em;
   color: #000;
 }
+
 .image-preview-outline{
   margin: 2%;
 }
@@ -573,8 +566,8 @@ textarea{
   position: absolute;
   top: 10px; 
   right: 20px; 
-  font-size: 28px;
-  font-weight: bold;
+  font-size: 100px;
+  /* font-weight: bold; */
   cursor: pointer;
   background-color: #282828; 
   width: 40px; 
@@ -582,6 +575,7 @@ textarea{
   border-radius: 50%; 
   display: flex;
   justify-content: center;
+  text-align: center;
   align-items: center;
 }
 
@@ -608,8 +602,8 @@ textarea{
 }
 .notification-count {
   position: absolute;
-  top: -5px;
-  right: 6px;
+  top: -0.5rem;
+  right: 0.2rem;
   background-color: red;
   color: white;
   border-radius: 50%;
@@ -652,7 +646,7 @@ textarea{
 }
 
 .file-info i {
-  font-size: 24px;
+  font-size: 1.2rem;
   margin-right: 10px; 
 }
 
@@ -682,11 +676,13 @@ textarea{
 
 .file-link {
   display: inline-flex; 
+  text-decoration: none;
   align-items: center;  
   max-width: 200px;      
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; 
+  color:#000;
 }
 
 .file-info-box{
@@ -694,11 +690,174 @@ textarea{
   flex-direction: column;
   margin-left: 10px;
 }
-/* .file-name {
-  margin-bottom: 5px; 
-} */
+.file-name {
+  font-size: .8rem;
+
+}
 
 .file-size {
   font-size: 12px; 
   color: #999;
+}
+.send-button{
+  border: none;
+  background-color: transparent;
+  font-size: 1.5em;
+}
+
+/* .send-button i{
+  font-size: 1.5em;
+} */
+ /* Add this to your CSS */
+.chat-date {
+  font-size: 14px;
+  color: #888;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.chat-bubble {
+  max-width: 70%;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #DCF8C6;
+  border: 1px solid #ddd;
+  margin: 5px;
+}
+
+.chat-bubble-received {
+  max-width: 70%;
+  padding: 10px;
+  border-radius: 10px;
+  background-color: #FFFFFF;
+  border: 1px solid #ddd;
+  margin: 5px;
+}
+
+
+/* แชทใหม่ */
+.chat-user-list {
+  width: 30%;
+  max-width: 100%;
+  max-height: 90%; 
+  /* height: 100%; */
+  background-color: #f5f5f5;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-bar1 {
+  padding: 10px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+}
+
+.search-text1 {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 0.8rem;
+}
+
+.user-item-chat {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: relative;
+}
+
+.user-item-chat:hover {
+  background-color: #e0f7fa;
+}
+
+.user-item-chat.selected {
+  background-color: #b3e5fc;
+}
+
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #ddd;
+  margin-right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  color: #ffffff;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.user-info-chat {
+  flex: 1;
+  overflow: hidden;
+}
+
+.user-info-chat span {
+  display: block;
+  font-size: .9rem;
+  color: #333;
+}
+
+.user-latest-message {
+  font-size: .9rem;
+  color: #888;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;  
+}
+.user-latest-message-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  overflow: hidden; 
+}
+
+.user-latest-message-time {
+  font-size: .9rem;
+  color: #666;
+  white-space: nowrap; 
+
+}
+.chat-user-list-scroll {
+  max-height: 100%; 
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden; /* ซ่อนการเลื่อนในแนวนอน (ถ้าไม่ต้องการ) */
+  padding: 8px; /* ระยะห่างด้านใน */
+  box-sizing: border-box; /* รวม padding และ border ในขนาดองค์ประกอบ */
+  background-color: #f9f9f9;
+}
+.chat-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.unread-count {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background-color: #3498db;
+  color: #fff;
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }

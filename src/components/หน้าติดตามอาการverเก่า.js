@@ -4,7 +4,7 @@ import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
 import {
   BarChart,
@@ -100,8 +100,6 @@ export default function Assessmentuserone({}) {
     Respiration: "",
   });
   const [painscore, setPainscore] = useState("");
-  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -152,34 +150,15 @@ export default function Assessmentuserone({}) {
   };
 
   useEffect(() => {
-    socket?.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
-    });
-
-    socket.on('deletedAlert', (data) => {
-      setAlerts((prevAlerts) =>
-        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
-      );
-      setUnreadCount((prevCount) => prevCount - 1); // ลดจำนวน unread เมื่อ alert ถูกลบ
+    socket.on("newAlert", (alert) => {
+      setAlerts((prevAlerts) => [...prevAlerts, alert]);
+      setUnreadCount((prevCount) => prevCount + 1);
     });
 
     return () => {
-      socket?.off('newAlert'); // Clean up the listener on component unmount
-      socket.off('deletedAlert');
+      socket.off("newAlert");
     };
   }, []);
-
-  useEffect(() => {
-    socket?.on("TotalUnreadCounts", (data) => {
-      console.log("📦 TotalUnreadCounts received:", data);
-      setUserUnreadCounts(data);
-    });
-
-    return () => {
-      socket?.off("TotalUnreadCounts");
-    };
-  }, [socket]);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -221,11 +200,6 @@ export default function Assessmentuserone({}) {
     })
       .then((res) => res.json())
       .then((data) => {
-        setSender({
-          name: data.data.name,
-          surname: data.data.surname,
-          _id: data.data._id,
-        });
         setData(data.data);
         if (data.data == "token expired") {
           window.localStorage.clear();
@@ -433,7 +407,7 @@ export default function Assessmentuserone({}) {
       .then((res) => res.json())
       .then((data) => {
         if (data.status === "ok") {
-          toast.success("ประเมินอาการสำเร็จ");
+          toast.success("เพิ่มข้อมูลสำเร็จ");
           setTimeout(() => {
             navigate("/assessmentuser", {
               state: { id: patientFormsone.user },
@@ -505,9 +479,7 @@ export default function Assessmentuserone({}) {
           MPersonnel: data._id,
         }),
       });
-      setTimeout(() => {
-        toast.success("แก้ไขสำเร็จ"); // แสดง toast หลังจาก 1 วินาที
-      }, 1000);      
+      alert("แก้ไขสำเร็จ");
       setIsEditMode(false);
       fetchAssessments(); // รีเฟรชข้อมูลใหม่
     } catch (error) {
@@ -853,7 +825,7 @@ export default function Assessmentuserone({}) {
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{`ระดับน้ำตาลในเลือด: ${data.DTX} mg/dL`}</span>
+          <span className="desc">{`DTX: ${data.DTX}`}</span>
         </div>
       );
     }
@@ -866,7 +838,7 @@ export default function Assessmentuserone({}) {
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{`ระดับความเจ็บปวด: ${data.Painscore}`}</span>
+          <span className="desc">{`Painscore: ${data.Painscore}`}</span>
         </div>
       );
     }
@@ -879,7 +851,7 @@ export default function Assessmentuserone({}) {
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{`อุณหภูมิ: ${data.Temperature} °C`}</span>
+          <span className="desc">{`Temperature: ${data.Temperature}`}</span>
         </div>
       );
     }
@@ -899,38 +871,13 @@ export default function Assessmentuserone({}) {
     }
     return null;
   };
-
-  const CustomTooltipSBP = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="custom-tooltip">
-          <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{`ความดันตัวบน: ${data.SBP} mmHg`}</span>
-        </div>
-      );
-    }
-    return null;
-  };
-  const CustomTooltipDBP = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="custom-tooltip">
-          <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{` ความดันตัวล่าง: ${data.DBP} mmHg`}</span>
-        </div>
-      );
-    }
-    return null;
-  };
   const CustomTooltipPulseRate = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{`ชีพจร: ${data.PulseRate} ครั้ง/นาที`}</span>
+          <span className="desc">{`PulseRate: ${data.PulseRate}`}</span>
         </div>
       );
     }
@@ -943,7 +890,7 @@ export default function Assessmentuserone({}) {
       return (
         <div className="custom-tooltip">
           <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{`การหายใจ: ${data.Respiration} ครั้ง/นาที`}</span>
+          <span className="desc">{`Respiration: ${data.Respiration}`}</span>
         </div>
       );
     }
@@ -1014,31 +961,8 @@ export default function Assessmentuserone({}) {
     fetchSymptomsCount();
   }, [patientFormsone.user, patientFormsone._id]);
 
-    useEffect(() => {
-      // ดึงข้อมูล unread count เมื่อเปิดหน้า
-      const fetchUnreadCount = async () => {
-        try {
-          const response = await fetch(
-            "http://localhost:5000/update-unread-count"
-          );
-  
-          if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-          }
-          const data = await response.json();
-          if (data.success) {
-            setUserUnreadCounts(data.users);
-          }
-        } catch (error) {
-          console.error("Error fetching unread count:", error);
-        }
-      };
-      fetchUnreadCount();
-    }, []);
-
   return (
     <main className="body">
-      <ToastContainer />
       <div className={`sidebar ${isActive ? "active" : ""}`}>
         <div class="logo_content">
           <div class="logo">
@@ -1083,20 +1007,11 @@ export default function Assessmentuserone({}) {
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
+              {countUnreadUsers() !== 0 && (
+                <span className="notification-countchat">
+                  {countUnreadUsers()}
+                </span>
+              )}
             </a>
           </li>
           <div class="nav-logout">
@@ -1325,21 +1240,20 @@ export default function Assessmentuserone({}) {
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
-                      // width={1000}
-                      // height={300}
+                      width={1000}
+                      height={300}
                       data={Temperaturedata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
+                        interval={0}
                         minTickGap={5}
                         tickLine={timeRange === "1month" ? false : true}
                         tick={
@@ -1347,37 +1261,34 @@ export default function Assessmentuserone({}) {
                             ? false
                             : { fontSize: 10, lineHeight: 1.5 }
                         }
-                      />{" "}
+                      />
                       <YAxis
                         domain={[30, 40]}
                         tick={{ fontSize: 10 }}
-                        ticks={[30, 32, 34, 36, 38, 40]}
-                        // hide={timeRange !== "1month"}
+                        ticks={[30, 35, 40]}
+                        hide={timeRange !== "1month"}
                       />
                       <Tooltip content={<CustomTooltipTemperature />} />
                       <ReferenceLine
                         y={min.Temperature}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
+                        stroke="rgb(0, 0, 0)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: 12,
+                          value: "Min อุณหภูมิ",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(0, 0, 0)" },
                         }}
                       />
                       <ReferenceLine
                         y={max.Temperature}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
+                        stroke="rgb(0, 0, 0)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: 12,
+                          value: "Max อุณหภูมิ",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(0, 0, 0)" },
                         }}
                       />
-
                       <Area
                         type="monotone"
                         dataKey="Temperature"
@@ -1388,21 +1299,18 @@ export default function Assessmentuserone({}) {
                       <Line
                         type="monotone"
                         dataKey="Temperature"
-                        stroke="#e5713f"
+                        stroke="rgb(229, 113, 63)"
                         strokeWidth={3}
-                        // dot={timeRange === "1month" ? false : <CustomDot />}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        isAnimationActive={true}
-                        animationDuration={1500}
+                        dot={timeRange === "1month" ? false : <CustomDot />}
                         connectNulls={true}
                       >
-                        {/* {timeRange !== "1month" && (
+                        {timeRange !== "1month" && (
                           <LabelList
                             dataKey="Temperature"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                           />
-                        )} */}
+                        )}
                       </Line>
                       {/* {timeRange === "1month" && (
                       <Brush
@@ -1424,20 +1332,30 @@ export default function Assessmentuserone({}) {
                   <div className="SBP"></div>
                   <span className="head-graph">ความดันตัวบน (mmHg)</span>
                 </div>
+                <div className="graph-label">
+                  <div className="DBP"></div>
+                  <span className="head-graph">ความดันตัวล่าง (mmHg)</span>
+                </div>
               </div>
               <p className="textgraph"></p>
               {BloodPressuredata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
+                      width={1000}
+                      height={300}
                       data={BloodPressuredata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
+                        interval={0}
                         minTickGap={5}
                         tickLine={timeRange === "1month" ? false : true}
                         tick={
@@ -1446,33 +1364,28 @@ export default function Assessmentuserone({}) {
                             : { fontSize: 10, lineHeight: 1.5 }
                         }
                       />
-                      <YAxis
-                        domain={[80, 200]} // หรือใช้ auto
-                        tickCount={12} // จำนวน tick (ช่วงจะแบ่งอัตโนมัติ)
-                        ticks={[80, 100, 120, 140, 160, 180, 200]}
-                        tick={{ fontSize: 10 }}
-                      />
-                      <Tooltip content={<CustomTooltipSBP />} />
+                      {timeRange === "1month" && (
+                        <YAxis tick={{ fontSize: 10 }} />
+                      )}
+                      <Tooltip content={<CustomTooltipBloodPressure />} />
                       <ReferenceLine
                         y={min.SBP}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
+                        stroke="red"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: 12,
+                          value: "Min SBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "red" },
                         }}
                       />
                       <ReferenceLine
                         y={max.SBP}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
+                        stroke="red"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: 12,
+                          value: "Max SBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "red" },
                         }}
                       />
                       {/* <Legend verticalAlign="top" align="center" wrapperStyle={{ color: '#000' }} /> */}
@@ -1482,27 +1395,32 @@ export default function Assessmentuserone({}) {
                         stroke="rgb(93, 93, 233)"
                         fill="rgb(93, 93, 233,0.3)"
                         connectNulls={true}
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="SBP" />
+                          )
+                        }
+                        legendType="none"
                       />
                       <Line
                         type="monotone"
                         dataKey="SBP"
                         name="ความดันตัวบน"
                         stroke="rgb(93, 93, 233)"
+                        fill="rgb(93, 93, 233,0.3)"
                         strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        isAnimationActive={true}
-                        animationDuration={1500}
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="SBP" />
+                          )
+                        }
                         connectNulls={true}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="SBP" />
-                        //   )
-                        // }
-                        // legendType="none"
                       >
-                        {/* {timeRange !== "1month" && (
+                        {timeRange !== "1month" && (
                           <LabelList
                             dataKey="SBP"
                             position="inside"
@@ -1515,9 +1433,9 @@ export default function Assessmentuserone({}) {
                               )
                             }
                           />
-                        )} */}
+                        )}
                       </Line>
-
+                  
                       {/* {timeRange === "1month" && (
                       <Brush
                         tickFormatter={formatDateTime}
@@ -1532,8 +1450,12 @@ export default function Assessmentuserone({}) {
                 </div>
               )}
             </div>
-            <div className="contentgraph">
+            {/* <div className="contentgraph">
               <div className="inline-containers">
+                <div className="graph-label">
+                  <div className="SBP"></div>
+                  <span className="head-graph">ความดันตัวบน (mmHg)</span>
+                </div>
                 <div className="graph-label">
                   <div className="DBP"></div>
                   <span className="head-graph">ความดันตัวล่าง (mmHg)</span>
@@ -1544,14 +1466,20 @@ export default function Assessmentuserone({}) {
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
+                      width={1000}
+                      height={300}
                       data={BloodPressuredata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
+                        interval={0}
                         minTickGap={5}
                         tickLine={timeRange === "1month" ? false : true}
                         tick={
@@ -1560,38 +1488,96 @@ export default function Assessmentuserone({}) {
                             : { fontSize: 10, lineHeight: 1.5 }
                         }
                       />
-                      <YAxis
-                        domain={[50, 120]}
-                        ticks={[50, 60, 70, 80, 90, 100, 110, 120]}
-                        tick={{ fontSize: 12 }}
-                        // padding={{ top: 10, bottom: 10 }}
+                      {timeRange === "1month" && (
+                        <YAxis tick={{ fontSize: 10 }} />
+                      )}
+                      <Tooltip content={<CustomTooltipBloodPressure />} />
+                      <ReferenceLine
+                        y={min.SBP}
+                        stroke="red"
+                        strokeDasharray="3 3"
+                        label={{
+                          value: "Min SBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "red" },
+                        }}
                       />
-                      <Tooltip content={<CustomTooltipDBP />} />
+                      <ReferenceLine
+                        y={max.SBP}
+                        stroke="red"
+                        strokeDasharray="3 3"
+                        label={{
+                          value: "Max SBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "red" },
+                        }}
+                      />
                       <ReferenceLine
                         y={min.DBP}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
+                        stroke="blue"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: 12,
+                          value: "Min DBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "blue" },
                         }}
                       />
                       <ReferenceLine
                         y={max.DBP}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
+                        stroke="blue"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: 12,
+                          value: "Max DBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "blue" },
                         }}
                       />
-
-                      {/* <Legend verticalAlign="top" align="center" wrapperStyle={{ color: '#000' }} /> */}
-
+                      <Area
+                        type="monotone"
+                        dataKey="SBP"
+                        stroke="rgb(93, 93, 233)"
+                        fill="rgb(93, 93, 233,0.3)"
+                        connectNulls={true}
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="SBP" />
+                          )
+                        }
+                        legendType="none"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="SBP"
+                        name="ความดันตัวบน"
+                        stroke="rgb(93, 93, 233)"
+                        fill="rgb(93, 93, 233,0.3)"
+                        strokeWidth={3}
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="SBP" />
+                          )
+                        }
+                        connectNulls={true}
+                      >
+                        {timeRange !== "1month" && (
+                          <LabelList
+                            dataKey="SBP"
+                            position="inside"
+                            style={{ fill: "white", fontSize: "10" }}
+                            dot={
+                              timeRange === "1month" ? (
+                                false
+                              ) : (
+                                <CustomDot dataKey="SBP" />
+                              )
+                            }
+                          />
+                        )}
+                      </Line>
                       <Area
                         type="monotone"
                         dataKey="DBP"
@@ -1605,28 +1591,125 @@ export default function Assessmentuserone({}) {
                         dataKey="DBP"
                         name="ความดันตัวล่าง"
                         stroke="#5ec1ff"
-                        // fill="rgb(94, 193, 255,0.3)"
+                        fill="rgb(94, 193, 255,0.3)"
                         strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="DBP" />
-                        //   )
-                        // }
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="DBP" />
+                          )
+                        }
                         connectNulls={true}
                       >
-                        {/* {timeRange !== "1month" && (
+                        {timeRange !== "1month" && (
                           <LabelList
                             dataKey="DBP"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                             dot={<CustomDot dataKey="DBP" />}
                           />
-                        )} */}
+                        )}
+                      </Line>
+                
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div> */}
+            <div className="contentgraph">
+              <div className="inline-containers">
+                <div className="graph-label">
+                  <div className="DBP"></div>
+                  <span className="head-graph">ความดันตัวล่าง (mmHg)</span>
+                </div>
+              </div>
+              <p className="textgraph"></p>
+              {BloodPressuredata && (
+                <div className="chart-containerass1">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <ComposedChart
+                      width={1000}
+                      height={300}
+                      data={BloodPressuredata}
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
+                    >
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis
+                        dataKey="createdAt"
+                        tickFormatter={formatDateTime}
+                        interval={0}
+                        minTickGap={5}
+                        tickLine={timeRange === "1month" ? false : true}
+                        tick={
+                          timeRange === "1month"
+                            ? false
+                            : { fontSize: 10, lineHeight: 1.5 }
+                        }
+                      />
+                      {timeRange === "1month" && (
+                        <YAxis tick={{ fontSize: 10 }} />
+                      )}
+                      <Tooltip content={<CustomTooltipBloodPressure />} />
+                      <ReferenceLine
+                        y={min.DBP}
+                        stroke="blue"
+                        strokeDasharray="3 3"
+                        label={{
+                          value: "Min DBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "blue" },
+                        }}
+                      />
+                      <ReferenceLine
+                        y={max.DBP}
+                        stroke="blue"
+                        strokeDasharray="3 3"
+                        label={{
+                          value: "Max DBP",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "blue" },
+                        }}
+                      />
+
+                      {/* <Legend verticalAlign="top" align="center" wrapperStyle={{ color: '#000' }} /> */}
+                   
+                      <Area
+                        type="monotone"
+                        dataKey="DBP"
+                        stroke="#5ec1ff"
+                        fill="rgb(94, 193, 255,0.3)"
+                        connectNulls={true}
+                        legendType="none"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="DBP"
+                        name="ความดันตัวล่าง"
+                        stroke="#5ec1ff"
+                        fill="rgb(94, 193, 255,0.3)"
+                        strokeWidth={3}
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="DBP" />
+                          )
+                        }
+                        connectNulls={true}
+                      >
+                        {timeRange !== "1month" && (
+                          <LabelList
+                            dataKey="DBP"
+                            position="inside"
+                            style={{ fill: "white", fontSize: "10" }}
+                            dot={<CustomDot dataKey="DBP" />}
+                          />
+                        )}
                       </Line>
                     </ComposedChart>
                   </ResponsiveContainer>
@@ -1645,16 +1728,20 @@ export default function Assessmentuserone({}) {
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
-                      // width={1000}
-                      // height={300}
+                      width={1000}
+                      height={300}
                       data={PulseRateData}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
+                        interval={0}
                         minTickGap={5}
                         tickLine={timeRange === "1month" ? false : true}
                         tick={
@@ -1663,38 +1750,36 @@ export default function Assessmentuserone({}) {
                             : { fontSize: 10, lineHeight: 1.5 }
                         }
                       />{" "}
-                      {/* {timeRange === "1month" && (
+                      {timeRange === "1month" && (
                         <YAxis
                           tick={{ fontSize: 10 }}
                           ticks={[0, 25, 50, 75, 100, 125, 150]}
                         />
-                      )} */}
+                      )}
                       <YAxis
-                        domain={[0, 150]}
                         tick={{ fontSize: 10 }}
                         ticks={[0, 25, 50, 75, 100, 125, 150]}
+                        hide={true}
                       />
                       <Tooltip content={<CustomTooltipPulseRate />} />
                       <ReferenceLine
                         y={min.PulseRate}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
+                        stroke="rgb(224, 44, 98)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: 12,
+                          value: "Min ชีพจร",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(224, 44, 98)" },
                         }}
                       />
                       <ReferenceLine
                         y={max.PulseRate}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
+                        stroke="rgb(224, 44, 98)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: 12,
+                          value: "Max ชีพจร",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(224, 44, 98)" },
                         }}
                       />
                       <Area
@@ -1709,25 +1794,22 @@ export default function Assessmentuserone({}) {
                         dataKey="PulseRate"
                         stroke="rgb(224, 44, 98)"
                         strokeWidth={3}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="PulseRate" />
-                        //   )
-                        // }
-                        dot={timeRange === "1month" ? false : { r: 4 }}
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="PulseRate" />
+                          )
+                        }
                         connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
                       >
-                        {/* {timeRange !== "1month" && (
+                        {timeRange !== "1month" && (
                           <LabelList
                             dataKey="PulseRate"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                           />
-                        )} */}
+                        )}
                       </Line>
                       {/* {timeRange === "1month" && (
                       <Brush
@@ -1756,21 +1838,20 @@ export default function Assessmentuserone({}) {
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
-                      // width={1000}
-                      // height={300}
+                      width={1000}
+                      height={300}
                       data={Respirationdata}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
+                        interval={0}
                         minTickGap={5}
                         tickLine={timeRange === "1month" ? false : true}
                         tick={
@@ -1782,29 +1863,27 @@ export default function Assessmentuserone({}) {
                       <YAxis
                         tick={{ fontSize: 10 }}
                         ticks={[0, 10, 20, 30, 40]}
-                        // hide={timeRange !== "1month"}
+                        hide={timeRange !== "1month"}
                       />
                       <Tooltip content={<CustomTooltipRespiration />} />
                       <ReferenceLine
                         y={min.Respiration}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
+                        stroke="rgb(44, 223, 71)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: 12,
+                          value: "Min การหายใจ",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(44, 223, 71)" },
                         }}
                       />
                       <ReferenceLine
                         y={max.Respiration}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
+                        stroke="rgb(44, 223, 71)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: 12,
+                          value: "Max การหายใจ",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(44, 223, 71)" },
                         }}
                       />
                       <Area
@@ -1819,25 +1898,22 @@ export default function Assessmentuserone({}) {
                         dataKey="Respiration"
                         stroke="rgb(44, 223, 71)"
                         strokeWidth={3}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="Respiration" />
-                        //   )
-                        // }
-                        dot={timeRange === "1month" ? false : { r: 4 }}
+                        dot={
+                          timeRange === "1month" ? (
+                            false
+                          ) : (
+                            <CustomDot dataKey="Respiration" />
+                          )
+                        }
                         connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
                       >
-                        {/* {timeRange !== "1month" && (
+                        {timeRange !== "1month" && (
                           <LabelList
                             dataKey="Respiration"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                           />
-                        )} */}
+                        )}
                       </Line>
                       {/* {timeRange === "1month" && (
                       <Brush
@@ -1865,21 +1941,20 @@ export default function Assessmentuserone({}) {
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
-                      // width={1000}
-                      // height={300}
+                      width={1000}
+                      height={300}
                       data={Painscoredata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
+                        interval={0}
                         minTickGap={5}
                         tickLine={timeRange === "1month" ? false : true}
                         tick={
@@ -1890,22 +1965,20 @@ export default function Assessmentuserone({}) {
                       />
 
                       <YAxis
-                        domain={[0, 10]}
                         tick={{ fontSize: 10 }}
-                        ticks={[0, 2, 4, 6, 8, 10]}
-                        // hide={timeRange !== "1month"}
+                        ticks={[0, 2, 4, 6, 8, 10, 12]}
+                        hide={timeRange !== "1month"}
                       />
 
                       <Tooltip content={<CustomTooltipPainscore />} />
                       <ReferenceLine
                         y={threshold.Painscore}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
+                        stroke="rgb(197, 44, 224)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Med",
-                          fill: "#00b300",
-                          fontSize: 12,
+                          value: "Threshold Pain Score",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(197, 44, 224)" },
                         }}
                       />
 
@@ -1920,22 +1993,18 @@ export default function Assessmentuserone({}) {
                         type="monotone"
                         dataKey="Painscore"
                         stroke="rgb(197, 44, 224)"
-                        // fill="rgb(197, 44, 224,0.3)"
+                        fill="rgb(197, 44, 224,0.3)"
                         name="ระดับความเจ็บปวด"
-                        strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        // dot={timeRange === "1month" ? false : <CustomDot />}
+                        dot={timeRange === "1month" ? false : <CustomDot />}
                         connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
                       >
-                        {/* {timeRange !== "1month" && (
+                        {timeRange !== "1month" && (
                           <LabelList
                             dataKey="Painscore"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                           />
-                        )} */}
+                        )}
                       </Line>
                       {/* {timeRange === "1month" && (
                       <Brush
@@ -1964,21 +2033,20 @@ export default function Assessmentuserone({}) {
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
-                      // width={1000}
-                      // height={300}
+                      width={1000}
+                      height={300}
                       data={dtxdata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 0, right: 0, left: -30, bottom: 0 }
+                          : { right: 28, left: 28 }
+                      }
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
                       <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
+                        interval={0}
                         minTickGap={5}
                         tickLine={timeRange === "1month" ? false : true}
                         tick={
@@ -1987,34 +2055,31 @@ export default function Assessmentuserone({}) {
                             : { fontSize: 10, lineHeight: 1.5 }
                         }
                       />
-                      {/* {timeRange === "1month" && ( */}
-                      <YAxis
-                        domain={[60, 180]}
-                        tick={{ fontSize: 10 }}
-                        ticks={[60, 80, 100, 120, 140, 160, 180]}
-                      />
-                      {/* )} */}
+                      {timeRange === "1month" && (
+                        <YAxis
+                          tick={{ fontSize: 10 }}
+                          ticks={[60, 80, 100, 120, 140, 160, 180]}
+                        />
+                      )}
                       <Tooltip content={<CustomTooltipDTX />} />
                       <ReferenceLine
                         y={min.DTX}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
+                        stroke="rgb(237, 219, 51)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: 12,
+                          value: "Min DTX",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(237, 219, 51)" },
                         }}
                       />
                       <ReferenceLine
                         y={max.DTX}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
+                        stroke="rgb(237, 219, 51)"
+                        strokeDasharray="3 3"
                         label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: 12,
+                          value: "Max DTX",
+                          position: "insideLeft",
+                          style: { fontSize: 10, fill: "rgb(237, 219, 51)" },
                         }}
                       />
 
@@ -2030,19 +2095,16 @@ export default function Assessmentuserone({}) {
                         dataKey="DTX"
                         stroke="rgb(237, 219, 51)"
                         strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        // dot={timeRange === "1month" ? false : <CustomDot />}
+                        dot={timeRange === "1month" ? false : <CustomDot />}
                         connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
                       >
-                        {/* {timeRange !== "1month" && (
+                        {timeRange !== "1month" && (
                           <LabelList
                             dataKey="DTX"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                           />
-                        )} */}
+                        )}
                       </Line>
                       {/* {timeRange === "1month" && (
                       <Brush
@@ -2480,3 +2542,206 @@ export default function Assessmentuserone({}) {
     </main>
   );
 }
+
+
+
+
+//สวยๆๆๆ  ver max min อยู่กลาง
+    // <div className="contentgraph">
+    //           <div className="inline-containers">
+    //             <div className="graph-label">
+    //               <div className="Temperature"></div>
+    //               <span className="head-graph">อุณหภูมิ (°C)</span>
+    //             </div>
+    //           </div>
+    //           <p className="textgraph"></p>
+    //           {Temperaturedata && (
+    //             <div className="chart-containerass1">
+    //               <ResponsiveContainer width="100%" height={300}>
+    //                 <ComposedChart
+    //                   // width={1000}
+    //                   // height={300}
+    //                   data={Temperaturedata}
+    //                   margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+    //                   // margin={
+    //                   //   timeRange === "1month"
+    //                   //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+    //                   //     : { right: 28, left: 28 }
+    //                   // }
+    //                 >
+    //                   <CartesianGrid strokeDasharray="3 3" />
+    //                   <XAxis
+    //                     dataKey="createdAt"
+    //                     tickFormatter={formatDateTime}
+    //                     interval="preserveStartEnd"
+    //                     minTickGap={5}
+    //                     tickLine={timeRange === "1month" ? false : true}
+    //                     tick={
+    //                       timeRange === "1month"
+    //                         ? false
+    //                         : { fontSize: 10, lineHeight: 1.5 }
+    //                     }
+    //                   />
+    //                   <YAxis
+    //                     domain={[30, 40]}
+    //                     tick={{ fontSize: 10 }}
+    //                     ticks={[30, 32, 34, 36, 38, 40]}
+    //                     // hide={timeRange !== "1month"}
+    //                   />
+    //                   <Tooltip content={<CustomTooltipTemperature />} />
+    //                   <ReferenceLine
+    //                     y={min.Temperature}
+    //                     stroke="#00b300"
+    //                     strokeDasharray="0"
+    //                     label="Min"
+    //                   />
+    //                   <ReferenceLine
+    //                     y={max.Temperature}
+    //                     stroke="#ff0000"
+    //                     strokeDasharray="0"
+    //                     label="Max"
+    //                   />
+    //                   <Area
+    //                     type="monotone"
+    //                     dataKey="Temperature"
+    //                     stroke="rgb(229, 113, 63)"
+    //                     fill="rgb(229, 113, 63,0.3)"
+    //                     connectNulls={true}
+    //                   />
+    //                   <Line
+    //                     type="monotone"
+    //                     dataKey="Temperature"
+    //                     stroke="#e5713f"
+    //                     strokeWidth={2}
+    //                     dot={timeRange === "1month" ? false : { r: 4 }} // dot={timeRange === "1month" ? false : <CustomDot />}
+    //                     connectNulls={true}
+    //                   >
+    //                     {/* {timeRange !== "1month" && (
+    //                       <LabelList
+    //                         dataKey="Temperature"
+    //                         position="inside"
+    //                         style={{ fill: "white", fontSize: "10" }}
+    //                       />
+    //                     )} */}
+    //                   </Line>
+    //                   {/* {timeRange === "1month" && (
+    //                   <Brush
+    //                     tickFormatter={formatDateTime}
+    //                     dataKey="createdAt"
+    //                     height={15}
+    //                     style={{ fontSize: "10" }}
+    //                     stroke="#878787"
+    //                   />
+    //                 )} */}
+    //                 </ComposedChart>
+    //               </ResponsiveContainer>
+    //             </div>
+    //           )}
+    //         </div>
+
+
+//ver max min อยู่ขวาสุด
+ <div className="contentgraph">
+              <div className="inline-containers">
+                <div className="graph-label">
+                  <div className="Temperature"></div>
+                  <span className="head-graph">อุณหภูมิ (°C)</span>
+                </div>
+              </div>
+              <p className="textgraph"></p>
+              {Temperaturedata && (
+                <div className="chart-containerass1">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <ComposedChart
+                      // width={1000}
+                      // height={300}
+                      data={Temperaturedata}
+                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      // margin={
+                      //   timeRange === "1month"
+                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                      //     : { right: 28, left: 28 }
+                      // }
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="createdAt"
+                        tickFormatter={formatDateTime}
+                        interval="preserveStartEnd"
+                        minTickGap={5}
+                        tickLine={timeRange === "1month" ? false : true}
+                        tick={
+                          timeRange === "1month"
+                            ? false
+                            : { fontSize: 10, lineHeight: 1.5 }
+                        }
+                      />
+                      <YAxis
+                        domain={[30, 40]}
+                        tick={{ fontSize: 10 }}
+                        ticks={[30, 32, 34, 36, 38, 40]}
+                        // hide={timeRange !== "1month"}
+                      />
+                      <Tooltip content={<CustomTooltipTemperature />} />
+                      <ReferenceLine
+                        y={min.Temperature}
+                        stroke="#00b300"
+                        strokeDasharray="5 5"
+                        label={{
+                          position: "right",
+                          value: "Min",
+                          fill: "#00b300",
+                          fontSize: 12,
+                        }}
+                      />
+                      <ReferenceLine
+                        y={max.Temperature}
+                        stroke="#ff0000"
+                        strokeDasharray="5 5"
+                        label={{
+                          position: "right",
+                          value: "Max",
+                          fill: "#ff0000",
+                          fontSize: 12,
+                        }}
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="Temperature"
+                        stroke="rgb(229, 113, 63)"
+                        fill="rgb(229, 113, 63,0.3)"
+                        connectNulls={true}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="Temperature"
+                        stroke="#e5713f"
+                        strokeWidth={3}
+                        // dot={timeRange === "1month" ? false : <CustomDot />}
+                        dot={{ r: 4 }}
+                        isAnimationActive={true}
+                        animationDuration={1500}
+                      >
+                        {/* {timeRange !== "1month" && (
+                          <LabelList
+                            dataKey="Temperature"
+                            position="inside"
+                            style={{ fill: "white", fontSize: "10" }}
+                          />
+                        )} */}
+                      </Line>
+                      {/* {timeRange === "1month" && (
+                      <Brush
+                        tickFormatter={formatDateTime}
+                        dataKey="createdAt"
+                        height={15}
+                        style={{ fontSize: "10" }}
+                        stroke="#878787"
+                      />
+                    )} */}
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>

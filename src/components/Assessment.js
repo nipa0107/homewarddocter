@@ -23,34 +23,36 @@ export default function Assessment({ }) {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
+  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
 
   useEffect(() => {
-    socket.on('newAlert', (alert) => {
+    socket?.on('newAlert', (alert) => {
       setAlerts(prevAlerts => [...prevAlerts, alert]);
       setUnreadCount(prevCount => prevCount + 1);
     });
 
+    socket.on('deletedAlert', (data) => {
+      setAlerts((prevAlerts) =>
+        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
+      );
+      setUnreadCount((prevCount) => Math.max(0, prevCount - 1));    });
+
     return () => {
-      socket.off('newAlert'); // Clean up the listener on component unmount
+      socket?.off('newAlert'); // Clean up the listener on component unmount
+      socket.off('deletedAlert');
     };
   }, []);
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-  //       setShowNotifications(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleClickOutside);
-
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, [notificationsRef]);
-
-  // const toggleNotifications = () => {
-  //   setShowNotifications(!showNotifications);
-  // };
+    useEffect(() => {
+      socket?.on("TotalUnreadCounts", (data) => {
+        console.log("📦 TotalUnreadCounts received:", data);
+        setUserUnreadCounts(data);
+      });
+  
+      return () => {
+        socket?.off("TotalUnreadCounts");
+      };
+    }, [socket]);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -91,6 +93,11 @@ export default function Assessment({ }) {
     })
       .then((res) => res.json())
       .then((data) => {
+        setSender({
+          name: data.data.name,
+          surname: data.data.surname,
+          _id: data.data._id,
+        });
         setData(data.data);
         if (data.data == "token expired") {
           window.localStorage.clear();
@@ -350,6 +357,27 @@ export default function Assessment({ }) {
     return unreadUsers.length;
   };
 
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
+
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    fetchUnreadCount();
+  }, []);
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -396,11 +424,20 @@ export default function Assessment({ }) {
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
-              {countUnreadUsers() !== 0 && (
-                <span className="notification-countchat">
-                  {countUnreadUsers()}
-                </span>
-              )}
+              {userUnreadCounts.map((user) => {
+                if (String(user.userId) === String(sender._id)) {
+                  return (
+                    <div key={user.userId}>
+                      {user.totalUnreadCount > 0 && (
+                        <div className="notification-countchat">
+                          {user.totalUnreadCount}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })}
             </a>
           </li>
           <div class="nav-logout">

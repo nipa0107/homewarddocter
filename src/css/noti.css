@@ -4,8 +4,8 @@
   
   .notifications-dropdown {
     position: absolute;
-    top: 65px;
-    right: 310px;
+    top: 2.5rem;
+    right: 16rem;
     width:65vh;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -60,22 +60,36 @@
   
   .notification-countchat {
     position: absolute;
-    top: 50%; /* ย้ายไปตำแหน่งที่ต้องการ */
-    right: 6px;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
     background-color: red;
-    color: white;
+    color: #fff;
+    font-size: 14px;
+    padding: 6px 8px;
     border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    display: inline-flex; 
+    width: 24px;
+    height: 24px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    transform: translate(0, -50%);
-    z-index: 1;
-    line-height: 1.5em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   }
-  
+  /* position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background-color: #3498db;
+  color: #fff;
+  font-size: 14px;
+  padding: 6px 8px;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); */
 
   .notifications-head{
     display: flex;
@@ -124,3 +138,12 @@
     color: #fff;
   }
   
+  .emergency-alert-message {
+    color: red;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: #ffe6e6; /* สีพื้นหลังอ่อน */
+    padding: .2rem;
+    border-radius: 4px;
+    display: inline-block;
+  }

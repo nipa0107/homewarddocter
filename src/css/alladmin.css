@@ -313,13 +313,13 @@ tr.assessmentnull {
 }
 
 .btn-abnormal {
-  background-color: #e7639a;
+  background-color: #fb8c00;
   color: white;
 }
 
 .btn-completed {
-  background-color: #FFCC80;
-  color: #000000;
+  background-color: #757575;
+  color:  white;
 }
 .btn-Emergency{
   background-color: #FF6A6A;
@@ -339,11 +339,11 @@ tr.assessmentnull {
 
 }
 .abnormal-status {
-  color: #e7639a;
+  color: #fb8c00;
 }
 
 .end-of-treatment-status {
-  color: #FFCC80;
+  color: #757575;
 }
 
 .not-evaluated {
@@ -480,14 +480,14 @@ p .label {
   color: #333;
 }
 
-.inline-container .title-ass {
+/* .inline-container .title-ass {
   margin-left: 3%;
   margin-right: 1rem;
   font-weight: bold;
   color: #333;
   flex: 0 0 20%;
   display: flex;
-}
+} */
 
 .textassesment label {
   margin-left: 1%;
@@ -505,6 +505,7 @@ p .label {
   color: #555;
 }
 
+
 .inline-container textarea {
   flex: 1;
   padding: 8px;
@@ -517,12 +518,12 @@ p .label {
   box-shadow: 0 0 5px rgba(13, 124, 242, 0.5);
 }
 
-textarea {
+/* textarea {
   resize: none;
   height: auto;
   min-height: 100px;
   height: 50%;
-}
+} */
 
 .select {
   width: 20%;
