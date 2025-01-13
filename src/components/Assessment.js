@@ -28,21 +28,48 @@ export default function Assessment({ }) {
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
+      console.log('Received newAlert:', alert);
+  
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+  
+        // ถ้ามีอยู่แล้ว ให้แทนที่ข้อมูลเดิม
+        if (isExisting) {
+          return prevAlerts.map((existingAlert) =>
+            existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+          );
+        }
+  
+        // ถ้ายังไม่มี ให้เพิ่มข้อมูลใหม่
+        return [...prevAlerts, alert];
+      });
     });
-
-    socket.on('deletedAlert', (data) => {
+  
+    socket?.on('deletedAlert', (data) => {
       setAlerts((prevAlerts) =>
         prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
       );
-      setUnreadCount((prevCount) => Math.max(0, prevCount - 1));    });
-
+    });
+  
     return () => {
-      socket?.off('newAlert'); // Clean up the listener on component unmount
-      socket.off('deletedAlert');
+      socket?.off('newAlert');
+      socket?.off('deletedAlert');
     };
   }, []);
+  
+  useEffect(() => {
+    const currentUserId = sender._id;
+  
+    const unreadAlerts = alerts.filter(
+      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+  
+    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+  }, [alerts]);
+  
+  
     useEffect(() => {
       socket?.on("TotalUnreadCounts", (data) => {
         console.log("📦 TotalUnreadCounts received:", data);
