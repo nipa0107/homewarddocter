@@ -1,101 +1,127 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useLocation } from "react-router-dom";
 import "../css/sidebar.css";
-import "../css/alladmin.css"
+import "../css/alladmin.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
-import io from 'socket.io-client';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import io from "socket.io-client";
 const socket = io("http://localhost:5000");
-export default function UpdateProfile() {
-  const [data, setData] = useState([]);
-  const navigate = useNavigate();
-  const [isActive, setIsActive] = useState(false);
-  const [token, setToken] = useState("");
+
+export default function Updatecaregiver() {
   const location = useLocation();
-  const [username, setUsername] = useState("");
-  const [tel, setTel] = useState("");
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
+  const navigate = useNavigate();
+  const [data, setData] = useState([]);
+  const { id, user } = location.state || {};
+  const caregiver = location.state?.caregiver;
+  const [gender, setGender] = useState("");
+  const [Relationship, setRelationship] = useState("");
+  const [adminData, setAdminData] = useState("");
+  const [isActive, setIsActive] = useState(false);
+  const [error, setError] = useState("");
+  const [token, setToken] = useState("");
+  const [otherGender, setOtherGender] = useState("");
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [otherRelationship, setOtherRelationship] = useState("");
+  const [formData, setFormData] = useState({
+    user: caregiver?.user || "",
+    name: caregiver?.name || "",
+    surname: caregiver?.surname || "",
+    tel: caregiver?.tel || "",
+    Relationship: caregiver?.Relationship || "",
+  });
+  const notificationsRef = useRef(null);
+  const bellRef = useRef(null);
+  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const [userId, setUserId] = useState("");
-  const [allUsers, setAllUsers] = useState([]);
-  const [datauser, setDatauser] = useState([]);
-  const [nametitle, setNameTitle] = useState("");
-  const notificationsRef = useRef(null);
-  const bellRef = useRef(null);
-  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
 
   useEffect(() => {
-    socket?.on('newAlert', (alert) => {
-      console.log('Received newAlert:', alert);
-  
+    socket?.on("newAlert", (alert) => {
+      console.log("Received newAlert:", alert);
+
       setAlerts((prevAlerts) => {
         const isExisting = prevAlerts.some(
           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
         );
-  
+
         let updatedAlerts;
-  
+
         if (isExisting) {
-          
-          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+          if (alert.alertMessage === "เป็นเคสฉุกเฉิน") {
             updatedAlerts = [...prevAlerts, alert];
           } else {
             updatedAlerts = prevAlerts.map((existingAlert) =>
-              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+              existingAlert.patientFormId === alert.patientFormId
+                ? alert
+                : existingAlert
             );
           }
         } else {
           updatedAlerts = [...prevAlerts, alert];
         }
-  
-        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+        return updatedAlerts.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
       });
     });
-  
-    socket?.on('deletedAlert', (data) => {
+
+    socket?.on("deletedAlert", (data) => {
       setAlerts((prevAlerts) => {
         const filteredAlerts = prevAlerts.filter(
           (alert) => alert.patientFormId !== data.patientFormId
         );
-        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        return filteredAlerts.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
       });
     });
-  
+
     return () => {
-      socket?.off('newAlert');
-      socket?.off('deletedAlert');
+      socket?.off("newAlert");
+      socket?.off("deletedAlert");
     };
   }, []);
-  
+
   useEffect(() => {
     const currentUserId = sender._id;
-  
+
     const unreadAlerts = alerts.filter(
-      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
-  
+
     setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
   }, [alerts]);
-    useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
-      });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
-      };
-    }, [socket]);
 
+  useEffect(() => {
+    socket?.on("TotalUnreadCounts", (data) => {
+      console.log("📦 TotalUnreadCounts received:", data);
+      setUserUnreadCounts(data);
+    });
+
+    return () => {
+      socket?.off("TotalUnreadCounts");
+    };
+  }, [socket]);
+
+  const FormatDate = (date) => {
+    const formattedDate = new Date(date);
+    // ตรวจสอบว่า date เป็น NaN หรือไม่
+    if (isNaN(formattedDate.getTime())) {
+      return ""; // ถ้าเป็น NaN ให้ส่งค่าว่างกลับไป
+    }
+    return formattedDate.toISOString().split("T")[0];
+  };
   const toggleNotifications = (e) => {
     e.stopPropagation();
     if (showNotifications) {
@@ -108,7 +134,8 @@ export default function UpdateProfile() {
 
   const handleClickOutside = (e) => {
     if (
-      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
       !bellRef.current.contains(e.target)
     ) {
       setShowNotifications(false);
@@ -116,33 +143,12 @@ export default function UpdateProfile() {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  // const toggleNotifications = () => {
-  //   setShowNotifications(!showNotifications);
-  // };
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (
-  //       notificationsRef.current &&
-  //       !notificationsRef.current.contains(event.target)
-  //     ) {
-  //       setShowNotifications(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleClickOutside);
-
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, [notificationsRef]);
-
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -173,89 +179,12 @@ export default function UpdateProfile() {
       });
   };
 
-  useEffect(() => {
-    const token = window.localStorage.getItem("token");
-    setToken(token);
-    if (token) {
-      fetch("http://localhost:5000/profiledt", {
-        method: "POST",
-        crossDomain: true,
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          token: token,
-        }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          console.log(data);
-          setData(data.data);
-          setName(data.data.name);
-          setSurname(data.data.surname);
-          setNameTitle(data.data.nametitle)
-          setUsername(data.data.username)
-          setTel(data.data.tel)
-          setEmail(data.data.email)
-        })
-        .catch((error) => {
-          console.error("Error verifying token:", error);
-          // logOut();
-        });
-    }
-  }, []);
-
-  const UpdateProfile = async () => {
-    try {
-      const docterData =
-      {
-        nametitle,
-        name,
-        tel,
-        surname,
-      };
-      const response = await fetch(`http://localhost:5000/updateprofile/${location.state._id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(docterData),
-      });
-
-      if (response.ok) {
-        const updatedAdmin = await response.json();
-        console.log("แก้ไขผู้แล้ว:", updatedAdmin);
-        setTimeout(() => {
-          navigate("/profile");
-        }, 1100);
-        // window.location.href = "./profile";
-      } else {
-        console.error("ไม่สามารถแก้ไขผู้ใช้ได้:", response.statusText);
-      }
-    } catch (error) {
-      console.error("เกิดข้อผิดพลาดในการแก้ไขผู้ใช้:", error);
-    }
-  };
-
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./";
-  };
-
-  // bi-list
-  const handleToggleSidebar = () => {
-    setIsActive(!isActive);
-  };
-
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token)
       .then((alerts) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
-          (alert) => !alert.viewedBy.includes(userId) // ตรวจสอบว่า userId ไม่อยู่ใน viewedBy
+          (alert) => !alert.viewedBy.includes(userId)
         ).length;
         setUnreadCount(unreadAlerts);
       })
@@ -271,9 +200,8 @@ export default function UpdateProfile() {
     if (token) {
       fetchUserData(token)
         .then((user) => {
-          setUserId(user._id); // ตั้งค่า userId
-          fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
-
+          setUserId(user._id);
+          fetchAndSetAlerts(token, user._id);
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
@@ -313,6 +241,67 @@ export default function UpdateProfile() {
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
       : alerts;
 
+  const currentDate = new Date();
+
+  const logOut = () => {
+    window.localStorage.clear();
+    window.location.href = "./";
+  };
+
+  const handleToggleSidebar = () => {
+    setIsActive(!isActive);
+  };
+
+  const handleBreadcrumbClick = () => {
+    navigate("/allinfo", { state: { id: id, user: user } });
+  };
+
+  const handleRelationshipChange = (e) => {
+    const value = e.target.value;
+    if (value === "อื่นๆ") {
+      setShowOtherInput(true);
+      setFormData((prev) => ({ ...prev, Relationship: otherRelationship })); // กรณี "อื่นๆ" ใช้ค่า otherRelationship
+    } else {
+      setShowOtherInput(false);
+      setFormData((prev) => ({ ...prev, Relationship: value })); // อัปเดต Relationship ตามที่เลือก
+    }
+  };
+  const handleOtherRelationshipChange = (e) => {
+    const value = e.target.value;
+    setOtherRelationship(value);
+    setFormData((prev) => ({ ...prev, Relationship: value })); // อัปเดต Relationship ด้วยค่าอื่นๆ
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await fetch("http://localhost:5000/updatecaregiver", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ _id: caregiver._id, ...formData }),
+      });
+
+      const data = await response.json();
+      if (data.status === "Ok") {
+        toast.success("แก้ไขข้อมูลสำเร็จ");
+        setTimeout(() => {
+          navigate("/infopatient", { state: { id: id, user: user } });
+        }, 1100);
+      } else {
+        // setError(data.error);
+        toast.error(data.error);
+      }
+    } catch (error) {
+      console.error("Error saving data:", error);
+      alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+    }
+  };
+
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
     const day = dateTime.getDate();
@@ -336,9 +325,11 @@ export default function UpdateProfile() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-      } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } เวลา ${hours < 10 ? "0" + hours : hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } น.`;
   };
 
   useEffect(() => {
@@ -362,9 +353,9 @@ export default function UpdateProfile() {
     };
     fetchUnreadCount();
   }, []);
-
   return (
     <main className="body">
+      <ToastContainer />
       <div className={`sidebar ${isActive ? "active" : ""}`}>
         <div class="logo_content">
           <div class="logo">
@@ -382,7 +373,7 @@ export default function UpdateProfile() {
             </a>
           </li>
           <li>
-            <a href="assessment" >
+            <a href="assessment">
               <i class="bi bi-clipboard2-pulse"></i>
               <span class="links_name">ติดตาม/ประเมินอาการ</span>
             </a>
@@ -400,14 +391,15 @@ export default function UpdateProfile() {
             </a>
           </li>
           <li>
-            <a href="assessinhomesss" >
+            <a href="assessinhomesss">
               <i class="bi bi-house-check"></i>
-              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+              <span class="links_name">แบบประเมินเยี่ยมบ้าน</span>
             </a>
           </li>
           <li>
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
+              <span className="links_name">แช็ต</span>
               {userUnreadCounts.map((user) => {
                 if (String(user.userId) === String(sender._id)) {
                   return (
@@ -438,14 +430,17 @@ export default function UpdateProfile() {
           </div>
         </ul>
       </div>
-
       <div className="home_content">
         <div className="homeheader">
-          <div className="header">แก้ไขโปรไฟล์ผู้ใช้</div>
+          <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                <a
+                  ref={bellRef}
+                  className="bell-icon"
+                  onClick={toggleNotifications}
+                >
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (
@@ -519,89 +514,152 @@ export default function UpdateProfile() {
             <li className="arrow">
               <i class="bi bi-chevron-double-right"></i>
             </li>
-            <li><a href="profile">โปรไฟล์</a>
+            <li>
+              <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
             </li>
             <li className="arrow">
               <i class="bi bi-chevron-double-right"></i>
             </li>
-            <li><a>แก้ไขโปรไฟล์ผู้ใช้</a>
+            <li>
+              <a
+                href="infopatient"
+                onClick={() =>
+                  navigate("/infopatient", { state: { id: id, user: user } })
+                }
+              >
+                ข้อมูลการดูแลผู้ป่วย
+              </a>
+            </li>
+            <li className="arrow">
+              <i class="bi bi-chevron-double-right"></i>
+            </li>
+            <li>
+              <a>แก้ไขข้อมูลผู้ดูแล</a>
             </li>
           </ul>
         </div>
-
-
-        {/* <h3>แก้ไขโปรไฟล์ผู้ใช้</h3> */}
-        <div className="formcontainerpf card mb-2">
-          <div className="mb-2">
-            <label>ชื่อผู้ใช้</label>
-            <input
-              type="text"
-              className="form-control gray-background"
-              readOnly
-              value={username}
-            //   onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div className="mb-2">
-            <label>คำนำหน้าชื่อ</label>
-            <select
-              className="form-control"
-              value={nametitle}
-              onChange={(e) => setNameTitle(e.target.value)}
-            >
-              <option value="">กรุณาเลือก</option>
-              <option value="แพทย์หญิง">แพทย์หญิง</option>
-              <option value="นายแพทย์">นายแพทย์</option>
-              <option value="พยาบาลวิชาชีพ">พยาบาลวิชาชีพ</option>
-                <option value="นาย">นาย</option>
-                <option value="นาง">นาง</option>
-                <option value="นางสาว">นางสาว</option>
-            </select>
-          </div>
-          <div className="mb-2">
-            <label>ชื่อ</label>
-            <input
-              type="text"
-              className="form-control"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="mb-2">
-            <label>นามสกุล</label>
-            <input
-              type="text"
-              className="form-control"
-              value={surname}
-              onChange={(e) => setSurname(e.target.value)}
-            />
-          </div>
-          <div className="mb-2">
-            <label>อีเมล</label>
-            <input
-              type="text"
-              className="form-control gray-background"
-              readOnly
-              value={email}
-            //   onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="mb-2">
-            <label>เบอร์โทรศัพท์</label>
-            <input
-              type="text"
-              className="form-control"
-              value={tel}
-              onChange={(e) => setTel(e.target.value)}
-            />
-          </div>
-
-          <div className="d-grid save">
-            <button
-              onClick={UpdateProfile}
-              type="submit"
-              className="btn btnsave py-2"
-            >
+        <h3>แก้ไขข้อมูลผู้ดูแล</h3>
+        <div className="adminall card mb-1">
+          <form>
+            <div className="mb-1">
+              <label>ชื่อ(ผู้ดูแล)</label>
+              <input
+                type="text"
+                className="form-control"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-1">
+              <label>นามสกุล(ผู้ดูแล)</label>
+              <input
+                type="text"
+                name="surname"
+                className="form-control"
+                value={formData.surname}
+                onChange={handleChange}
+              />
+            </div>
+            <div className="mb-1">
+              <label>ความสัมพันธ์</label>
+              <div class="relationship-container">
+                <div class="relationship-group">
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        value="พ่อ"
+                        checked={formData.Relationship === "พ่อ"}
+                        onChange={handleRelationshipChange}
+                      />
+                      พ่อ
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        value="แม่"
+                        checked={formData.Relationship === "แม่"}
+                        onChange={handleRelationshipChange}
+                      />
+                      แม่
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        value="ลูก"
+                        checked={formData.Relationship === "ลูก"}
+                        onChange={handleRelationshipChange}
+                      />
+                      ลูก
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        value="ภรรยา"
+                        checked={formData.Relationship === "ภรรยา"}
+                        onChange={handleRelationshipChange}
+                      />
+                      ภรรยา
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        value="สามี"
+                        checked={formData.Relationship === "สามี"}
+                        onChange={handleRelationshipChange}
+                      />
+                      สามี
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input
+                        type="radio"
+                        value="อื่นๆ"
+                        checked={showOtherInput}
+                        onChange={handleRelationshipChange}
+                      />
+                      อื่นๆ
+                    </label>
+                  </div>
+                </div>
+                {showOtherInput && (
+                  <div className="mt-2">
+                    <label>กรุณาระบุ:</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={otherRelationship}
+                      onChange={handleOtherRelationshipChange}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="mb-1">
+              <label>เบอร์โทรศัพท์(ผู้ดูแล)</label>
+              <input
+                type="text"
+                name="tel"
+                className="form-control"
+                value={formData.tel}
+                onChange={handleChange}
+              />
+            </div>
+          </form>
+        </div>
+        <div className="btn-group">
+          <div className="btn-next">
+            <button onClick={handleSave} className="btn btn-outline py-2">
               บันทึก
             </button>
           </div>

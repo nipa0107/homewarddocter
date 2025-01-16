@@ -41,24 +41,49 @@ const ChatComponent = () => {
   const [isActive, setIsActive] = useState(false);
   const messageRefs = useRef({});
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); // To store the `users` array from the response
-  useEffect(() => {
-    socket?.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
-    });
 
-    socket.on('deletedAlert', (data) => {
-      setAlerts((prevAlerts) =>
-        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
-      );
-      setUnreadCount((prevCount) => prevCount - 1); // ลดจำนวน unread เมื่อ alert ถูกลบ
-    });
-
-    return () => {
-      socket?.off('newAlert'); // Clean up the listener on component unmount
-      socket.off('deletedAlert');
-    };
-  }, []);
+ useEffect(() => {
+  socketnew?.on('newAlert', (alert) => {
+       console.log('Received newAlert:', alert);
+   
+       setAlerts((prevAlerts) => {
+         const isExisting = prevAlerts.some(
+           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+         );
+   
+         let updatedAlerts;
+   
+         if (isExisting) {
+           
+           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+             updatedAlerts = [...prevAlerts, alert];
+           } else {
+             updatedAlerts = prevAlerts.map((existingAlert) =>
+               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+             );
+           }
+         } else {
+           updatedAlerts = [...prevAlerts, alert];
+         }
+   
+         return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+       });
+     });
+   
+     socketnew?.on('deletedAlert', (data) => {
+       setAlerts((prevAlerts) => {
+         const filteredAlerts = prevAlerts.filter(
+           (alert) => alert.patientFormId !== data.patientFormId
+         );
+         return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+       });
+     });
+   
+     return () => {
+      socketnew?.off('newAlert');
+      socketnew?.off('deletedAlert');
+     };
+   }, []);
   const openModal = (image) => {
     setCurrentImage(image); // Set the current image when opening the modal
     setModalOpen(true);
@@ -376,8 +401,13 @@ const ChatComponent = () => {
       formData.append("message", input);
       formData.append("roomId", selectedUserId);
       formData.append("senderId", sender._id);
+      //   formData.append("recipientModel", "User");
       formData.append("senderModel", "MPersonnel");
-      if (file) formData.append("image", file);
+      //   if (senderModel === 'MPersonnel') {
+      //     formData.append('recipientId', selectedUserId);
+      //     formData.append('recipientModel', 'User');
+      //   }
+      if (file) formData.append("image", file); // เพิ่มไฟล์ใน FormData
 
       try {
         const response = await fetch("http://localhost:5000/sendchat", {
@@ -388,9 +418,15 @@ const ChatComponent = () => {
         const result = await response.json();
 
         if (response.ok) {
+          //   setMessages((prev) => [...prev, result.newChat]);
           setInput("");
-          setFile(null);
+          setFile(null); // ล้างไฟล์
           setFilePreview(null);
+          //   socket.emit("sendMessage", {
+          //     roomId: selectedUserId,
+          //     message: input,
+          //     senderId: sender._id,
+          //   });
           const textarea = textareaRef.current;
           textarea.style.height = "50px";
         } else {
@@ -661,6 +697,11 @@ const ChatComponent = () => {
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
+              {/* {countUnreadUsers() !== 0 && (
+              <span className="notification-countchat">
+                {countUnreadUsers()}
+              </span>
+            )} */}
               {userUnreadCounts.map((user) => {
                 if (String(user.userId) === String(sender._id)) {
                   return (
@@ -1043,15 +1084,15 @@ const ChatComponent = () => {
                                 </a>
                               )
                             ) : (
-                              //   <span
-                              //   className="message-chat"
-                              //     dangerouslySetInnerHTML={{
-                              //       __html: linkifyText(msg.message),
-                              //     }}
-                              //   />
-                              <span className="message-chat">
-                                {msg.message}
-                              </span>
+                                <span
+                                className="message-chat"
+                                  dangerouslySetInnerHTML={{
+                                    __html: linkifyText(msg.message),
+                                  }}
+                                />
+                              // <span className="message-chat">
+                              //   {msg.message}
+                              // </span>
                             )}
 
                             {/* {msg.image && (

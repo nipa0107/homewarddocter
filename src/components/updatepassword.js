@@ -35,22 +35,57 @@ function Updatepassword() {
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
+      console.log('Received newAlert:', alert);
+  
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+  
+        let updatedAlerts;
+  
+        if (isExisting) {
+          
+          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+            updatedAlerts = [...prevAlerts, alert];
+          } else {
+            updatedAlerts = prevAlerts.map((existingAlert) =>
+              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+            );
+          }
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+  
+        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
     });
-
-    socket.on('deletedAlert', (data) => {
-      setAlerts((prevAlerts) =>
-        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
-      );
-      setUnreadCount((prevCount) => prevCount - 1); // ลดจำนวน unread เมื่อ alert ถูกลบ
+  
+    socket?.on('deletedAlert', (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
     });
-
+  
     return () => {
-      socket?.off('newAlert'); // Clean up the listener on component unmount
-      socket.off('deletedAlert');
+      socket?.off('newAlert');
+      socket?.off('deletedAlert');
     };
   }, []);
+  
+  
+  useEffect(() => {
+    const currentUserId = sender._id;
+  
+    const unreadAlerts = alerts.filter(
+      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+  
+    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+  }, [alerts]);
 
       useEffect(() => {
         socket?.on("TotalUnreadCounts", (data) => {
@@ -228,55 +263,6 @@ function Updatepassword() {
     } น.`;
   };
 
-  const fetchAllUsers = async (userId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/alluserchat?userId=${userId}`
-      );
-      const data = await response.json();
-
-      const usersWithLastMessage = await Promise.all(
-        data.data.map(async (user) => {
-          const lastMessageResponse = await fetch(
-            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-          );
-          const lastMessageData = await lastMessageResponse.json();
-
-          const lastMessage = lastMessageData.lastMessage;
-          return { ...user, lastMessage: lastMessage ? lastMessage : null };
-        })
-      );
-
-      const sortedUsers = usersWithLastMessage.sort((a, b) => {
-        if (!a.lastMessage) return 1;
-        if (!b.lastMessage) return -1;
-        return (
-          new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
-        );
-      });
-
-      setAllUsers(sortedUsers);
-    } catch (error) {
-      console.error("Error fetching all users:", error);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchAllUsers(data._id);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [data]);
-
-  const countUnreadUsers = () => {
-    const unreadUsers = allUsers.filter((user) => {
-      const lastMessage = user.lastMessage;
-      return (
-        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-      );
-    });
-    return unreadUsers.length;
-  };
   const Updatepassword = () => {
     fetch(`http://localhost:5000/updatepassword/${location.state._id}`, {
       method: "POST",

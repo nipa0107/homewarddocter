@@ -5,7 +5,7 @@ import logow from "../img/logow.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-import { Typography, Stepper, Step, StepLabel, Wizard, WizardStep } from "@material-ui/core";
+import { Typography, Stepper, Step, StepLabel, Wizard, WizardStep } from "@mui/material";
 import { useForm, FormProvider } from "react-hook-form";
 import { useFormContext } from 'react-hook-form';
 import { fetchAlerts } from './Alert/alert';
@@ -46,18 +46,74 @@ export default function AgendaForm({ }) {
     const notificationsRef = useRef(null);
     const [showToTopButton, setShowToTopButton] = useState(false);
     const bellRef = useRef(null);
-
+  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
 
     useEffect(() => {
-        socket.on('newAlert', (alert) => {
-            setAlerts(prevAlerts => [...prevAlerts, alert]);
-            setUnreadCount(prevCount => prevCount + 1);
+      socket?.on('newAlert', (alert) => {
+        console.log('Received newAlert:', alert);
+    
+        setAlerts((prevAlerts) => {
+          const isExisting = prevAlerts.some(
+            (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+          );
+    
+          let updatedAlerts;
+    
+          if (isExisting) {
+            
+            if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+              updatedAlerts = [...prevAlerts, alert];
+            } else {
+              updatedAlerts = prevAlerts.map((existingAlert) =>
+                existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+              );
+            }
+          } else {
+            updatedAlerts = [...prevAlerts, alert];
+          }
+    
+          return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
         });
-
-        return () => {
-            socket.off('newAlert'); // Clean up the listener on component unmount
-        };
+      });
+    
+      socket?.on('deletedAlert', (data) => {
+        setAlerts((prevAlerts) => {
+          const filteredAlerts = prevAlerts.filter(
+            (alert) => alert.patientFormId !== data.patientFormId
+          );
+          return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        });
+      });
+    
+      return () => {
+        socket?.off('newAlert');
+        socket?.off('deletedAlert');
+      };
     }, []);
+    
+  useEffect(() => {
+    const currentUserId = sender._id;
+  
+    const unreadAlerts = alerts.filter(
+      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+  
+    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+  }, [alerts]);
+  
+  
+    useEffect(() => {
+      socket?.on("TotalUnreadCounts", (data) => {
+        console.log("📦 TotalUnreadCounts received:", data);
+        setUserUnreadCounts(data);
+      });
+  
+      return () => {
+        socket?.off("TotalUnreadCounts");
+      };
+    }, [socket]);
+
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
@@ -97,6 +153,11 @@ export default function AgendaForm({ }) {
         })
             .then((res) => res.json())
             .then((data) => {
+                setSender({
+                    name: data.data.name,
+                    surname: data.data.surname,
+                    _id: data.data._id,
+                  });
                 setData(data.data);
                 if (data.data == "token expired") {
                     window.localStorage.clear();
@@ -308,55 +369,6 @@ export default function AgendaForm({ }) {
             } น.`;
     };
 
-    const fetchAllUsers = async (userId) => {
-        try {
-            const response = await fetch(
-                `http://localhost:5000/alluserchat?userId=${userId}`
-            );
-            const data = await response.json();
-
-            const usersWithLastMessage = await Promise.all(
-                data.data.map(async (user) => {
-                    const lastMessageResponse = await fetch(
-                        `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-                    );
-                    const lastMessageData = await lastMessageResponse.json();
-
-                    const lastMessage = lastMessageData.lastMessage;
-                    return { ...user, lastMessage: lastMessage ? lastMessage : null };
-                })
-            );
-
-            const sortedUsers = usersWithLastMessage.sort((a, b) => {
-                if (!a.lastMessage) return 1;
-                if (!b.lastMessage) return -1;
-                return (
-                    new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
-                );
-            });
-
-            setAllUsers(sortedUsers);
-        } catch (error) {
-            console.error("Error fetching all users:", error);
-        }
-    };
-    //polling
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetchAllUsers(data._id);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [data]);
-
-    const countUnreadUsers = () => {
-        const unreadUsers = allUsers.filter((user) => {
-            const lastMessage = user.lastMessage;
-            return (
-                lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-            );
-        });
-        return unreadUsers.length;
-    };
 
     const steps = getSteps();
     function getSteps() {
@@ -483,7 +495,27 @@ export default function AgendaForm({ }) {
         totalScore: 0,
     });
 
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
 
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    fetchUnreadCount();
+  }, []);
     return (
         <main className="bodyform">
             <ToastContainer />
