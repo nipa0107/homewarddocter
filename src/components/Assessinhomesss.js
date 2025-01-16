@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
-import { useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
 import io from 'socket.io-client';
@@ -478,7 +478,9 @@ export default function Assessinhomesss({ }) {
             onChange={(e) => setSearchKeyword(e.target.value)}
           />
         </div>
-
+        <div class="container-fluid">
+          
+        </div>
         <div className="toolbar">
           <p className="countadmin1">
             จำนวนผู้ป่วยทั้งหมด :{" "}

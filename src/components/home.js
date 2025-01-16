@@ -4,12 +4,14 @@ import "../css/alladmin.css";
 import "../css/noti.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
-import Pt from "../img/pt.png";
-import Pt2 from "../img/pt2.png";
+import Pt from "../img/patient.png";
+import Pt2 from "../img/patientcount.png";
 import Bh from "../img/better-health.png";
 import VSG from "../img/vsg.png";
-import VSR from "../img/vsr.png";
+import VSR from "../img/abnormal.png";
 import Noti from "../img//noti.png";
+import DoughnutChartComponent from "./Chart.js";
+import { Chart } from "chart.js";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import CountUp from 'react-countup';
 import { useNavigate } from "react-router-dom";
@@ -33,7 +35,6 @@ export default function Home() {
   const bellRef = useRef(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [medicalData, setMedicalData] = useState({});
-  const [completedDiagnosisData, setCompletedDiagnosisData] = useState([]);
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
@@ -369,10 +370,15 @@ export default function Home() {
     return acc;
   }, {});
 
-  const diagnosisData = Object.entries(diagnosisCount).map(([name, value]) => ({ name, value }));
 
   // Define colors for each diagnosis
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28AFF', '#FF6F91', '#FF6361', '#BC5090'];
+  const diagnosisData = Object.entries(diagnosisCount).map(([name, value], index) => ({
+    name,
+    value,
+    color: COLORS[index % COLORS.length], // เพิ่มสีจาก COLORS
+  }));
+
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -408,18 +414,16 @@ export default function Home() {
     },
     { male: 0, female: 0, unspecified: 0 }
   );
+  const totalUsers = genderCount.male + genderCount.female + genderCount.unspecified;
 
   // ข้อมูลสำหรับ PieChart
   const genderData = [
-    { name: "ชาย", value: genderCount.male },
-    { name: "หญิง", value: genderCount.female },
-    { name: "ไม่ระบุ", value: genderCount.unspecified },
+    { name: "ชาย", value: totalUsers > 0 ? (genderCount.male / totalUsers) * 100 : 0 },
+    { name: "หญิง", value: totalUsers > 0 ? (genderCount.female / totalUsers) * 100 : 0 },
+    { name: "ไม่ระบุ", value: totalUsers > 0 ? (genderCount.unspecified / totalUsers) * 100 : 0 },
   ];
-  const totalUsers = genderCount.male + genderCount.female + genderCount.unspecified;
 
 
-
-  const COLOR = ['#0088FE', '#FF8042', '#0088FE'];
 
   //Immobility
   const [group3Users, setGroup3Users] = useState([]); // เก็บข้อมูลผู้ใช้อยู่ในกลุ่มที่ 3
@@ -441,6 +445,205 @@ export default function Home() {
 
     fetchGroup3Users(); // เรียกฟังก์ชันดึงข้อมูล
   }, []);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const tableRef = useRef(null); // เพิ่ม useRef สำหรับตาราง
+
+  // ฟังก์ชันสำหรับเลื่อนไปยังตาราง
+  const scrollToTable = () => {
+    if (tableRef.current) {
+      tableRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+  const usersPerPage = 4;
+
+  // Calculate the current users to display
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = group3Users.slice(indexOfFirstUser, indexOfLastUser);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(group3Users.length / usersPerPage);
+
+  const handleClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [filteredUsers, setFilteredUsers] = useState(group3Users);
+
+  useEffect(() => {
+    setFilteredUsers(group3Users);
+  }, [group3Users]);
+
+
+  const handleDateFilter = (filterType) => {
+    const now = new Date();
+    let filtered;
+    if (filterType === "latest") {
+      // Sort the data by creation date in descending order
+      filtered = [...group3Users].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+    } else if (filterType === "7days") {
+      filtered = group3Users.filter(
+        (user) =>
+          new Date(user.createdAt) >= new Date(now.setDate(now.getDate() - 7))
+      );
+    } else if (filterType === "30days") {
+      filtered = group3Users.filter(
+        (user) =>
+          new Date(user.createdAt) >= new Date(now.setMonth(now.getMonth() - 1))
+      );
+    } else {
+      filtered = group3Users; // Default to all users
+    }
+    setFilteredUsers(filtered);
+  };
+
+
+  const [stats, setStats] = useState({ totalUsers: 0, totalPatientForms: 0, abnormalCasesCount: 0 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/assessments/stats", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        if (data.success) {
+          setStats(data.stats);
+        } else {
+          console.error("Failed to fetch stats:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, [token]);
+
+  const [caseCounts, setCaseCounts] = useState({
+    totalCases: 0,
+    normalCasesCount: 0,
+    abnormalCasesCount: 0,
+    emergencyCasesCount: 0,
+  });
+
+  useEffect(() => {
+    const fetchCaseCounts = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/assessments/countcase");
+        const data = await response.json();
+        if (data.success) {
+          setCaseCounts(data.stats);
+        } else {
+          console.error("Failed to fetch case counts:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching case counts:", error);
+      }
+    };
+
+    fetchCaseCounts();
+  }, []);
+
+  const [group3Count, setGroup3Count] = useState(0);
+
+  useEffect(() => {
+    const fetchGroup3Count = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/immobility/group3/count");
+        const data = await response.json();
+        if (data.success) {
+          setGroup3Count(data.count); // เก็บจำนวนรวมใน State
+        } else {
+          console.error("Failed to fetch group 3 count:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching group 3 count:", error);
+      }
+    };
+
+    fetchGroup3Count();
+  }, []);
+
+
+  const COLORS_DIAGNOSIS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28AFF', '#FF6F91', '#FF6361', '#BC5090'];
+  const COLORS_GENDER = ['#0088FE', '#f9a8d4', '#9ca3af']; // Male, Female, Unspecified
+  const COLORS_STATUS = ["#4caf50", "#ff9800", "#f44336"]; // สีสำหรับปกติ, ผิดปกติ, และฉุกเฉิน
+  const COLORS_IMMOBILITY = ["#1cc88a", "#4e73df", "#e74a3b"]; // สีสำหรับแต่ละกลุ่ม
+
+  const [caseStats, setCaseStats] = useState([]);
+
+  useEffect(() => {
+    const fetchCaseStats = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/assessments/countstats");
+        const data = await response.json();
+        if (data.success) {
+          setCaseStats([
+            { name: "เคสปกติ", value: parseFloat(data.stats.normalCasesPercentage) },
+            { name: "เคสผิดปกติ", value: parseFloat(data.stats.abnormalCasesPercentage) },
+            { name: "เคสฉุกเฉิน", value: parseFloat(data.stats.emergencyCasesPercentage) },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error fetching case stats:", error);
+      }
+    };
+
+    fetchCaseStats();
+  }, []);
+
+  const [immobilityData, setImmobilityData] = useState([]);
+
+  useEffect(() => {
+    const fetchImmobilityData = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/immobility/groups");
+        const result = await response.json();
+
+        if (result.success) {
+          const { group1, group2, group3 } = result.data;
+          const total = group1 + group2 + group3;
+
+          // ตรวจสอบว่าข้อมูลที่ได้จาก API ถูกต้องหรือไม่
+          console.log("API Result:", result.data);
+
+          if (total > 0) {
+            // คำนวณเปอร์เซ็นต์
+            const formattedData = [
+              { name: "กลุ่มที่ 1 (ช่วยเหลือตัวเองดี)", value: ((group1 / total) * 100).toFixed(2) },
+              { name: "กลุ่มที่ 2 (ช่วยเหลือตัวเองได้ปานกลาง)", value: ((group2 / total) * 100).toFixed(2) },
+              { name: "กลุ่มที่ 3 (ช่วยเหลือตัวเองได้น้อย)", value: ((group3 / total) * 100).toFixed(2) },
+            ];
+
+            setImmobilityData(formattedData);
+          } else {
+            console.error("Total is zero, no data to display.");
+          }
+        } else {
+          console.error("API returned error:", result.error);
+        }
+      } catch (error) {
+        console.error("Error fetching immobility data:", error);
+      }
+    };
+
+    fetchImmobilityData();
+  }, []);
+
+
+  const caseDetails = [
+    { label: "เคสปกติ", count: caseCounts.normalCasesCount, color: "#4caf50" },
+    { label: "เคสผิดปกติ", count: caseCounts.abnormalCasesCount, color: "#ff9800" },
+    { label: "เคสฉุกเฉิน", count: caseCounts.emergencyCasesCount, color: "#f44336" },
+
+  ];
 
   return (
 
@@ -506,7 +709,7 @@ export default function Home() {
           </div>
         </ul>
       </div>
-      <div className="home_content">
+      <div className="home_content" >
         <div className="homeheader">
           <div className="header">Dashboard</div>
           <div className="profile_details">
@@ -576,89 +779,75 @@ export default function Home() {
             )}
           </div>
         )}
-        <div class="container-fluid">
-
-          <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i
-              class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
-          </div>
-
+        <div class="container-fluid bg-light">
           <div class="row">
-
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                        Earnings (Monthly)</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">$40,000</div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                        Earnings (Annual)</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
-                    </div>
-                    <div class="col-auto">
-                      <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-info shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
+            <div
+              className="col-xl-4 col-md-6 mb-4 mt-4"
+              onClick={() => navigate("/allpatient")}
+              style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
+            >
+              <div className="card border-left shadow h-100 py-2 hover-card">
+                <div className="card-body pb-0">
+                  <div className="row no-gutters align-items-start">
+                    <div className="col mr-3 text-left">
+                      <div className="fs-6 text-primary mb-1" style={{ fontWeight: "bold" }}>
+                        <i className="bi bi-people-fill"></i> ผู้ป่วยที่กำลังรักษา
                       </div>
-                      <div class="row no-gutters align-items-center">
-                        <div class="col-auto">
-                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-                        </div>
-                        <div class="col">
-                          <div class="progress progress-sm mr-2">
-                            <div class="progress-bar bg-info" role="progressbar"
-                            style={{width:"50%"}}
-                              // style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                              aria-valuemax="100"></div>
-                          </div>
-                        </div>
+                      <div className="h2 mb-0 font-weight-bold text-gray-800">
+                        <CountUp end={datauser.filter((user) => user.deletedAt === null).length} />
                       </div>
                     </div>
-                    <div class="col-auto">
-                      <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                    <div className="col-auto">
+                      <img src={Pt2} className="patient" alt="patient" />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div class="col-xl-3 col-md-6 mb-4">
-              <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                  <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                        Pending Requests</div>
-                      <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+            <div
+              className="col-xl-4 col-md-6 mb-4 mt-4"
+              onClick={() => navigate("/abnormalcase")}
+              style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
+            >
+              <div className="card border-left shadow h-100 py-2 hover-card abnormal-status-card">
+                <div className="card-body pb-0">
+                  <div className="row no-gutters align-items-start">
+                    <div className="col mr-3 text-left">
+                      <div className="fs-6 abnormal-status-text mb-1" style={{ fontWeight: "bold" }}>
+                        <i className="bi bi-people-fill"></i> เคสที่มีอาการผิดปกติ
+                      </div>
+                      <div className="h2 mb-0 font-weight-bold text-gray-800">
+                        <CountUp end={stats.abnormalCasesCount} />
+                      </div>
                     </div>
-                    <div class="col-auto">
-                      <i class="fas fa-comments fa-2x text-gray-300"></i>
+                    <div className="col-auto">
+                      <img src={VSR} className="patient" alt="patient" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div
+              className="col-xl-4 col-md-6 mb-4 mt-4"
+              onClick={scrollToTable}
+              style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
+            >
+              <div className="card border-left shadow h-100 py-2 hover-card group3-status-card">
+                <div className="card-body pb-0">
+                  <div className="row no-gutters align-items-start">
+                    <div className="col mr-3 text-left">
+                      <div className="fs-6 group3-status-text mb-1" style={{ fontWeight: "bold" }}>
+                        <i className="bi bi-people-fill"></i> ผู้ป่วยที่ช่วยเหลือตัวเองได้น้อย
+                      </div>
+                      <div className="h2 mb-0 font-weight-bold text-gray-800">
+                        <CountUp end={group3Count} />
+                      </div>
+                    </div>
+                    <div className="col-auto">
+                      <img src={Pt} className="patient" alt="patient" />
                     </div>
                   </div>
                 </div>
@@ -666,219 +855,355 @@ export default function Home() {
             </div>
           </div>
 
-
+          {/* <h6 className="m-0" style={{fontWeight:"bold" , color:"#5ab1f8"}}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6> */}
           <div class="row">
-
-            <div class="col-xl-8 col-lg-7">
-              <div class="card shadow mb-4">
-                <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Earnings Overview</h6>
-                  <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                      aria-labelledby="dropdownMenuLink">
-                      <div class="dropdown-header">Dropdown Header:</div>
-                      <a class="dropdown-item" href="#">Action</a>
-                      <a class="dropdown-item" href="#">Another action</a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="#">Something else here</a>
-                    </div>
-                  </div>
-                </div>
-                <div class="card-body">
-                  <div class="chart-area">
-                    <canvas id="myAreaChart"></canvas>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <div class="col-xl-4 col-lg-5">
               <div class="card shadow mb-4">
                 <div
                   class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
-                  <div class="dropdown no-arrow">
-                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
-                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in"
-                      aria-labelledby="dropdownMenuLink">
-                      <div class="dropdown-header">Dropdown Header:</div>
-                      <a class="dropdown-item" href="#">Action</a>
-                      <a class="dropdown-item" href="#">Another action</a>
-                      <div class="dropdown-divider"></div>
-                      <a class="dropdown-item" href="#">Something else here</a>
-                    </div>
-                  </div>
+                  <h6 class="m-0 font-weight-bold text-primary">โรคของผู้ป่วยที่กำลังรักษา</h6>
+
                 </div>
-                <div class="card-body">
-                  <div class="chart-pie pt-4 pb-2">
-                    <canvas id="myPieChart"></canvas>
+                <div class="card-body pt-2">
+                  <div className="chart-pie mb-5 ">
+                    <DoughnutChartComponent data={diagnosisData} colors={COLORS_DIAGNOSIS} />
+                    {/* <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          dataKey="value"
+                          isAnimationActive={true}
+                          data={diagnosisData}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={100}
+                          fill="#8884d8"
+                          label={({ name, percent }) => `${(percent * 100).toFixed(2)}%`}
+
+                        >
+                          {diagnosisData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value, name) => [`ผู้ป่วย${name}`]} />
+                      </PieChart>
+                    </ResponsiveContainer> */}
                   </div>
-                  <div class="mt-4 text-center small">
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-primary"></i> Direct
-                    </span>
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-success"></i> Social
-                    </span>
-                    <span class="mr-2">
-                      <i class="fas fa-circle text-info"></i> Referral
-                    </span>
-                  </div>
+                  <ul>
+                    {diagnosisData.map((entry, index) => (
+                      <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            width: '15px',
+                            height: '15px',
+                            backgroundColor: COLORS[index % COLORS.length],
+                            borderRadius: '50%', // ทำให้เป็นวงกลม
+                            marginRight: '10px',
+                          }}
+                        ></span>
+                        <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
+                          ผู้ป่วย{entry.name} : {entry.value} เคส
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
                 </div>
+              </div>
+            </div>
+            <div className="col-xl-4 col-lg-5">
+              <div className="card shadow mb-4">
+                <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 className="m-0 font-weight-bold text-primary">
+                    รวมเคสปกติ/ผิดปกติ/เคสฉุกเฉิน
+                  </h6>
+                </div>
+                <div className="card-body pt-6">
+                  <div className="chart-pie mb-5">
+                    <DoughnutChartComponent data={caseStats} colors={COLORS_STATUS} />
+                  </div>
+                  <ul
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      padding: 0,
+                      width: "100%",
+                      // ใช้พื้นที่เต็มเพื่อให้การจัดชิดซ้ายดูสมเหตุสมผล
+                    }}
+                  >
+                    {caseStats.map((entry, index) => (
+                      <li
+                        key={`legend-${index}`}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginRight: "15px",
+                          marginBottom: "9px",
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: "15px",
+                            height: "15px",
+                            backgroundColor: COLORS_STATUS[index % COLORS_STATUS.length],
+                            borderRadius: "50%",
+                            marginRight: "5px",
+                          }}
+                        ></span>
+                        <span style={{ color: COLORS_STATUS[index % COLORS_STATUS.length] }} >
+                          {entry.name} 
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="col-xl-4 col-lg-5">
+              <div class="card shadow mb-4">
+                <div
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 class="m-0 font-weight-bold text-primary">ผู้ป่วย 3 กลุ่ม Immobility</h6>
+                </div>
+                <div className="card-body pt-4">
+                  {immobilityData.length > 0 ? (
+                    <>
+                      <div className="chart-pie mb-5">
+                        <DoughnutChartComponent
+                          data={immobilityData.map((entry) => ({
+                            name: entry.name,
+                            value: parseFloat(entry.value),
+                          }))}
+                          colors={COLORS_IMMOBILITY}
+                        />
+                      </div>
+                      <ul
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          padding: 0,
+                        }}
+                      >
+                        {immobilityData.map((entry, index) => (
+                          <li
+                            key={`legend-${index}`}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              marginBottom: "8px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: "15px",
+                                height: "15px",
+                                backgroundColor: ["#1cc88a", "#4e73df", "#e74a3b"][index],
+                                borderRadius: "50%",
+                                marginRight: "10px",
+                              }}
+                            ></span>
+                            <span style={{ color: COLORS_IMMOBILITY[index % COLORS_IMMOBILITY.length] }}>{entry.name}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <p>ไม่มีข้อมูลสำหรับกราฟนี้</p>
+                  )}
+                </div>
+
               </div>
             </div>
           </div>
 
           <div class="row">
-
-            <div class="col-lg-6 mb-4">
-
+            <div class="col-xl-4 col-lg-5">
               <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Projects</h6>
-                </div>
-                <div class="card-body">
-                  <h4 class="small font-weight-bold">Server Migration <span
-                    class="float-right">20%</span></h4>
-                  <div class="progress mb-4">
-                    <div class="progress-bar bg-danger" role="progressbar" 
-                      aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <h4 class="small font-weight-bold">Sales Tracking <span
-                    class="float-right">40%</span></h4>
-                  <div class="progress mb-4">
-                    <div class="progress-bar bg-warning" role="progressbar" 
-                      aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <h4 class="small font-weight-bold">Customer Database <span
-                    class="float-right">60%</span></h4>
-                  <div class="progress mb-4">
-                    <div class="progress-bar" role="progressbar" 
-                      aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <h4 class="small font-weight-bold">Payout Details <span
-                    class="float-right">80%</span></h4>
-                  <div class="progress mb-4">
-                    <div class="progress-bar bg-info" role="progressbar" 
-                      aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                  <h4 class="small font-weight-bold">Account Setup <span
-                    class="float-right">Complete!</span></h4>
-                  <div class="progress">
-                    <div class="progress-bar bg-success" role="progressbar"
-                      aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-primary text-white shadow">
-                    <div class="card-body">
-                      Primary
-                      <div class="text-white-50 small">#4e73df</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-success text-white shadow">
-                    <div class="card-body">
-                      Success
-                      <div class="text-white-50 small">#1cc88a</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-info text-white shadow">
-                    <div class="card-body">
-                      Info
-                      <div class="text-white-50 small">#36b9cc</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-warning text-white shadow">
-                    <div class="card-body">
-                      Warning
-                      <div class="text-white-50 small">#f6c23e</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-danger text-white shadow">
-                    <div class="card-body">
-                      Danger
-                      <div class="text-white-50 small">#e74a3b</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-secondary text-white shadow">
-                    <div class="card-body">
-                      Secondary
-                      <div class="text-white-50 small">#858796</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-light text-black shadow">
-                    <div class="card-body">
-                      Light
-                      <div class="text-black-50 small">#f8f9fc</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                  <div class="card bg-dark text-white shadow">
-                    <div class="card-body">
-                      Dark
-                      <div class="text-white-50 small">#5a5c69</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                <div
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 class="m-0 font-weight-bold text-primary">สัดส่วนรวมเพศของผู้ป่วย</h6>
 
+                </div>
+                <div class="card-body pt-4">
+                  <div className="chart-pie mb-4">
+                    <DoughnutChartComponent data={genderData} />
+                  </div>
+                  <ul
+                    style={{
+                      display: "flex", // จัดเรียงเป็นแนวนอน
+                      justifyContent: "center", // จัดให้อยู่กึ่งกลางในแนวนอน
+                      alignItems: "center", // จัดให้อยู่ตรงกลางในแนวตั้ง
+                      padding: 0, // เอา padding ออก
+                      margin: 0, // เอา margin ออก
+                      listStyle: "none", // ลบ bullet points
+                    }}
+                  >
+                    {genderData.map((entry, index) => (
+                      <li
+                        key={`legend-${index}`}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          marginRight: "15px", // เพิ่มระยะห่างระหว่างแต่ละ `li`
+                        }}
+                      >
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: "15px",
+                            height: "15px",
+                            backgroundColor: COLORS_GENDER[index % COLORS_GENDER.length],
+                            borderRadius: "50%",
+                            marginRight: "5px", // ระยะห่างระหว่างสีและข้อความ
+                          }}
+                        ></span>
+                        <span style={{ color: COLORS_GENDER[index % COLORS_GENDER.length] }}>
+                          {entry.name}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+            <div className="col-xl-8 col-lg-7" ref={tableRef}>
+              <div className="card shadow mb-4">
+                <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                  <h6 className="m-0" style={{ fontWeight: "bold" }}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6>
+                  <div className="filter-options">
+                    <div className="dropdown">
+                      <a
+                        href=""
+                        id="filterMenuButton"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        style={{ textDecoration: "none", border: "none", background: "transparent", padding: 0, color: "#5ab1f8" }}
+                      >
+                        <i className="bi bi-three-dots-vertical"></i>
+                      </a>
+                      <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="filterMenuButton">
+                        <li>
+                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("latest")}>
+                            ล่าสุด
+                          </a>
+                        </li>
+                        <li>
+                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("7days")}>
+                            7 วัน
+                          </a>
+                        </li>
+                        <li>
+                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("30days")}>
+                            30 วัน
+                          </a>
+                        </li>
+                        {/* <li>
+                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("all")}>
+                            แสดงทั้งหมด
+                          </a>
+                        </li> */}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="card-body pt-2 pb-2">
+                  <div className="table-responsive">
+                    <table className="table custom-table table-hover">
+                      <thead>
+                        <tr>
+                          <th scope="col" style={{ width: "5%" }}>#</th>
+                          <th scope="col">ชื่อ-สกุล</th>
+                          <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                          <th scope="col">คะแนนรวม</th>
+                          <th scope="col">วันที่ประเมิน</th>
+                          <th scope="col">สถานะ</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredUsers.slice(indexOfFirstUser, indexOfLastUser).map((user, index) => (
+                          <tr
+                            key={index}
+                            onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                            style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
+                          >
+                            <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
+                            <td>{user.user.name} {user.user.surname}</td>
+                            <td>{user.Diagnosis}</td>
+                            <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
+                            <td>{new Date(user.createdAt).toLocaleDateString("th-TH")}</td>
+                            <td>
+                              <a
+                                href=""
+                                onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
+                              >
+                                <i className="bi bi-three-dots"></i>
+                              </a>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  {/* <nav aria-label="...">
+                    <ul class="pagination pagination-sm">
+                      <button
+                        className="btn btn-sm btn-outline-secondary ms-2"
+                        onClick={toggleSortOrder}
+                      >
+                        {sortOrder === "asc" ? "เรียงลำดับ ↑" : "เรียงลำดับ ↓"}
+                      </button>
+                    </ul>
+                  </nav> */}
+                  <nav aria-label="Page navigation example" className="mt-3">
+                    <ul className="pagination justify-content-end">
+                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                        <a
+                          className="page-link"
+                          href="#"
+                          onClick={() => handleClick(currentPage - 1)}
+                        >
+                          ก่อนหน้า
+                        </a>
+                      </li>
+                      {Array.from({ length: totalPages }, (_, i) => (
+                        <li
+                          key={i + 1}
+                          className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                        >
+                          <a
+                            className="page-link"
+                            href="#"
+                            onClick={() => handleClick(i + 1)}
+                          >
+                            {i + 1}
+                          </a>
+                        </li>
+                      ))}
+                      <li
+                        className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                      >
+                        <a
+                          className="page-link"
+                          href="#"
+                          onClick={() => handleClick(currentPage + 1)}
+                        // style={{color:"#64b5f6"}}
+                        >
+                          ถัดไป
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
             </div>
 
-            <div class="col-lg-6 mb-4">
-
-              <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Illustrations</h6>
-                </div>
-                <div class="card-body">
-                  <div class="text-center">
-                  </div>
-                  <p>Add some quality, svg illustrations to your project courtesy of <a
-                    target="_blank" rel="nofollow" href="https://undraw.co/">unDraw</a>, a
-                    constantly updated collection of beautiful svg images that you can use
-                    completely free and without attribution!</p>
-                  <a target="_blank" rel="nofollow" href="https://undraw.co/">Browse Illustrations on
-                    unDraw &rarr;</a>
-                </div>
-              </div>
-
-              <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                  <h6 class="m-0 font-weight-bold text-primary">Development Approach</h6>
-                </div>
-                <div class="card-body">
-                  <p>SB Admin 2 makes extensive use of Bootstrap 4 utility classes in order to reduce
-                    CSS bloat and poor page performance. Custom CSS classes are used to create
-                    custom components and custom utility classes.</p>
-                  <p class="mb-0">Before working with this theme, you should become familiar with the
-                    Bootstrap framework, especially the utility classes.</p>
-                </div>
-              </div>
-
-            </div>
           </div>
 
         </div>

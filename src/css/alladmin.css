@@ -624,14 +624,14 @@ p .label {
 .dashboardincontent {
   display: flex;
   width: 100%;
-  height: 100%;
+  height: auto;
   background: #fff;
 }
 
 .container-fluid {
   width: 100%;
-  padding-right: 15px;
-  padding-left: 15px;
+  height: 100%;
+  padding: 20px 20px 0px 20px;
   margin-right: auto;
   margin-left: auto;
 }
@@ -776,4 +776,72 @@ p .label {
 }
 .border-left {
   border-left: 4px solid #64b5f6; /* Replace with your blue color */
+  transition: all .25s ease !important;
+  /* align-items: start; */
+}
+.abnormal-status-card {
+  border-left: 5px solid #FF6A6A; /* ตัวอย่างสีสำหรับสถานะผิดปกติ */
+}
+.abnormal-status-text{
+  color: #FF6A6A;
+}
+
+.group3-status-card {
+  border-left: 5px solid #fb8c00; /* ตัวอย่างสีสำหรับสถานะผิดปกติ */
+}
+.group3-status-text{
+  color: #fb8c00;
+  font-size: 17px;
+}
+.chart-area {
+  position: relative;
+  height: 19rem;
+  width: 100%;
+  @include media-breakpoint-up(md) {
+    height: 19rem;
+  }
+}
+
+
+.chart-bar {
+  position: relative;
+  height: 10rem;
+  width: 100%;
+  @include media-breakpoint-up(md) {
+    height: 20rem;
+  }
+}
+
+
+.chart-pie {
+  position: relative;
+  height: 17rem;
+  width: 100%;
+  @include media-breakpoint-up(md) {
+    height: calc(20rem - 43px) !important;
+  }
+}
+.dropdown-menu {
+  min-width: 150px;
+}
+
+.dropdown-menu .dropdown-item {
+  font-size: 14px;
+  padding: 10px;
+}
+.text-left {
+  text-align: left !important;
+}
+.patient {
+  width: 70px;
+  height: 70px;
+}
+.hover-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }

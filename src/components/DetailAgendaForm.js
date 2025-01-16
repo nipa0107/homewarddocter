@@ -486,6 +486,11 @@ export default function DetailAgendaForm() {
     }
   };
 
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const toggleAccordion = (index) => {
+    setOpenIndex(openIndex === index ? null : index); // เปิด-ปิดเมื่อคลิก
+  };
 
   return (
     <main className="body">
@@ -754,10 +759,10 @@ export default function DetailAgendaForm() {
                       </div>
                     </div>
                   </div>
-                  <div class="d-grid gap-2 d-md-block"
-                    style={{ padding: "2px 5px" }}>
+                  <div>
                     <button
-                      className="btn m-2"
+                      className="btn m-3"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
                       onClick={() => handleEditClick('Patient Agenda Form')}
                     >
                       แก้ไขข้อมูล
@@ -767,236 +772,227 @@ export default function DetailAgendaForm() {
               </div>
             </div>
             {/* Caregiver Agenda */}
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingTwo">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="headingTwo">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseTwo"
+                  aria-expanded="false"
+                  aria-controls="collapseTwo"
+                >
                   <b>2. Caregiver Agenda</b>
                 </button>
               </h2>
-              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+              <div
+                id="collapseTwo"
+                className="accordion-collapse collapse"
+                aria-labelledby="headingTwo"
+                data-bs-parent="#accordionExample"
+              >
                 <div className="accordion-body" style={{ lineHeight: "20px" }}>
                   {AgendaForms.CaregiverAgenda?.Care_Agenda?.map((agenda, index) => (
                     <div key={index}>
-                      <div className="row">
-                        <div className="col-sm-2">
-                          <strong>ชื่อ-นามสกุล:</strong>
+                      <div
+                        className="row"
+                        style={{ cursor: "pointer", padding: "5px 0" }}
+                        onClick={() => toggleAccordion(index)}
+                      >
+                        <div className="col-sm-3">
+                          <strong style={{ color: "#64b5f6", textDecoration: "underline" }}>คนที่ {index + 1} : {agenda.firstName} {agenda.lastName || "-"}</strong>
                         </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.firstName} {agenda.lastName || "-"}</p>
-                            </div>
-                          </div>
+                        <div className="col-sm-10">
+                          <span ></span>
+                          <i
+                            className={openIndex === index}
+                            style={{ marginLeft: "10px" }}
+                          ></i>
                         </div>
                       </div>
-                      <div className="row">
-                        <div className="col-sm-2">
-                          <strong>Idea:</strong>
-                        </div>
-                        <div className="col-sm-9">
+                      {openIndex === index && (
+                        <div style={{ marginLeft: "20px" }}>
                           <div className="row">
-                            <div className="col-8 col-sm-6">
+                            <div className="col-sm-2">
+                              <strong>Idea :</strong>
+                            </div>
+                            <div className="col-sm-10">
                               <p>{agenda.caregiver_idea || "-"}</p>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-2">
-                          <strong>Feeling:</strong>
-                        </div>
-                        <div className="col-sm-9">
                           <div className="row">
-                            <div className="col-8 col-sm-6">
+                            <div className="col-sm-2">
+                              <strong>Feeling :</strong>
+                            </div>
+                            <div className="col-sm-10">
                               <p>{agenda.caregiver_feeling || "-"}</p>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-2">
-                          <strong>Function:</strong>
-                        </div>
-                        <div className="col-sm-9">
                           <div className="row">
-                            <div className="col-8 col-sm-6">
+                            <div className="col-sm-2">
+                              <strong>Function :</strong>
+                            </div>
+                            <div className="col-sm-10">
                               <p>{agenda.caregiver_funtion || "-"}</p>
                             </div>
                           </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-2">
-                          <strong>Expectation:</strong>
-                        </div>
-                        <div className="col-sm-9">
                           <div className="row">
-                            <div className="col-8 col-sm-6">
+                            <div className="col-sm-2">
+                              <strong>Expectation :</strong>
+                            </div>
+                            <div className="col-sm-10">
                               <p>{agenda.caregiver_expectation || "-"}</p>
                             </div>
                           </div>
+                          <hr />
                         </div>
-                      </div>
-                      <hr />
-                    </div>
-                  )) || "-"}
-                </div>
-                <div class="d-grid gap-2 d-md-block"
-                  style={{ padding: "2px 5px" }}>
-                  <button
-                    className="btn m-4"
-                    onClick={() => handleEditClick('Caregiver Agenda Form')}
-                  >
-                    แก้ไขข้อมูล
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingThree">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                  <b>3. Caregiver Assessments</b>
-                </button>
-              </h2>
-              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
-                <div className="accordion-body mt-3" style={{ lineHeight: "20px" }}>
-                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map((agenda, index) => (
-                    <div key={index}>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>ชื่อ-นามสกุล:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.firstName} {agenda.lastName || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Care:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.care || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Affection:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.affection || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Rest:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.rest || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Empathy:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.empathy || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Goal Of Care:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.goalOfCare || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Information:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.information || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Ventilation:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.ventilation || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Empowerment:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.empowerment || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>Resource:</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <div className="row">
-                            <div className="col-8 col-sm-6">
-                              <p>{agenda.resource || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <hr />
+                      )}
                     </div>
                   )) || "ไม่มีข้อมูล"}
                 </div>
-                <div class="d-grid gap-2 d-md-block"
-                  style={{ padding: "2px 5px" }}>
+                <div>
                   <button
-                    className="btn m-4"
-                    onClick={() => handleEditClick('Caregiver Assessment Form')}
+                    className="btn m-3"
+                    style={{ backgroundColor: "#ffde59", color: "black" }}
+                    onClick={() => handleEditClick("Caregiver Agenda Form")}
                   >
                     แก้ไขข้อมูล
                   </button>
                 </div>
               </div>
             </div>
+            <div className="accordion-item">
+              <h2 className="accordion-header" id="headingThree">
+                <button
+                  className="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseThree"
+                  aria-expanded="false"
+                  aria-controls="collapseThree"
+                >
+                  <b>3. Caregiver Assessments</b>
+                </button>
+              </h2>
+              <div
+                id="collapseThree"
+                className="accordion-collapse collapse"
+                aria-labelledby="headingThree"
+                data-bs-parent="#accordionExample"
+              >
+                <div className="accordion-body mt-3" style={{ lineHeight: "20px" }}>
+                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map((agenda, index) => (
+                    <div key={index}>
+                      <div
+                        className="row"
+                        style={{ cursor: "pointer", padding: "10px 0" }}
+                        onClick={() => toggleAccordion(index)}
+                      >
+                        <div className="col-sm-3">
+                          <strong style={{ color: "#64b5f6", textDecoration: "underline" }}>
+                            คนที่ {index + 1} : {agenda.firstName} {agenda.lastName || "-"}
+                          </strong>
+                        </div>
+                        <div className="col-sm-9">
+                          <i
+                            className={openIndex === index}
+                            style={{ marginLeft: "10px" }}
+                          ></i>
+                        </div>
+                      </div>
+                      {openIndex === index && (
+                        <div style={{ marginLeft: "20px", padding: "10px 0" }}>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Care :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.care || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Affection :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.affection || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Rest :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.rest || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Empathy :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.empathy || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Goal Of Care :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.goalOfCare || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Information :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.information || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Ventilation :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.ventilation || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Empowerment :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.empowerment || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-3">
+                              <strong>Resource :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.resource || "-"}</p>
+                            </div>
+                          </div>
+                          <hr />
+                        </div>
+                      )}
+                    </div>
+                  )) || "ไม่มีข้อมูล"}
+                </div>
+                <div>
+                  <button
+                    className="btn m-4"
+                    style={{ backgroundColor: "#ffde59", color: "black" }}
+                    onClick={() => handleEditClick("Caregiver Assessment Form")}
+                  >
+                    แก้ไขข้อมูล
+                  </button>
+                </div>
+              </div>
+            </div>
+
+
             <div className="accordion-item">
               <h2 className="accordion-header" id="headingFour">
                 <button
@@ -1054,10 +1050,10 @@ export default function DetailAgendaForm() {
                     window.location.reload();
                   </script>
                 </div>
-                <div class="d-grid gap-2 d-md-block"
-                  style={{ padding: "2px 5px" }}>
+                <div>
                   <button
                     className="btn m-4"
+                    style={{ backgroundColor: "#ffde59", color: "black" }}
                     onClick={() => handleEditClick('Zaritburdeninterview Form')}
                   >
                     แก้ไขข้อมูล

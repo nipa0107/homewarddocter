@@ -47,7 +47,7 @@ const ChatComponent = () => {
       setUnreadCount(prevCount => prevCount + 1);
     });
 
-    socket.on('deletedAlert', (data) => {
+    socket?.on('deletedAlert', (data) => {
       setAlerts((prevAlerts) =>
         prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
       );
@@ -56,7 +56,7 @@ const ChatComponent = () => {
 
     return () => {
       socket?.off('newAlert'); // Clean up the listener on component unmount
-      socket.off('deletedAlert');
+      socket?.off('deletedAlert');
     };
   }, []);
   const openModal = (image) => {

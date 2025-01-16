@@ -425,6 +425,7 @@ tr.assessmentnull {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    margin-top: 4%;
     /* Full viewport height */
     background-color: #e7f5fe;
 }
@@ -460,7 +461,7 @@ tr.assessmentnull {
 .form-content {
     margin-left: 500px;
     /* Sidebar width */
-    margin-top: 100px;
+    margin-top: 10px;
     /* Offset for the header */
     padding: 20px;
     height: calc(100vh - 60px);

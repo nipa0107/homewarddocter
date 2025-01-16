@@ -442,11 +442,6 @@
   align-items: center;
 }
 
-.patient {
-  width: 50%;
-  /* Adjust size to 50% of its container */
-  height: auto;
-}
 
 .num {
   font-size: 2.5rem;

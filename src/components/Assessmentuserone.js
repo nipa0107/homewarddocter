@@ -33,7 +33,7 @@ import { renderAlerts } from "./Alert/renderAlerts";
 import "../css/contentgraph.css";
 import io from "socket.io-client";
 const socket = io("http://localhost:5000");
-export default function Assessmentuserone({}) {
+export default function Assessmentuserone({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [token, setToken] = useState("");
@@ -101,7 +101,7 @@ export default function Assessmentuserone({}) {
   });
   const [painscore, setPainscore] = useState("");
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -507,7 +507,7 @@ export default function Assessmentuserone({}) {
       });
       setTimeout(() => {
         toast.success("แก้ไขสำเร็จ"); // แสดง toast หลังจาก 1 วินาที
-      }, 1000);      
+      }, 1000);
       setIsEditMode(false);
       fetchAssessments(); // รีเฟรชข้อมูลใหม่
     } catch (error) {
@@ -840,11 +840,9 @@ export default function Assessmentuserone({}) {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const CustomTooltipDTX = ({ active, payload }) => {
@@ -1014,27 +1012,27 @@ export default function Assessmentuserone({}) {
     fetchSymptomsCount();
   }, [patientFormsone.user, patientFormsone._id]);
 
-    useEffect(() => {
-      // ดึงข้อมูล unread count เมื่อเปิดหน้า
-      const fetchUnreadCount = async () => {
-        try {
-          const response = await fetch(
-            "http://localhost:5000/update-unread-count"
-          );
-  
-          if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-          }
-          const data = await response.json();
-          if (data.success) {
-            setUserUnreadCounts(data.users);
-          }
-        } catch (error) {
-          console.error("Error fetching unread count:", error);
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
+
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
         }
-      };
-      fetchUnreadCount();
-    }, []);
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    fetchUnreadCount();
+  }, []);
 
   return (
     <main className="body">
@@ -1151,33 +1149,52 @@ export default function Assessmentuserone({}) {
           <ul>
             <li>
               <a href="home">
-                <i class="bi bi-house-fill"></i>
+                <i className="bi bi-house-fill"></i>
               </a>
             </li>
             <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
+              <i className="bi bi-chevron-double-right"></i>
             </li>
-            <li>
-              <a href="assessment" className="info">
-                ติดตาม/ประเมินอาการ
-              </a>
-            </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
-            </li>
-            <li>
-              <a onClick={handleBreadcrumbClick} className="info">
-                การบันทึกอาการผู้ป่วย
-              </a>
-            </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
-            </li>
-            <li>
-              <a>รายละเอียดอาการผู้ป่วย</a>
-            </li>
+            {location.state?.fromAbnormalCases ? (
+              <>
+                <li>
+                  <a href="/abnormalcase" className="info">
+                    บันทึกผู้ป่วยที่มีอาการผิดปกติ
+                  </a>
+                </li>
+                <li className="arrow">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li>
+                  <a>รายละเอียดอาการผู้ป่วย</a>
+                </li>
+              </>
+            ) : (
+              <>
+                <li>
+                  <a href="assessment" className="info">
+                    ติดตาม/ประเมินอาการ
+                  </a>
+                </li>
+                <li className="arrow">
+                  <i class="bi bi-chevron-double-right"></i>
+                </li>
+                <li>
+                  <a onClick={handleBreadcrumbClick} className="info">
+                    การบันทึกอาการผู้ป่วย
+                  </a>
+                </li>
+                <li className="arrow">
+                  <i class="bi bi-chevron-double-right"></i>
+                </li>
+                <li>
+                  <a>รายละเอียดอาการผู้ป่วย</a>
+                </li>
+              </>
+            )}
           </ul>
         </div>
+
         <div className="toolbar"></div>
         <div className="content">
           <p className="headerassesment">
@@ -1261,9 +1278,8 @@ export default function Assessmentuserone({}) {
               {patientFormsone.Symptoms &&
                 patientFormsone.Symptoms.map((symptom, index) => (
                   <div className="symptom-item" key={index}>
-                    <label className="title-ptf1">{`อาการที่ ${
-                      index + 1
-                    }: `}</label>
+                    <label className="title-ptf1">{`อาการที่ ${index + 1
+                      }: `}</label>
                     <span className="text1">{symptom}</span>
                   </div>
                 ))}
@@ -1329,11 +1345,11 @@ export default function Assessmentuserone({}) {
                       // height={300}
                       data={Temperaturedata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                    // margin={
+                    //   timeRange === "1month"
+                    //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                    //     : { right: 28, left: 28 }
+                    // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
@@ -1352,7 +1368,7 @@ export default function Assessmentuserone({}) {
                         domain={[30, 40]}
                         tick={{ fontSize: 10 }}
                         ticks={[30, 32, 34, 36, 38, 40]}
-                        // hide={timeRange !== "1month"}
+                      // hide={timeRange !== "1month"}
                       />
                       <Tooltip content={<CustomTooltipTemperature />} />
                       <ReferenceLine
@@ -1493,14 +1509,14 @@ export default function Assessmentuserone({}) {
                         isAnimationActive={true}
                         animationDuration={1500}
                         connectNulls={true}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="SBP" />
-                        //   )
-                        // }
-                        // legendType="none"
+                      // dot={
+                      //   timeRange === "1month" ? (
+                      //     false
+                      //   ) : (
+                      //     <CustomDot dataKey="SBP" />
+                      //   )
+                      // }
+                      // legendType="none"
                       >
                         {/* {timeRange !== "1month" && (
                           <LabelList
@@ -1564,7 +1580,7 @@ export default function Assessmentuserone({}) {
                         domain={[50, 120]}
                         ticks={[50, 60, 70, 80, 90, 100, 110, 120]}
                         tick={{ fontSize: 12 }}
-                        // padding={{ top: 10, bottom: 10 }}
+                      // padding={{ top: 10, bottom: 10 }}
                       />
                       <Tooltip content={<CustomTooltipDBP />} />
                       <ReferenceLine
@@ -1782,7 +1798,7 @@ export default function Assessmentuserone({}) {
                       <YAxis
                         tick={{ fontSize: 10 }}
                         ticks={[0, 10, 20, 30, 40]}
-                        // hide={timeRange !== "1month"}
+                      // hide={timeRange !== "1month"}
                       />
                       <Tooltip content={<CustomTooltipRespiration />} />
                       <ReferenceLine
@@ -1869,11 +1885,11 @@ export default function Assessmentuserone({}) {
                       // height={300}
                       data={Painscoredata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                    // margin={
+                    //   timeRange === "1month"
+                    //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                    //     : { right: 28, left: 28 }
+                    // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
@@ -1893,7 +1909,7 @@ export default function Assessmentuserone({}) {
                         domain={[0, 10]}
                         tick={{ fontSize: 10 }}
                         ticks={[0, 2, 4, 6, 8, 10]}
-                        // hide={timeRange !== "1month"}
+                      // hide={timeRange !== "1month"}
                       />
 
                       <Tooltip content={<CustomTooltipPainscore />} />
@@ -1968,11 +1984,11 @@ export default function Assessmentuserone({}) {
                       // height={300}
                       data={dtxdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                    // margin={
+                    //   timeRange === "1month"
+                    //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                    //     : { right: 28, left: 28 }
+                    // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
@@ -2163,39 +2179,35 @@ export default function Assessmentuserone({}) {
                   <div className="mb-1 status-name">
                     <div className="btn-group-status-name">
                       <div
-                        className={`btn-ass ${
-                          statusName === "ปกติ" ? "btn-normal" : "btn-outline"
-                        }`}
+                        className={`btn-ass ${statusName === "ปกติ" ? "btn-normal" : "btn-outline"
+                          }`}
                         onClick={() => handleButtonClick("ปกติ")}
                       >
                         ปกติ
                       </div>
                       <div
-                        className={`btn-ass ${
-                          statusName === "ผิดปกติ"
-                            ? "btn-abnormal"
-                            : "btn-outline"
-                        }`}
+                        className={`btn-ass ${statusName === "ผิดปกติ"
+                          ? "btn-abnormal"
+                          : "btn-outline"
+                          }`}
                         onClick={() => handleButtonClick("ผิดปกติ")}
                       >
                         ผิดปกติ
                       </div>
                       <div
-                        className={`btn-ass ${
-                          statusName === "เคสฉุกเฉิน"
-                            ? "btn-Emergency"
-                            : "btn-outline"
-                        }`}
+                        className={`btn-ass ${statusName === "เคสฉุกเฉิน"
+                          ? "btn-Emergency"
+                          : "btn-outline"
+                          }`}
                         onClick={() => handleButtonClick("เคสฉุกเฉิน")}
                       >
                         เคสฉุกเฉิน
                       </div>
                       <div
-                        className={`btn-ass ${
-                          statusName === "จบการรักษา"
-                            ? "btn-completed"
-                            : "btn-outline"
-                        }`}
+                        className={`btn-ass ${statusName === "จบการรักษา"
+                          ? "btn-completed"
+                          : "btn-outline"
+                          }`}
                         onClick={() => handleButtonClick("จบการรักษา")}
                       >
                         จบการรักษา
@@ -2262,37 +2274,33 @@ export default function Assessmentuserone({}) {
               <form onSubmit={handleUpdateAssessment}>
                 <div className="mb-1 status-name">
                   <div
-                    className={`btn-ass ${
-                      statusName === "ปกติ" ? "btn-normal" : "btn-outline"
-                    }`}
+                    className={`btn-ass ${statusName === "ปกติ" ? "btn-normal" : "btn-outline"
+                      }`}
                     onClick={() => handleButtonClick("ปกติ")}
                   >
                     ปกติ
                   </div>
                   <div
-                    className={`btn-ass ${
-                      statusName === "ผิดปกติ" ? "btn-abnormal" : "btn-outline"
-                    }`}
+                    className={`btn-ass ${statusName === "ผิดปกติ" ? "btn-abnormal" : "btn-outline"
+                      }`}
                     onClick={() => handleButtonClick("ผิดปกติ")}
                   >
                     ผิดปกติ
                   </div>
                   <div
-                    className={`btn-ass ${
-                      statusName === "เคสฉุกเฉิน"
-                        ? "btn-Emergency"
-                        : "btn-outline"
-                    }`}
+                    className={`btn-ass ${statusName === "เคสฉุกเฉิน"
+                      ? "btn-Emergency"
+                      : "btn-outline"
+                      }`}
                     onClick={() => handleButtonClick("เคสฉุกเฉิน")}
                   >
                     เคสฉุกเฉิน
                   </div>
                   <div
-                    className={`btn-ass ${
-                      statusName === "จบการรักษา"
-                        ? "btn-completed"
-                        : "btn-outline"
-                    }`}
+                    className={`btn-ass ${statusName === "จบการรักษา"
+                      ? "btn-completed"
+                      : "btn-outline"
+                      }`}
                     onClick={() => handleButtonClick("จบการรักษา")}
                   >
                     จบการรักษา
