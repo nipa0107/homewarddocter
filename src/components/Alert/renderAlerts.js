@@ -16,6 +16,10 @@ export const renderAlerts = (
           : "not-viewed"
       }`}
       onClick={async () => {
+        if (!alert._id) {
+          console.error("Error: alert._id is undefined or null");
+          return; // หาก alert._id ไม่มีค่า ก็หยุดการทำงาน
+        }
         try {
           const response = await fetch(
             `http://localhost:5000/alerts/${alert._id}/viewed`,
@@ -33,15 +37,16 @@ export const renderAlerts = (
             throw new Error("Network response was not ok");
           }
 
-          navigate("/assessmentuserone", {
-            state: { id: alert.patientFormId },
-          });
+         
           const updatedAlerts = alerts.map((a) =>
             a._id === alert._id
               ? { ...a, viewedBy: [...a.viewedBy, userId] }
               : a
           );
           setAlerts(updatedAlerts);
+          navigate("/assessmentuserone", {
+            state: { id: alert.patientFormId},
+          });
           setUnreadCount(
             updatedAlerts.filter(
               (a) => !Array.isArray(a.viewedBy) || !a.viewedBy.includes(userId)
@@ -58,7 +63,7 @@ export const renderAlerts = (
         }
       }}
     >
-      <p>
+      {/* <p >
         คุณ: {alert.user?.name || "Unknown"} {alert.user?.surname || "Unknown"}
       </p>
       <p
@@ -69,12 +74,36 @@ export const renderAlerts = (
         }
       >
         {alert.alertMessage}
+      </p> */}
+      {alert.alertMessage === "เป็นเคสฉุกเฉิน" ? (
+  <p>
+    คุณ: {alert.user?.name || "Unknown"} {alert.user?.surname || "Unknown"}{" "}
+    <span className="emergency-alert-message">{alert.alertMessage}</span>
+  </p>
+) : (
+  <>
+    <p>
+      คุณ: {alert.user?.name || "Unknown"} {alert.user?.surname || "Unknown"}
+    </p>
+    <p>{alert.alertMessage}</p>
+  </>
+)}
+
+      <p>ผู้ป่วยบันทึกเมื่อ: {formatDate(alert.patientFormCreatedAt|| "Unknown")}
       </p>
-      <p>บันทึกเมื่อ: {formatDate(alert.createdAt)}</p>
-      {/* <p>แก้ไขเมื่อ: {formatDate(alert.updatedAt)}</p> */}
-      {alert.updatedAt && alert.updatedAt !== alert.createdAt && (
-        <p>แก้ไขเมื่อ: {formatDate(alert.updatedAt)}</p>
-      )}{" "}
+      {/* <p>ผู้ป่วยบันทึกเมื่อ: {formatDate(alert.createdAt || "Unknown")}</p> */}
+
+      {alert.createdAtAss && (
+        <p>เวลาที่ประเมิน: {formatDate(alert.createdAtAss)}</p>
+      )}
+{!alert.alertMessage.includes("เป็นเคสฉุกเฉิน") &&
+  alert.patientFormUpdatedAt &&
+  alert.patientFormUpdatedAt !== alert.patientFormCreatedAt && (
+    <p>แก้ไขเมื่อ: {formatDate(alert.patientFormUpdatedAt)}</p>
+)}
+      {/* {alert.patientFormUpdatedAt && alert.patientFormUpdatedAt !== alert.patientFormCreatedAt && (
+        <p>แก้ไขเมื่อ: {formatDate(alert.patientFormUpdatedAt)}</p>
+      )}{" "} */}
       {!Array.isArray(alert.viewedBy) || !alert.viewedBy.includes(userId) ? (
         <span className="unread-dotnoti"></span>
       ) : null}

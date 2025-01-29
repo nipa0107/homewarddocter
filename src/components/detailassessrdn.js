@@ -38,16 +38,74 @@ export default function DetailAssessreadiness() {
   const [readinessAssessments, setReadinessAssessments] = useState([]);
   const bellRef = useRef(null);
 
-  useEffect(() => {
-    socket.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
-    });
+  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
 
+  useEffect(() => {
+    socket?.on('newAlert', (alert) => {
+      console.log('Received newAlert:', alert);
+  
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+  
+        let updatedAlerts;
+  
+        if (isExisting) {
+          
+          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+            updatedAlerts = [...prevAlerts, alert];
+          } else {
+            updatedAlerts = prevAlerts.map((existingAlert) =>
+              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+            );
+          }
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+  
+        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
+    });
+  
+    socket?.on('deletedAlert', (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
+    });
+  
     return () => {
-      socket.off('newAlert'); // Clean up the listener on component unmount
+      socket?.off('newAlert');
+      socket?.off('deletedAlert');
     };
   }, []);
+  
+  useEffect(() => {
+    const currentUserId = sender._id;
+  
+    const unreadAlerts = alerts.filter(
+      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+  
+    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+  }, [alerts]);
+  
+  
+    useEffect(() => {
+      socket?.on("TotalUnreadCounts", (data) => {
+        console.log("📦 TotalUnreadCounts received:", data);
+        setUserUnreadCounts(data);
+      });
+  
+      return () => {
+        socket?.off("TotalUnreadCounts");
+      };
+    }, [socket]);
+
   const toggleNotifications = (e) => {
     e.stopPropagation();
     if (showNotifications) {
@@ -87,6 +145,11 @@ export default function DetailAssessreadiness() {
     })
       .then((res) => res.json())
       .then((data) => {
+        setSender({
+          name: data.data.name,
+          surname: data.data.surname,
+          _id: data.data._id,
+        });
         setData(data.data);
         if (data.data == "token expired") {
           window.localStorage.clear();
@@ -207,56 +270,6 @@ export default function DetailAssessreadiness() {
     return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]
       } ${year + 543} เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
       } น.`;
-  };
-
-  const fetchAllUsers = async (userId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/alluserchat?userId=${userId}`
-      );
-      const data = await response.json();
-
-      const usersWithLastMessage = await Promise.all(
-        data.data.map(async (user) => {
-          const lastMessageResponse = await fetch(
-            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-          );
-          const lastMessageData = await lastMessageResponse.json();
-
-          const lastMessage = lastMessageData.lastMessage;
-          return { ...user, lastMessage: lastMessage ? lastMessage : null };
-        })
-      );
-
-      const sortedUsers = usersWithLastMessage.sort((a, b) => {
-        if (!a.lastMessage) return 1;
-        if (!b.lastMessage) return -1;
-        return (
-          new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
-        );
-      });
-
-      setAllUsers(sortedUsers);
-    } catch (error) {
-      console.error("Error fetching all users:", error);
-    }
-  };
-  //polling
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchAllUsers(data._id);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [data]);
-
-  const countUnreadUsers = () => {
-    const unreadUsers = allUsers.filter((user) => {
-      const lastMessage = user.lastMessage;
-      return (
-        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-      );
-    });
-    return unreadUsers.length;
   };
 
   const logOut = () => {
@@ -420,6 +433,27 @@ export default function DetailAssessreadiness() {
 
   const [isEditing, setIsEditing] = useState(false);
 
+    useEffect(() => {
+      // ดึงข้อมูล unread count เมื่อเปิดหน้า
+      const fetchUnreadCount = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost:5000/update-unread-count"
+          );
+  
+          if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status}`);
+          }
+          const data = await response.json();
+          if (data.success) {
+            setUserUnreadCounts(data.users);
+          }
+        } catch (error) {
+          console.error("Error fetching unread count:", error);
+        }
+      };
+      fetchUnreadCount();
+    }, []);
   return (
     <main className="body">
       <ToastContainer />
@@ -467,11 +501,20 @@ export default function DetailAssessreadiness() {
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
-              {countUnreadUsers() !== 0 && (
-                <span className="notification-countchat">
-                  {countUnreadUsers()}
-                </span>
-              )}
+              {userUnreadCounts.map((user) => {
+                if (String(user.userId) === String(sender._id)) {
+                  return (
+                    <div key={user.userId}>
+                      {user.totalUnreadCount > 0 && (
+                        <div className="notification-countchat">
+                          {user.totalUnreadCount}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })}
             </a>
           </li>
           <div className="nav-logout">

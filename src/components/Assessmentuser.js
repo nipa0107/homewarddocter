@@ -37,25 +37,61 @@ export default function Assessmentuser({}) {
   const [relatedPatientForms, setRelatedPatientForms] = useState([]);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [showScrollTopButton, setShowScrollTopButton] = useState(false);
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
+      console.log('Received newAlert:', alert);
+  
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+  
+        let updatedAlerts;
+  
+        if (isExisting) {
+          
+          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+            updatedAlerts = [...prevAlerts, alert];
+          } else {
+            updatedAlerts = prevAlerts.map((existingAlert) =>
+              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+            );
+          }
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+  
+        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
     });
-
-    socket.on('deletedAlert', (data) => {
-      setAlerts((prevAlerts) =>
-        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
-      );
-      setUnreadCount((prevCount) => prevCount - 1); // ลดจำนวน unread เมื่อ alert ถูกลบ
+  
+    socket?.on('deletedAlert', (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
     });
-
+  
     return () => {
-      socket?.off('newAlert'); // Clean up the listener on component unmount
-      socket.off('deletedAlert');
+      socket?.off('newAlert');
+      socket?.off('deletedAlert');
     };
   }, []);
+  
+  
+  useEffect(() => {
+    const currentUserId = sender._id;
+  
+    const unreadAlerts = alerts.filter(
+      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+  
+    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+  }, [alerts]);
 
       useEffect(() => {
         socket?.on("TotalUnreadCounts", (data) => {
@@ -425,6 +461,28 @@ export default function Assessmentuser({}) {
       fetchUnreadCount();
     }, []);
 
+      const handleScroll = () => {
+        if (window.scrollY > 300) {
+          setShowScrollTopButton(true); 
+        } else {
+          setShowScrollTopButton(false); 
+        }
+      };
+    
+      useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => {
+          window.removeEventListener("scroll", handleScroll);
+        };
+      }, []);
+    
+      const scrollToTop = () => {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth", 
+        });
+      };
+
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -772,7 +830,28 @@ export default function Assessmentuser({}) {
               <p className="no-notification">ไม่มีการแจ้งเตือน</p>
             )}
           </div>
+          
         )}
+         {showScrollTopButton && (
+        <button
+          className="scroll-to-top-btn"
+          onClick={scrollToTop}
+          style={{
+            position: "fixed",
+            bottom: "1rem",
+            right: "1rem",
+            backgroundColor: "#87CEFA",
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            padding: ".5em .8em",
+            cursor: "pointer",
+            fontSize: "1rem",
+          }}
+        >
+        <i class="bi bi-caret-up-fill"></i>        
+        </button>
+      )}
       </div>
     </main>
   );

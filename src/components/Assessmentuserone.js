@@ -52,12 +52,7 @@ export default function Assessmentuserone({ }) {
   const [statusName, setStatusName] = useState("");
   const [dateass, setDateass] = useState([]);
   const [isAssessed, setIsAssessed] = useState(false);
-  const [dtxdata, setDTXData] = useState([]);
-  const [Painscoredata, setPainscoreData] = useState([]);
-  const [Temperaturedata, setTemperatureData] = useState([]);
-  const [BloodPressuredata, setBloodPressureData] = useState([]);
-  const [PulseRateData, setPulseRateData] = useState([]);
-  const [Respirationdata, setRespirationData] = useState([]);
+  const [patientdata, setPatientData] = useState([]);
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [mpersonnel, setMPersonnel] = useState([]);
@@ -76,7 +71,7 @@ export default function Assessmentuserone({ }) {
   const notificationsRef = useRef(null);
   const [userId, setUserId] = useState("");
   const bellRef = useRef(null);
-
+  const [historyass, setHistoryAss] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [historyVisible, setHistoryVisible] = useState(false); // ใช้ในการเปิด/ปิดการแสดง history
   const [history, setHistory] = useState([]);
@@ -101,7 +96,8 @@ export default function Assessmentuserone({ }) {
   });
   const [painscore, setPainscore] = useState("");
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [showScrollTopButton, setShowScrollTopButton] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -153,22 +149,57 @@ export default function Assessmentuserone({ }) {
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
+      console.log('Received newAlert:', alert);
+  
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+  
+        let updatedAlerts;
+  
+        if (isExisting) {
+          
+          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+            updatedAlerts = [...prevAlerts, alert];
+          } else {
+            updatedAlerts = prevAlerts.map((existingAlert) =>
+              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+            );
+          }
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+  
+        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
     });
-
-    socket.on('deletedAlert', (data) => {
-      setAlerts((prevAlerts) =>
-        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
-      );
-      setUnreadCount((prevCount) => prevCount - 1); // ลดจำนวน unread เมื่อ alert ถูกลบ
+  
+    socket?.on('deletedAlert', (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      });
     });
-
+  
     return () => {
-      socket?.off('newAlert'); // Clean up the listener on component unmount
-      socket.off('deletedAlert');
+      socket?.off('newAlert');
+      socket?.off('deletedAlert');
     };
   }, []);
+  
+  
+  useEffect(() => {
+    const currentUserId = sender._id;
+  
+    const unreadAlerts = alerts.filter(
+      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+  
+    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+  }, [alerts]);
 
   useEffect(() => {
     socket?.on("TotalUnreadCounts", (data) => {
@@ -299,56 +330,6 @@ export default function Assessmentuserone({ }) {
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
       : alerts;
 
-  // แช็ตยังไม่อ่าน
-  const fetchAllUsers = async (userId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/alluserchat?userId=${userId}`
-      );
-      const data = await response.json();
-
-      const usersWithLastMessage = await Promise.all(
-        data.data.map(async (user) => {
-          const lastMessageResponse = await fetch(
-            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-          );
-          const lastMessageData = await lastMessageResponse.json();
-
-          const lastMessage = lastMessageData.lastMessage;
-          return { ...user, lastMessage: lastMessage ? lastMessage : null };
-        })
-      );
-
-      const sortedUsers = usersWithLastMessage.sort((a, b) => {
-        if (!a.lastMessage) return 1;
-        if (!b.lastMessage) return -1;
-        return (
-          new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
-        );
-      });
-
-      setAllUsers(sortedUsers);
-    } catch (error) {
-      console.error("Error fetching all users:", error);
-    }
-  };
-  //polling
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchAllUsers(data._id);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [data]);
-
-  const countUnreadUsers = () => {
-    const unreadUsers = allUsers.filter((user) => {
-      const lastMessage = user.lastMessage;
-      return (
-        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-      );
-    });
-    return unreadUsers.length;
-  };
 
   useEffect(() => {
     const fetchpatientForms = async () => {
@@ -465,6 +446,7 @@ export default function Assessmentuserone({ }) {
         setMPersonnel(currentAssessment.MPersonnel);
         setDateass(currentAssessment.createdAt);
         setAssessmentId(currentAssessment._id);
+        setHistoryAss(currentAssessment.history || []);
       }
     } catch (error) {
       console.error("Error fetching assessments:", error);
@@ -618,12 +600,13 @@ export default function Assessmentuserone({ }) {
       return itemDate >= startDate && itemDate <= endDate;
     });
   };
+
   useEffect(() => {
-    const fetchDataBloodPressure = async () => {
+    const fetchPatientData = async () => {
       try {
         if (patientFormsone.user && patientFormsone._id) {
           const response = await fetch(
-            `http://localhost:5000/getBloodPressureData/${patientFormsone.user}/${patientFormsone._id}`,
+            `http://localhost:5000/getPatientData/${patientFormsone.user}/${patientFormsone._id}`,
             {
               method: "GET",
               headers: {
@@ -634,7 +617,7 @@ export default function Assessmentuserone({ }) {
           const data = await response.json();
           if (data.status === "ok") {
             const filteredData = filterDataByTimeRange(data.data);
-            setBloodPressureData(filteredData);
+            setPatientData(filteredData);
           } else {
             console.error("Error fetching Blood Pressure data");
           }
@@ -644,150 +627,7 @@ export default function Assessmentuserone({ }) {
       }
     };
 
-    fetchDataBloodPressure();
-  }, [patientFormsone.user, patientFormsone._id, token, timeRange]);
-
-  useEffect(() => {
-    const fetchDataPulseRate = async () => {
-      try {
-        if (patientFormsone.user && patientFormsone._id) {
-          const response = await fetch(
-            `http://localhost:5000/getPulseRateData/${patientFormsone.user}/${patientFormsone._id}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          const data = await response.json();
-          if (data.status === "ok") {
-            const filteredData = filterDataByTimeRange(data.data);
-            setPulseRateData(filteredData);
-          } else {
-            console.error("Error fetching Temperature data");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching Painscore data:", error);
-      }
-    };
-
-    fetchDataPulseRate();
-  }, [patientFormsone.user, patientFormsone._id, token, timeRange]);
-  useEffect(() => {
-    const fetchDatadtx = async () => {
-      try {
-        if (patientFormsone.user && patientFormsone._id) {
-          const response = await fetch(
-            `http://localhost:5000/getDTXData/${patientFormsone.user}/${patientFormsone._id}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          const data = await response.json();
-          if (data.status === "ok") {
-            const filteredData = filterDataByTimeRange(data.data);
-            setDTXData(filteredData);
-          } else {
-            console.error("Error fetching DTX data");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching DTX data:", error);
-      }
-    };
-
-    fetchDatadtx();
-  }, [patientFormsone.user, patientFormsone._id, token, timeRange]);
-  useEffect(() => {
-    const fetchDataPainscore = async () => {
-      try {
-        if (patientFormsone.user && patientFormsone._id) {
-          const response = await fetch(
-            `http://localhost:5000/getPainscoreData/${patientFormsone.user}/${patientFormsone._id}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          const data = await response.json();
-          if (data.status === "ok") {
-            const filteredData = filterDataByTimeRange(data.data);
-            setPainscoreData(filteredData);
-          } else {
-            console.error("Error fetching Painscore data");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching Painscore data:", error);
-      }
-    };
-
-    fetchDataPainscore();
-  }, [patientFormsone.user, patientFormsone._id, token, timeRange]);
-
-  useEffect(() => {
-    const fetchDataTemperature = async () => {
-      try {
-        if (patientFormsone.user && patientFormsone._id) {
-          const response = await fetch(
-            `http://localhost:5000/getTemperatureData/${patientFormsone.user}/${patientFormsone._id}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          const data = await response.json();
-          if (data.status === "ok") {
-            const filteredData = filterDataByTimeRange(data.data);
-            setTemperatureData(filteredData);
-          } else {
-            console.error("Error fetching Temperature data");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching Temperature data:", error);
-      }
-    };
-
-    fetchDataTemperature();
-  }, [patientFormsone.user, patientFormsone._id, token, timeRange]);
-
-  useEffect(() => {
-    const fetchDataRespiration = async () => {
-      try {
-        if (patientFormsone.user && patientFormsone._id) {
-          const response = await fetch(
-            `http://localhost:5000/getRespirationData/${patientFormsone.user}/${patientFormsone._id}`,
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          const data = await response.json();
-          if (data.status === "ok") {
-            const filteredData = filterDataByTimeRange(data.data);
-            setRespirationData(filteredData);
-          } else {
-            console.error("Error fetching Temperature data");
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching Painscore data:", error);
-      }
-    };
-
-    fetchDataRespiration();
+    fetchPatientData();
   }, [patientFormsone.user, patientFormsone._id, token, timeRange]);
 
   const currentDate = new Date();
@@ -1034,6 +874,27 @@ export default function Assessmentuserone({ }) {
     fetchUnreadCount();
   }, []);
 
+  const handleScroll = () => {
+    if (window.scrollY > 300) {
+      setShowScrollTopButton(true); 
+    } else {
+      setShowScrollTopButton(false); 
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", 
+    });
+  };
   return (
     <main className="body">
       <ToastContainer />
@@ -1337,13 +1198,13 @@ export default function Assessmentuserone({ }) {
                 </div>
               </div>
               <p className="textgraph"></p>
-              {Temperaturedata && (
+              {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
-                      data={Temperaturedata}
+                      data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                     // margin={
                     //   timeRange === "1month"
@@ -1442,11 +1303,11 @@ export default function Assessmentuserone({ }) {
                 </div>
               </div>
               <p className="textgraph"></p>
-              {BloodPressuredata && (
+              {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
-                      data={BloodPressuredata}
+                      data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
@@ -1556,11 +1417,11 @@ export default function Assessmentuserone({ }) {
                 </div>
               </div>
               <p className="textgraph"></p>
-              {BloodPressuredata && (
+              {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
-                      data={BloodPressuredata}
+                      data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
@@ -1657,13 +1518,13 @@ export default function Assessmentuserone({ }) {
                 </div>
               </div>
               <p className="textgraph"></p>
-              {PulseRateData && (
+              {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
-                      data={PulseRateData}
+                      data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
@@ -1768,13 +1629,13 @@ export default function Assessmentuserone({ }) {
                 </div>
               </div>
               <p className="textgraph"></p>
-              {Respirationdata && (
+              {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
-                      data={Respirationdata}
+                      data={patientdata}
                       // margin={
                       //   timeRange === "1month"
                       //     ? { top: 0, right: 0, left: -30, bottom: 0 }
@@ -1877,13 +1738,13 @@ export default function Assessmentuserone({ }) {
                 </div>
               </div>
               <p className="textgraph"></p>
-              {Painscoredata && (
+              {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
-                      data={Painscoredata}
+                      data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                     // margin={
                     //   timeRange === "1month"
@@ -1976,13 +1837,13 @@ export default function Assessmentuserone({ }) {
                 </div>
               </div>
               <p className="textgraph"></p>
-              {dtxdata && (
+              {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
-                      data={dtxdata}
+                      data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
                     // margin={
                     //   timeRange === "1month"
@@ -2052,23 +1913,7 @@ export default function Assessmentuserone({ }) {
                         isAnimationActive={true}
                         animationDuration={1500}
                       >
-                        {/* {timeRange !== "1month" && (
-                          <LabelList
-                            dataKey="DTX"
-                            position="inside"
-                            style={{ fill: "white", fontSize: "10" }}
-                          />
-                        )} */}
                       </Line>
-                      {/* {timeRange === "1month" && (
-                      <Brush
-                        tickFormatter={formatDateTime}
-                        dataKey="createdAt"
-                        height={15}
-                        style={{ fontSize: "10", fill: "#000" }}
-                        stroke="#878787"
-                      />
-                    )} */}
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
@@ -2099,12 +1944,14 @@ export default function Assessmentuserone({ }) {
                         แก้ไข
                       </div>
                     )}
+                    {historyass.length > 0 && (
                     <div className="menu-item" onClick={handleViewHistory}>
                       <span className="icon">
                         <i class="bi bi-clock-history"></i>
                       </span>{" "}
                       ดูประวัติการแก้ไข
                     </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -2433,10 +2280,6 @@ export default function Assessmentuserone({ }) {
                     </li>
                   ))}
                 </ul>
-                {/* <button
-                onClick={() => setHistoryVisible(false)}
-                className="btn btn-close"
-              ></button> */}
               </div>
             </div>
           </div>
@@ -2484,6 +2327,26 @@ export default function Assessmentuserone({ }) {
             )}
           </div>
         )}
+          {showScrollTopButton && (
+        <button
+          className="scroll-to-top-btn"
+          onClick={scrollToTop}
+          style={{
+            position: "fixed",
+            bottom: "1rem",
+            right: "1rem",
+            backgroundColor: "#87CEFA",
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            padding: ".5em .8em",
+            cursor: "pointer",
+            fontSize: "1rem",
+          }}
+        >
+        <i class="bi bi-caret-up-fill"></i>        
+        </button>
+      )}
       </div>
     </main>
   );

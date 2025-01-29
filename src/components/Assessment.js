@@ -26,38 +26,49 @@ export default function Assessment({ }) {
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
 
-  useEffect(() => {
-    socket?.on('newAlert', (alert) => {
-      console.log('Received newAlert:', alert);
-  
-      setAlerts((prevAlerts) => {
-        const isExisting = prevAlerts.some(
-          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
-        );
-  
-        // ถ้ามีอยู่แล้ว ให้แทนที่ข้อมูลเดิม
-        if (isExisting) {
-          return prevAlerts.map((existingAlert) =>
-            existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-          );
-        }
-  
-        // ถ้ายังไม่มี ให้เพิ่มข้อมูลใหม่
-        return [...prevAlerts, alert];
-      });
-    });
-  
-    socket?.on('deletedAlert', (data) => {
-      setAlerts((prevAlerts) =>
-        prevAlerts.filter((alert) => alert.patientFormId !== data.patientFormId)
-      );
-    });
-  
-    return () => {
-      socket?.off('newAlert');
-      socket?.off('deletedAlert');
-    };
-  }, []);
+   useEffect(() => {
+     socket?.on('newAlert', (alert) => {
+       console.log('Received newAlert:', alert);
+   
+       setAlerts((prevAlerts) => {
+         const isExisting = prevAlerts.some(
+           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+         );
+   
+         let updatedAlerts;
+   
+         if (isExisting) {
+           
+           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+             updatedAlerts = [...prevAlerts, alert];
+           } else {
+             updatedAlerts = prevAlerts.map((existingAlert) =>
+               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+             );
+           }
+         } else {
+           updatedAlerts = [...prevAlerts, alert];
+         }
+   
+         return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+       });
+     });
+   
+     socket?.on('deletedAlert', (data) => {
+       setAlerts((prevAlerts) => {
+         const filteredAlerts = prevAlerts.filter(
+           (alert) => alert.patientFormId !== data.patientFormId
+         );
+         return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+       });
+     });
+   
+     return () => {
+       socket?.off('newAlert');
+       socket?.off('deletedAlert');
+     };
+   }, []);
+   
   
   useEffect(() => {
     const currentUserId = sender._id;
@@ -374,15 +385,6 @@ export default function Assessment({ }) {
     return () => clearInterval(interval);
   }, [data]);
 
-  const countUnreadUsers = () => {
-    const unreadUsers = allUsers.filter((user) => {
-      const lastMessage = user.lastMessage;
-      return (
-        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-      );
-    });
-    return unreadUsers.length;
-  };
 
   useEffect(() => {
     // ดึงข้อมูล unread count เมื่อเปิดหน้า
@@ -405,6 +407,7 @@ export default function Assessment({ }) {
     };
     fetchUnreadCount();
   }, []);
+  
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -559,7 +562,8 @@ export default function Assessment({ }) {
               </tr>
             </thead>
             <tbody>
-              {datauser
+            {datauser.filter((user) => user.deletedAt === null).length > 0 ? (
+              datauser
                 .filter((user) => user.deletedAt === null)
                 .map((i, index) => {
                   const userBirthday = i.birthday ? new Date(i.birthday) : null;
@@ -609,8 +613,15 @@ export default function Assessment({ }) {
                         </a>
                       </td>
                     </tr>
-                  );
-                })}
+                    );
+                  })
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center", color: "#B2B2B2" }}>
+                  ไม่พบข้อมูลที่คุณค้นหา
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

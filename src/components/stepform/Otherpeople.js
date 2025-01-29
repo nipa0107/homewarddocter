@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
-import { Collapse } from "@material-ui/core";
+import Collapse from '@mui/material/Collapse';
 
 export const Otherpeople = ({ onDataChange }) => {
   const { control, register, getValues, setValue } = useFormContext();

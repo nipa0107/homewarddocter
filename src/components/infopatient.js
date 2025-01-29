@@ -45,34 +45,102 @@ export default function Infopatient({ }) {
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
     const bellRef = useRef(null);
+    const [caregiverInfo, setCaregiverInfo] = useState(null);
 
-    useEffect(() => {
-        socket.on('newAlert', (alert) => {
-            setAlerts(prevAlerts => [...prevAlerts, alert]);
-            setUnreadCount(prevCount => prevCount + 1);
+     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+     const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+     const [selectedCaregiver, setSelectedCaregiver] = useState(null);
+     const [formData, setFormData] = useState({
+       user: "",
+       name: "",
+       surname: "",
+       tel: "",
+       Relationship: "",
+     });
+     const handleAddCaregiver = () => {
+        navigate("/addcaregiver", { state: { Iduser: id, id } }); // `userId` อาจเป็น ID ของผู้ป่วย
+      };
+    
+
+   useEffect(() => {
+     socket?.on('newAlert', (alert) => {
+       console.log('Received newAlert:', alert);
+   
+       setAlerts((prevAlerts) => {
+         const isExisting = prevAlerts.some(
+           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+         );
+   
+         let updatedAlerts;
+   
+         if (isExisting) {
+           
+           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+             updatedAlerts = [...prevAlerts, alert];
+           } else {
+             updatedAlerts = prevAlerts.map((existingAlert) =>
+               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+             );
+           }
+         } else {
+           updatedAlerts = [...prevAlerts, alert];
+         }
+   
+         return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+       });
+     });
+   
+     socket?.on('deletedAlert', (data) => {
+       setAlerts((prevAlerts) => {
+         const filteredAlerts = prevAlerts.filter(
+           (alert) => alert.patientFormId !== data.patientFormId
+         );
+         return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+       });
+     });
+   
+     return () => {
+       socket?.off('newAlert');
+       socket?.off('deletedAlert');
+     };
+   }, []);
+   
+     useEffect(() => {
+       const currentUserId = sender._id;
+     
+       const unreadAlerts = alerts.filter(
+         (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+       );
+     
+       setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+     }, [alerts]);
+     
+     
+       useEffect(() => {
+         socket?.on("TotalUnreadCounts", (data) => {
+           console.log("📦 TotalUnreadCounts received:", data);
+           setUserUnreadCounts(data);
+         });
+     
+         return () => {
+           socket?.off("TotalUnreadCounts");
+         };
+       }, [socket]);
+
+
+       const handleEdit = (caregiver) => {
+        console.log("caregiver ที่กำลังแก้ไข:", caregiver);
+        navigate("/updatecaregiver", { state: { caregiver, id }});
+        setSelectedCaregiver(caregiver);
+        setFormData({
+          user: caregiver.user || "",
+          name: caregiver.name || "",
+          surname: caregiver.surname || "",
+          tel: caregiver.tel || "",
+          Relationship: caregiver.Relationship || "",
         });
-
-        return () => {
-            socket.off('newAlert'); // Clean up the listener on component unmount
-        };
-    }, []);
-    // useEffect(() => {
-    //     const handleClickOutside = (event) => {
-    //         if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-    //             setShowNotifications(false);
-    //         }
-    //     };
-
-    //     document.addEventListener("mousedown", handleClickOutside);
-
-    //     return () => {
-    //         document.removeEventListener("mousedown", handleClickOutside);
-    //     };
-    // }, [notificationsRef]);
-
-    // const toggleNotifications = () => {
-    //     setShowNotifications(!showNotifications);
-    // };
+      };
+   
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
@@ -112,6 +180,11 @@ export default function Infopatient({ }) {
         })
             .then((res) => res.json())
             .then((data) => {
+                setSender({
+                    name: data.data.name,
+                    surname: data.data.surname,
+                    _id: data.data._id,
+                  });
                 setData(data.data);
                 if (data.data == "token expired") {
                     window.localStorage.clear();
@@ -154,14 +227,18 @@ export default function Infopatient({ }) {
                 const response = await fetch(`http://localhost:5000/getcaregiver/${id}`);
                 const caregiverData = await response.json();
                 if (caregiverData.status === 'ok') {
+                    setCaregiverInfo(caregiverData.data);
                     setCaregiverName(caregiverData.data.name);
                     setCaregiverSurname(caregiverData.data.surname);
                     setCaregiverTel(caregiverData.data.tel);
                     setRelationship(caregiverData.data.Relationship);
                 }
             } catch (error) {
-                console.error("Error fetching caregiver data:", error);
-            }
+                if (error.response && error.response.status === 404) {
+                    setCaregiverInfo(null);
+                  } else {
+                    console.error("Error fetching caregiver info:", error);
+                  }            }
         };
         fetchCaregiverData();
     }, [id]);
@@ -434,55 +511,53 @@ export default function Infopatient({ }) {
             } น.`;
     };
 
-    const fetchAllUsers = async (userId) => {
-        try {
-            const response = await fetch(
-                `http://localhost:5000/alluserchat?userId=${userId}`
-            );
-            const data = await response.json();
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
 
-            const usersWithLastMessage = await Promise.all(
-                data.data.map(async (user) => {
-                    const lastMessageResponse = await fetch(
-                        `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-                    );
-                    const lastMessageData = await lastMessageResponse.json();
-
-                    const lastMessage = lastMessageData.lastMessage;
-                    return { ...user, lastMessage: lastMessage ? lastMessage : null };
-                })
-            );
-
-            const sortedUsers = usersWithLastMessage.sort((a, b) => {
-                if (!a.lastMessage) return 1;
-                if (!b.lastMessage) return -1;
-                return (
-                    new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
-                );
-            });
-
-            setAllUsers(sortedUsers);
-        } catch (error) {
-            console.error("Error fetching all users:", error);
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
         }
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
     };
-    //polling
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetchAllUsers(data._id);
-        }, 1000);
-        return () => clearInterval(interval);
-    }, [data]);
+    fetchUnreadCount();
+  }, []);
 
-    const countUnreadUsers = () => {
-        const unreadUsers = allUsers.filter((user) => {
-            const lastMessage = user.lastMessage;
-            return (
-                lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-            );
+  const handleDelete = async (caregiverId) => {
+    if (window.confirm("คุณต้องการลบข้อมูลผู้ดูแลนี้หรือไม่?")) {
+      try {
+        const response = await fetch(`http://localhost:5000/deletecaregiver`, {
+          method: "POST", // ใช้ POST หรือ DELETE ตาม API ของคุณ
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ _id: caregiverId }), // ส่ง `_id` ของผู้ดูแลไป
         });
-        return unreadUsers.length;
-    };
+
+        const data = await response.json();
+        if (response.ok) {
+          alert("ลบข้อมูลสำเร็จ");
+          // อัปเดต caregiverInfo เพื่อรีเฟรชข้อมูล
+          setCaregiverInfo((prev) =>
+            prev.filter((caregiver) => caregiver._id !== caregiverId)
+          );
+        } else {
+          alert(`เกิดข้อผิดพลาด: ${data.error}`);
+        }
+      } catch (error) {
+        console.error("Error deleting caregiver:", error);
+        alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+      }
+    }
+  };
 
     return (
         <main className="body">
@@ -530,11 +605,20 @@ export default function Infopatient({ }) {
                         <a href="chat" style={{ position: "relative" }}>
                             <i className="bi bi-chat-dots"></i>
                             <span className="links_name">แช็ต</span>
-                            {countUnreadUsers() !== 0 && (
-                                <span className="notification-countchat">
-                                    {countUnreadUsers()}
-                                </span>
-                            )}
+                            {userUnreadCounts.map((user) => {
+                if (String(user.userId) === String(sender._id)) {
+                  return (
+                    <div key={user.userId}>
+                      {user.totalUnreadCount > 0 && (
+                        <div className="notification-countchat">
+                          {user.totalUnreadCount}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                return null;
+              })}
                         </a>
                     </li>
                     <div class="nav-logout">
@@ -650,7 +734,7 @@ export default function Infopatient({ }) {
                             <p>
                                 <span>เบอร์โทรศัพท์</span>
                             </p>
-                            <p>
+                            {/* <p>
                                 <span>ผู้ดูแล</span>
                             </p>
                             <p>
@@ -658,7 +742,7 @@ export default function Infopatient({ }) {
                             </p>
                             <p>
                                 <span>เบอร์โทรศัพท์ผู้ดูแล</span>
-                            </p>
+                            </p> */}
                         </div>
                         <div className="right-info">
                             <p>
@@ -682,7 +766,7 @@ export default function Infopatient({ }) {
                             <p>
                                 <b>{tel || '-'}</b>
                             </p>
-                            <p>
+                            {/* <p>
                                 <b>{caregiverName || '-'}</b> <b>{caregiverSurname || '-'}</b>
                             </p>
                             <p>
@@ -690,7 +774,7 @@ export default function Infopatient({ }) {
                             </p>
                             <p>
                                 <b>{caregiverTel || '-'}</b>
-                            </p>
+                            </p> */}
                         </div>
                     </div>
                     <div className="btn-group mb-4">
@@ -705,11 +789,75 @@ export default function Infopatient({ }) {
                                 แก้ไข
                             </button>
                         </div>
-                        <div className="deleteimg1">
+                        {/* <div className="deleteimg1">
                             <button onClick={() => deleteUser()}>ลบ</button>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
+                <div className="info3 card mb-1">
+          <div className="header">
+            <b>ข้อมูลผู้ดูแล</b>
+          </div>
+          
+          <div>
+            {caregiverInfo && caregiverInfo.length > 0 ? (
+              <div>
+                <div className="user-info-caregiver">
+                  {caregiverInfo.map((caregiver, index) => (
+                    <div className="inline-container-caregiver" key={index}>
+                      <p>
+                        <span>ผู้ดูแลคนที่ {index + 1}:</span>
+                      </p>
+                      <div className="caregiver-card">
+                      <div className="caregiver-info">
+                        <p>
+                          <span>ชื่อ-สกุล:</span> {caregiver.name || "-"}{" "}
+                          {caregiver.surname || "-"}
+                        </p>
+                        <p>
+                          <span>ความสัมพันธ์:</span>{" "}
+                          {caregiver.Relationship || "-"}
+                        </p>
+                        <p>
+                          <span>เบอร์โทรศัพท์:</span> {caregiver.tel || "-"}
+                        </p>
+                        </div>
+                        <div class="button-container-vertical">
+                      <button class="button-edit" 
+                      onClick={() => handleEdit(caregiver)}>
+                        แก้ไข
+                      </button>
+                       <button  class="button-delete" 
+                      onClick={() => handleDelete(caregiver._id)}>
+                        ลบ 
+                      </button>
+                    </div>
+                      </div>
+                
+               
+                    </div>
+                  ))}
+                 </div>
+                 <div className="btn-group mb-4">
+                  <div className="adddata">
+                    <button onClick={handleAddCaregiver}>เพิ่มผู้ดูแล</button>
+                  </div>
+                </div>
+             
+              </div>
+            ) : (
+              <div>
+                <p className="no-equipment">ไม่มีข้อมูลผู้ดูแล</p>
+                <div className="btn-group mb-4">
+                  {/* <div className="adddata">
+                    <button onClick={handleAddCaregiver}>เพิ่มผู้ดูแล</button>
+                  </div> */}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
                 <br></br>
                 <div className="info3 card mb-1">
                     <div className="header"><b>ข้อมูลการเจ็บป่วย</b></div>
@@ -774,7 +922,7 @@ export default function Infopatient({ }) {
                                                         window.open(`${medicalInfo.fileP}`, "_blank");
                                                     }}
                                                 >
-                                                    {medicalInfo.fileP.replace("?alt=media", "").split("/").pop().split("\\").pop()}
+                                                    {medicalInfo.filePName}
                                                 </a>
                                             ) : (
                                                 "-"
@@ -796,7 +944,7 @@ export default function Infopatient({ }) {
                                                         window.open(`${medicalInfo.fileM}`, "_blank");
                                                     }}
                                                 >
-                                                    {medicalInfo.fileM.replace("?alt=media", "").split("/").pop().split("\\").pop()}
+                                                    {medicalInfo.fileMName}
                                                 </a>
                                             ) : (
                                                 "-"
@@ -817,7 +965,7 @@ export default function Infopatient({ }) {
                                                         window.open(`${medicalInfo.filePhy}`, "_blank");
                                                     }}
                                                 >
-                                                    {medicalInfo.filePhy.replace("?alt=media", "").split("/").pop().split("\\").pop()}
+                                                    {medicalInfo.filePhyName}
                                                 </a>
                                             ) : (
                                                 "-"

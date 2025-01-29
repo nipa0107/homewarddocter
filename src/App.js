@@ -36,7 +36,6 @@ import MultiStepForm from "./components/MultiStepForm";
 import DetailAssessinhomesss from "./components/DetailAssessinhomeForm";
 import DetailAgenda from "./components/DetailAgendaForm";
 import Abnormalcase from "./components/Abnormalcase"
-import ChatComponent from "./components/Chat200967"
 // import Immobility from "./components/Immobility";
 
 import Emailverification from "./components/email-verification";
@@ -44,7 +43,8 @@ import VerifyOtp from "./components/VerifyOtp";
 import UpdateEmail from "./components/updateemail";
 import UpdateOTP from "./components/updateotp";
 import AgendaForm from "./components/AgendaForm";
-
+import UpdateCaregiver from "./components/updatecaregiver";
+import AddCaregiver from "./components/addcaregiver";
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
     element
@@ -81,12 +81,6 @@ function App() {
             path="/chat"
             element={
               <PrivateRoute element={<Chat />} isLoggedIn={isLoggedIn} />
-            }
-          />
-          <Route
-            path="/c"
-            element={
-              <PrivateRoute element={<ChatComponent />} isLoggedIn={isLoggedIn} />
             }
           />
           <Route
@@ -312,6 +306,21 @@ function App() {
             path="/updateotp"
             element={
               <PrivateRoute element={<UpdateOTP />} isLoggedIn={isLoggedIn} />
+            }
+          />
+                 <Route
+            path="/updatecaregiver"
+            element={
+              <PrivateRoute element={<UpdateCaregiver />} isLoggedIn={isLoggedIn} />
+            }
+          />
+            <Route
+            path="/addcaregiver"
+            element={
+              <PrivateRoute
+                element={<AddCaregiver />}
+                isLoggedIn={isLoggedIn}
+              />
             }
           />
           {/* <Route
