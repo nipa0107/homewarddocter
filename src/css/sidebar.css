@@ -254,7 +254,7 @@
 }
 .home_content{
     position: relative;
-    height: 100%;
+    height: auto;
     width: calc(100% - 300px);
     left: 320px;
     transition: all 0.5s ease;

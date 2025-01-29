@@ -625,7 +625,7 @@ export default function Assessinhomesssuser({ }) {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th style={{ width: "10%" }}>#</th>
                             <th>วันที่บันทึก</th>
                             <th>วันที่แก้ไขล่าสุด</th>
                             <th>ผลการประเมิน</th>
@@ -640,7 +640,7 @@ export default function Assessinhomesssuser({ }) {
                                     onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
                                     style={{ cursor: "pointer" }}
                                 >
-                                    <td>{index + 1}</td>
+                                    <td style={{ width: "10%" }}>{index + 1}</td>
                                     <td>{formatDate(form.createdAt)}</td>
                                     <td>{formatDate(form.updatedAt)}</td>
                                     <td> <span className="normal-status">{form.status_agenda}</span></td>
@@ -686,7 +686,7 @@ export default function Assessinhomesssuser({ }) {
                     <table className="table">
                         <thead>
                             <tr>
-                                <th>ครั้งที่ประเมิน</th>
+                                <th style={{ width: "10%" }}>#</th>
                                 <th>วันที่บันทึก</th>
                                 <th>วันที่แก้ไขล่าสุด</th>
                                 <th>ผลการประเมิน</th>
@@ -701,7 +701,7 @@ export default function Assessinhomesssuser({ }) {
                                         onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
                                         style={{ cursor: "pointer" }}
                                     >
-                                        <td>{index + 1}</td>
+                                        <td style={{ width: "10%" }}>{index + 1}</td>
                                         <td>{formatDate(form.createdAt)}</td>
                                         <td>{formatDate(form.updatedAt)}</td>
                                         <td> <span className="normal-status">{form.status_inhome}</span></td>

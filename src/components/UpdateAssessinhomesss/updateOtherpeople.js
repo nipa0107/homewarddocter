@@ -37,7 +37,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
 
     const renderCaregiverForm = (type, title, caregivers) => (
         <div>
-            <h4><b>{title}</b></h4>
+            <h4 className="mt-2"><b>{title}</b></h4>
             {caregivers.map((cg, index) => {
                 const isOpen = openIndexes[type]?.includes(index);
                 return (
@@ -67,7 +67,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     />
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">2. วันเกิด :</label>
+                                    <label className="form-label mt-2">2. วันเกิด :</label>
                                     <input
                                         type="date"
                                         className="form-control"
@@ -78,7 +78,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     />
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">3. บทบาท :</label>
+                                    <label className="form-label mt-2">3. บทบาท :</label>
                                     <select
                                         className="form-select"
                                         value={cg.role}
@@ -100,7 +100,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                 </div>
 
                                 <div className="m-2">
-                                    <label className="form-label mt-1">4. อาชีพ :</label>
+                                    <label className="form-label mt-2">4. อาชีพ :</label>
                                     <select
                                         className="form-select"
                                         value={cg.occupation}
@@ -125,7 +125,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     </select>
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">5. สถานภาพ :</label>
+                                    <label className="form-label mt-2">5. สถานภาพ :</label>
                                     <select
                                         className="form-select"
                                         value={cg.status}
@@ -142,7 +142,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     </select>
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">6. การศึกษา :</label>
+                                    <label className="form-label mt-2">6. การศึกษา :</label>
                                     <select
                                         className="form-select"
                                         value={cg.education}
@@ -163,7 +163,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     </select>
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">7. รายได้ต่อเดือน :</label>
+                                    <label className="form-label mt-2">7. รายได้ต่อเดือน :</label>
                                     <select
                                         className="form-select"
                                         value={cg.income}
@@ -180,7 +180,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     </select>
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">8. สิทธิ :</label>
+                                    <label className="form-label mt-2">8. สิทธิ :</label>
                                     <select
                                         className="form-select"
                                         value={cg.benefit}
@@ -198,7 +198,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     </select>
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">9. โรคประจำตัว :</label>
+                                    <label className="form-label mt-2">9. โรคประจำตัว :</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -209,7 +209,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     />
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">10. อุปนิสัย :</label>
+                                    <label className="form-label mt-2">10. อุปนิสัย :</label>
                                     <input
                                         type="text"
                                         className="form-control"
@@ -220,7 +220,7 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     />
                                 </div>
                                 <div className="m-2">
-                                    <label className="form-label mt-1">8. รายละเอียดการดูแลผู้ป่วย :</label>
+                                    <label className="form-label mt-2">8. รายละเอียดการดูแลผู้ป่วย :</label>
                                     <input
                                         type="text"
                                         className="form-control"

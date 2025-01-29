@@ -35,7 +35,7 @@ import Assessreadinessuser from "./components/Assessreadinessuser";
 import MultiStepForm from "./components/MultiStepForm";
 import DetailAssessinhomesss from "./components/DetailAssessinhomeForm";
 import DetailAgenda from "./components/DetailAgendaForm";
-
+import Abnormalcase from "./components/Abnormalcase"
 // import Immobility from "./components/Immobility";
 
 import Emailverification from "./components/email-verification";
@@ -159,7 +159,7 @@ function App() {
             path="/agendaform"
             element={
               <PrivateRoute
-                element={<AgendaForm/>}
+                element={<AgendaForm />}
                 isLoggedIn={isLoggedIn}
               />
             }
@@ -247,6 +247,15 @@ function App() {
             }
           />
           <Route
+            path="/abnormalcase"
+            element={
+              <PrivateRoute
+                element={<Abnormalcase />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
             path="/MultiStepForm"
             element={
               <PrivateRoute
@@ -268,26 +277,26 @@ function App() {
             path="/detailAgendaForm"
             element={
               <PrivateRoute
-                element={<DetailAgenda/>}
+                element={<DetailAgenda />}
                 isLoggedIn={isLoggedIn}
               />
             }
           />
 
-<Route
+          <Route
             path="/emailverification"
             element={
-              <PrivateRoute element={<Emailverification/>} isLoggedIn={isLoggedIn} />
+              <PrivateRoute element={<Emailverification />} isLoggedIn={isLoggedIn} />
             }
           />
-            <Route
+          <Route
             path="/verifyotp"
             element={
-              <PrivateRoute element={<VerifyOtp/>} isLoggedIn={isLoggedIn} />
+              <PrivateRoute element={<VerifyOtp />} isLoggedIn={isLoggedIn} />
             }
           />
 
-<Route
+          <Route
             path="/updateemail"
             element={
               <PrivateRoute element={<UpdateEmail />} isLoggedIn={isLoggedIn} />
@@ -326,10 +335,10 @@ function App() {
           <Route path="/forgetpassword" element={<Reset />} />
           <Route path="/success" element={<Success />} />
         </Routes>
-        
+
       </div>
     </Router>
-    
+
   );
 }
 
