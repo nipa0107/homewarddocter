@@ -388,6 +388,8 @@ export default function Assessinhomesssuser({ }) {
         }
     }, [id]);
 
+    // const sortedAgendaForms = AgendaForms.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -564,65 +566,72 @@ export default function Assessinhomesssuser({ }) {
 
                     </div>
                     <div className="toolbar ">
-                    {AgendaForms && AgendaForms.length > 0 && (
+                        {AgendaForms && AgendaForms.length > 0 && (
 
-                        <button
-                            className="btn btn-primary add-assessment-btn"
-                            onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
-                        >
-                            <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                            เพิ่มการประเมิน
-                        </button>
-                    )}
-                </div>
-                <div className="nameass mt-5">
-                    <h4>
-                        ประเมิน Agenda
-                    </h4>
-                </div>
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th style={{ width: "10%" }}>#</th>
-                            <th>วันที่บันทึก</th>
-                            <th>วันที่แก้ไขล่าสุด</th>
-                            <th>ผลการประเมิน</th>
-                            <th>ผู้ประเมิน</th>
-                        </tr>
-
-                    </thead>
-                    <tbody>
-                        {AgendaForms.length > 0 ? (
-                            AgendaForms.map((form, index) => (
-                                <tr key={form._id}
-                                    onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
-                                    style={{ cursor: "pointer" }}
-                                >
-                                    <td style={{ width: "10%" }}>{index + 1}</td>
-                                    <td>{formatDate(form.createdAt)}</td>
-                                    <td>{formatDate(form.updatedAt)}</td>
-                                    <td> <span className="normal-status">{form.status_agenda}</span></td>
-                                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            // แสดงข้อความเมื่อไม่มีข้อมูล
-                            <tr>
-                                <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                    <a
-                                        className="info"
-                                        onClick={() =>
-                                            navigate("/agendaform", { state: { id: userData._id } })
-                                        }
-                                    >
-                                        <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                                    </a>
-                                </td>
-                            </tr>
+                            <button
+                                className="btn btn-primary add-assessment-btn"
+                                onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
+                            >
+                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                                เพิ่มการประเมิน
+                            </button>
                         )}
-                    </tbody>
+                    </div>
+                    <div className="nameass mt-5">
+                        <h4>
+                            ประเมิน Agenda
+                        </h4>
+                    </div>
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th style={{ width: "10%" }}>#</th>
+                                <th>วันที่บันทึก</th>
+                                <th>วันที่แก้ไขล่าสุด</th>
+                                <th>ผลการประเมิน</th>
+                                <th>ผู้ประเมิน</th>
+                            </tr>
 
-                </table>
+                        </thead>
+                        <tbody>
+                            {AgendaForms.length > 0 ? (
+                                AgendaForms.map((form, index) => (
+                                    <tr key={form._id}
+                                        onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        <td style={{ width: "10%" }}>{index + 1}</td>
+                                        <td>{formatDate(form.createdAt)}</td>
+                                        <td>
+                                            {form.updatedAt !== form.createdAt ? (
+                                                formatDate(form.updatedAt)
+                                            ) : (
+                                                <span className="not-evaluated">ยังไม่มีการแก้ไขข้อมูล</span>
+                                            )}
+                                        </td>
+
+                                        <td> <span className="normal-status">{form.status_agenda}</span></td>
+                                        <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                // แสดงข้อความเมื่อไม่มีข้อมูล
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                                        <a
+                                            className="info"
+                                            onClick={() =>
+                                                navigate("/agendaform", { state: { id: userData._id } })
+                                            }
+                                        >
+                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+
+                    </table>
                     <div className="toolbar mt-4">
                         {AssessinhomeForms && AssessinhomeForms.length > 0 && (
 
@@ -661,7 +670,14 @@ export default function Assessinhomesssuser({ }) {
                                     >
                                         <td style={{ width: "10%" }}>{index + 1}</td>
                                         <td>{formatDate(form.createdAt)}</td>
-                                        <td>{formatDate(form.updatedAt)}</td>
+                                        <td>
+                                            {form.updatedAt !== form.createdAt ? (
+                                                formatDate(form.updatedAt)
+                                            ) : (
+                                                <span className="not-evaluated">ยังไม่มีการแก้ไขข้อมูล</span>
+                                            )}
+                                        </td>
+
                                         <td> <span className="normal-status">{form.status_inhome}</span></td>
                                         <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                                     </tr>
@@ -685,7 +701,7 @@ export default function Assessinhomesssuser({ }) {
                     </table>
 
                 </div>
-                
+
             </div>
         </main>
     );
