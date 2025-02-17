@@ -669,8 +669,8 @@ export default function Abnormalcaser({ }) {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sortedAbnormalCases.length > 0 ? (
-                                    sortedAbnormalCases.map((caseData, index) => (
+                                {abnormalCases.length > 0 ? (
+                                    abnormalCases.map((caseData, index) => (
                                         <tr
                                             key={caseData._id}
                                             className="info"

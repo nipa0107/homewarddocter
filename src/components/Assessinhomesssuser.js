@@ -500,316 +500,237 @@ export default function Assessinhomesssuser({}) {
         </ul>
       </div>
 
-      <div className="home_content">
-        <div className="homeheader">
-          <div className="header">แบบประเมินเยี่ยมบ้าน</div>
-          <div className="profile_details">
-            <ul className="nav-list">
-              <li>
-                <a
-                  ref={bellRef}
-                  className="bell-icon"
-                  onClick={toggleNotifications}
-                >
-                  {showNotifications ? (
-                    <i className="bi bi-bell-fill"></i>
-                  ) : (
-                    <i className="bi bi-bell"></i>
-                  )}
-                  {unreadCount > 0 && (
-                    <span className="notification-count">{unreadCount}</span>
-                  )}
-                </a>
-              </li>
-              <li>
-                <a href="profile">
-                  <i className="bi bi-person"></i>
-                  <span className="links_name">
-                    {data && data.nametitle + data.name + " " + data.surname}
-                  </span>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-        {showNotifications && (
-          <div className="notifications-dropdown" ref={notificationsRef}>
-            <div className="notifications-head">
-              <h2 className="notifications-title">การแจ้งเตือน</h2>
-              <p
-                className="notifications-allread"
-                onClick={markAllAlertsAsViewed}
-              >
-                ทำเครื่องหมายว่าอ่านทั้งหมด
-              </p>
-              <div className="notifications-filter">
-                <button
-                  className={filterType === "all" ? "active" : ""}
-                  onClick={() => handleFilterChange("all")}
-                >
-                  ดูทั้งหมด
-                </button>
-                <button
-                  className={filterType === "unread" ? "active" : ""}
-                  onClick={() => handleFilterChange("unread")}
-                >
-                  ยังไม่อ่าน
-                </button>
-              </div>
-            </div>
-            {filteredAlerts.length > 0 ? (
-              <>
-                {renderAlerts(
-                  filteredAlerts,
-                  token,
-                  userId,
-                  navigate,
-                  setAlerts,
-                  setUnreadCount,
-                  formatDate
-                )}
-              </>
-            ) : (
-              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-            )}
-          </div>
-        )}
-        <div className="breadcrumbs mt-4">
-          <ul>
-            <li>
-              <a href="home">
-                <i class="bi bi-house-fill"></i>
-              </a>
-            </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
-            </li>
-            <li>
-              <a href="assessinhomesss" className="info">
-                แบบประเมินเยี่ยมบ้าน
-              </a>
-            </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
-            </li>
-            <li>
-              <a>บันทึกการประเมิน</a>
-            </li>
-          </ul>
-        </div>
-        <div className="toolbar"></div>
-        <div className="content">
-          <div className="">
-            <p className="headerassesment">
-              {name} {surname}
-            </p>
-            {birthday ? (
-              <p className="textassesment">
-                <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน{" "}
-                <label>เพศ:</label>
-                {gender}
-              </p>
-            ) : (
-              <p className="textassesment">
-                {" "}
-                <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>
-                {gender}
-              </p>
-            )}
-            <p className="textassesment">
-              <label>HN:</label>
-              {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-              <label>AN:</label>
-              {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-              <label>ผู้ป่วยโรค:</label>
-              {medicalData && medicalData.Diagnosis
-                ? medicalData.Diagnosis
-                : "ไม่มีข้อมูล"}
-            </p>
-          </div>
-          <div className="toolbar ">
-            {AgendaForms && AgendaForms.length > 0 && (
-              <button
-                className="btn btn-primary add-assessment-btn"
-                onClick={() =>
-                  navigate("/agendaform", { state: { id: userData._id } })
-                }
-              >
-                <i
-                  className="bi bi-plus-circle"
-                  style={{ marginRight: "8px" }}
-                ></i>
-                เพิ่มการประเมิน
-              </button>
-            )}
-          </div>
-          <div className="nameass mt-5">
-            <h4>ประเมิน Agenda</h4>
-          </div>
-          <table className="table">
-            <thead>
-              <tr>
-                <th style={{ width: "5%" }}>#</th>
-                <th>วันที่บันทึก</th>
-                <th>วันที่แก้ไขล่าสุด</th>
-                <th>ผลการประเมิน</th>
-                <th>ผู้ประเมิน</th>
-              </tr>
-            </thead>
-            <tbody>
-              {AgendaForms.length > 0 ? (
-                AgendaForms.map((form, index) => (
-                  <tr
-                    key={form._id}
-                    onClick={() =>
-                      navigate("/detailAgendaForm", { state: { id: form._id } })
-                    }
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td style={{ width: "5%" }}>{index + 1}</td>
-                    <td>{formatDate(form.createdAt)}</td>
-                    <td>
-                      {form.updatedAt !== form.createdAt ? (
-                        formatDate(form.updatedAt)
-                      ) : (
-                        <span className="not-evaluated">
-                          ยังไม่มีการแก้ไขข้อมูล
-                        </span>
-                      )}
-                    </td>{" "}
-                    <td>
-                      {" "}
-                      <span className="normal-status">
-                        {form.status_agenda}
-                      </span>
-                    </td>
-                    <td>
-                      {form.MPersonnel
-                        ? `${form.MPersonnel.nametitle || ""} ${
-                            form.MPersonnel.name || ""
-                          } ${form.MPersonnel.surname || ""}`
-                        : "ไม่ระบุผู้ประเมิน"}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                // แสดงข้อความเมื่อไม่มีข้อมูล
-                <tr>
-                  <td
-                    colSpan="5"
-                    style={{ textAlign: "center", verticalAlign: "middle" }}
-                  >
-                    <a
-                      className="info"
-                      onClick={() =>
-                        navigate("/agendaform", { state: { id: userData._id } })
-                      }
-                    >
-                      <span className="not-evaluated">
-                        ยังไม่ได้รับการประเมิน
-                      </span>
-                    </a>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-          <div className="toolbar mt-4">
-            {AssessinhomeForms && AssessinhomeForms.length > 0 && (
-              <button
-                className="btn btn-primary add-assessment-btn"
-                onClick={() =>
-                  navigate("/assessinhomesssform", {
-                    state: { id: userData._id },
-                  })
-                }
-              >
-                <i
-                  className="bi bi-plus-circle"
-                  style={{ marginRight: "8px" }}
-                ></i>
-                เพิ่มการประเมิน
-              </button>
-            )}
-          </div>
-          <div className="nameass mt-5">
-            <h4>ประเมิน IN-HOME-SSS</h4>
-          </div>
+            <div className="home_content">
+                <div className="homeheader">
 
-          <table className="table">
-            <thead>
-              <tr>
-                <th style={{ width: "5%" }}>#</th>
-                <th>วันที่บันทึก</th>
-                <th>วันที่แก้ไขล่าสุด</th>
-                <th>ผลการประเมิน</th>
-                <th>ผู้ประเมิน</th>
-              </tr>
-            </thead>
-            <tbody>
-              {AssessinhomeForms.length > 0 ? (
-                AssessinhomeForms.map((form, index) => (
-                  <tr
-                    key={form._id}
-                    onClick={() =>
-                      navigate("/detailAssessinhomeForm", {
-                        state: { id: form._id },
-                      })
-                    }
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td style={{ width: "5%" }}>{index + 1}</td>
-                    <td>{formatDate(form.createdAt)}</td>
-                    <td>
-                      {form.updatedAt !== form.createdAt ? (
-                        formatDate(form.updatedAt)
-                      ) : (
-                        <span className="not-evaluated">
-                          ยังไม่มีการแก้ไขข้อมูล
-                        </span>
-                      )}
-                    </td>{" "}
-                    <td>
-                      {" "}
-                      <span className="normal-status">
-                        {form.status_inhome}
-                      </span>
-                    </td>
-                    <td>
-                      {form.MPersonnel
-                        ? `${form.MPersonnel.nametitle || ""} ${
-                            form.MPersonnel.name || ""
-                          } ${form.MPersonnel.surname || ""}`
-                        : "ไม่ระบุผู้ประเมิน"}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                // แสดงข้อความเมื่อไม่มีข้อมูล
-                <tr>
-                  <td
-                    colSpan="5"
-                    style={{ textAlign: "center", verticalAlign: "middle" }}
-                  >
-                    <a
-                      className="info"
-                      onClick={() =>
-                        navigate("/assessinhomesssform", {
-                          state: { id: userData._id },
-                        })
-                      }
-                    >
-                      <span className="not-evaluated">
-                        ยังไม่ได้รับการประเมิน
-                      </span>
-                    </a>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </main>
-  );
+                    <div className="header">แบบประเมินเยี่ยมบ้าน</div>
+                    <div className="profile_details">
+                        <ul className="nav-list">
+                            <li>
+                                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                                    {showNotifications ? (
+                                        <i className="bi bi-bell-fill"></i>
+                                    ) : (
+                                        <i className="bi bi-bell"></i>
+                                    )}
+                                    {unreadCount > 0 && (
+                                        <span className="notification-count">{unreadCount}</span>
+                                    )}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="profile">
+                                    <i className="bi bi-person"></i>
+                                    <span className="links_name">
+                                        {data && data.nametitle + data.name + " " + data.surname}
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                {showNotifications && (
+                    <div className="notifications-dropdown" ref={notificationsRef}>
+                        <div className="notifications-head">
+                            <h2 className="notifications-title">การแจ้งเตือน</h2>
+                            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
+                                ทำเครื่องหมายว่าอ่านทั้งหมด
+                            </p>
+                            <div className="notifications-filter">
+                                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
+                                    ดูทั้งหมด
+                                </button>
+                                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
+                                    ยังไม่อ่าน
+                                </button>
+                            </div>
+                        </div>
+                        {filteredAlerts.length > 0 ? (
+                            <>
+                                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
+                            </>
+                        ) : (
+                            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+                        )}
+                    </div>
+                )}
+                <div className="breadcrumbs mt-4">
+                    <ul>
+                        <li>
+                            <a href="home">
+                                <i class="bi bi-house-fill"></i>
+                            </a>
+                        </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li>
+                            <a href="assessinhomesss" className="info">
+                                แบบประเมินเยี่ยมบ้าน
+                            </a>
+                        </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li>
+                            <a>บันทึกการประเมิน</a>
+                        </li>
+                    </ul>
+                </div>
+                <div className="toolbar"></div>
+                <div className="content">
+                    <div className="">
+                        <p className="headerassesment">
+                            {name} {surname}
+                        </p>
+                        {birthday ? (
+                            <p className="textassesment">
+                                <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
+                            </p>
+                        ) : (
+                            <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
+                        )}
+                        <p className="textassesment">
+
+                            <label>HN:</label>
+                            {medicalData && medicalData.HN
+                                ? medicalData.HN
+                                : "ไม่มีข้อมูล"}
+                            <label>AN:</label>
+                            {medicalData && medicalData.AN
+                                ? medicalData.AN
+                                : "ไม่มีข้อมูล"}
+                            <label>ผู้ป่วยโรค:</label>
+                            {medicalData && medicalData.Diagnosis
+                                ? medicalData.Diagnosis
+                                : "ไม่มีข้อมูล"}
+                        </p>
+
+                    </div>
+                    <div className="toolbar ">
+                    {AgendaForms && AgendaForms.length > 0 && (
+
+                        <button
+                            className="btn btn-primary add-assessment-btn"
+                            onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
+                        >
+                            <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                            เพิ่มการประเมิน
+                        </button>
+                    )}
+                </div>
+                <div className="nameass mt-5">
+                    <h4>
+                        ประเมิน Agenda
+                    </h4>
+                </div>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th style={{ width: "10%" }}>#</th>
+                            <th>วันที่บันทึก</th>
+                            <th>วันที่แก้ไขล่าสุด</th>
+                            <th>ผลการประเมิน</th>
+                            <th>ผู้ประเมิน</th>
+                        </tr>
+
+                    </thead>
+                    <tbody>
+                        {AgendaForms.length > 0 ? (
+                            AgendaForms.map((form, index) => (
+                                <tr key={form._id}
+                                    onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <td style={{ width: "10%" }}>{index + 1}</td>
+                                    <td>{formatDate(form.createdAt)}</td>
+                                    <td>{formatDate(form.updatedAt)}</td>
+                                    <td> <span className="normal-status">{form.status_agenda}</span></td>
+                                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            // แสดงข้อความเมื่อไม่มีข้อมูล
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                                    <a
+                                        className="info"
+                                        onClick={() =>
+                                            navigate("/agendaform", { state: { id: userData._id } })
+                                        }
+                                    >
+                                        <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+
+                </table>
+                    <div className="toolbar mt-4">
+                        {AssessinhomeForms && AssessinhomeForms.length > 0 && (
+
+                            <button
+                                className="btn btn-primary add-assessment-btn"
+                                onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
+                            >
+                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                                เพิ่มการประเมิน
+                            </button>
+                        )}
+                    </div>
+                    <div className="nameass mt-5">
+                        <h4>
+                            ประเมิน IN-HOME-SSS
+                        </h4>
+                    </div>
+
+                    <table className="table">
+                        <thead>
+                            <tr>
+                                <th style={{ width: "10%" }}>#</th>
+                                <th>วันที่บันทึก</th>
+                                <th>วันที่แก้ไขล่าสุด</th>
+                                <th>ผลการประเมิน</th>
+                                <th>ผู้ประเมิน</th>
+                            </tr>
+
+                        </thead>
+                        <tbody>
+                            {AssessinhomeForms.length > 0 ? (
+                                AssessinhomeForms.map((form, index) => (
+                                    <tr key={form._id}
+                                        onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
+                                        style={{ cursor: "pointer" }}
+                                    >
+                                        <td style={{ width: "10%" }}>{index + 1}</td>
+                                        <td>{formatDate(form.createdAt)}</td>
+                                        <td>{formatDate(form.updatedAt)}</td>
+                                        <td> <span className="normal-status">{form.status_inhome}</span></td>
+                                        <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                // แสดงข้อความเมื่อไม่มีข้อมูล
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                                        <a
+                                            className="info"
+                                            onClick={() =>
+                                                navigate("/assessinhomesssform", { state: { id: userData._id } })
+                                            }
+                                        >
+                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                </div>
+                
+            </div>
+        </main>
+    );
 }

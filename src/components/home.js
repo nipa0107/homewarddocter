@@ -1190,16 +1190,6 @@ export default function Home() {
                       </tbody>
                     </table>
                   </div>
-                  {/* <nav aria-label="...">
-                    <ul class="pagination pagination-sm">
-                      <button
-                        className="btn btn-sm btn-outline-secondary ms-2"
-                        onClick={toggleSortOrder}
-                      >
-                        {sortOrder === "asc" ? "เรียงลำดับ ↑" : "เรียงลำดับ ↓"}
-                      </button>
-                    </ul>
-                  </nav> */}
                   <nav aria-label="Page navigation example" className="mt-3">
                     <ul className="pagination justify-content-end">
                       <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
@@ -1242,9 +1232,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
           </div>
-
         </div>
       </div>
     </main >
