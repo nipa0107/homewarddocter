@@ -603,7 +603,7 @@ export default function AgendaForm({ }) {
                             </p>
                         </div>
 
-                        <Stepper className="stepper" activeStep={activeStep} orientation="vertical">
+                        <Stepper className="stepper mt-4" activeStep={activeStep} orientation="vertical">
                             {steps.map((label, index) => (
                                 <Step key={index}>
                                     <StepLabel>{label}</StepLabel>

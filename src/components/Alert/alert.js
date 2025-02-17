@@ -1,6 +1,6 @@
-export const fetchAlerts = async (token) => {
+export const fetchAlerts = async (token,userId) => {
   try {
-    const response = await fetch("http://localhost:5000/alerts", {
+    const response = await fetch(`http://localhost:5000/alerts?userId=${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

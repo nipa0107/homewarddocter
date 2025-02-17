@@ -26,6 +26,9 @@ export default function Home() {
   const [token, setToken] = useState("");
   const [alerts, setAlerts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showNotificationsNormal, setShowNotificationsNormal] = useState(false);
+  const [showNotificationsAbnormal, setShowNotificationsANM] = useState(false);
+
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const [userId, setUserId] = useState("");
@@ -33,75 +36,81 @@ export default function Home() {
   const navigate = useNavigate();
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
+  const bellRef1 = useRef(null);
   const [completedCount, setCompletedCount] = useState(0);
   const [medicalData, setMedicalData] = useState({});
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
-   useEffect(() => {
-     socket?.on('newAlert', (alert) => {
-       console.log('Received newAlert:', alert);
-   
-       setAlerts((prevAlerts) => {
-         const isExisting = prevAlerts.some(
-           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
-         );
-   
-         let updatedAlerts;
-   
-         if (isExisting) {
-           
-           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-             updatedAlerts = [...prevAlerts, alert];
-           } else {
-             updatedAlerts = prevAlerts.map((existingAlert) =>
-               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-             );
-           }
-         } else {
-           updatedAlerts = [...prevAlerts, alert];
-         }
-   
-         return updatedAlerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-       });
-     });
-   
-     socket?.on('deletedAlert', (data) => {
-       setAlerts((prevAlerts) => {
-         const filteredAlerts = prevAlerts.filter(
-           (alert) => alert.patientFormId !== data.patientFormId
-         );
-         return filteredAlerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-       });
-     });
-   
-     return () => {
-       socket?.off('newAlert');
-       socket?.off('deletedAlert');
-     };
-   }, []);
-   
-  
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+
+  useEffect(() => {
+    socket?.on("newAlert", (alert) => {
+      console.log("Received newAlert:", alert);
+
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+
+        let updatedAlerts;
+
+        if (isExisting) {
+          if (alert.alertMessage === "เป็นเคสฉุกเฉิน") {
+            updatedAlerts = [...prevAlerts, alert];
+          } else {
+            updatedAlerts = prevAlerts.map((existingAlert) =>
+              existingAlert.patientFormId === alert.patientFormId
+                ? alert
+                : existingAlert
+            );
+          }
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+
+        return updatedAlerts.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+      });
+    });
+
+    socket?.on("deletedAlert", (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+        return filteredAlerts.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+      });
+    });
+
+    return () => {
+      socket?.off("newAlert");
+      socket?.off("deletedAlert");
+    };
+  }, []);
+
   useEffect(() => {
     const currentUserId = sender._id;
-  
+
     const unreadAlerts = alerts.filter(
-      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
-  
+
     setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
   }, [alerts]);
-  
-  
-    useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
-      });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
-      };
-    }, [socket]);
+
+  useEffect(() => {
+    socket?.on("TotalUnreadCounts", (data) => {
+      console.log("📦 TotalUnreadCounts received:", data);
+      setUserUnreadCounts(data);
+    });
+
+    return () => {
+      socket?.off("TotalUnreadCounts");
+    };
+  }, [socket]);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -113,9 +122,19 @@ export default function Home() {
     // setShowNotifications(prev => !prev);
   };
 
+  const toggleNotificationsNormal = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotificationsNormal(false);
+    } else {
+      setShowNotificationsNormal(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
   const handleClickOutside = (e) => {
     if (
-      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
       !bellRef.current.contains(e.target)
     ) {
       setShowNotifications(false);
@@ -123,13 +142,59 @@ export default function Home() {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
+  const handleClickOutsideNM = (e) => {
+    if (
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
+      !bellRef1.current.contains(e.target)
+    ) {
+      setShowNotificationsNormal(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutsideNM);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideNM);
+    };
+  }, []);
+
+
+  const toggleNotificationsANM = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotificationsANM(false);
+    } else {
+      setShowNotificationsANM(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
+
+  const handleClickOutsideANM = (e) => {
+    if (
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotificationsANM(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutsideANM);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideANM);
+    };
+  }, []);
   const getAllUser = () => {
     fetch('http://localhost:5000/alluser', {
       method: 'GET',
@@ -166,6 +231,11 @@ export default function Home() {
     })
       .then((res) => res.json())
       .then((data) => {
+        setSender({
+          name: data.data.name,
+          surname: data.data.surname,
+          _id: data.data._id,
+        });
         setData(data.data);
         if (data.data == "token expired") {
           window.localStorage.clear();
@@ -715,20 +785,11 @@ export default function Home() {
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
+              {countUnreadUsers() !== 0 && (
+                <span className="notification-countchat">
+                  {countUnreadUsers()}
+                </span>
+              )}
             </a>
           </li>
           <div className="nav-logout">
@@ -747,11 +808,35 @@ export default function Home() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-              <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef1} className="bell-icon" onClick={toggleNotificationsNormal}>
+                  {showNotificationsNormal ? (
+                    <i class="bi bi-clipboard2-pulse-fill"></i>
+                  ) : (
+                    <i class="bi bi-clipboard2-pulse"></i>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="notification-count">{unreadCount}</span>
+                  )}
+                </a>
+              </li>
+              <li>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (
                     <i className="bi bi-bell"></i>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="notification-count">{unreadCount}</span>
+                  )}
+                </a>
+              </li>
+              <li>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotificationsANM}>
+                  {showNotificationsAbnormal ? (
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                  ) : (
+                    <i class="bi bi-exclamation-triangle"></i>                  
                   )}
                   {unreadCount > 0 && (
                     <span className="notification-count">{unreadCount}</span>
@@ -770,54 +855,131 @@ export default function Home() {
           </div>
         </div>
         {showNotifications && (
-                  <div className="notifications-dropdown" ref={notificationsRef}>
-                    <div className="notifications-head">
-                      <h2 className="notifications-title">การแจ้งเตือน</h2>
-                      <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                        ทำเครื่องหมายว่าอ่านทั้งหมด
-                      </p>
-                      <div className="notifications-filter">
-                        <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                          ดูทั้งหมด
-                        </button>
-                        <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                          ยังไม่อ่าน
-                        </button>
-                      </div>
-                    </div>
-                    {filteredAlerts.length > 0 ? (
-                      <>
-                        {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                      </>
-                    ) : (
-                      <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                    )}
-                  </div>
-                )}{showNotifications && (
-                          <div className="notifications-dropdown" ref={notificationsRef}>
-                            <div className="notifications-head">
-                              <h2 className="notifications-title">การแจ้งเตือน</h2>
-                              <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                                ทำเครื่องหมายว่าอ่านทั้งหมด
-                              </p>
-                              <div className="notifications-filter">
-                                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                                  ดูทั้งหมด
-                                </button>
-                                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                                  ยังไม่อ่าน
-                                </button>
-                              </div>
-                            </div>
-                            {filteredAlerts.length > 0 ? (
-                              <>
-                                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                              </>
-                            ) : (
-                              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                            )}
-                          </div>
-                        )}
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h5 className="notifications-title">การแจ้งเตือนประเมิน</h5>
+              <p
+                className="notifications-allread"
+                onClick={markAllAlertsAsViewed}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+              <div className="notifications-filter">
+                <button
+                  className={filterType === "all" ? "active" : ""}
+                  onClick={() => handleFilterChange("all")}
+                >
+                  ดูทั้งหมด
+                </button>
+                <button
+                  className={filterType === "unread" ? "active" : ""}
+                  onClick={() => handleFilterChange("unread")}
+                >
+                  ยังไม่อ่าน
+                </button>
+              </div>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
+          </div>
+        )}
+       {showNotificationsNormal && (
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h5 className="notifications-title">การแจ้งเตือนแบบบันทึก</h5>
+              <p
+                className="notifications-allread"
+                onClick={markAllAlertsAsViewed}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+              <div className="notifications-filter">
+                <button
+                  className={filterType === "all" ? "active" : ""}
+                  onClick={() => handleFilterChange("all")}
+                >
+                  ดูทั้งหมด
+                </button>
+                <button
+                  className={filterType === "unread" ? "active" : ""}
+                  onClick={() => handleFilterChange("unread")}
+                >
+                  ยังไม่อ่าน
+                </button>
+              </div>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
+          </div>
+        )}
+       {showNotificationsAbnormal && (
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h5 className="notifications-title">การแจ้งเตือนความผิดปกติ</h5>
+              <p
+                className="notifications-allread"
+                onClick={markAllAlertsAsViewed}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+              <div className="notifications-filter">
+                <button
+                  className={filterType === "all" ? "active" : ""}
+                  onClick={() => handleFilterChange("all")}
+                >
+                  ดูทั้งหมด
+                </button>
+                <button
+                  className={filterType === "unread" ? "active" : ""}
+                  onClick={() => handleFilterChange("unread")}
+                >
+                  ยังไม่อ่าน
+                </button>
+              </div>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
+          </div>
+        )}
         <div class="container-fluid bg-light">
           <div class="row">
             <div

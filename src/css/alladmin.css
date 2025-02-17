@@ -87,7 +87,7 @@
   background-color: #87CEFA;
   color: white;
   text-align: center;
-  margin-top: 20px;
+  /* margin-top: 20px; */
 }
 
 .cardall {
@@ -126,15 +126,6 @@ tr.assessmentnull {
   margin-right: auto;
 }
 
-.headerassesment {
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-}
-
-.textassesment {
-  text-align: center;
-}
 
 .contentinass {
   width: 80%;
@@ -155,9 +146,7 @@ tr.assessmentnull {
 
 }
 
-.textheadSymptom {
-  font-weight: bold;
-}
+
 
 .btn-group {
   gap: 10px;
@@ -209,7 +198,7 @@ tr.assessmentnull {
 
 .deleteimg1 button {
   border-radius: 5px;
-  width: 10vh;
+  width: 8rem;
   background-color: rgb(236, 78, 78);
   color: white;
   border: none;
@@ -218,7 +207,7 @@ tr.assessmentnull {
 
 .editimg1 button {
   border-radius: 5px;
-  width: 10vh;
+  width: 8rem;
   background-color: #ffde59;
   color: black;
   border: none;
@@ -227,6 +216,7 @@ tr.assessmentnull {
 }
 
 .adddata {
+  width: 8rem;
   margin-top: 8px;
   display: flex;
   justify-content: center;
@@ -235,7 +225,7 @@ tr.assessmentnull {
 
 .adddata button {
   border-radius: 5px;
-  width: 11vh;
+  width: 8rem;
   background-color: #87CEFA;
   color: white;
   border: none;
@@ -388,18 +378,7 @@ tr.assessmentnull {
   line-height: 50px;
 }
 
-.headerassesment {
-  font-size: 1.5em;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 10px;
-}
 
-.textassesment {
-  font-size: 1.1em;
-  color: #666;
-  margin-bottom: 10px;
-}
 
 .contentinass {
   background: #fff;
@@ -416,10 +395,7 @@ tr.assessmentnull {
   margin-bottom: 10px;
 }
 
-.textheadSymptom {
-  font-weight: bold;
 
-}
 
 .text {
   color: #555;
@@ -468,10 +444,10 @@ p .label {
   color: #333;
 }
 
-.inline-container {
+/* .inline-container {
   display: flex;
   align-items: center;
-}
+} */
 
 .inline-container .title-ptf {
   margin-left: 3%;
@@ -489,34 +465,14 @@ p .label {
   display: flex;
 } */
 
-.textassesment label {
-  margin-left: 1%;
-  margin-right: 0.5rem;
-  font-size: 16;
-  font-weight: bold;
-  color: #333;
-
-}
 
 
-.inline-container .text {
+/* .inline-container .text {
   flex: 1;
   margin: 0;
   color: #555;
-}
+} */
 
-
-.inline-container textarea {
-  flex: 1;
-  padding: 8px;
-  margin-top: 8px;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.inline-container textarea:focus {
-  border-color: #87CEFA;
-  box-shadow: 0 0 5px rgba(13, 124, 242, 0.5);
-}
 
 /* textarea {
   resize: none;
@@ -538,11 +494,7 @@ p .label {
   color: rgba(214, 214, 214, 0.6);
 }
 
-.no-notification {
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
-}
+
 
 .symtoms-count {
   margin-left: 5;
@@ -599,15 +551,13 @@ p .label {
   /* Smaller text size */
 }
 
-.inline-container textarea {
+/* .inline-container textarea {
   flex: 1;
   padding: 10px;
-  /* Add padding */
   margin-top: 8px;
   margin-right: 55px;
-  /* Ensure some space from the right edge */
   transition: border-color 0.3s, box-shadow 0.3s;
-}
+} */
 
 .detail-info {
   margin-left: 30px;
@@ -948,3 +898,14 @@ p .label {
 input[type="radio"] {
   margin-right: 5px;
 }
+
+.input-error {
+  border-radius: 4px; 
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); 
+}
+
+.error-text {
+    color: red;
+    font-size: 0.875em;
+}
+  

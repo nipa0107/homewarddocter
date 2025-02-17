@@ -1,39 +1,30 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback,useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast } from "react-toastify";
 
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  Label,
-  LineChart,
   Line,
-  LabelList,
   Area,
   ComposedChart,
-  AreaChart,
-  ReferenceArea,
-  Brush,
+  // Brush,
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
-
 import "../css/contentgraph.css";
 import io from "socket.io-client";
 const socket = io("http://localhost:5000");
-export default function Assessmentuserone({ }) {
+
+export default function Assessmentuserone() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [token, setToken] = useState("");
@@ -47,23 +38,18 @@ export default function Assessmentuserone({ }) {
   const [birthday, setBirthday] = useState("");
   const [suggestion, setSuggestion] = useState("");
   const [detail, setDetail] = useState("");
-  const [status_name, setstatus_name] = useState("");
   const [PPS, setPPS] = useState("");
   const [statusName, setStatusName] = useState("");
   const [dateass, setDateass] = useState([]);
+  const [dateModified, setDateModified] = useState([]);
   const [isAssessed, setIsAssessed] = useState(false);
   const [patientdata, setPatientData] = useState([]);
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
   const [mpersonnel, setMPersonnel] = useState([]);
-  const [mpersonnelID, setMPersonnelID] = useState([]);
   const [medicalData, setMedicalData] = useState([]);
   const [symptomsCount, setSymptomsCount] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState("7days");
-  const [allUsers, setAllUsers] = useState([]);
-  const [datauser, setDatauser] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -73,7 +59,7 @@ export default function Assessmentuserone({ }) {
   const bellRef = useRef(null);
   const [historyass, setHistoryAss] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [historyVisible, setHistoryVisible] = useState(false); // ใช้ในการเปิด/ปิดการแสดง history
+  const [historyVisible, setHistoryVisible] = useState(false); 
   const [history, setHistory] = useState([]);
   const [assessmentId, setAssessmentId] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -96,9 +82,146 @@ export default function Assessmentuserone({ }) {
   });
   const [painscore, setPainscore] = useState("");
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+  const textareaDetailRef = useRef(null);
+  const textareaSuggestionRef = useRef(null);
 
+  const [unreadCountsByType, setUnreadCountsByType] = useState({
+    assessment: 0,
+    abnormal: 0,
+    normal: 0,
+  });
+
+  
+  const getUnreadCount = useCallback(
+    (type) => {
+      const filteredByType = alerts.filter(
+        (alert) =>
+          (type === "assessment" &&
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน") ||
+          (type === "abnormal" &&
+            (alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน")) ||
+          (type === "normal" && alert.alertType === "normal")
+      );
+      return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+        .length;
+    },
+    [alerts, userId]
+  );
+  useEffect(() => {
+    if (!userId) return;
+    const updatedCounts = {
+      assessment: getUnreadCount("assessment"),
+      abnormal: getUnreadCount("abnormal"),
+      normal: getUnreadCount("normal"),
+    };
+    setUnreadCountsByType(updatedCounts);
+  }, [alerts, userId]);
+
+  useEffect(() => {
+    socket?.on("newAlert", (alert) => {
+      console.log("Received newAlert:", alert);
+
+      if (alert.MPersonnel?.id === userId) {
+        console.log("Ignoring alert from self");
+        return;
+      }
+
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+
+        let updatedAlerts;
+
+        if (isExisting) {
+          updatedAlerts = prevAlerts.map((existingAlert) =>
+            existingAlert.patientFormId === alert.patientFormId
+              ? alert
+              : existingAlert
+          );
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+
+        return [...updatedAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      });
+    });
+
+    socket?.on("deletedAlert", (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+
+        return [...filteredAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      });
+    });
+
+    return () => {
+      socket?.off("newAlert");
+      socket?.off("deletedAlert");
+    };
+  }, [userId]);
+
+
+  useEffect(() => {
+    const currentUserId = sender._id;
+
+    const unreadAlerts = alerts.filter(
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+
+    setUnreadCount(unreadAlerts.length); 
+  }, [alerts,sender._id]);
+
+  useEffect(() => {
+    socket?.on("TotalUnreadCounts", (data) => {
+      console.log("📦 TotalUnreadCounts received:", data);
+      setUserUnreadCounts(data);
+    });
+
+    return () => {
+      socket?.off("TotalUnreadCounts");
+    };
+  }, []);
+
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
+
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -128,7 +251,7 @@ export default function Assessmentuserone({ }) {
         PPS,
       });
     }
-  }, [isEditMode]);
+  }, [isEditMode, suggestion, detail, statusName, PPS]);
 
   const isDataChanged = () => {
     return (
@@ -147,98 +270,9 @@ export default function Assessmentuserone({ }) {
     setIsEditMode(false);
   };
 
-  useEffect(() => {
-    socket?.on('newAlert', (alert) => {
-      console.log('Received newAlert:', alert);
-  
-      setAlerts((prevAlerts) => {
-        const isExisting = prevAlerts.some(
-          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
-        );
-  
-        let updatedAlerts;
-  
-        if (isExisting) {
-          
-          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-            updatedAlerts = [...prevAlerts, alert];
-          } else {
-            updatedAlerts = prevAlerts.map((existingAlert) =>
-              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-            );
-          }
-        } else {
-          updatedAlerts = [...prevAlerts, alert];
-        }
-  
-        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-      });
-    });
-  
-    socket?.on('deletedAlert', (data) => {
-      setAlerts((prevAlerts) => {
-        const filteredAlerts = prevAlerts.filter(
-          (alert) => alert.patientFormId !== data.patientFormId
-        );
-        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-      });
-    });
-  
-    return () => {
-      socket?.off('newAlert');
-      socket?.off('deletedAlert');
-    };
-  }, []);
-  
-  
-  useEffect(() => {
-    const currentUserId = sender._id;
-  
-    const unreadAlerts = alerts.filter(
-      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
-    );
-  
-    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-  }, [alerts]);
+ 
 
-  useEffect(() => {
-    socket?.on("TotalUnreadCounts", (data) => {
-      console.log("📦 TotalUnreadCounts received:", data);
-      setUserUnreadCounts(data);
-    });
 
-    return () => {
-      socket?.off("TotalUnreadCounts");
-    };
-  }, [socket]);
-
-  const toggleNotifications = (e) => {
-    e.stopPropagation();
-    if (showNotifications) {
-      setShowNotifications(false);
-    } else {
-      setShowNotifications(true);
-    }
-    // setShowNotifications(prev => !prev);
-  };
-
-  const handleClickOutside = (e) => {
-    if (
-      notificationsRef.current &&
-      !notificationsRef.current.contains(e.target) &&
-      !bellRef.current.contains(e.target)
-    ) {
-      setShowNotifications(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -258,7 +292,7 @@ export default function Assessmentuserone({ }) {
           _id: data.data._id,
         });
         setData(data.data);
-        if (data.data == "token expired") {
+        if (data.data === "token expired") {
           window.localStorage.clear();
           window.location.href = "./";
         }
@@ -269,8 +303,8 @@ export default function Assessmentuserone({ }) {
       });
   };
   const fetchAndSetAlerts = (token, userId) => {
-    fetchAlerts(token)
-      .then((alerts) => {
+    fetchAlerts(token, userId)
+          .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -298,26 +332,45 @@ export default function Assessmentuserone({ }) {
     }
   }, []);
 
-  const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+  const markAllByTypeAsViewed = (type) => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ userId: userId }),
+      body: JSON.stringify({ userId: userId, type: type }),
     })
       .then((res) => res.json())
       .then((data) => {
-        const updatedAlerts = alerts.map((alert) => ({
-          ...alert,
-          viewedBy: [...alert.viewedBy, userId],
-        }));
-        setAlerts(updatedAlerts);
-        setUnreadCount(0);
+        if (data.message === "All selected alerts marked as viewed") {
+          const updatedAlerts = alerts.map((alert) => {
+            if (
+              type === "all" ||
+              ((alert.alertType === type ||
+                (type === "abnormal" &&
+                  (alert.alertType === "abnormal" ||
+                    alert.alertMessage === "เคสฉุกเฉิน")) ||
+                (type === "assessment" &&
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                !alert.viewedBy.includes(userId))
+            ) {
+              return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+            }
+            return alert;
+          });
+
+          setAlerts(updatedAlerts);
+          // setUnreadCount(0);
+          const unreadAlerts = updatedAlerts.filter(
+            (alert) => !alert.viewedBy.includes(userId)
+          );
+          setUnreadCount(unreadAlerts.length);
+        }
       })
       .catch((error) => {
-        console.error("Error marking all alerts as viewed:", error);
+        console.error("Error marking alerts as viewed:", error);
       });
   };
 
@@ -328,9 +381,38 @@ export default function Assessmentuserone({ }) {
   const filteredAlerts =
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+      : filterType === "assessment"
+      ? alerts.filter(
+          (alert) =>
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน"
+        )
+      : filterType === "abnormal"
+      ? alerts.filter(
+          (alert) =>
+            alert.alertType === "abnormal" ||
+            alert.alertMessage === "เคสฉุกเฉิน"
+        )
+      : filterType === "normal"
+      ? alerts.filter((alert) => alert.alertType === "normal")
       : alerts;
 
-
+  const getFilterLabel = (type) => {
+    switch (type) {
+      case "all":
+        return "ทั้งหมด";
+      case "unread":
+        return "ยังไม่อ่าน";
+      case "normal":
+        return "บันทึกอาการ";
+      case "abnormal":
+        return "ผิดปกติ";
+      case "assessment":
+        return "ประเมินอาการ";
+      default:
+        return "ไม่ทราบ";
+    }
+  };
   useEffect(() => {
     const fetchpatientForms = async () => {
       try {
@@ -370,7 +452,7 @@ export default function Assessmentuserone({ }) {
 
       fetchData();
     }
-  }, [patientFormsone.user]);
+  }, [patientFormsone.user,patientFormsone._id]);
 
   useEffect(() => {
     if (patientFormsone && patientFormsone.user) {
@@ -382,7 +464,6 @@ export default function Assessmentuserone({ }) {
           const data = await response.json();
           console.log("Medical Information:", data);
           setMedicalData(data.data);
-          console.log("22:", medicalData);
         } catch (error) {
           console.error("Error fetching medical information:", error);
         }
@@ -390,10 +471,24 @@ export default function Assessmentuserone({ }) {
 
       fetchMedicalInfo();
     }
-  }, [patientFormsone.user]);
+  }, [patientFormsone.user,patientFormsone ]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!statusName && !PPS) {
+      toast.error("กรุณาเลือกค่า PPS และสถานะการประเมินอาการ");
+      return;
+    }
+
+    if (!statusName) {
+      toast.error("กรุณาเลือกสถานะการประเมินอาการ");
+      return;
+    }
+    if (!PPS) {
+      toast.error("กรุณาเลือกค่า PPS");
+      return;
+    }
+
     fetch("http://localhost:5000/addassessment", {
       method: "POST",
       headers: {
@@ -424,7 +519,7 @@ export default function Assessmentuserone({ }) {
       });
   };
 
-  const fetchAssessments = async () => {
+  const fetchAssessments = useCallback(async () => {
     try {
       const response = await fetch(`http://localhost:5000/allAssessments`, {
         method: "GET",
@@ -445,17 +540,18 @@ export default function Assessmentuserone({ }) {
         setSuggestion(currentAssessment.suggestion);
         setMPersonnel(currentAssessment.MPersonnel);
         setDateass(currentAssessment.createdAt);
+        setDateModified(currentAssessment.updatedAt);
         setAssessmentId(currentAssessment._id);
         setHistoryAss(currentAssessment.history || []);
       }
     } catch (error) {
       console.error("Error fetching assessments:", error);
     }
-  };
+  }, [token, patientFormsone._id]);
 
   useEffect(() => {
     fetchAssessments();
-  }, [patientFormsone._id]);
+  }, [fetchAssessments]);
 
   const handleEditAssessment = () => {
     setIsEditMode(true);
@@ -466,8 +562,8 @@ export default function Assessmentuserone({ }) {
         `http://localhost:5000/assessment/${assessmentId}`
       );
       const data = await response.json();
-      setHistory(data.data.history); // ตั้งค่า history
-      setHistoryVisible(true); // เปิดการแสดงผล history
+      setHistory(data.data.history); 
+      setHistoryVisible(true); 
     } catch (error) {
       console.error("Error fetching history:", error);
     }
@@ -488,7 +584,7 @@ export default function Assessmentuserone({ }) {
         }),
       });
       setTimeout(() => {
-        toast.success("แก้ไขสำเร็จ"); // แสดง toast หลังจาก 1 วินาที
+        toast.success("แก้ไขสำเร็จ"); 
       }, 1000);
       setIsEditMode(false);
       fetchAssessments(); // รีเฟรชข้อมูลใหม่
@@ -510,7 +606,6 @@ export default function Assessmentuserone({ }) {
   useEffect(() => {
     const fetchThreshold = async () => {
       if (patientFormsone && patientFormsone.user) {
-        console.log("งง", patientFormsone.user);
         try {
           const token = window.localStorage.getItem("token");
           if (token) {
@@ -577,7 +672,23 @@ export default function Assessmentuserone({ }) {
     };
 
     fetchThreshold();
-  }, [patientFormsone.user]);
+  }, [
+    patientFormsone.user,
+    patientFormsone,
+    threshold.DBP.max,
+    threshold.DBP.min,
+    threshold.DTX.max,
+    threshold.DTX.min,
+    threshold.Painscore,
+    threshold.PulseRate.max,
+    threshold.PulseRate.min,
+    threshold.Respiration.max,
+    threshold.Respiration.min,
+    threshold.SBP.max,
+    threshold.SBP.min,
+    threshold.Temperature.max,
+    threshold.Temperature.min,
+  ]);
 
   const handleTimeRangeChange = (event) => {
     setTimeRange(event.target.value);
@@ -647,7 +758,7 @@ export default function Assessmentuserone({ }) {
         setUserAge(ageDiff);
       }
     }
-  }, [currentDate]);
+  }, [currentDate,birthday]);
 
   const logOut = () => {
     window.localStorage.clear();
@@ -680,9 +791,11 @@ export default function Assessmentuserone({ }) {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-      } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } เวลา ${hours < 10 ? "0" + hours : hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } น.`;
   };
 
   const CustomTooltipDTX = ({ active, payload }) => {
@@ -724,19 +837,19 @@ export default function Assessmentuserone({ }) {
     return null;
   };
 
-  const CustomTooltipBloodPressure = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="custom-tooltip">
-          <p className="label">{`${formatDate(data.createdAt)}`}</p>
-          <span className="desc">{`SBP: ${data.SBP}`}</span>
-          <span className="desc">{` DBP: ${data.DBP}`}</span>
-        </div>
-      );
-    }
-    return null;
-  };
+  // const CustomTooltipBloodPressure = ({ active, payload }) => {
+  //   if (active && payload && payload.length) {
+  //     const data = payload[0].payload;
+  //     return (
+  //       <div className="custom-tooltip">
+  //         <p className="label">{`${formatDate(data.createdAt)}`}</p>
+  //         <span className="desc">{`SBP: ${data.SBP}`}</span>
+  //         <span className="desc">{` DBP: ${data.DBP}`}</span>
+  //       </div>
+  //     );
+  //   }
+  //   return null;
+  // };
 
   const CustomTooltipSBP = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -796,33 +909,11 @@ export default function Assessmentuserone({ }) {
     setStatusName(value);
   };
 
-  const CustomDot = ({ cx, cy, stroke, payload, dataKey }) => {
-    const value = payload[dataKey];
-
-    if (value === null || value === undefined || value === "") {
-      return null;
-    }
-
-    return (
-      <svg x={cx - 20} y={cy - 10.5} width={40} height={20} viewBox="0 0 40 20">
-        <rect x="0" y="0" width="40" height="20" fill={stroke} />
-        <text
-          x="50%"
-          y="50%"
-          fill="#fff"
-          textAnchor="middle"
-          alignmentBaseline="middle"
-          fontSize="12px"
-        ></text>
-      </svg>
-    );
-  };
-
   const formatDateTime = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
     const day = dateTime.getDate().toString().padStart(2, "0");
     const month = (dateTime.getMonth() + 1).toString().padStart(2, "0");
-    const year = dateTime.getFullYear();
+    // const year = dateTime.getFullYear();
     const hours = dateTime.getHours().toString().padStart(2, "0");
     const minutes = dateTime.getMinutes().toString().padStart(2, "0");
     return `${day}/${month}\n${hours}:${minutes}`;
@@ -840,20 +931,17 @@ export default function Assessmentuserone({ }) {
           }
           const data = await response.json();
           setSymptomsCount(data.symptomsCount);
-          setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching symptoms count:", error);
-        setError(error);
-        setLoading(false);
       }
     };
 
     fetchSymptomsCount();
   }, [patientFormsone.user, patientFormsone._id]);
 
+  
   useEffect(() => {
-    // ดึงข้อมูล unread count เมื่อเปิดหน้า
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
@@ -876,9 +964,9 @@ export default function Assessmentuserone({ }) {
 
   const handleScroll = () => {
     if (window.scrollY > 300) {
-      setShowScrollTopButton(true); 
+      setShowScrollTopButton(true);
     } else {
-      setShowScrollTopButton(false); 
+      setShowScrollTopButton(false);
     }
   };
 
@@ -892,9 +980,50 @@ export default function Assessmentuserone({ }) {
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
-      behavior: "smooth", 
+      behavior: "smooth",
     });
   };
+
+  
+  const adjustTextareaHeight = (textarea) => {
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+
+    if (textarea.scrollHeight > 100) {
+      textarea.style.height = "200px"; 
+      textarea.style.overflowY = "auto"; 
+    } else {
+      textarea.style.height = textarea.scrollHeight + "px";
+      textarea.style.overflowY = "hidden"; 
+    }
+  };
+  useEffect(() => {
+    if (isEditMode) {
+      setTimeout(() => {
+        adjustTextareaHeight(textareaDetailRef.current);
+        adjustTextareaHeight(textareaSuggestionRef.current);
+      }, 0);
+    }
+  }, [isEditMode]);
+
+  const handleInputChange = (e, setter) => {
+    const textarea = e.target;
+
+    textarea.style.height = "auto";
+
+    textarea.style.height = textarea.scrollHeight + "px";
+
+    if (textarea.scrollHeight > 200) {
+      textarea.style.overflowY = "auto"; 
+      textarea.style.height = "200px"; 
+    } else {
+      textarea.style.overflowY = "hidden";
+    }
+
+    setter(textarea.value);
+  };
+
   return (
     <main className="body">
       <ToastContainer />
@@ -1058,32 +1187,41 @@ export default function Assessmentuserone({ }) {
 
         <div className="toolbar"></div>
         <div className="content">
-          <p className="headerassesment">
-            {name} {surname}
-          </p>
-          {birthday ? (
-            <p className="textassesment">
-              <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน{" "}
-              <label>เพศ:</label>
-              {gender}
+          <div>
+            <p className="headerassesment">
+              {name} {surname}
             </p>
-          ) : (
+            {birthday ? (
+              <p className="textassesment">
+                <label>อายุ:</label>{" "}
+                <span>
+                  {userAge} ปี {userAgeInMonths} เดือน
+                </span>{" "}
+                <label>เพศ:</label> <span>{gender}</span>
+              </p>
+            ) : (
+              <p className="textassesment">
+                <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
+                <label>เพศ:</label> <span>{gender}</span>
+              </p>
+            )}
             <p className="textassesment">
-              {" "}
-              <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>
-              {gender}
+              <label>HN:</label>{" "}
+              <span>
+                {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
+              </span>
+              <label>AN:</label>{" "}
+              <span>
+                {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
+              </span>
+              <label>ผู้ป่วยโรค:</label>{" "}
+              <span>
+                {medicalData && medicalData.Diagnosis
+                  ? medicalData.Diagnosis
+                  : "ไม่มีข้อมูล"}
+              </span>
             </p>
-          )}
-          <p className="textassesment">
-            <label>HN:</label>
-            {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-            <label>AN:</label>
-            {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-            <label>ผู้ป่วยโรค:</label>
-            {medicalData && medicalData.Diagnosis
-              ? medicalData.Diagnosis
-              : "ไม่มีข้อมูล"}
-          </p>
+          </div>
           <div className="contentin-outmost">
             <div className="divdate">
               <b className="textdate" align="center">
@@ -1092,44 +1230,47 @@ export default function Assessmentuserone({ }) {
             </div>
             <div className="content-in">
               <p className="textheadSymptom-center">สัญญาณชีพ</p>
-              <div className="container">
+              <div className="container-ass">
                 <div className="left-column">
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">อุณหภูมิ</label>
-                    <p className="text">
-                      {patientFormsone.Temperature || "-"} °C
-                    </p>
+                    <label className="title-Vitalsigns">อุณหภูมิ:</label>
+                    <p className="text">{patientFormsone.Temperature || "-"}</p>
+                    <p className="text-unit">°C</p>
                   </div>
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">ความดันตัวบน</label>
-                    <p className="text">{patientFormsone.SBP || "-"} mmHg</p>
+                    <label className="title-Vitalsigns">ความดันตัวบน:</label>
+                    <p className="text">{patientFormsone.SBP || "-"} </p>
+                    <p className="text-unit">mmHg</p>
                   </div>
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">ความดันตัวล่าง</label>
-                    <p className="text">{patientFormsone.DBP || "-"} mmHg</p>
+                    <label className="title-Vitalsigns">ความดันตัวล่าง:</label>
+                    <p className="text">{patientFormsone.DBP || "-"}</p>
+                    <p className="text-unit">mmHg</p>
                   </div>
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">ชีพจร</label>
-                    <p className="text">
-                      {patientFormsone.PulseRate || "-"} ครั้ง/นาที
-                    </p>
+                    <label className="title-Vitalsigns">ชีพจร:</label>
+                    <p className="text">{patientFormsone.PulseRate || "-"}</p>
+                    <p className="text-unit">ครั้ง/นาที</p>
                   </div>
                 </div>
 
                 <div className="right-column">
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">การหายใจ</label>
-                    <p className="text">
-                      {patientFormsone.Respiration || "-"} ครั้ง/นาที
-                    </p>
+                    <label className="title-Vitalsigns">การหายใจ:</label>
+                    <p className="text">{patientFormsone.Respiration || "-"}</p>
+                    <p className="text-unit">ครั้ง/นาที</p>
                   </div>
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">ระดับความเจ็บปวด</label>
+                    <label className="title-Vitalsigns">
+                      ระดับความเจ็บปวด:
+                    </label>
                     <p className="text">{patientFormsone.Painscore || "-"}</p>
+                    <p className="text-unit"></p>
                   </div>
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">DTX</label>
-                    <p className="text">{patientFormsone.DTX || "-"} mg/dL</p>
+                    <label className="title-Vitalsigns">DTX:</label>
+                    <p className="text">{patientFormsone.DTX || "-"}</p>
+                    <p className="text-unit">mg/dL</p>
                   </div>
                 </div>
               </div>
@@ -1139,15 +1280,16 @@ export default function Assessmentuserone({ }) {
               {patientFormsone.Symptoms &&
                 patientFormsone.Symptoms.map((symptom, index) => (
                   <div className="symptom-item" key={index}>
-                    <label className="title-ptf1">{`อาการที่ ${index + 1
-                      }: `}</label>
-                    <span className="text1">{symptom}</span>
+                    <label className="title-symtom">{`อาการที่ ${
+                      index + 1
+                    }: `}</label>
+                    <span className="text-symtom">{symptom}</span>
                   </div>
                 ))}
 
               <p className="textheadSymptom-center">
                 ความถี่ของอาการ
-                <span className="bracket">(นับรวมการบันทึกปัจจุบัน)</span>:
+                <span className="bracket">(นับรวมการบันทึกปัจจุบัน)</span>
               </p>
               <div className="inline-containersymtoms-count">
                 {symptomsCount.map((symptom) => (
@@ -1158,24 +1300,39 @@ export default function Assessmentuserone({ }) {
               </div>
               <div className="inline-container">
                 <label className="textheadSymptom">ความรุนแรงของอาการ:</label>
-                <p className="text">
-                  &nbsp;{patientFormsone.LevelSymptom || "-"}
+                <p className="text-symtom-inline">
+                  <span
+                    className={
+                      patientFormsone.LevelSymptom?.trim() === "ดีขึ้น"
+                        ? "up-normal-status-LevelSymptom"
+                        : patientFormsone.LevelSymptom === "พอ ๆ เดิม"
+                        ? "normal-status-LevelSymptom"
+                        : patientFormsone.LevelSymptom?.trim() === "แย่ลง"
+                        ? "abnormal-status-LevelSymptom"
+                        : "end-of-treatment-status"
+                    }
+                  >
+                    &nbsp;{patientFormsone.LevelSymptom || "-"}
+                  </span>
                 </p>
               </div>
               <div className="inline-container">
                 <label className="textheadSymptom">
                   สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม:
                 </label>
-                <p className="text">
+                <p className="text-symtom-inline">
                   &nbsp;{patientFormsone.request_detail || "-"}
                 </p>
               </div>
               <div className="inline-container">
                 <label className="textheadSymptom">ผู้บันทึก:</label>
-                <p className="text">&nbsp;{patientFormsone.Recorder || "-"}</p>
+                <p className="text-symtom-inline">
+                  &nbsp;{patientFormsone.Recorder || "-"}
+                </p>
               </div>
             </div>
           </div>
+          
           {/* <div className="contentinass"> */}
           <div className="contentgraphs">
             <div className="selecttime">
@@ -1197,7 +1354,6 @@ export default function Assessmentuserone({ }) {
                   <span className="head-graph">อุณหภูมิ (°C)</span>
                 </div>
               </div>
-              <p className="textgraph"></p>
               {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1206,11 +1362,11 @@ export default function Assessmentuserone({ }) {
                       // height={300}
                       data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                    // margin={
-                    //   timeRange === "1month"
-                    //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                    //     : { right: 28, left: 28 }
-                    // }
+                      // margin={
+                      //   timeRange === "1month"
+                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                      //     : { right: 28, left: 28 }
+                      // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
@@ -1229,7 +1385,7 @@ export default function Assessmentuserone({ }) {
                         domain={[30, 40]}
                         tick={{ fontSize: 10 }}
                         ticks={[30, 32, 34, 36, 38, 40]}
-                      // hide={timeRange !== "1month"}
+                        // hide={timeRange !== "1month"}
                       />
                       <Tooltip content={<CustomTooltipTemperature />} />
                       <ReferenceLine
@@ -1254,7 +1410,6 @@ export default function Assessmentuserone({ }) {
                           fontSize: 12,
                         }}
                       />
-
                       <Area
                         type="monotone"
                         dataKey="Temperature"
@@ -1294,6 +1449,14 @@ export default function Assessmentuserone({ }) {
                   </ResponsiveContainer>
                 </div>
               )}
+              {timeRange === "1month" &&
+                patientdata &&
+                patientdata.length > 0 && (
+                  <p className="textgraph">
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    {formatDate(patientdata[patientdata.length - 1].createdAt)}
+                  </p>
+                )}
             </div>
             <div className="contentgraph">
               <div className="inline-containers">
@@ -1302,7 +1465,6 @@ export default function Assessmentuserone({ }) {
                   <span className="head-graph">ความดันตัวบน (mmHg)</span>
                 </div>
               </div>
-              <p className="textgraph"></p>
               {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1370,14 +1532,14 @@ export default function Assessmentuserone({ }) {
                         isAnimationActive={true}
                         animationDuration={1500}
                         connectNulls={true}
-                      // dot={
-                      //   timeRange === "1month" ? (
-                      //     false
-                      //   ) : (
-                      //     <CustomDot dataKey="SBP" />
-                      //   )
-                      // }
-                      // legendType="none"
+                        // dot={
+                        //   timeRange === "1month" ? (
+                        //     false
+                        //   ) : (
+                        //     <CustomDot dataKey="SBP" />
+                        //   )
+                        // }
+                        // legendType="none"
                       >
                         {/* {timeRange !== "1month" && (
                           <LabelList
@@ -1408,6 +1570,14 @@ export default function Assessmentuserone({ }) {
                   </ResponsiveContainer>
                 </div>
               )}
+              {timeRange === "1month" &&
+                patientdata &&
+                patientdata.length > 0 && (
+                  <p className="textgraph">
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    {formatDate(patientdata[patientdata.length - 1].createdAt)}
+                  </p>
+                )}
             </div>
             <div className="contentgraph">
               <div className="inline-containers">
@@ -1416,7 +1586,6 @@ export default function Assessmentuserone({ }) {
                   <span className="head-graph">ความดันตัวล่าง (mmHg)</span>
                 </div>
               </div>
-              <p className="textgraph"></p>
               {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1441,7 +1610,7 @@ export default function Assessmentuserone({ }) {
                         domain={[50, 120]}
                         ticks={[50, 60, 70, 80, 90, 100, 110, 120]}
                         tick={{ fontSize: 12 }}
-                      // padding={{ top: 10, bottom: 10 }}
+                        // padding={{ top: 10, bottom: 10 }}
                       />
                       <Tooltip content={<CustomTooltipDBP />} />
                       <ReferenceLine
@@ -1509,6 +1678,14 @@ export default function Assessmentuserone({ }) {
                   </ResponsiveContainer>
                 </div>
               )}
+              {timeRange === "1month" &&
+                patientdata &&
+                patientdata.length > 0 && (
+                  <p className="textgraph">
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    {formatDate(patientdata[patientdata.length - 1].createdAt)}
+                  </p>
+                )}
             </div>
             <div className="contentgraph">
               <div className="inline-containers">
@@ -1517,7 +1694,6 @@ export default function Assessmentuserone({ }) {
                   <span className="head-graph">ชีพจร (ครั้ง/นาที)</span>
                 </div>
               </div>
-              <p className="textgraph"></p>
               {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1619,6 +1795,14 @@ export default function Assessmentuserone({ }) {
                   </ResponsiveContainer>
                 </div>
               )}
+              {timeRange === "1month" &&
+                patientdata &&
+                patientdata.length > 0 && (
+                  <p className="textgraph">
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    {formatDate(patientdata[patientdata.length - 1].createdAt)}
+                  </p>
+                )}
             </div>
 
             <div className="contentgraph">
@@ -1628,7 +1812,6 @@ export default function Assessmentuserone({ }) {
                   <span className="head-graph">การหายใจ (ครั้ง/นาที)</span>
                 </div>
               </div>
-              <p className="textgraph"></p>
               {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1659,7 +1842,7 @@ export default function Assessmentuserone({ }) {
                       <YAxis
                         tick={{ fontSize: 10 }}
                         ticks={[0, 10, 20, 30, 40]}
-                      // hide={timeRange !== "1month"}
+                        // hide={timeRange !== "1month"}
                       />
                       <Tooltip content={<CustomTooltipRespiration />} />
                       <ReferenceLine
@@ -1729,6 +1912,14 @@ export default function Assessmentuserone({ }) {
                   </ResponsiveContainer>
                 </div>
               )}
+              {timeRange === "1month" &&
+                patientdata &&
+                patientdata.length > 0 && (
+                  <p className="textgraph">
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    {formatDate(patientdata[patientdata.length - 1].createdAt)}
+                  </p>
+                )}
             </div>
             <div className="contentgraph">
               <div className="inline-containers">
@@ -1737,7 +1928,6 @@ export default function Assessmentuserone({ }) {
                   <span className="head-graph">ระดับความเจ็บปวด</span>
                 </div>
               </div>
-              <p className="textgraph"></p>
               {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1746,11 +1936,11 @@ export default function Assessmentuserone({ }) {
                       // height={300}
                       data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                    // margin={
-                    //   timeRange === "1month"
-                    //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                    //     : { right: 28, left: 28 }
-                    // }
+                      // margin={
+                      //   timeRange === "1month"
+                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                      //     : { right: 28, left: 28 }
+                      // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
@@ -1770,12 +1960,12 @@ export default function Assessmentuserone({ }) {
                         domain={[0, 10]}
                         tick={{ fontSize: 10 }}
                         ticks={[0, 2, 4, 6, 8, 10]}
-                      // hide={timeRange !== "1month"}
+                        // hide={timeRange !== "1month"}
                       />
 
                       <Tooltip content={<CustomTooltipPainscore />} />
                       <ReferenceLine
-                        y={threshold.Painscore}
+                        y={painscore}
                         stroke="#00b300"
                         strokeDasharray="5 5"
                         label={{
@@ -1827,6 +2017,14 @@ export default function Assessmentuserone({ }) {
                   </ResponsiveContainer>
                 </div>
               )}
+              {timeRange === "1month" &&
+                patientdata &&
+                patientdata.length > 0 && (
+                  <p className="textgraph">
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    {formatDate(patientdata[patientdata.length - 1].createdAt)}
+                  </p>
+                )}
             </div>
 
             <div className="contentgraph">
@@ -1836,7 +2034,6 @@ export default function Assessmentuserone({ }) {
                   <span className="head-graph">ระดับน้ำตาลในเลือด (mg/dL)</span>
                 </div>
               </div>
-              <p className="textgraph"></p>
               {patientdata && (
                 <div className="chart-containerass1">
                   <ResponsiveContainer width="100%" height={300}>
@@ -1845,11 +2042,11 @@ export default function Assessmentuserone({ }) {
                       // height={300}
                       data={patientdata}
                       margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                    // margin={
-                    //   timeRange === "1month"
-                    //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                    //     : { right: 28, left: 28 }
-                    // }
+                      // margin={
+                      //   timeRange === "1month"
+                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                      //     : { right: 28, left: 28 }
+                      // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
@@ -1868,7 +2065,7 @@ export default function Assessmentuserone({ }) {
                       <YAxis
                         domain={[60, 180]}
                         tick={{ fontSize: 10 }}
-                        ticks={[60, 80, 100, 120, 140, 160, 180]}
+                        ticks={[60, 85, 110, 135, 160, 185, 210]}
                       />
                       {/* )} */}
                       <Tooltip content={<CustomTooltipDTX />} />
@@ -1912,51 +2109,77 @@ export default function Assessmentuserone({ }) {
                         connectNulls={true}
                         isAnimationActive={true}
                         animationDuration={1500}
-                      >
-                      </Line>
+                      ></Line>
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
               )}
+              {timeRange === "1month" &&
+                patientdata &&
+                patientdata.length > 0 && (
+                  <p className="textgraph">
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    {formatDate(patientdata[patientdata.length - 1].createdAt)}
+                  </p>
+                )}
             </div>
           </div>
 
           {isAssessed ? (
-            <div className="contentinass">
-              <div className="inline-container-ass">
-                <p className="textheadSymptom-center-ass">การประเมินอาการ</p>
+            <div className="contentin-outmost-ass">
+              <div className="divass">
+                <div className="inline-container-ass">
+                  <b className="textass" align="center">
+                    การประเมินอาการ
+                  </b>
+                  {(data._id === mpersonnel._id || historyass.length > 0) && (
+                    <div
+                      className="ellipsis-btn"
+                      onClick={() => setShowMenu(!showMenu)}
+                    >
+                      <i class="bi bi-three-dots-vertical"></i>
+                    </div>
+                  )}
+                </div>
+
                 <div
-                  className="ellipsis-btn"
-                  onClick={() => setShowMenu(!showMenu)}
+                  className={`ellipsis-menu ${showMenu ? "show" : ""}`}
+                  ref={menuRef}
                 >
-                  <span className="icon">⋮</span>
+                  {/* เมนูที่แสดงขึ้น */}
+                  {showMenu && (
+                    <div className="menu-content">
+                      {data._id === mpersonnel._id && (
+                        <div
+                          className="menu-item"
+                          onClick={handleEditAssessment}
+                        >
+                          <span className="icon">
+                            <i className="bi bi-pencil-fill"></i>
+                          </span>{" "}
+                          แก้ไข
+                        </div>
+                      )}
+                      {historyass.length > 0 && (
+                        <div className="menu-item" onClick={handleViewHistory}>
+                          <span className="icon">
+                            <i className="bi bi-clock-history"></i>
+                          </span>{" "}
+                          ดูประวัติการแก้ไข
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="ellipsis-menu" ref={menuRef}>
-                {/* เมนูที่แสดงขึ้น */}
-                {showMenu && (
-                  <div className="menu-content">
-                    {data._id === mpersonnel._id && (
-                      <div className="menu-item" onClick={handleEditAssessment}>
-                        <span className="icon">
-                          <i class="bi bi-pencil-fill"></i>
-                        </span>{" "}
-                        แก้ไข
-                      </div>
-                    )}
-                    {historyass.length > 0 && (
-                    <div className="menu-item" onClick={handleViewHistory}>
-                      <span className="icon">
-                        <i class="bi bi-clock-history"></i>
-                      </span>{" "}
-                      ดูประวัติการแก้ไข
-                    </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              <div className="mb-1">
-                <div className="mb-1 status-name">
+
+              <div className="content-in-ass">
+                <div className="inline-container">
+                  <label className="title-ass-inside">PPS: </label>
+                  <p className="text-ass-inside">{PPS || "-"}</p>
+                </div>
+                <div className="inline-container">
+                  <label className="title-ass-inside">ผลการประเมินอาการ:</label>
                   <div className="btn-group-status-name">
                     {statusName === "ปกติ" && (
                       <div
@@ -1982,90 +2205,58 @@ export default function Assessmentuserone({ }) {
                         เคสฉุกเฉิน
                       </div>
                     )}
-                    {statusName === "จบการรักษา" && (
+                    {statusName === "สิ้นสุดการรักษา" && (
                       <div
                         className="btn-ass btn-completed"
-                        onClick={() => handleButtonClick("จบการรักษา")}
+                        onClick={() => handleButtonClick("สิ้นสุดการรักษา")}
                       >
-                        จบการรักษา
+                        สิ้นสุดการรักษา
                       </div>
                     )}
                     <input type="hidden" value={statusName} />
                   </div>
                 </div>
-              </div>
-              <div className="inline-container">
-                <label className="title-ass">PPS: </label>
-                <p className="text">{PPS || "-"}</p>
-              </div>
-
-              <div className="inline-container">
-                <label className="title-ass">รายละเอียดสำหรับแพทย์: </label>
-                <p className="text">{detail || "-"}</p>
-              </div>
-              <div className="inline-container">
-                <label className="title-ass">คำแนะนำสำหรับผู้ป่วย: </label>
-                <p className="text">{suggestion || "-"}</p>
-              </div>
-              <div className="inline-container">
-                <label className="title-ass">ผู้ประเมิน: </label>
-                <p className="text">
-                  {mpersonnel.nametitle} {mpersonnel.name} {mpersonnel.surname}
-                </p>
-              </div>
-              <div className="inline-container">
-                <label className="title-ass">วันที่ประเมิน: </label>
-                <p className="text">{formatDate(dateass)}</p>
+                <div className="inline-container">
+                  <label className="title-ass-inside">รายละเอียดสำหรับแพทย์: </label>
+                  <p className="text-ass-inside">{detail || "-"}</p>
+                </div>
+                <div className="inline-container">
+                  <label className="title-ass-inside">คำแนะนำสำหรับผู้ป่วย: </label>
+                  <p className="text-ass-inside">{suggestion || "-"}</p>
+                </div>
+                <div className="inline-container">
+                  <label className="title-ass-inside">ผู้ประเมิน: </label>
+                  <p className="text-ass-inside">
+                    {mpersonnel.nametitle} {mpersonnel.name}{" "}
+                    {mpersonnel.surname}
+                  </p>
+                </div>
+                <div className="inline-container">
+                  <label className="title-ass-inside">วันที่ประเมิน: </label>
+                  <p className="text-ass-inside">{formatDate(dateass)}</p>
+                </div>
+                {historyass.length > 0 && (
+                  <div className="inline-container">
+                    <label className="title-ass-inside">วันที่แก้ไขล่าสุด: </label>
+                    <p className="text-ass-inside">{formatDate(dateModified)}</p>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
-            <div className="contentinass">
-              <p className="textheadSymptom-center">ประเมินอาการ</p>
-              <form onSubmit={handleSubmit}>
-                <div className="mb-1">
-                  <div className="mb-1 status-name">
-                    <div className="btn-group-status-name">
-                      <div
-                        className={`btn-ass ${statusName === "ปกติ" ? "btn-normal" : "btn-outline"
-                          }`}
-                        onClick={() => handleButtonClick("ปกติ")}
-                      >
-                        ปกติ
-                      </div>
-                      <div
-                        className={`btn-ass ${statusName === "ผิดปกติ"
-                          ? "btn-abnormal"
-                          : "btn-outline"
-                          }`}
-                        onClick={() => handleButtonClick("ผิดปกติ")}
-                      >
-                        ผิดปกติ
-                      </div>
-                      <div
-                        className={`btn-ass ${statusName === "เคสฉุกเฉิน"
-                          ? "btn-Emergency"
-                          : "btn-outline"
-                          }`}
-                        onClick={() => handleButtonClick("เคสฉุกเฉิน")}
-                      >
-                        เคสฉุกเฉิน
-                      </div>
-                      <div
-                        className={`btn-ass ${statusName === "จบการรักษา"
-                          ? "btn-completed"
-                          : "btn-outline"
-                          }`}
-                        onClick={() => handleButtonClick("จบการรักษา")}
-                      >
-                        จบการรักษา
-                      </div>
-                      <input type="hidden" value={statusName} />
-                    </div>
-                  </div>
+            <div className="contentin-outmost-ass">
+              <div className="divass">
+                <b className="textass" align="center">
+                  ประเมินอาการ
+                </b>
+                
+              </div>
+              <div className="content-in-ass">
+                <form onSubmit={handleSubmit}>
                   <div className="inline-container">
-                    <label className="title-ass">PPS</label>
+                    <label className="title-ass">PPS:</label>
                     <select
-                      className="form-control select"
+                      className="form-select select"
                       onChange={(e) => setPPS(e.target.value)}
                     >
                       <option value="">กรุณาเลือก</option>
@@ -2082,30 +2273,84 @@ export default function Assessmentuserone({ }) {
                       <option value="100">100</option>
                     </select>
                   </div>
-                </div>
-                <div className="inline-container">
-                  <label className="title-ass">รายละเอียดสำหรับแพทย์: </label>
-                  <textarea
-                    type="text"
-                    className="form-control"
-                    onChange={(e) => setDetail(e.target.value)}
-                  />
-                </div>
-                <div className="inline-container">
-                  <label className="title-ass">คำแนะนำสำหรับผู้ป่วย: </label>
-                  <textarea
-                    type="text"
-                    className="form-control"
-                    onChange={(e) => setSuggestion(e.target.value)}
-                  />
-                </div>
+                  <div className="inline-container">
+                    <label className="title-ass">ประเมินอาการ:</label>
+                    <div className="btn-group-status-name">
+                      <div
+                        className={`btn-ass ${
+                          statusName === "ปกติ" ? "btn-normal" : "btn-outline"
+                        }`}
+                        onClick={() => handleButtonClick("ปกติ")}
+                      >
+                        ปกติ
+                      </div>
+                      <div
+                        className={`btn-ass ${
+                          statusName === "ผิดปกติ"
+                            ? "btn-abnormal"
+                            : "btn-outline"
+                        }`}
+                        onClick={() => handleButtonClick("ผิดปกติ")}
+                      >
+                        ผิดปกติ
+                      </div>
+                      <div
+                        className={`btn-ass ${
+                          statusName === "เคสฉุกเฉิน"
+                            ? "btn-Emergency"
+                            : "btn-outline"
+                        }`}
+                        onClick={() => handleButtonClick("เคสฉุกเฉิน")}
+                      >
+                        เคสฉุกเฉิน
+                      </div>
+                      <div
+                        className={`btn-ass ${
+                          statusName === "สิ้นสุดการรักษา"
+                            ? "btn-completed"
+                            : "btn-outline"
+                        }`}
+                        onClick={() => handleButtonClick("สิ้นสุดการรักษา")}
+                      >
+                        สิ้นสุดการรักษา
+                      </div>
+                      <input type="hidden" value={statusName} />
+                    </div>
+                  </div>
 
-                <div className="d-grid save">
-                  <button type="submit" className="btn btnsave py-2">
-                    บันทึก
-                  </button>
-                </div>
-              </form>
+                  <div className="inline-container">
+                    <label className="title-ass">รายละเอียดสำหรับแพทย์: </label>
+                    <textarea
+                      className="form-control"
+                      onChange={(e) => handleInputChange(e, setDetail)}
+                      rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                      style={{ resize: "vertical" }}
+                    ></textarea>
+                  </div>
+
+                  <div className="inline-container">
+                    <label className="title-ass">คำแนะนำสำหรับผู้ป่วย: </label>
+                    <textarea
+                      className="form-control"
+                      onChange={(e) => handleInputChange(e, setSuggestion)}
+                      // rows="1"
+                      // style={{
+                      //   overflowY: "hidden",
+                      //   resize: "none",
+                      //   maxHeight: "200px",
+                      // }}
+                      rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                      style={{ resize: "vertical" }}
+                    ></textarea>
+                  </div>
+
+                  <div className="d-grid save-ass">
+                    <button type="submit" className="btn btnsave-ass py-2">
+                      บันทึก
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
         </div>
@@ -2119,69 +2364,122 @@ export default function Assessmentuserone({ }) {
                 <h4>แก้ไขการประเมิน</h4>
               </div>
               <form onSubmit={handleUpdateAssessment}>
-                <div className="mb-1 status-name">
-                  <div
-                    className={`btn-ass ${statusName === "ปกติ" ? "btn-normal" : "btn-outline"
-                      }`}
-                    onClick={() => handleButtonClick("ปกติ")}
+                <div className="model-edit-ass">
+                  <label>PPS:</label>
+                  <select
+                    className="form-control"
+                    value={PPS}
+                    onChange={(e) => setPPS(e.target.value)}
                   >
-                    ปกติ
-                  </div>
-                  <div
-                    className={`btn-ass ${statusName === "ผิดปกติ" ? "btn-abnormal" : "btn-outline"
+                    <option value="">กรุณาเลือก PPS</option>
+                    {[...Array(11)].map((_, i) => (
+                      <option key={i} value={i * 10}>
+                        {i * 10}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="model-edit-ass">
+                  <label>ประเมินอาการ:</label>
+                  <div className="btn-group-status-name">
+                    <div
+                      className={`btn-ass ${
+                        statusName === "ปกติ" ? "btn-normal" : "btn-outline"
                       }`}
-                    onClick={() => handleButtonClick("ผิดปกติ")}
-                  >
-                    ผิดปกติ
-                  </div>
-                  <div
-                    className={`btn-ass ${statusName === "เคสฉุกเฉิน"
-                      ? "btn-Emergency"
-                      : "btn-outline"
+                      onClick={() => handleButtonClick("ปกติ")}
+                    >
+                      ปกติ
+                    </div>
+                    <div
+                      className={`btn-ass ${
+                        statusName === "ผิดปกติ"
+                          ? "btn-abnormal"
+                          : "btn-outline"
                       }`}
-                    onClick={() => handleButtonClick("เคสฉุกเฉิน")}
-                  >
-                    เคสฉุกเฉิน
-                  </div>
-                  <div
-                    className={`btn-ass ${statusName === "จบการรักษา"
-                      ? "btn-completed"
-                      : "btn-outline"
+                      onClick={() => handleButtonClick("ผิดปกติ")}
+                    >
+                      ผิดปกติ
+                    </div>
+                    <div
+                      className={`btn-ass ${
+                        statusName === "เคสฉุกเฉิน"
+                          ? "btn-Emergency"
+                          : "btn-outline"
                       }`}
-                    onClick={() => handleButtonClick("จบการรักษา")}
-                  >
-                    จบการรักษา
+                      onClick={() => handleButtonClick("เคสฉุกเฉิน")}
+                    >
+                      เคสฉุกเฉิน
+                    </div>
+                    <div
+                      className={`btn-ass ${
+                        statusName === "สิ้นสุดการรักษา"
+                          ? "btn-completed"
+                          : "btn-outline"
+                      }`}
+                      onClick={() => handleButtonClick("สิ้นสุดการรักษา")}
+                    >
+                      สิ้นสุดการรักษา
+                    </div>
                   </div>
                 </div>
+                <div className="model-edit-ass">
+                  <label>รายละเอียดสำหรับแพทย์:</label>
+                  <textarea
+                    ref={textareaDetailRef}
+                    value={detail}
+                    className="form-control"
+                    onChange={(e) => {
+                      setDetail(e.target.value); // อัปเดต state
+                      adjustTextareaHeight(e.target); // ปรับความสูง
+                    }}
+                    rows="1"
+                    style={{
+                      overflowY: "hidden",
+                      resize: "none",
+                      maxHeight: "100px",
+                    }}
+                  ></textarea>
 
-                <label>PPS:</label>
-                <select
-                  className="form-control"
-                  value={PPS}
-                  onChange={(e) => setPPS(e.target.value)}
-                >
-                  <option value="">กรุณาเลือก PPS</option>
-                  {[...Array(11)].map((_, i) => (
-                    <option key={i} value={i * 10}>
-                      {i * 10}
-                    </option>
-                  ))}
-                </select>
-
-                <label>รายละเอียดสำหรับแพทย์:</label>
-                <textarea
+                  {/* <textarea
                   className="form-control"
                   value={detail}
                   onChange={(e) => setDetail(e.target.value)}
-                />
-
-                <label>คำแนะนำสำหรับผู้ป่วย:</label>
-                <textarea
+                /> */}
+                </div>
+                <div className="model-edit-ass">
+                  <label>คำแนะนำสำหรับผู้ป่วย:</label>
+                  {/* <textarea
+                 value={suggestion}
+                      className="form-control"
+                      onChange={(e) => handleInputChange(e, setSuggestion)}
+                      rows="1"
+                      style={{
+                        overflowY: "hidden",
+                        resize: "none",
+                        maxHeight: "100px",
+                      }}
+                    ></textarea> */}
+                  <textarea
+                    ref={textareaSuggestionRef}
+                    value={suggestion}
+                    className="form-control"
+                    onChange={(e) => {
+                      setSuggestion(e.target.value);
+                      adjustTextareaHeight(e.target);
+                    }}
+                    rows="1"
+                    style={{
+                      overflowY: "hidden",
+                      resize: "none",
+                      maxHeight: "100px",
+                    }}
+                  ></textarea>
+                  {/* <textarea
                   className="form-control"
                   value={suggestion}
                   onChange={(e) => setSuggestion(e.target.value)}
-                />
-
+                /> */}
+                </div>
                 <div className="button-group-EditMode">
                   <button
                     disabled={!isDataChanged()}
@@ -2223,8 +2521,14 @@ export default function Assessmentuserone({ }) {
                 <ul className="history-list">
                   {history.map((item, index) => (
                     <li key={index} className="history-item">
-                      <div className="history-item-header">
-                        <div className="mb-3">
+                      <div className="history-item-body">
+                        <p>
+                          PPS:{" "}
+                          <strong><span className="pps">{item.PPS}</span></strong>
+                        </p>
+                        <div className="history-item-header">
+                          {/* <div className="mb-3"> */}
+                          ผลการประเมินอาการ:
                           <div className="btn-group-history">
                             {item.status_name === "ปกติ" && (
                               <div className="btn-ass btn-normal">
@@ -2241,39 +2545,34 @@ export default function Assessmentuserone({ }) {
                                 {item.status_name}
                               </div>
                             )}
-                            {item.status_name === "จบการรักษา" && (
+                            {item.status_name === "สิ้นสุดการรักษา" && (
                               <div className="btn-ass btn-completed">
                                 {item.status_name}
                               </div>
                             )}
+                            {/* </div> */}
                           </div>
                         </div>
-                      </div>
-                      <div className="history-item-body">
                         <p>
-                          <strong>PPS:</strong>{" "}
-                          <span className="pps">{item.PPS}</span>
+                          รายละเอียดสำหรับแพทย์:{" "}
+                          <strong><span className="detail">{item.detail|| "-"}</span></strong>
                         </p>
                         <p>
-                          <strong>รายละเอียดสำหรับแพทย์:</strong>{" "}
-                          <span className="detail">{item.detail}</span>
+                          คำแนะนำสำหรับผู้ป่วย:{" "}
+                          <strong><span className="suggestion">{item.suggestion|| "-"}</span></strong>
                         </p>
                         <p>
-                          <strong>คำแนะนำสำหรับผู้ป่วย:</strong>{" "}
-                          <span className="suggestion">{item.suggestion}</span>
-                        </p>
-                        <p>
-                          <strong>แก้ไขโดย:</strong>{" "}
-                          <span className="updatedBy">
+                          แก้ไขโดย:{" "}
+                          <strong><span className="updatedBy">
                             {item.updatedBy?.name || "N/A"}{" "}
                             {item.updatedBy?.surname || "N/A"}
-                          </span>
+                          </span></strong>
                         </p>
                         <p>
-                          <strong>วันที่แก้ไข:</strong>{" "}
-                          <span className="date">
+                          วันที่แก้ไข:{" "}
+                          <strong><span className="date">
                             {formatDate(item.updatedAt)}
-                          </span>
+                          </span></strong>
                         </p>
                       </div>
                       <hr className="history-separator" />
@@ -2285,68 +2584,137 @@ export default function Assessmentuserone({ }) {
           </div>
         )}
 
-        {showNotifications && (
-          <div className="notifications-dropdown" ref={notificationsRef}>
-            <div className="notifications-head">
-              <h2 className="notifications-title">การแจ้งเตือน</h2>
-              <p
-                className="notifications-allread"
-                onClick={markAllAlertsAsViewed}
-              >
-                ทำเครื่องหมายว่าอ่านทั้งหมด
-              </p>
-              <div className="notifications-filter">
-                <button
-                  className={filterType === "all" ? "active" : ""}
-                  onClick={() => handleFilterChange("all")}
-                >
-                  ดูทั้งหมด
-                </button>
-                <button
-                  className={filterType === "unread" ? "active" : ""}
-                  onClick={() => handleFilterChange("unread")}
-                >
-                  ยังไม่อ่าน
-                </button>
+      {showNotifications && (
+        <div className="notifications-dropdown" ref={notificationsRef}>
+          <div className="notifications-head">
+            <h2 className="notifications-title">การแจ้งเตือน</h2>
+          </div>
+          <div className="notifications-filter">
+            <div
+              className={`notification-box ${
+                filterType === "all" ? "active" : ""
+              }`}
+              onClick={() => handleFilterChange("all")}
+            >
+              <div className="notification-item">
+                <i className="bi bi-bell"></i>
+                ทั้งหมด
+              </div>
+              <div className="notification-right">
+                {unreadCount > 0 && (
+                  <span className="notification-count-noti">{unreadCount}</span>
+                )}
+                <i className="bi bi-chevron-right"></i>
               </div>
             </div>
-            {filteredAlerts.length > 0 ? (
-              <>
-                {renderAlerts(
-                  filteredAlerts,
-                  token,
-                  userId,
-                  navigate,
-                  setAlerts,
-                  setUnreadCount,
-                  formatDate
+            <div
+              className={`notification-box ${
+                filterType === "abnormal" ? "active" : ""
+              }`}
+              onClick={() => handleFilterChange("abnormal")}
+            >
+              <div className="notification-item">
+                <i className="bi bi-exclamation-triangle"></i>
+                ผิดปกติ
+              </div>
+              <div className="notification-right">
+                {unreadCountsByType.abnormal > 0 && (
+                  <span className="notification-count-noti">
+                    {unreadCountsByType.abnormal}
+                  </span>
                 )}
-              </>
-            ) : (
-              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-            )}
+                <i class="bi bi-chevron-right"></i>
+              </div>
+            </div>
+            <div
+              className={`notification-box ${
+                filterType === "normal" ? "active" : ""
+              }`}
+              onClick={() => handleFilterChange("normal")}
+            >
+              <div className="notification-item">
+                {" "}
+                <i className="bi bi-journal-text"></i>
+                บันทึกอาการ
+              </div>
+              <div className="notification-right">
+                {unreadCountsByType.normal > 0 && (
+                  <span className="notification-count-noti">
+                    {unreadCountsByType.normal}
+                  </span>
+                )}
+                <i class="bi bi-chevron-right"></i>
+              </div>
+            </div>
+
+            <div
+              className={`notification-box ${
+                filterType === "assessment" ? "active" : ""
+              }`}
+              onClick={() => handleFilterChange("assessment")}
+            >
+              <div className="notification-item">
+                <i className="bi bi-clipboard-check"></i>
+                ประเมินอาการ
+              </div>
+              <div className="notification-right">
+                {unreadCountsByType.assessment > 0 && (
+                  <span className="notification-count-noti">
+                    {unreadCountsByType.assessment}
+                  </span>
+                )}
+                <i class="bi bi-chevron-right"></i>
+              </div>
+            </div>
           </div>
-        )}
-          {showScrollTopButton && (
-        <button
-          className="scroll-to-top-btn"
-          onClick={scrollToTop}
-          style={{
-            position: "fixed",
-            bottom: "1rem",
-            right: "1rem",
-            backgroundColor: "#87CEFA",
-            color: "white",
-            border: "none",
-            borderRadius: "50%",
-            padding: ".5em .8em",
-            cursor: "pointer",
-            fontSize: "1rem",
-          }}
-        >
-        <i class="bi bi-caret-up-fill"></i>        
-        </button>
+          <div className="selected-filter">
+            <p>
+              การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+            </p>
+            <p
+              className="mark-all-read-btn"
+              onClick={() => markAllByTypeAsViewed(filterType)}
+            >
+              ทำเครื่องหมายว่าอ่านทั้งหมด
+            </p>
+          </div>
+          {filteredAlerts.length > 0 ? (
+            <div>
+              {renderAlerts(
+                filteredAlerts,
+                token,
+                userId,
+                navigate,
+                setAlerts,
+                setUnreadCount,
+                formatDate
+              )}
+            </div>
+          ) : (
+            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+          )}
+        </div>
       )}
+        {showScrollTopButton && (
+          <button
+            className="scroll-to-top-btn"
+            onClick={scrollToTop}
+            style={{
+              position: "fixed",
+              bottom: "1rem",
+              right: "1rem",
+              backgroundColor: "#87CEFA",
+              color: "white",
+              border: "none",
+              borderRadius: "50%",
+              padding: ".5em .8em",
+              cursor: "pointer",
+              fontSize: "1rem",
+            }}
+          >
+            <i class="bi bi-caret-up-fill"></i>
+          </button>
+        )}
       </div>
     </main>
   );

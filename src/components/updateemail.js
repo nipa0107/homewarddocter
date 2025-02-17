@@ -9,6 +9,8 @@ import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
 export default function UpdateEmail() {
     const [email, setEmail] = useState('');
+    const [oldEmail, setOldEmail] = useState("");
+    const [newEmail, setNewEmail] = useState("");
     const [username, setUsername] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
@@ -26,7 +28,7 @@ export default function UpdateEmail() {
     const bellRef = useRef(null);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
-    
+    const [emailError, setEmailError] = useState("");
     const [data, setData] = useState([]);
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
@@ -95,7 +97,7 @@ export default function UpdateEmail() {
 
     useEffect(() => {
         if (dataemail) {
-          setEmail(dataemail.email);
+          setOldEmail(dataemail.email);
           setUsername(dataemail.username);
         }
       }, [dataemail]);
@@ -126,23 +128,7 @@ export default function UpdateEmail() {
           document.removeEventListener('mousedown', handleClickOutside);
         };
       }, []);
-    // useEffect(() => {
-    //   const handleClickOutside = (event) => {
-    //     if (
-    //       notificationsRef.current &&
-    //       !notificationsRef.current.contains(event.target)
-    //     ) {
-    //       setShowNotifications(false);
-    //     }
-    //   };
-  
-    //   document.addEventListener("mousedown", handleClickOutside);
-  
-    //   return () => {
-    //     document.removeEventListener("mousedown", handleClickOutside);
-    //   };
-    // }, [notificationsRef]);
-  
+
     const fetchUserData = (token) => {
       return fetch("http://localhost:5000/profiledt", {
         method: "POST",
@@ -267,24 +253,39 @@ export default function UpdateEmail() {
 
       const handleSubmit = (e) => {
         e.preventDefault();
-      
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-          setErrorMessage('กรุณาใส่อีเมลที่ถูกต้อง');
-          return;
-        }
+
+         let hasError = false;
+
+    setErrorMessage("");
+    setEmailError("");
+
+    if (!newEmail.trim()) {
+      setEmailError("กรุณากรอกอีเมลใหม่");
+      hasError = true;
+    } else {
+      setEmailError("");
+    }
+  
+  
+    if (hasError) return;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      setErrorMessage("กรุณาใส่อีเมลที่ถูกต้อง");
+      return;
+    }
       
         fetch('http://localhost:5000/send-otp2', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ username, email }), // ส่ง username และ email
+          body: JSON.stringify({ username, email: newEmail }), // ส่ง username และ email
         })
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
-              navigate('/updateotp', { state: { username, email } }); // ส่ง username และ email ไปยังหน้า VerifyOtp
+              navigate('/updateotp', { state: { username, email: newEmail,dataemail } }); // ส่ง username และ email ไปยังหน้า VerifyOtp
             } else {
               setErrorMessage(data.error || 'เกิดข้อผิดพลาดในการส่ง OTP');
             }
@@ -326,6 +327,12 @@ export default function UpdateEmail() {
     };
     fetchUnreadCount();
   }, []);
+
+  const handleEmailChange = (e) => {
+    setNewEmail(e.target.value);   
+    setErrorMessage("");          
+    setEmailError("");           
+  };
       return (
         <main className="body">
           <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -459,12 +466,14 @@ export default function UpdateEmail() {
           <label htmlFor="email">อีเมลใหม่</label>
           <input
             type="email"
-            id="email"
-            className="form-control"
-            // value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            // id="email"
+            className={`form-control ${emailError ? "input-error" : ""}`}
+            value={newEmail} 
+            onChange={handleEmailChange} 
+            // required
           />
+          {emailError && <span className="error-text">{emailError}</span>}
+
         </div>
         <div className="d-grid">
         {errorMessage && <p className="error-message">{errorMessage}</p>}

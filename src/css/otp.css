@@ -1,0 +1,68 @@
+.label-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.email-text {
+    font-weight: bold;
+    /* เพิ่มความชัดเจน */
+    color: #333;
+    /* ใช้สีที่เหมาะสม */
+}
+
+.otp-input-container {
+    text-align: center;
+}
+
+.otp-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    /* ระยะห่างระหว่างช่อง */
+    margin: 10px 0;
+}
+
+.otp-input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+}
+
+.otp-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.otp-instructions {
+    text-align: center;
+}
+
+.message-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.error-messageotp {
+    display: inline-block; 
+    margin: 0;
+    color: #dc3545; 
+  }
+  .success-message{
+    color: #28a745;
+  }
+  .resend-link {
+    color: #6c757d; /* สีเทาอ่อนสำหรับลิงก์ */
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .resend-link:hover {
+    color: #007bff; /* สีฟ้าสำหรับลิงก์เมื่อ Hover */
+  }

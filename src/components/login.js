@@ -8,8 +8,12 @@ export default class Login extends Component {
     this.state = {
       username: "",
       password: "",
+      showPassword: false,
+
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.togglePassword = this.togglePassword.bind(this);
+
   }
 
   handleSubmit(e) {
@@ -48,7 +52,14 @@ export default class Login extends Component {
       });
   }
 
+  togglePassword() {
+    this.setState((prevState) => ({
+      showPassword: !prevState.showPassword,
+    }));
+  }
+
   render() {
+    const { showPassword } = this.state;
     return (
       <div className="logincontainer">
         <div className="formcontainer">
@@ -71,34 +82,31 @@ export default class Login extends Component {
                   onChange={(e) => this.setState({ username: e.target.value })}
                 />
               </div>
-
-              <div className="mb-3">
-                {/* <label>Password</label> */}
+              <div className="mb-3 position-relative">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} 
                   className="form-control"
                   placeholder="รหัสผ่าน"
                   onChange={(e) => this.setState({ password: e.target.value })}
                 />
-              </div>
+                  <i
+                  className={`bi ${
+                    showPassword ? "bi-eye-slash" : "bi-eye"
+                  }`}
+                  onClick={this.togglePassword}
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    right: "10px",
+                    transform: "translateY(-50%)", 
+                    cursor: "pointer", 
+                  }}
+                >
+                
+                  
+                </i>
 
-              {/* <div className="mb-3">
-          <div className="custom-control custom-checkbox">
-            <input
-              type="checkbox"
-              className="custom-control-input"
-              id="customCheck1"
-            />
-            <label className="custom-control-label" htmlFor="customCheck1">
-              Remember me
-            </label>
-          </div>
-        </div> */}
-                  {/* แสดงข้อความผิดพลาด */}
-              <p id="errormessage" className="errormessage">
-                {this.state.errorMessage}
-              </p>
-              
+              </div>
 
               <p className="forgot-password">
                 <a href="/forgetpassword">ลืมรหัสผ่าน ?</a>
