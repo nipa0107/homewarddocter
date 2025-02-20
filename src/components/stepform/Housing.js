@@ -3,6 +3,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 
 export const Housing = ({ onDataChange }) => {
   const { control, setValue, getValues } = useFormContext();
+
   // ดึงค่าเริ่มต้นจาก form
   const initialNeighborRelationship = getValues("neighborRelationship") || "";
   const [neighborRelationship, setNeighborRelationship] = useState(

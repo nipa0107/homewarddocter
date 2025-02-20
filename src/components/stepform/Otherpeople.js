@@ -39,6 +39,7 @@ export const Otherpeople = ({ onDataChange }) => {
                 CaregiverId: caregiver.id || "",
                 firstName: caregiver.name || "",
                 lastName: caregiver.surname || "",
+                relationship: caregiver.relationship || "ไม่ระบุ",  // ใช้ relationship จาก API
                 birthDate: caregiver.birthDate || "",
                 role: caregiver.role || "",
                 occupation: caregiver.occupation || "",
@@ -70,7 +71,7 @@ export const Otherpeople = ({ onDataChange }) => {
       firstName: "",
       lastName: "",
       birthDate: "",
-      role: "",
+      relationship: "",
       occupation: "",
       status: "",
       education: "",
@@ -94,7 +95,7 @@ export const Otherpeople = ({ onDataChange }) => {
       firstName: getValues(`existingCaregivers.${index}.firstName`) || field.firstName || "",
       lastName: getValues(`existingCaregivers.${index}.lastName`) || field.lastName || "",
       birthDate: getValues(`existingCaregivers.${index}.birthDate`) || field.birthDate || "",
-      role: getValues(`existingCaregivers.${index}.role`) || field.role || "",
+      relationship: getValues(`existingCaregivers.${index}.relationship`) || field.relationship || "ไม่ระบุ", // เพิ่มส่วนนี้
       occupation: getValues(`existingCaregivers.${index}.occupation`) || field.occupation || "",
       status: getValues(`existingCaregivers.${index}.status`) || field.status || "",
       education: getValues(`existingCaregivers.${index}.education`) || field.education || "",
@@ -110,7 +111,7 @@ export const Otherpeople = ({ onDataChange }) => {
       firstName: getValues(`newCaregivers.${index}.firstName`) || "",
       lastName: getValues(`newCaregivers.${index}.lastName`) || "",
       birthDate: getValues(`newCaregivers.${index}.birthDate`) || "",
-      role: getValues(`newCaregivers.${index}.role`) || "",
+      relationship: getValues(`newCaregivers.${index}.relationship`) || "",
       occupation: getValues(`newCaregivers.${index}.occupation`) || "",
       status: getValues(`newCaregivers.${index}.status`) || "",
       education: getValues(`newCaregivers.${index}.education`) || "",
@@ -151,7 +152,7 @@ export const Otherpeople = ({ onDataChange }) => {
                   marginBottom: "8px",
                 }}
               >
-                {`คนที่ ${index + 1} ${field.firstName} ${field.lastName}`}
+                {`คนที่ ${index + 1}. ${field.firstName} ${field.lastName} (${field.relationship})`}
               </span>
               <Collapse in={openIndex.existing === index}>
                 <div className="p-2">
@@ -209,26 +210,18 @@ export const Otherpeople = ({ onDataChange }) => {
                     />
                   </div>
                   <div className="mt-2">
-                    <label>บทบาท:</label>
+                    <label>ความสัมพันธ์ :</label>
                     <Controller
-                      name={`existingCaregivers.${index}.role`}
+                      name={`existingCaregivers.${index}.relationship`}
                       control={control}
+                      defaultValue={field.relationship || ""}
                       render={({ field }) => (
-                        <select
-                          className="form-select"
-                          {...field}
-                        >
-                          <option value="">เลือกบทบาท</option>
-                          <option value="ลูก">ลูก</option>
-                          <option value="บิดา">บิดา</option>
-                          <option value="มารดา">มารดา</option>
-                          <option value="คู่สมรส (สามี/ภรรยา)">คู่สมรส (สามี/ภรรยา)</option>
-                          <option value="ญาติ">ญาติ</option>
-                          <option value="ปู่/ย่า/ตา/ยาย">ปู่/ย่า/ตา/ยาย</option>
-                          <option value="พี่ชาย/พี่สาว">พี่ชาย/พี่สาว</option>
-                          <option value="น้องชาย/น้องสาว">น้องชาย/น้องสาว</option>
-                          <option value="ผู้ปกครอง">ผู้ปกครอง</option>
-                        </select>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={field.value}
+                          disabled // Prevent editing for existing caregivers
+                        />
                       )}
                     />
                   </div>
@@ -414,12 +407,12 @@ export const Otherpeople = ({ onDataChange }) => {
                   marginBottom: "8px",
                 }}
               >
-                {`คนที่ ${existingFields.length + index + 1} ${field.firstName} ${field.lastName}`}
+                {`คนที่ ${existingFields.length + index + 1}. ${field.firstName} ${field.lastName}`}
               </span>
               <Collapse in={openIndex.new === index}>
                 <div className="p-2">
                   <div>
-                    <label>ชื่อ:</label>
+                    <label>ชื่อ :</label>
                     <Controller
                       name={`newCaregivers.${index}.firstName`}
                       control={control}
@@ -433,7 +426,7 @@ export const Otherpeople = ({ onDataChange }) => {
                     />
                   </div>
                   <div>
-                    <label>สกุล:</label>
+                    <label>สกุล :</label>
                     <Controller
                       name={`newCaregivers.${index}.lastName`}
                       control={control}
@@ -464,19 +457,19 @@ export const Otherpeople = ({ onDataChange }) => {
                     />
                   </div>
                   <div className="mt-2">
-                    <label>บทบาท:</label>
+                    <label>ความสัมพันธ์ :</label>
                     <Controller
-                      name={`newCaregivers.${index}.role`}
+                      name={`newCaregivers.${index}.relationship`}
                       control={control}
                       render={({ field }) => (
                         <select
                           className="form-select"
                           {...field}
                         >
-                          <option value="">เลือกบทบาท</option>
+                          <option value="">เลือกความสัมพันธ์</option>
                           <option value="ลูก">ลูก</option>
-                          <option value="พ่อ">บิดา</option>
-                          <option value="แม่">มารดา</option>
+                          <option value="พ่อ">พ่อ</option>
+                          <option value="แม่">แม่</option>
                           <option value="คู่สมรส">คู่สมรส (สามี/ภรรยา)</option>
                           <option value="ญาติ">ญาติ</option>
                           <option value="ปู่/ย่า/ตา/ยาย">ปู่/ย่า/ตา/ยาย</option>
@@ -488,7 +481,7 @@ export const Otherpeople = ({ onDataChange }) => {
                     />
                   </div>
                   <div className="mt-2">
-                    <label>อาชีพ:</label>
+                    <label>อาชีพ :</label>
                     <Controller
                       name={`newCaregivers.${index}.occupation`}
                       control={control}
@@ -637,7 +630,7 @@ export const Otherpeople = ({ onDataChange }) => {
                     />
                   </div>
                   <div className="mt-2">
-                    <label>รายละเอียดการดูแลผู้ป่วย:</label>
+                    <label>รายละเอียดการดูแลผู้ป่วย :</label>
                     <Controller
                       name={`newCaregivers.${index}.careDetails`}
                       control={control}

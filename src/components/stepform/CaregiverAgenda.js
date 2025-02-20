@@ -8,7 +8,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
   const [caregivers, setCaregivers] = useState([]);
   const [newCaregivers, setNewCaregivers] = useState([]);
   const [careAgenda, setCareAgenda] = useState([]);
-  const [openIndex, setOpenIndex] = useState(null); // ควบคุมฟอร์มที่เปิดอยู่
+  const [openIndex, setOpenIndex] = useState(0); // ควบคุมฟอร์มที่เปิดอยู่
   const location = useLocation();
   const { id } = location.state || {};
 
@@ -43,18 +43,19 @@ export const CaregiverAgenda = ({ onDataChange }) => {
         console.error("Error fetching new caregivers:", error);
       }
     };
-  
+
     if (id) fetchNewCaregivers();
   }, [id]);
-  
+
 
   // อัปเดต careAgenda เมื่อข้อมูล caregivers หรือ newCaregivers ถูกโหลด
   useEffect(() => {
     const combinedCaregivers = [
       ...caregivers.map((c) => ({
         id: c.id,
-        firstName: c.name,
-        lastName: c.surname,
+        firstName: c.firstName,
+        lastName: c.lastName,
+        relationship: c.relationship,
         caregiver_idea: "",
         caregiver_feeling: "",
         caregiver_function: "",
@@ -64,6 +65,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
         id: c.id,
         firstName: c.firstName,
         lastName: c.lastName,
+        relationship: c.relationship,
         caregiver_idea: "",
         caregiver_feeling: "",
         caregiver_function: "",
@@ -92,57 +94,64 @@ export const CaregiverAgenda = ({ onDataChange }) => {
 
   return (
     <div>
-      <div className="info3 card mt-4">
+      <div className="title-form mt-1">
         <div className="header">
           <b>Caregiver Agenda</b>
         </div>
-        <div className="m-4">
-          {careAgenda.map((item, index) => (
-            <div key={item.id}>
-              <span
-                onClick={() => toggleFormVisibility(index)}
-                style={{
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  color: "#5cb3fd",
-                  marginBottom: "8px",
-                }}
-              >
-                {`คนที่ ${index + 1}. ${item.firstName} ${item.lastName}`}
-              </span>
-              <Collapse in={openIndex === index}>
-                <div className="p-2">
-                  {[{ name: "caregiver_idea", label: "Idea" },
-                    { name: "caregiver_feeling", label: "Feeling" },
-                    { name: "caregiver_function", label: "Function" },
-                    { name: "caregiver_expectation", label: "Expectation" },
-                  ].map((field) => (
-                    <div key={field.name}>
-                      <label className="form-label">{field.label}:</label>
-                      <Controller
-                        name={`careAgenda_${index}_${field.name}`}
-                        control={control}
-                        render={({ field: controllerField }) => (
-                          <input
-                            type="text"
-                            className="google-form-input"
-                            placeholder="กรอกคำตอบ"
-                            {...controllerField}
-                            value={item[field.name]}
-                            onChange={(e) => {
-                              controllerField.onChange(e);
-                              handleInputChange(index, field.name, e.target.value);
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </Collapse>
-            </div>
-          ))}
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-person-check" style={{ color: "#008000" }}></i> ประเมินผู้ดูแลเบื้องต้น</p>
         </div>
+
+      </div>
+      <div className="m-4">
+        {careAgenda.map((item, index) => (
+          <div key={item.id}>
+            <span
+              onClick={() => toggleFormVisibility(index)}
+              style={{
+                cursor: "pointer",
+                color: "#007BFF",
+                display: "block", // ทำให้แต่ละบรรทัดเป็น block
+                marginTop: "20px",
+                transition: "color 0.3s ease", // ทำให้การเปลี่ยนสีมีการเคลื่อนไหว
+              }}
+              onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+              onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
+            >
+              <b>{`ผู้ดูแลคนที่ ${index + 1}. ${item.firstName} ${item.lastName} (${item.relationship})`}</b>
+            </span>
+
+            <Collapse in={openIndex === index}>
+              <div>
+                {[{ name: "caregiver_idea", label: "Idea" },
+                { name: "caregiver_feeling", label: "Feeling" },
+                { name: "caregiver_function", label: "Function" },
+                { name: "caregiver_expectation", label: "Expectation" },
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label className="form-label mt-2">{field.label} :</label>
+                    <Controller
+                      name={`careAgenda_${index}_${field.name}`}
+                      control={control}
+                      render={({ field: controllerField }) => (
+                        <textarea
+                          className="form-control"
+                          placeholder="กรอกคำตอบ"
+                          {...controllerField}
+                          value={item[field.name]}
+                          onChange={(e) => {
+                            controllerField.onChange(e);
+                            handleInputChange(index, field.name, e.target.value);
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Collapse>
+          </div>
+        ))}
       </div>
     </div>
   );

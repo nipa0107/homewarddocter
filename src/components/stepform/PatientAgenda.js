@@ -15,12 +15,12 @@ export const PatientAgenda = ({ onDataChange }) => {
 
     return (
         <div>
-            <div className="info3 card mt-4">
+            <div className="title-form mt-1">
                 <div className="header">
                     <b>Patient Agenda</b>
                 </div>
                 <div style={{ marginLeft: '26px' }}>
-                    <p>ประเมินผู้ป่วยเบื้องต้น</p>
+                    <p style={{color:"#666"}}><i class="bi bi-person-check" style={{color:"#008000"}}></i> ประเมินผู้ป่วยเบื้องต้น</p>
                 </div>
             </div>
 
@@ -31,17 +31,16 @@ export const PatientAgenda = ({ onDataChange }) => {
                 { name: "patient_function", label: "Function" },
                 { name: "patient_expectation", label: "Expectation" }
             ].map((field) => (
-                <div className="info3 card" key={field.name}>
+                <div className="mt-4" key={field.name}>
                     <div className='m-4'>
-                        <label className="form-label">{field.label}:</label>
+                        <label className="form-label">{field.label} : </label>
                         <div>
                             <Controller
                                 name={field.name}
                                 control={control}
                                 render={({ field: controllerField }) => (
-                                    <input
-                                        type="text"
-                                        className="google-form-input"
+                                    <textarea
+                                        className="form-control"
                                         placeholder="กรอกคำตอบ"
                                         {...controllerField}
                                         onChange={(e) => {

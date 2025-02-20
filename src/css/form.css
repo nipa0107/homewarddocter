@@ -1,14 +1,44 @@
+.container-form {
+    background-color: #e8f5fd;
+    padding: 5em;
+    min-height: 100vh;
+    margin-top: 40px !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.formcontent {
+    background-color: white;
+    position: relative;
+    width: 70%;
+    padding: 1em;
+    border-radius: 8px;
+    border-left: 1px solid #ddd;
+    /* ขอบด้านซ้าย */
+    border-right: 1px solid #ddd;
+    /* ขอบด้านขวา */
+    border-top: 5px solid #87CEFA;
+    /* ขอบบนเป็นสีฟ้า */
+    border-bottom: 2px solid #87CEFA;
+    /* ขอบล่างเป็นสีฟ้า */
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.formcontent .name {
+    margin-top: 10px;
+    color: #000;
+    font-size: 1.6em;
+}
+
 .add {
     border-style: solid 1px;
     border-radius: 5px;
 }
 
-/* .form_content {
-    position: relative;
-    height: 100%;
-    transition: all 0.5s ease;
-    margin-bottom: 2%;
-} */
 .sidebarform {
     position: fixed;
     border-right: 1px solid #87CEFA;
@@ -20,19 +50,19 @@
     border-radius: 8px;
     overflow: hidden;
 }
-.agendaform{
+
+.agendaform {
     position: fixed;
     top: 110px;
-    /* Offset for the fixed header */
     left: 250px;
     width: 390px;
     height: calc(25vh - 50px);
-    /* Full height minus the header */
     border: 1px solid #ddd;
     background-color: white;
     overflow-y: auto;
     border-radius: 8px;
 }
+
 .textassesmentagenda {
     font-size: 16px;
     color: #666;
@@ -43,6 +73,7 @@
     font-weight: bold;
     color: #323232;
 }
+
 .add:hover {
     background-color: #87CEFA;
     color: #ffffff;
@@ -402,7 +433,7 @@ tr.assessmentnull {
 
 }
 
-.info3 .header {
+.info4 .header {
     background-color: #95d7ff;
     /* สีฟ้า */
     color: #000;
@@ -411,14 +442,13 @@ tr.assessmentnull {
     margin: 0;
     border-radius: 3px 3px 0 0;
 }
-
-.info3 .header b {
-    font-size: 20px;
+.title-form{
+    border-bottom: 1px solid #ddd;
+}
+.header b {
+    font-size: 25px;
 }
 
-.info3.card {
-    padding: 0;
-}
 
 /* In stylechat.css or form.css */
 .bodyform {
@@ -453,34 +483,43 @@ tr.assessmentnull {
 }
 
 .form-label {
-    font-size: 18px;
-    /* หรือขนาดที่คุณต้องการ */
-    /* font-weight: bold; */
+    font-size: 17px;
+    line-height: 50px;
 }
 
-.form-content {
-    margin-left: 500px;
-    /* Sidebar width */
-    margin-top: 10px;
-    /* Offset for the header */
-    padding: 20px;
-    height: calc(100vh - 60px);
-    /* Full height minus the header */
-    overflow-y: auto;
-    /* Scrollable content */
+.namepatient {
+    line-height: 32px;
+    margin-top: -10px;
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    margin-left: 10px;
 }
 
-.info3 {
-    width: 55%;
+.step-menu button {
+    text-align: left;
+    border-left: #ddd;
+    border-right: #ddd;
+    border-top: 1px solid #d6d6d6;
+    border-bottom: 1px none;
+    padding: 8px;
+
+}
+
+.info4 {
+    width: 90% !important;
     margin-left: auto;
     margin-right: auto;
     line-height: 50px;
+
+}
+.zarit{
+    width: 3%;
 }
 
 .headerassesmentinhome {
     font-size: 1.4em;
     font-weight: bold;
-    color: #333;
+    color: black;
     margin-bottom: 4px;
 }
 
@@ -505,6 +544,7 @@ tr.assessmentnull {
     margin-top: 10px;
     margin-left: 25px;
 }
+
 .nameagenda {
     margin-top: 10px;
     margin-left: 35px;
@@ -531,6 +571,7 @@ tr.assessmentnull {
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #ddd;
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.05);
     padding: 1rem;
 }
 
@@ -734,8 +775,10 @@ textarea {
     cursor: pointer;
 } */
 .stepper {
-    margin-left: 5rem;
-    color: #f9f9f9;
+    margin-bottom: 40px;
+    width: 70%;
+    margin-right: auto;
+    margin-left: auto;
 }
 
 .homeheader {
@@ -747,22 +790,24 @@ textarea {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.google-form-input {
-    border: none;
-    border-bottom: 2px solid #ccc;
+.form-control {
+    border: 1px solid #ccc;
+    border-radius: 5px;
     font-size: 1rem;
     transition: border-color 0.3s ease-in-out;
     width: 100%;
 }
 
-.google-form-input:focus {
+/* .google-form-input:focus {
     outline: none;
     border-bottom: 2px solid #4285f4;
-    /* Google Forms blue */
-}
+} */
 
-.google-form-input::placeholder {
-    color: #ccc;
+.form-control::placeholder {
+    color: #c6c6c6;
+    padding-top: 12px;
+    padding-left: 2px;
+    padding-bottom: 5px;
 }
 
 /* .form-input-other {
@@ -812,5 +857,6 @@ textarea {
 }
 
 .textassesmentinhome label {
-    margin-right: 10px; /* ระยะห่างทางขวาจาก label */
+    margin-right: 10px;
+    /* ระยะห่างทางขวาจาก label */
 }

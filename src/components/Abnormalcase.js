@@ -661,7 +661,7 @@ export default function Abnormalcaser({ }) {
                         <table className="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>วันที่บันทึก</th>
+                                    <th>วันที่ประเมิน</th>
                                     <th>ชื่อ-สกุล</th>
                                     <th>ผลการประเมิน</th>
                                     <th>ผู้ประเมิน</th>
@@ -684,14 +684,14 @@ export default function Abnormalcaser({ }) {
                                               }
                                         >
                                             <td>{formatDate(caseData.updatedAt)}</td>
-                                            <td>{caseData.PatientForm?.user?.name || "N/A"} {caseData.PatientForm?.user?.surname || ""}</td>
+                                            <td>{caseData.PatientForm?.user?.name || "ไม่ระบุชื่อ"} {caseData.PatientForm?.user?.surname || ""}</td>
                                             <td style={{ color: caseData.status_name === "ผิดปกติ" ? "#fb8c00" : "#FF6A6A" }}>
                                                 {caseData.status_name}
                                             </td>
                                             <td>
                                                 {caseData.MPersonnel
                                                     ? `${caseData.MPersonnel.nametitle} ${caseData.MPersonnel.name} ${caseData.MPersonnel.surname}`
-                                                    : "N/A"}
+                                                    : "ไม่ระบุชื่อ"}
                                             </td>
                                         </tr>
                                     ))

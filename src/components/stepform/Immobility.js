@@ -2,41 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import CountUp from 'react-countup';
 
-export const Immobility = ({ Immobilitydata, setImmobilityData }) => {
+export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, showError, setShowError }) => {
   const [totalScore, setTotalScore] = useState(null);
   const [group, setGroup] = useState('');
 
-  const calculateTotalScore = () => {
-    const scoreKeys = [
-      'Pick_up_food',
-      'Clean_up',
-      'Put_on_clothes',
-      'Shower',
-      'Using_the_toilet',
-      'Get_up',
-      'Walk_inside',
-      'Up_down_stairs',
-      'Continence_urine',
-      'Continence_stool',
-      'Walk_outside',
-      'Cooking',
-      'Household_chores',
-      'Shopping',
-      'Taking_public_transportation',
-      'Taking_medicine',
-    ];
+  const scoreKeys = [
+    'Pick_up_food', 'Clean_up', 'Put_on_clothes', 'Shower', 'Using_the_toilet',
+    'Get_up', 'Walk_inside', 'Up_down_stairs', 'Continence_urine', 'Continence_stool',
+    'Walk_outside', 'Cooking', 'Household_chores', 'Shopping', 'Taking_public_transportation',
+    'Taking_medicine'
+  ];
 
+  const calculateTotalScore = () => {
     let total = 0;
+    let hasMissing = false; // ตรวจสอบว่ามีข้อไหนไม่ได้เลือกหรือไม่
+
     scoreKeys.forEach(key => {
-      const value = parseInt(Immobilitydata[key], 10) || 0;
-      total += value;
+      if (!Immobilitydata[key]) {
+        hasMissing = true;
+      } else {
+        total += parseInt(Immobilitydata[key], 10) || 0;
+      }
     });
 
-    setTotalScore(total); // อัปเดตคะแนนรวมใน State แยก
-    setImmobilityData((prevData) => ({
-      ...prevData,
-      totalScore: total, // เก็บคะแนนรวมไว้ใน Immobilitydata
-    }));
+    setHasError(hasMissing); // แจ้งให้ Parent Component รู้ว่ามี Error
+    if (!hasMissing) setShowError(false); // ถ้าเลือกครบให้ซ่อนข้อความแจ้งเตือน
+    setTotalScore(total); 
+    setImmobilityData(prevData => ({ ...prevData, totalScore: total }));
+
 
     if (total >= 16 && total <= 20) {
       setGroup('กลุ่มที่ 1 (ช่วยเหลือตัวเองดี)');
@@ -75,7 +68,10 @@ export const Immobility = ({ Immobilitydata, setImmobilityData }) => {
             type="radio"
             value={option.value}
             checked={Immobilitydata[name] === String(option.value)}
-            onChange={(e) => setImmobilityData({ ...Immobilitydata, [name]: e.target.value })}
+            onChange={(e) => {
+              setImmobilityData({ ...Immobilitydata, [name]: e.target.value });
+              calculateTotalScore(); // อัปเดตคะแนนและเช็คว่าข้อมูลครบหรือไม่
+            }}
             style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
           />
         </td>
@@ -205,8 +201,14 @@ export const Immobility = ({ Immobilitydata, setImmobilityData }) => {
               ))}
             </tbody>
           </table>
+          {showError && (
+        <p style={{ color: 'red', textAlign: 'center', marginTop: '10px' }}>
+          <i class="bi bi-exclamation-circle"></i> กรุณาเลือกให้ครบทุกข้อ
+        </p>
+      )}
         </div>
       </div>
+      
       <div className="info3 card mt-3">
         <div className="header">
           <b>การประเมินผล</b>

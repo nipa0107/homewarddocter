@@ -8,7 +8,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
   const [caregivers, setCaregivers] = useState([]);
   const [newCaregivers, setNewCaregivers] = useState([]);
   const [careAssessment, setCareAssessment] = useState([]);
-  const [openIndex, setOpenIndex] = useState(null);
+  const [openIndex, setOpenIndex] = useState(0);
   const location = useLocation();
   const { id } = location.state || {};
 
@@ -43,7 +43,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
         console.error("Error fetching new caregivers:", error);
       }
     };
-  
+
     if (id) fetchNewCaregivers();
   }, [id]);
 
@@ -51,8 +51,9 @@ export const CaregiverAssessment = ({ onDataChange }) => {
     const combinedCaregivers = [
       ...caregivers.map((c) => ({
         id: c.id,
-        firstName: c.name,
-        lastName: c.surname,
+        firstName: c.firstName,
+        lastName: c.lastName,
+        relationship: c.relationship,
         care: "",
         affection: "",
         rest: "",
@@ -67,6 +68,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
         id: c.id,
         firstName: c.firstName,
         lastName: c.lastName,
+        relationship: c.relationship,
         care: "",
         affection: "",
         rest: "",
@@ -99,63 +101,70 @@ export const CaregiverAssessment = ({ onDataChange }) => {
 
   return (
     <div>
-      <div className="info3 card mt-4">
+      <div className="title-form mt-1">
         <div className="header">
           <b>Caregiver Assessment</b>
         </div>
-        <div className="m-4">
-          {careAssessment.map((item, index) => (
-            <div key={item.id}>
-              <span
-                onClick={() => toggleFormVisibility(index)}
-                style={{
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  color: "#5cb3fd",
-                  marginBottom: "8px",
-                }}
-              >
-                {`คนที่ ${index + 1}. ${item.firstName} ${item.lastName}`}
-              </span>
-              <Collapse in={openIndex === index}>
-                <div className="p-2">
-                  {[
-                    { name: "care", label: "Care (ดูแลเรื่องอะไรบ้าง)" },
-                    { name: "affection", label: "Affection (ส่งผลต่อตนเองอย่างไรบ้าง)" },
-                    { name: "rest", label: "Rest (มีเวลาพักผ่อนบ้างหรือไม่)" },
-                    { name: "empathy", label: "Empathy (การแสดงความเข้าอกเข้าใจเป็นอย่างไรบ้าง)" },
-                    { name: "goalOfCare", label: "Goal of care (เป้าหมายในการรักษาของผู้ดูแลคืออะไร)" },
-                    { name: "information", label: "Information (การให้ข้อมูล ความรู้เพิ่มเติม)" },
-                    { name: "ventilation", label: "Ventilation (การรับฟังความกังวลใจ)" },
-                    { name: "empowerment", label: "Empowerment (การให้กำลังใจ)" },
-                    { name: "resource", label: "Resource (แนะนำช่องทางช่วยเหลือ)" },
-                  ].map((field) => (
-                    <div key={field.name}>
-                      <label className="form-label">{field.label}:</label>
-                      <Controller
-                        name={`careAssessment_${index}_${field.name}`}
-                        control={control}
-                        render={({ field: controllerField }) => (
-                          <input
-                            type="text"
-                            className="google-form-input"
-                            placeholder="กรอกคำตอบ"
-                            {...controllerField}
-                            value={item[field.name]}
-                            onChange={(e) => {
-                              controllerField.onChange(e);
-                              handleInputChange(index, field.name, e.target.value);
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </Collapse>
-            </div>
-          ))}
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{color:"#666"}}><i class="bi bi-person-check" style={{ color: "#008000" }}></i> ประเมินภาระในการดูแลและปัญหาสุขภาพจิตของผู้ดูแล</p>
         </div>
+      </div>
+      <div className="m-4">
+        
+        {careAssessment.map((item, index) => (
+          <div key={item.id}>
+            <span
+              onClick={() => toggleFormVisibility(index)}
+              style={{
+                cursor: "pointer",
+                // textDecoration: "underline",
+                color: "#007BFF",
+                display: "block", // ทำให้แต่ละบรรทัดเป็น block
+                marginTop: "20px",
+                transition: "color 0.3s ease", // ทำให้การเปลี่ยนสีมีการเคลื่อนไหว
+              }}
+              onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+              onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
+            >
+              <b > {`ผู้ดูแลคนที่ ${index + 1}. ${item.firstName} ${item.lastName} (${item.relationship})`}</b>
+            </span>
+            <Collapse in={openIndex === index}>
+              <div >
+                {[
+                  { name: "care", label: "Care (ดูแลเรื่องอะไรบ้าง)" },
+                  { name: "affection", label: "Affection (ส่งผลต่อตนเองอย่างไรบ้าง)" },
+                  { name: "rest", label: "Rest (มีเวลาพักผ่อนบ้างหรือไม่)" },
+                  { name: "empathy", label: "Empathy (การแสดงความเข้าอกเข้าใจเป็นอย่างไรบ้าง)" },
+                  { name: "goalOfCare", label: "Goal of care (เป้าหมายในการรักษาของผู้ดูแลคืออะไร)" },
+                  { name: "information", label: "Information (การให้ข้อมูล ความรู้เพิ่มเติม)" },
+                  { name: "ventilation", label: "Ventilation (การรับฟังความกังวลใจ)" },
+                  { name: "empowerment", label: "Empowerment (การให้กำลังใจ)" },
+                  { name: "resource", label: "Resource (แนะนำช่องทางช่วยเหลือ)" },
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label className="form-label mt-3">{field.label} :</label>
+                    <Controller
+                      name={`careAssessment_${index}_${field.name}`}
+                      control={control}
+                      render={({ field: controllerField }) => (
+                        <textarea
+                          className="form-control"
+                          placeholder="กรอกคำตอบ"
+                          {...controllerField}
+                          value={item[field.name]}
+                          onChange={(e) => {
+                            controllerField.onChange(e);
+                            handleInputChange(index, field.name, e.target.value);
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                ))}
+              </div>
+            </Collapse>
+          </div>
+        ))}
       </div>
     </div>
   );
