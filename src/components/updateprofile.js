@@ -32,6 +32,10 @@ export default function UpdateProfile() {
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [telError, setTelError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [surnameError, setSurnameError] = useState("");
+  const [nametitleError, setNametitleError] = useState("");
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
@@ -123,26 +127,6 @@ export default function UpdateProfile() {
     };
   }, []);
 
-  // const toggleNotifications = () => {
-  //   setShowNotifications(!showNotifications);
-  // };
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (
-  //       notificationsRef.current &&
-  //       !notificationsRef.current.contains(event.target)
-  //     ) {
-  //       setShowNotifications(false);
-  //     }
-  //   };
-
-  //   document.addEventListener("mousedown", handleClickOutside);
-
-  //   return () => {
-  //     document.removeEventListener("mousedown", handleClickOutside);
-  //   };
-  // }, [notificationsRef]);
-
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -207,7 +191,38 @@ export default function UpdateProfile() {
     }
   }, []);
 
-  const UpdateProfile = async () => {
+  const UpdateProfile = async (e) => {
+    e.preventDefault();
+    let hasError = false;
+    if (!tel.trim() && !tel.length !== 10) {
+      setTelError("เบอร์โทรศัพท์ต้องมี 10 หลัก");
+      hasError = true;
+    } else {
+      setTelError("");
+    }
+
+    if (!name.trim()) {
+      setNameError("กรุณากรอกชื่อ");
+      hasError = true;
+    } else {
+      setNameError("");
+    }
+
+    if (!surname.trim()) {
+      setSurnameError("กรุณากรอกนามสกุล");
+      hasError = true;
+    } else {
+      setSurnameError("");
+    }
+
+    if (!nametitle.trim()) {
+      setNametitleError("กรุณาเลือกคำนำหน้าชื่อ");
+      hasError = true;
+    } else {
+      setNametitleError("");
+    }
+
+    if (hasError) return;
     try {
       const docterData =
       {
@@ -362,6 +377,53 @@ export default function UpdateProfile() {
     };
     fetchUnreadCount();
   }, []);
+
+  const handleInputChange = (e) => {
+    const input = e.target.value;
+    if (/[^0-9]/.test(input)) {
+      setTelError("เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้น");
+    } else {
+      setTelError("");
+    }
+    setTel(input.replace(/\D/g, ""));
+  };
+  const handleInputNameChange = (e) => {
+    const input = e.target.value;
+
+    // ตรวจสอบว่ามีตัวเลขหรืออักขระพิเศษหรือไม่
+    if (/[^ก-๙a-zA-Z\s]/.test(input)) {
+      setNameError("ชื่อควรเป็นตัวอักษรเท่านั้น");
+    } else {
+      setNameError("");
+    }
+
+    setName(input.replace(/[^ก-๙a-zA-Z\s]/g, "")); // กรองเฉพาะตัวอักษรและช่องว่าง
+  };
+
+  const handleInputSurnameChange = (e) => {
+    const input = e.target.value;
+
+    // ตรวจสอบว่ามีตัวเลขหรืออักขระพิเศษหรือไม่
+    if (/[^ก-๙a-zA-Z\s]/.test(input)) {
+      setSurnameError("นามสกุลควรเป็นตัวอักษรเท่านั้น");
+    } else {
+      setSurnameError(""); // ล้าง error หากไม่มีปัญหา
+    }
+
+    setSurname(input.replace(/[^ก-๙a-zA-Z\s]/g, "")); // กรองเฉพาะตัวอักษรและช่องว่าง
+  };
+
+  const handleInputNameTitleChange = (e) => {
+    const input = e.target.value;
+  
+    if (!input.trim()) {
+      setNametitleError("กรุณาเลือกคำนำหน้าชื่อ");
+    } else {
+      setNametitleError(""); 
+    }
+  
+    setNameTitle(input);
+  };
 
   return (
     <main className="body">
@@ -545,10 +607,10 @@ export default function UpdateProfile() {
           <div className="mb-2">
             <label>คำนำหน้าชื่อ</label>
             <select
-              className="form-control"
+                className={`form-control ${nametitleError ? "input-error" : ""}`}
               value={nametitle}
-              onChange={(e) => setNameTitle(e.target.value)}
-            >
+              onChange={handleInputNameTitleChange}            
+              >
               <option value="">กรุณาเลือก</option>
               <option value="แพทย์หญิง">แพทย์หญิง</option>
               <option value="นายแพทย์">นายแพทย์</option>
@@ -557,25 +619,30 @@ export default function UpdateProfile() {
                 <option value="นาง">นาง</option>
                 <option value="นางสาว">นางสาว</option>
             </select>
+            {nametitleError && <span className="error-text">{nametitleError}</span>}
+
           </div>
           <div className="mb-2">
             <label>ชื่อ</label>
             <input
               type="text"
-              className="form-control"
+              className={`form-control ${nameError ? "input-error" : ""}`}
               value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
+              onChange={handleInputNameChange}
+              />
+              {nameError && <span className="error-text">{nameError}</span>}
+              </div>
           <div className="mb-2">
             <label>นามสกุล</label>
             <input
               type="text"
-              className="form-control"
+              className={`form-control ${surnameError ? "input-error" : ""}`}
               value={surname}
-              onChange={(e) => setSurname(e.target.value)}
-            />
-          </div>
+              onChange={handleInputSurnameChange}
+              />
+              {surnameError && <span className="error-text">{surnameError}</span>}
+  
+            </div>
           <div className="mb-2">
             <label>อีเมล</label>
             <input
@@ -590,10 +657,13 @@ export default function UpdateProfile() {
             <label>เบอร์โทรศัพท์</label>
             <input
               type="text"
-              className="form-control"
+              className={`form-control ${telError ? "input-error" : ""}`}
+              maxLength="10"
               value={tel}
-              onChange={(e) => setTel(e.target.value)}
+              onChange={handleInputChange}
             />
+            {telError && <span className="error-text">{telError}</span>}
+
           </div>
 
           <div className="d-grid save">

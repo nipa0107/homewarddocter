@@ -4,472 +4,472 @@ import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { fetchAlerts } from './Alert/alert';
-import { renderAlerts } from './Alert/renderAlerts';
-import io from 'socket.io-client';
+import { fetchAlerts } from "./Alert/alert";
+import { renderAlerts } from "./Alert/renderAlerts";
+import io from "socket.io-client";
 
 const socket = io("http://localhost:5000");
 
-export default function Assessinhomesssuser({ }) {
-    const navigate = useNavigate();
-    const [data, setData] = useState([]);
-    const [isActive, setIsActive] = useState(false);
-    const [token, setToken] = useState("");
-    const [patientForms, setPatientForms] = useState("");
-    const location = useLocation();
-    const { id } = location.state;
-    const [username, setUsername] = useState("");
-    const [name, setName] = useState("");
-    const [surname, setSurname] = useState("");
-    const [gender, setGender] = useState("");
-    const [birthday, setBirthday] = useState("");
-    const [assessments, setAssessments] = useState([]);
-    const [mpersonnel, setMPersonnel] = useState([]);
-    const [userAge, setUserAge] = useState(0);
-    const [userAgeInMonths, setUserAgeInMonths] = useState(0);
-    const [userData, setUserData] = useState(null);
-    const [medicalData, setMedicalData] = useState([]);
-    const [allUsers, setAllUsers] = useState([]);
-    const [datauser, setDatauser] = useState([]);
-    const [alerts, setAlerts] = useState([]);
-    const [showNotifications, setShowNotifications] = useState(false);
-    const [unreadCount, setUnreadCount] = useState(0);
-    const [filterType, setFilterType] = useState("all");
-    const notificationsRef = useRef(null);
-    const [userId, setUserId] = useState("");
-    const bellRef = useRef(null);
+export default function Assessinhomesssuser({}) {
+  const navigate = useNavigate();
+  const [data, setData] = useState([]);
+  const [isActive, setIsActive] = useState(false);
+  const [token, setToken] = useState("");
+  const [patientForms, setPatientForms] = useState("");
+  const location = useLocation();
+  const { id } = location.state;
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [gender, setGender] = useState("");
+  const [birthday, setBirthday] = useState("");
+  const [assessments, setAssessments] = useState([]);
+  const [mpersonnel, setMPersonnel] = useState([]);
+  const [userAge, setUserAge] = useState(0);
+  const [userAgeInMonths, setUserAgeInMonths] = useState(0);
+  const [userData, setUserData] = useState(null);
+  const [medicalData, setMedicalData] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [datauser, setDatauser] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [filterType, setFilterType] = useState("all");
+  const notificationsRef = useRef(null);
+  const [userId, setUserId] = useState("");
+  const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
 
   useEffect(() => {
-    socket?.on('newAlert', (alert) => {
-      console.log('Received newAlert:', alert);
-  
+    socket?.on("newAlert", (alert) => {
+      console.log("Received newAlert:", alert);
+
       setAlerts((prevAlerts) => {
         const isExisting = prevAlerts.some(
           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
         );
-  
+
         let updatedAlerts;
-  
+
         if (isExisting) {
-          
-          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+          if (alert.alertMessage === "เป็นเคสฉุกเฉิน") {
             updatedAlerts = [...prevAlerts, alert];
           } else {
             updatedAlerts = prevAlerts.map((existingAlert) =>
-              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+              existingAlert.patientFormId === alert.patientFormId
+                ? alert
+                : existingAlert
             );
           }
         } else {
           updatedAlerts = [...prevAlerts, alert];
         }
-  
-        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+        return updatedAlerts.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
       });
     });
-  
-    socket?.on('deletedAlert', (data) => {
+
+    socket?.on("deletedAlert", (data) => {
       setAlerts((prevAlerts) => {
         const filteredAlerts = prevAlerts.filter(
           (alert) => alert.patientFormId !== data.patientFormId
         );
-        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+        return filteredAlerts.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
       });
     });
-  
+
     return () => {
-      socket?.off('newAlert');
-      socket?.off('deletedAlert');
+      socket?.off("newAlert");
+      socket?.off("deletedAlert");
     };
   }, []);
-  
-  
+
   useEffect(() => {
     const currentUserId = sender._id;
-  
+
     const unreadAlerts = alerts.filter(
-      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
-  
+
     setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
   }, [alerts]);
-  
-  
-    useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
+
+  useEffect(() => {
+    socket?.on("TotalUnreadCounts", (data) => {
+      console.log("📦 TotalUnreadCounts received:", data);
+      setUserUnreadCounts(data);
+    });
+
+    return () => {
+      socket?.off("TotalUnreadCounts");
+    };
+  }, [socket]);
+
+  const toggleNotifications = (e) => {
+    e.stopPropagation();
+    if (showNotifications) {
+      setShowNotifications(false);
+    } else {
+      setShowNotifications(true);
+    }
+    // setShowNotifications(prev => !prev);
+  };
+
+  const handleClickOutside = (e) => {
+    if (
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
+      !bellRef.current.contains(e.target)
+    ) {
+      setShowNotifications(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  const fetchUserData = (token) => {
+    return fetch("http://localhost:5000/profiledt", {
+      method: "POST",
+      crossDomain: true,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({ token }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setSender({
+          name: data.data.name,
+          surname: data.data.surname,
+          _id: data.data._id,
+        });
+        setData(data.data);
+        if (data.data == "token expired") {
+          window.localStorage.clear();
+          window.location.href = "./";
+        }
+        return data.data;
+      })
+      .catch((error) => {
+        console.error("Error verifying token:", error);
       });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
+  };
+  const fetchAndSetAlerts = (token, userId) => {
+    fetchAlerts(token)
+      .then((alerts) => {
+        setAlerts(alerts);
+        const unreadAlerts = alerts.filter(
+          (alert) => !alert.viewedBy.includes(userId)
+        ).length;
+        setUnreadCount(unreadAlerts);
+      })
+      .catch((error) => {
+        console.error("Error fetching alerts:", error);
+      });
+  };
+
+  useEffect(() => {
+    const token = window.localStorage.getItem("token");
+    setToken(token);
+
+    if (token) {
+      fetchUserData(token)
+        .then((user) => {
+          setUserId(user._id);
+          fetchAndSetAlerts(token, user._id);
+        })
+        .catch((error) => {
+          console.error("Error verifying token:", error);
+        });
+    }
+  }, []);
+
+  const markAllAlertsAsViewed = () => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId: userId }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const updatedAlerts = alerts.map((alert) => ({
+          ...alert,
+          viewedBy: [...alert.viewedBy, userId],
+        }));
+        setAlerts(updatedAlerts);
+        setUnreadCount(0);
+      })
+      .catch((error) => {
+        console.error("Error marking all alerts as viewed:", error);
+      });
+  };
+
+  const handleFilterChange = (type) => {
+    setFilterType(type);
+  };
+
+  const filteredAlerts =
+    filterType === "unread"
+      ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+      : alerts;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/getuser/${id}`);
+        const data = await response.json();
+        setUserData(data);
+        setUsername(data.username);
+        setName(data.name);
+        setSurname(data.surname);
+        setGender(data.gender);
+        setBirthday(data.birthday);
+      } catch (error) {
+        console.error("Error fetching caremanual data:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  useEffect(() => {
+    if (userData && userData._id) {
+      const fetchMedicalInfo = async () => {
+        try {
+          const response = await fetch(
+            `http://localhost:5000/medicalInformation/${userData._id}`
+          );
+          const data = await response.json();
+          console.log("Medical Information:", data);
+          setMedicalData(data.data);
+          console.log("22:", medicalData);
+        } catch (error) {
+          console.error("Error fetching medical information:", error);
+        }
       };
-    }, [socket]);
 
-    const toggleNotifications = (e) => {
-        e.stopPropagation();
-        if (showNotifications) {
-            setShowNotifications(false);
-        } else {
-            setShowNotifications(true);
+      fetchMedicalInfo();
+    }
+  }, [userData]);
+
+  const fetchMpersonnel = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setMPersonnel(data.data);
+      console.log("Mpersonnel:", data.data);
+    } catch (error) {
+      console.error("Error fetching patient forms:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMpersonnel();
+  }, []);
+
+  const currentDate = new Date();
+
+  const userBirthday = new Date(birthday);
+
+  useEffect(() => {
+    if (birthday) {
+      const userBirthday = new Date(birthday);
+      const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
+      const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
+      setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
+
+      if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
+      ) {
+        setUserAge(ageDiff - 1);
+      } else {
+        setUserAge(ageDiff);
+      }
+    }
+  }, [currentDate]);
+
+  const logOut = () => {
+    window.localStorage.clear();
+    window.location.href = "./";
+  };
+  // bi-list
+  const handleToggleSidebar = () => {
+    setIsActive(!isActive);
+  };
+  const formatDate = (dateTimeString) => {
+    const dateTime = new Date(dateTimeString);
+    const day = dateTime.getDate();
+    const month = dateTime.getMonth() + 1;
+    const year = dateTime.getFullYear();
+    const hours = dateTime.getHours();
+    const minutes = dateTime.getMinutes();
+
+    const thaiMonths = [
+      "มกราคม",
+      "กุมภาพันธ์",
+      "มีนาคม",
+      "เมษายน",
+      "พฤษภาคม",
+      "มิถุนายน",
+      "กรกฎาคม",
+      "สิงหาคม",
+      "กันยายน",
+      "ตุลาคม",
+      "พฤศจิกายน",
+      "ธันวาคม",
+    ];
+
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } เวลา ${hours < 10 ? "0" + hours : hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } น.`;
+  };
+
+  const [AssessinhomeForms, setAssessinhomeForms] = useState({});
+
+  const fetchAssessinhomeForms = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/getAssessinhomeForms/${id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-        // setShowNotifications(prev => !prev);
-    };
+      );
+      const data = await response.json();
+      setAssessinhomeForms(data.data);
+      console.log("Patient Forms1:", data.data);
+    } catch (error) {
+      console.error("Error fetching patient forms:", error);
+    }
+  };
 
-    const handleClickOutside = (e) => {
-        if (
-            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
-            !bellRef.current.contains(e.target)
-        ) {
-            setShowNotifications(false);
+  useEffect(() => {
+    if (id) {
+      fetchAssessinhomeForms();
+    }
+  }, [id]);
+
+  const [AgendaForms, setAgendaForms] = useState({});
+
+  const fetchAgendaForms = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/getAgendaForms/${id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-    };
+      );
+      const data = await response.json();
+      setAgendaForms(data.data);
+      console.log("Patient Forms1:", data.data);
+    } catch (error) {
+      console.error("Error fetching patient forms:", error);
+    }
+  };
 
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
+  useEffect(() => {
+    if (id) {
+      fetchAgendaForms();
+    }
+  }, [id]);
 
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-    const fetchUserData = (token) => {
-        return fetch("http://localhost:5000/profiledt", {
-            method: "POST",
-            crossDomain: true,
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "Access-Control-Allow-Origin": "*",
-            },
-            body: JSON.stringify({ token }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                setSender({
-                    name: data.data.name,
-                    surname: data.data.surname,
-                    _id: data.data._id,
-                  });
-                setData(data.data);
-                if (data.data == "token expired") {
-                    window.localStorage.clear();
-                    window.location.href = "./";
-                }
-                return data.data;
-            })
-            .catch((error) => {
-                console.error("Error verifying token:", error);
-            });
-    };
-    const fetchAndSetAlerts = (token, userId) => {
-        fetchAlerts(token)
-            .then((alerts) => {
-                setAlerts(alerts);
-                const unreadAlerts = alerts.filter(
-                    (alert) => !alert.viewedBy.includes(userId)
-                ).length;
-                setUnreadCount(unreadAlerts);
-            })
-            .catch((error) => {
-                console.error("Error fetching alerts:", error);
-            });
-    };
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
 
-    useEffect(() => {
-        const token = window.localStorage.getItem("token");
-        setToken(token);
-
-        if (token) {
-            fetchUserData(token)
-                .then(user => {
-                    setUserId(user._id);
-                    fetchAndSetAlerts(token, user._id);
-
-
-                })
-                .catch((error) => {
-                    console.error("Error verifying token:", error);
-                });
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
         }
-    }, []);
-
-
-    const markAllAlertsAsViewed = () => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed", {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({ userId: userId }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                const updatedAlerts = alerts.map((alert) => ({
-                    ...alert,
-                    viewedBy: [...alert.viewedBy, userId],
-                }));
-                setAlerts(updatedAlerts);
-                setUnreadCount(0);
-            })
-            .catch((error) => {
-                console.error("Error marking all alerts as viewed:", error);
-            });
-    };
-
-    const handleFilterChange = (type) => {
-        setFilterType(type);
-    };
-
-    const filteredAlerts = filterType === "unread"
-        ? alerts.filter(alert => !alert.viewedBy.includes(userId))
-        : alerts;
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/getuser/${id}`);
-                const data = await response.json();
-                setUserData(data);
-                setUsername(data.username);
-                setName(data.name);
-                setSurname(data.surname);
-                setGender(data.gender);
-                setBirthday(data.birthday);
-            } catch (error) {
-                console.error("Error fetching caremanual data:", error);
-            }
-        };
-
-        fetchData();
-    }, [id]);
-
-    useEffect(() => {
-        if (userData && userData._id) {
-            const fetchMedicalInfo = async () => {
-                try {
-                    const response = await fetch(
-                        `http://localhost:5000/medicalInformation/${userData._id}`
-                    );
-                    const data = await response.json();
-                    console.log("Medical Information:", data);
-                    setMedicalData(data.data);
-                    console.log("22:", medicalData);
-
-                } catch (error) {
-                    console.error("Error fetching medical information:", error);
-                }
-            };
-
-            fetchMedicalInfo();
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
         }
-    }, [userData]);
-
-
-
-    const fetchMpersonnel = async () => {
-        try {
-            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            setMPersonnel(data.data);
-            console.log("Mpersonnel:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
     };
-
-    useEffect(() => {
-        fetchMpersonnel();
-    }, []);
-
-    const currentDate = new Date();
-
-    const userBirthday = new Date(birthday);
-
-    useEffect(() => {
-        if (birthday) {
-            const userBirthday = new Date(birthday);
-            const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
-            const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
-            setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
-
-            if (
-                monthDiff < 0 ||
-                (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
-            ) {
-                setUserAge(ageDiff - 1);
-            } else {
-                setUserAge(ageDiff);
-            }
-        }
-    }, [currentDate]);
-
-    const logOut = () => {
-        window.localStorage.clear();
-        window.location.href = "./";
-    };
-    // bi-list
-    const handleToggleSidebar = () => {
-        setIsActive(!isActive);
-    };
-    const formatDate = (dateTimeString) => {
-        const dateTime = new Date(dateTimeString);
-        const day = dateTime.getDate();
-        const month = dateTime.getMonth() + 1;
-        const year = dateTime.getFullYear();
-        const hours = dateTime.getHours();
-        const minutes = dateTime.getMinutes();
-
-        const thaiMonths = [
-            "มกราคม",
-            "กุมภาพันธ์",
-            "มีนาคม",
-            "เมษายน",
-            "พฤษภาคม",
-            "มิถุนายน",
-            "กรกฎาคม",
-            "สิงหาคม",
-            "กันยายน",
-            "ตุลาคม",
-            "พฤศจิกายน",
-            "ธันวาคม",
-        ];
-
-        return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
-            } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-            } น.`;
-    };
-
-    const [AssessinhomeForms, setAssessinhomeForms] = useState({});
-
-    const fetchAssessinhomeForms = async () => {
-        try {
-            const response = await fetch(
-                `http://localhost:5000/getAssessinhomeForms/${id}`,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            const data = await response.json();
-            setAssessinhomeForms(data.data);
-            console.log("Patient Forms1:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
-    };
-
-    useEffect(() => {
-        if (id) {
-            fetchAssessinhomeForms();
-        }
-    }, [id]);
-
-    const [AgendaForms, setAgendaForms] = useState({});
-
-    const fetchAgendaForms = async () => {
-        try {
-            const response = await fetch(
-                `http://localhost:5000/getAgendaForms/${id}`,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            const data = await response.json();
-            setAgendaForms(data.data);
-            console.log("Patient Forms1:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
-    };
-
-    useEffect(() => {
-        if (id) {
-            fetchAgendaForms();
-        }
-    }, [id]);
-
-    // const sortedAgendaForms = AgendaForms.sort((a,b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-
-      useEffect(() => {
-        // ดึงข้อมูล unread count เมื่อเปิดหน้า
-        const fetchUnreadCount = async () => {
-          try {
-            const response = await fetch(
-              "http://localhost:5000/update-unread-count"
-            );
-    
-            if (!response.ok) {
-              throw new Error(`Network response was not ok: ${response.status}`);
-            }
-            const data = await response.json();
-            if (data.success) {
-              setUserUnreadCounts(data.users);
-            }
-          } catch (error) {
-            console.error("Error fetching unread count:", error);
-          }
-        };
-        fetchUnreadCount();
-      }, []);
-    return (
-        <main className="body">
-            <div className={`sidebar ${isActive ? "active" : ""}`}>
-                <div class="logo_content">
-                    <div class="logo">
-                        <div class="logo_name">
-                            <img src={logow} className="logow" alt="logo"></img>
-                        </div>
-                    </div>
-                    <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-                </div>
-                <ul class="nav-list">
-                    <li>
-                        <a href="home">
-                            <i class="bi bi-house"></i>
-                            <span class="links_name">หน้าหลัก</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessment">
-                            <i class="bi bi-clipboard2-pulse"></i>
-                            <span class="links_name">ติดตาม/ประเมินอาการ</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="allpatient">
-                            <i class="bi bi-people"></i>
-                            <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessreadiness">
-                            <i className="bi bi-clipboard-check"></i>
-                            <span className="links_name">ประเมินความพร้อมการดูแล</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessinhomesss">
-                            <i className="bi bi-house-check"></i>
-                            <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat" style={{ position: "relative" }}>
-                            <i className="bi bi-chat-dots"></i>
-                            <span className="links_name">แช็ต</span>
-                            {userUnreadCounts.map((user) => {
+    fetchUnreadCount();
+  }, []);
+  return (
+    <main className="body">
+      <div className={`sidebar ${isActive ? "active" : ""}`}>
+        <div class="logo_content">
+          <div class="logo">
+            <div class="logo_name">
+              <img src={logow} className="logow" alt="logo"></img>
+            </div>
+          </div>
+          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
+        </div>
+        <ul class="nav-list">
+          <li>
+            <a href="home">
+              <i class="bi bi-house"></i>
+              <span class="links_name">หน้าหลัก</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessment">
+              <i class="bi bi-clipboard2-pulse"></i>
+              <span class="links_name">ติดตาม/ประเมินอาการ</span>
+            </a>
+          </li>
+          <li>
+            <a href="allpatient">
+              <i class="bi bi-people"></i>
+              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessreadiness">
+              <i className="bi bi-clipboard-check"></i>
+              <span className="links_name">ประเมินความพร้อมการดูแล</span>
+            </a>
+          </li>
+          <li>
+            <a href="assessinhomesss">
+              <i className="bi bi-house-check"></i>
+              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
+            </a>
+          </li>
+          <li>
+            <a href="chat" style={{ position: "relative" }}>
+              <i className="bi bi-chat-dots"></i>
+              <span className="links_name">แช็ต</span>
+              {userUnreadCounts.map((user) => {
                 if (String(user.userId) === String(sender._id)) {
                   return (
                     <div key={user.userId}>
@@ -483,22 +483,22 @@ export default function Assessinhomesssuser({ }) {
                 }
                 return null;
               })}
-                        </a>
-                    </li>
-                    <div class="nav-logout">
-                        <li>
-                            <a href="./" onClick={logOut}>
-                                <i
-                                    class="bi bi-box-arrow-right"
-                                    id="log_out"
-                                    onClick={logOut}
-                                ></i>
-                                <span class="links_name">ออกจากระบบ</span>
-                            </a>
-                        </li>
-                    </div>
-                </ul>
-            </div>
+            </a>
+          </li>
+          <div class="nav-logout">
+            <li>
+              <a href="./" onClick={logOut}>
+                <i
+                  class="bi bi-box-arrow-right"
+                  id="log_out"
+                  onClick={logOut}
+                ></i>
+                <span class="links_name">ออกจากระบบ</span>
+              </a>
+            </li>
+          </div>
+        </ul>
+      </div>
 
             <div className="home_content">
                 <div className="homeheader">
@@ -608,72 +608,65 @@ export default function Assessinhomesssuser({ }) {
 
                     </div>
                     <div className="toolbar ">
-                        {AgendaForms && AgendaForms.length > 0 && (
+                    {AgendaForms && AgendaForms.length > 0 && (
 
-                            <button
-                                className="btn btn-primary add-assessment-btn"
-                                onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
-                            >
-                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                                เพิ่มการประเมิน
-                            </button>
-                        )}
-                    </div>
-                    <div className="nameass mt-5">
-                        <h4>
-                            ประเมิน Agenda
-                        </h4>
-                    </div>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th style={{ width: "10%" }}>#</th>
-                                <th>วันที่บันทึก</th>
-                                <th>วันที่แก้ไขล่าสุด</th>
-                                <th>ผลการประเมิน</th>
-                                <th>ผู้ประเมิน</th>
-                            </tr>
+                        <button
+                            className="btn btn-primary add-assessment-btn"
+                            onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
+                        >
+                            <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                            เพิ่มการประเมิน
+                        </button>
+                    )}
+                </div>
+                <div className="nameass mt-5">
+                    <h4>
+                        ประเมิน Agenda
+                    </h4>
+                </div>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th style={{ width: "10%" }}>#</th>
+                            <th>วันที่บันทึก</th>
+                            <th>วันที่แก้ไขล่าสุด</th>
+                            <th>ผลการประเมิน</th>
+                            <th>ผู้ประเมิน</th>
+                        </tr>
 
-                        </thead>
-                        <tbody>
-                            {AgendaForms.length > 0 ? (
-                                AgendaForms.map((form, index) => (
-                                    <tr key={form._id}
-                                        onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        <td style={{ width: "10%" }}>{index + 1}</td>
-                                        <td>{formatDate(form.createdAt)}</td>
-                                        <td>
-                                            {form.updatedAt !== form.createdAt ? (
-                                                formatDate(form.updatedAt)
-                                            ) : (
-                                                <span className="not-evaluated">ยังไม่มีการแก้ไขข้อมูล</span>
-                                            )}
-                                        </td>
-
-                                        <td> <span className="normal-status">{form.status_agenda}</span></td>
-                                        <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                // แสดงข้อความเมื่อไม่มีข้อมูล
-                                <tr>
-                                    <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                        <a
-                                            className="info"
-                                            onClick={() =>
-                                                navigate("/agendaform", { state: { id: userData._id } })
-                                            }
-                                        >
-                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                                        </a>
-                                    </td>
+                    </thead>
+                    <tbody>
+                        {AgendaForms.length > 0 ? (
+                            AgendaForms.map((form, index) => (
+                                <tr key={form._id}
+                                    onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <td style={{ width: "10%" }}>{index + 1}</td>
+                                    <td>{formatDate(form.createdAt)}</td>
+                                    <td>{formatDate(form.updatedAt)}</td>
+                                    <td> <span className="normal-status">{form.status_agenda}</span></td>
+                                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                                 </tr>
-                            )}
-                        </tbody>
+                            ))
+                        ) : (
+                            // แสดงข้อความเมื่อไม่มีข้อมูล
+                            <tr>
+                                <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                                    <a
+                                        className="info"
+                                        onClick={() =>
+                                            navigate("/agendaform", { state: { id: userData._id } })
+                                        }
+                                    >
+                                        <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
 
-                    </table>
+                </table>
                     <div className="toolbar mt-4">
                         {AssessinhomeForms && AssessinhomeForms.length > 0 && (
 
@@ -712,14 +705,7 @@ export default function Assessinhomesssuser({ }) {
                                     >
                                         <td style={{ width: "10%" }}>{index + 1}</td>
                                         <td>{formatDate(form.createdAt)}</td>
-                                        <td>
-                                            {form.updatedAt !== form.createdAt ? (
-                                                formatDate(form.updatedAt)
-                                            ) : (
-                                                <span className="not-evaluated">ยังไม่มีการแก้ไขข้อมูล</span>
-                                            )}
-                                        </td>
-
+                                        <td>{formatDate(form.updatedAt)}</td>
                                         <td> <span className="normal-status">{form.status_inhome}</span></td>
                                         <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                                     </tr>
@@ -743,7 +729,7 @@ export default function Assessinhomesssuser({ }) {
                     </table>
 
                 </div>
-
+                
             </div>
         </main>
     );

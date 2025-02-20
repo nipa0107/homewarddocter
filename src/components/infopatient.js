@@ -827,10 +827,10 @@ export default function Infopatient({ }) {
                       onClick={() => handleEdit(caregiver)}>
                         แก้ไข
                       </button>
-                       <button  class="button-delete" 
+                       {/* <button  class="button-delete" 
                       onClick={() => handleDelete(caregiver._id)}>
                         ลบ 
-                      </button>
+                      </button> */}
                     </div>
                       </div>
                 
@@ -838,11 +838,11 @@ export default function Infopatient({ }) {
                     </div>
                   ))}
                  </div>
-                 <div className="btn-group mb-4">
+                 {/* <div className="btn-group mb-4">
                   <div className="adddata">
                     <button onClick={handleAddCaregiver}>เพิ่มผู้ดูแล</button>
                   </div>
-                </div>
+                </div> */}
              
               </div>
             ) : (
@@ -986,9 +986,9 @@ export default function Infopatient({ }) {
                                         แก้ไข
                                     </button>
                                 </div>
-                                <div className="deleteimg1">
+                                {/* <div className="deleteimg1">
                                     <button onClick={handleDeleteMedicalInfo}>ลบ</button>
-                                </div>
+                                </div> */}
                             </div>
                         </>
                     ) : (

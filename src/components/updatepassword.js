@@ -2,11 +2,14 @@ import React, { useEffect, useState, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import "../css/sidebar.css";
 import "../css/alladmin.css"
+import "../css/editpassword.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
+import { ToastContainer, toast } from "react-toastify";
+
 // import 'react-toastify/dist/ReactToastify.css';
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
@@ -22,7 +25,6 @@ function Updatepassword() {
   const [token, setToken] = useState('');
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
-
   const [alerts, setAlerts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -32,6 +34,15 @@ function Updatepassword() {
   const [datauser, setDatauser] = useState([]);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+
+  const [passwordError, setPasswordError] = useState("");
+  const [newpasswordError, setNewPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const toggleShowPassword = (setter) => setter((prev) => !prev);
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
@@ -263,7 +274,40 @@ function Updatepassword() {
     } น.`;
   };
 
-  const Updatepassword = () => {
+  const Updatepassword = (e) => {
+    e.preventDefault();
+    let hasError = false;
+    if (!password.trim()) {
+      setPasswordError("กรุณากรอกรหัสผ่านเก่า");
+      hasError = true;
+    } else {
+      setPasswordError("");
+    }
+
+    if (!newPassword.trim()) {
+      setNewPasswordError("กรุณากรอกรหัสผ่านใหม่");
+      hasError = true;
+    } else if (newPassword.length < 8) {
+      setNewPasswordError("รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร");
+      hasError = true;
+    } else if (newPassword === password) {
+      setNewPasswordError("รหัสผ่านใหม่ต้องไม่ตรงกับรหัสผ่านเก่า");
+      hasError = true;
+    } else {
+      setNewPasswordError("");
+    }
+    if (!confirmNewPassword.trim()) {
+      setConfirmPasswordError("กรุณากรอกยืนยันรหัสผ่านใหม่");
+      hasError = true;
+    } else if (newPassword !== confirmNewPassword) {
+      setConfirmPasswordError("รหัสผ่านใหม่และยืนยันรหัสผ่านใหม่ไม่ตรงกัน");
+      hasError = true;
+    } else {
+      setConfirmPasswordError("");
+    }
+
+    if (hasError) return;
+
     fetch(`http://localhost:5000/updatepassword/${location.state._id}`, {
       method: "POST",
       headers: {
@@ -282,9 +326,16 @@ function Updatepassword() {
       .then((data) => {
         console.log(data);
         if (data.status === "ok") {
-          navigate("/profile");
+          toast.success("เปลี่ยนรหัสผ่านสำเร็จ");
+          setTimeout(() => {
+            navigate("/profile");
+          }, 1100);
         } else {
-          setError(data.error);
+          if (data.error === "รหัสผ่านเก่าไม่ถูกต้อง") {
+            setPasswordError("รหัสผ่านเก่าไม่ถูกต้อง"); // แสดงข้อความในช่องรหัสผ่านเก่า
+          } else {
+            setError(data.error);
+          }
         }
       })
       .catch((error) => {
@@ -292,7 +343,45 @@ function Updatepassword() {
       });
   };
 
+  const handlePasswordChange = (input) => {
+    setPassword(input);
+    if (passwordError) {
+      setPasswordError("");
+    }
+  };
 
+  const validateNewPassword = (input) => {
+    if (!input.trim()) {
+      setNewPasswordError("กรุณากรอกรหัสผ่านใหม่");
+    } else if (input.length < 8) {
+      setNewPasswordError("รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร");
+    } else {
+      setNewPasswordError("");
+    }
+    setNewPassword(input);
+
+    // ตรวจสอบเฉพาะกรณีที่ confirmNewPassword มีค่า
+    if (confirmNewPassword.trim() && input !== confirmNewPassword) {
+      setConfirmPasswordError("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
+    } else {
+      setConfirmPasswordError("");
+    }
+  };
+
+  const validateConfirmPassword = (input) => {
+    if (!input.trim()) {
+      setConfirmPasswordError("กรุณากรอกยืนยันรหัสผ่าน");
+    } else {
+      setConfirmNewPassword(input);
+
+      // ตรวจสอบเฉพาะกรณีที่ newPassword มีค่า
+      if (newPassword.trim() && input !== newPassword) {
+        setConfirmPasswordError("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน");
+      } else {
+        setConfirmPasswordError("");
+      }
+    }
+  };
   const logOut = () => {
     window.localStorage.clear();
     window.location.href = "./";
@@ -327,6 +416,7 @@ function Updatepassword() {
 
   return (
     <main className="body">
+       <ToastContainer />
       <div className={`sidebar ${isActive ? "active" : ""}`}>
         <div class="logo_content">
           <div class="logo">
@@ -494,26 +584,73 @@ function Updatepassword() {
         {/* <h3>เปลี่ยนรหัสผ่าน</h3> */}
         <div className="formcontainerpf">
           <div className="auth-inner">
-            รหัสผ่านเก่า
-            <input
-              className="form-control"
-              type="password"
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          <div>
+              รหัสผ่านเก่า
+              <div className="password-input">
+                <input
+                  value={password}
+                  className={`form-control ${
+                    passwordError ? "input-error" : ""
+                  }`}
+                  type={showPassword ? "text" : "password"}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
+                />
+                <i
+                  className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}
+                  onClick={() => toggleShowPassword(setShowPassword)}
+                ></i>
+              </div>
+            </div>
+            {passwordError && (
+              <span className="error-text">{passwordError}</span>
+            )}
+
             <br />
-            รหัสผ่านใหม่
-            <input
-              className="form-control"
-              type="password"
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
+            <div>
+              รหัสผ่านใหม่
+              <div className="password-input">
+                <input
+                  className={`form-control ${
+                    newpasswordError ? "input-error" : ""
+                  }`}
+                  type={showNewPassword ? "text" : "password"}
+                  onChange={(e) => validateNewPassword(e.target.value)}
+                />
+                <i
+                  className={`bi ${
+                    showNewPassword ? "bi-eye-slash" : "bi-eye"
+                  }`}
+                  onClick={() => toggleShowPassword(setShowNewPassword)}
+                ></i>
+              </div>
+            </div>
+
+            {newpasswordError && (
+              <span className="error-text">{newpasswordError}</span>
+            )}
             <br />
-            ยืนยันรหัสผ่านใหม่
-            <input
-              className="form-control"
-              type="password"
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-            />
+            <div>
+              ยืนยันรหัสผ่านใหม่
+              <div className="password-input">
+                <input
+                  className={`form-control ${
+                    confirmPasswordError ? "input-error" : ""
+                  }`}
+                  type={showConfirmPassword ? "text" : "password"}
+                  onChange={(e) => validateConfirmPassword(e.target.value)}
+                />
+                <i
+                  className={`bi ${
+                    showConfirmPassword ? "bi-eye-slash" : "bi-eye"
+                  }`}
+                  onClick={() => toggleShowPassword(setShowConfirmPassword)}
+                ></i>
+              </div>
+            </div>
+            {confirmPasswordError && (
+              <span className="error-text">{confirmPasswordError}</span>
+            )}
+
             {/* แสดงข้อความ error */}
             <p id="errormessage" className="errormessage">{error}</p>
           </div>

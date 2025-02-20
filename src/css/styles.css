@@ -82,9 +82,9 @@
     border-radius: 8px;
 }
 
-.homesubmit{
+/* .homesubmit{
 	margin-top: -10%;
-}
+} */
 
 .form-control {
 	font-size: 2vh;
@@ -109,10 +109,11 @@
   }
   
   .table {
-	width: 90%; 
+	width: 85%; 
 	margin :0 auto;
 	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1); 
-	line-height: 50px; 
+	/* line-height: 50px;  */
+	line-height: 2rem;
 	padding: 15px; 
 	border-collapse: collapse; 
 	border-spacing: 1; 

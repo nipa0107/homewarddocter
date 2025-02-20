@@ -13,10 +13,8 @@ import PatientAgendaForm from "./UpdateAssessinhomesss/updatePatientAgenda.js";
 import CaregiverAgendaForm from "./UpdateAssessinhomesss/updateCaregiverAgenda.js";
 import CaregiverAssessmentForm from "./UpdateAssessinhomesss/updateCaregiverAssessment.js";
 import ZaritburdeninterviewForm from "./UpdateAssessinhomesss/updateZaritburdeninterview.js";
-import io from 'socket.io-client';
+import io from "socket.io-client";
 const socket = io("http://localhost:5000");
-
-
 
 export default function DetailAgendaForm() {
   const navigate = useNavigate();
@@ -42,13 +40,13 @@ export default function DetailAgendaForm() {
   const bellRef = useRef(null);
 
   useEffect(() => {
-    socket.on('newAlert', (alert) => {
-      setAlerts(prevAlerts => [...prevAlerts, alert]);
-      setUnreadCount(prevCount => prevCount + 1);
+    socket.on("newAlert", (alert) => {
+      setAlerts((prevAlerts) => [...prevAlerts, alert]);
+      setUnreadCount((prevCount) => prevCount + 1);
     });
 
     return () => {
-      socket.off('newAlert'); // Clean up the listener on component unmount
+      socket.off("newAlert"); // Clean up the listener on component unmount
     };
   }, []);
   const toggleNotifications = (e) => {
@@ -63,7 +61,8 @@ export default function DetailAgendaForm() {
 
   const handleClickOutside = (e) => {
     if (
-      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
       !bellRef.current.contains(e.target)
     ) {
       setShowNotifications(false);
@@ -71,10 +70,10 @@ export default function DetailAgendaForm() {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
   const fetchUserData = (token) => {
@@ -207,9 +206,11 @@ export default function DetailAgendaForm() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]
-      } ${year + 543} เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
-      } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
+      year + 543
+    } เวลา ${hours < 10 ? "0" + hours : hours}:${
+      minutes < 10 ? "0" + minutes : minutes
+    } น.`;
   };
 
   const formatThaiDate = (dateString) => {
@@ -235,7 +236,6 @@ export default function DetailAgendaForm() {
 
     return `${day} ${thaiMonths[month - 1]} ${year + 543}`; // Convert year to Thai calendar
   };
-
 
   const fetchAllUsers = async (userId) => {
     try {
@@ -301,7 +301,9 @@ export default function DetailAgendaForm() {
   useEffect(() => {
     const fetchAgendaForms = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getAgendaForm/${id}`);
+        const response = await fetch(
+          `http://localhost:5000/getAgendaForm/${id}`
+        );
         const data = await response.json();
 
         if (response.ok) {
@@ -357,7 +359,6 @@ export default function DetailAgendaForm() {
     }
   }, [AgendaForms.user]);
 
-
   const handleBreadcrumbClick = () => {
     navigate("/assessinhomesssuser", { state: { id: AgendaForms.user } });
   };
@@ -366,26 +367,26 @@ export default function DetailAgendaForm() {
   const getGroupStyle = (totalScore) => {
     if (totalScore !== null) {
       if (totalScore > 20) {
-        return 'text-danger'; // สีแดงสำหรับภาระหนัก
+        return "text-danger"; // สีแดงสำหรับภาระหนัก
       } else if (totalScore >= 11) {
-        return 'text-primary'; // สีน้ำเงินสำหรับภาระปานกลาง
+        return "text-primary"; // สีน้ำเงินสำหรับภาระปานกลาง
       } else if (totalScore >= 0) {
-        return 'text-success'; // สีเขียวสำหรับไม่มีภาระ
+        return "text-success"; // สีเขียวสำหรับไม่มีภาระ
       }
     }
-    return 'text-dark'; // ค่าเริ่มต้น (สีดำ) หากไม่มีคะแนน
+    return "text-dark"; // ค่าเริ่มต้น (สีดำ) หากไม่มีคะแนน
   };
 
   // ฟังก์ชันสำหรับข้อความการประเมินผล
   const getGroupMessage = (totalScore) => {
     if (totalScore <= 10) {
-      return 'ไม่มีภาระทางใจ';
+      return "ไม่มีภาระทางใจ";
     } else if (totalScore >= 11 && totalScore <= 20) {
-      return 'มีภาระปานกลาง';
+      return "มีภาระปานกลาง";
     } else if (totalScore > 20) {
-      return 'มีภาระหนัก';
+      return "มีภาระหนัก";
     }
-    return 'ไม่มีข้อมูล'; // กรณีไม่มีคะแนน
+    return "ไม่มีข้อมูล"; // กรณีไม่มีคะแนน
   };
 
   const activityLevelMapping = {
@@ -393,9 +394,8 @@ export default function DetailAgendaForm() {
     lightly_active: "ออกกำลังกาย 1-3 ครั้งต่อสัปดาห์",
     moderately_active: "ออกกำลังกาย 4-5 ครั้งต่อสัปดาห์",
     very_active: "ออกกำลังกาย 6-7 ครั้งต่อสัปดาห์",
-    super_active: "ออกกำลังกายวันละ 2 ครั้งขึ้นไป"
+    super_active: "ออกกำลังกายวันละ 2 ครั้งขึ้นไป",
   };
-
 
   const [currentEditSection, setCurrentEditSection] = useState("");
   const [modalContent, setModalContent] = useState(null);
@@ -413,7 +413,8 @@ export default function DetailAgendaForm() {
     setCurrentEditSection(section);
     if (section === "Patient Agenda Form") {
       setModalContent(
-        <PatientAgendaForm formData={AgendaForms.PatientAgenda}
+        <PatientAgendaForm
+          formData={AgendaForms.PatientAgenda}
           onSave={(data) => handleSaveChanges({ PatientAgenda: data })}
         />
       );
@@ -455,7 +456,7 @@ export default function DetailAgendaForm() {
     try {
       const updatedData = {
         ...AgendaForms, // Existing data
-        ...updatedSection,   // Updated section (PhysicalExamination or Immobility)
+        ...updatedSection, // Updated section (PhysicalExamination or Immobility)
       };
 
       const response = await fetch(`http://localhost:5000/updateAgenda/${id}`, {
@@ -472,8 +473,7 @@ export default function DetailAgendaForm() {
       }
 
       console.log("Updated successfully:", result.data);
-      toast.success("ข้อมูลได้รับการแก้ไขเรียบร้อย"
-      );
+      toast.success("ข้อมูลได้รับการแก้ไขเรียบร้อย");
 
       // ให้ modal ปิดหลังจาก toast แสดงข้อความสำเร็จ
       setTimeout(() => {
@@ -567,7 +567,11 @@ export default function DetailAgendaForm() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                <a
+                  ref={bellRef}
+                  className="bell-icon"
+                  onClick={toggleNotifications}
+                >
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (
@@ -648,7 +652,9 @@ export default function DetailAgendaForm() {
               <i className="bi bi-chevron-double-right"></i>
             </li>
             <li>
-              <a onClick={handleBreadcrumbClick} className="info">บันทึกการประเมิน</a>
+              <a onClick={handleBreadcrumbClick} className="info">
+                บันทึกการประเมิน
+              </a>
             </li>
             <li className="arrow">
               <i className="bi bi-chevron-double-right"></i>
@@ -687,7 +693,6 @@ export default function DetailAgendaForm() {
               : "ไม่มีข้อมูล"}
           </p>
           <p>
-
             <p className="textassesment">
               <p>
                 <label>วันที่บันทึก:</label>
@@ -705,65 +710,74 @@ export default function DetailAgendaForm() {
             {/* Patient Agenda */}
             <div class="accordion-item">
               <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                <button
+                  class="accordion-button"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#collapseOne"
+                  aria-expanded="true"
+                  aria-controls="collapseOne"
+                >
                   <b>1. Patient Agenda</b>
                 </button>
               </h2>
-              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
-                <div className="accordion-body mt-2" style={{ lineHeight: "20px" }}>
+              <div
+                id="collapseOne"
+                class="accordion-collapse collapse show"
+                aria-labelledby="headingOne"
+                data-bs-parent="#accordionExample"
+              >
+                <div
+                  className="accordion-body mt-2"
+                  style={{ lineHeight: "20px" }}
+                >
                   <div class="row ">
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                       <strong>Idea :</strong>
                     </div>
-                    <div class="col-sm-9">
-                      <div class="row ">
-                        <div class="col-8 col-sm-6">
-                          <p>{AgendaForms.PatientAgenda?.patient_idea || "-"}</p>
+                    
+                        <div class="col-sm-6">
+                          <p>
+                            {AgendaForms.PatientAgenda?.patient_idea || "-"}
+                          </p>
                         </div>
-                      </div>
-                    </div>
+                      
                   </div>
                   <div class="row ">
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                       <strong>Feeling :</strong>
                     </div>
-                    <div class="col-sm-9">
-                      <div class="row ">
-                        <div class="col-8 col-sm-6">
-                          <p>{AgendaForms.PatientAgenda?.patient_feeling || "-"}</p>
+                    
+                        <div class="col-sm-6">
+                          <p>
+                            {AgendaForms.PatientAgenda?.patient_feeling || "-"}
+                          </p>
                         </div>
-                      </div>
-                    </div>
+                      
                   </div>
                   <div class="row ">
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                       <strong>Function :</strong>
                     </div>
-                    <div class="col-sm-9">
-                      <div class="row ">
-                        <div class="col-8 col-sm-6">
-                          <p>{AgendaForms.PatientAgenda?.patient_funtion || "-"}</p>
-                        </div>
-                      </div>
+                    <div class="col-sm-6">
+                      <p>{AgendaForms.PatientAgenda?.patient_funtion || "-"}</p>
                     </div>
                   </div>
-                  <div class="row ">
-                    <div class="col-sm-2">
+                  <div className="row">
+                    <div className="col-sm-3">
                       <strong>Expectation :</strong>
                     </div>
-                    <div class="col-sm-9">
-                      <div class="row ">
-                        <div class="col-8 col-sm-6">
-                          <p>{AgendaForms.PatientAgenda?.patient_expectation || "-"}</p>
-                        </div>
-                      </div>
+                    <div className="col-sm-6">
+                      <p>
+                        {AgendaForms.PatientAgenda?.patient_expectation || "-"}
+                      </p>
                     </div>
                   </div>
                   <div>
                     <button
                       className="btn m-3"
                       style={{ backgroundColor: "#ffde59", color: "black" }}
-                      onClick={() => handleEditClick('Patient Agenda Form')}
+                      onClick={() => handleEditClick("Patient Agenda Form")}
                     >
                       แก้ไขข้อมูล
                     </button>
@@ -792,63 +806,73 @@ export default function DetailAgendaForm() {
                 data-bs-parent="#accordionExample"
               >
                 <div className="accordion-body" style={{ lineHeight: "20px" }}>
-                  {AgendaForms.CaregiverAgenda?.Care_Agenda?.map((agenda, index) => (
-                    <div key={index}>
-                      <div
-                        className="row"
-                        style={{ cursor: "pointer", padding: "5px 0" }}
-                        onClick={() => toggleAccordion(index)}
-                      >
-                        <div className="col-sm-3">
-                          <strong style={{ color: "#64b5f6", textDecoration: "underline" }}>คนที่ {index + 1} : {agenda.firstName} {agenda.lastName || "-"}</strong>
+                  {AgendaForms.CaregiverAgenda?.Care_Agenda?.map(
+                    (agenda, index) => (
+                      <div key={index}>
+                        <div
+                          className="row"
+                          style={{ cursor: "pointer", padding: "5px 0" }}
+                          onClick={() => toggleAccordion(index)}
+                        >
+                          <div className="col-sm-3">
+                            <strong
+                              style={{
+                                color: "#64b5f6",
+                                textDecoration: "underline",
+                              }}
+                            >
+                              คนที่ {index + 1} : {agenda.firstName}{" "}
+                              {agenda.lastName || "-"}
+                            </strong>
+                          </div>
+                          <div className="col-sm-10">
+                            <span></span>
+                            <i
+                              className={openIndex === index}
+                              style={{ marginLeft: "10px" }}
+                            ></i>
+                          </div>
                         </div>
-                        <div className="col-sm-10">
-                          <span ></span>
-                          <i
-                            className={openIndex === index}
-                            style={{ marginLeft: "10px" }}
-                          ></i>
-                        </div>
+                        {openIndex === index && (
+                          <div style={{ marginLeft: "20px" }}>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Idea :</strong>
+                              </div>
+                              <div className="col-sm-6">
+                                <p>{agenda.caregiver_idea || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Feeling :</strong>
+                              </div>
+                              <div className="col-sm-6">
+                                <p>{agenda.caregiver_feeling || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Function :</strong>
+                              </div>
+                              <div className="col-sm-6">
+                                <p>{agenda.caregiver_funtion || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Expectation :</strong>
+                              </div>
+                              <div className="col-sm-6">
+                                <p>{agenda.caregiver_expectation || "-"}</p>
+                              </div>
+                            </div>
+                            <hr />
+                          </div>
+                        )}
                       </div>
-                      {openIndex === index && (
-                        <div style={{ marginLeft: "20px" }}>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Idea :</strong>
-                            </div>
-                            <div className="col-sm-10">
-                              <p>{agenda.caregiver_idea || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Feeling :</strong>
-                            </div>
-                            <div className="col-sm-10">
-                              <p>{agenda.caregiver_feeling || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Function :</strong>
-                            </div>
-                            <div className="col-sm-10">
-                              <p>{agenda.caregiver_funtion || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Expectation :</strong>
-                            </div>
-                            <div className="col-sm-10">
-                              <p>{agenda.caregiver_expectation || "-"}</p>
-                            </div>
-                          </div>
-                          <hr />
-                        </div>
-                      )}
-                    </div>
-                  )) || "ไม่มีข้อมูล"}
+                    )
+                  ) || "ไม่มีข้อมูล"}
                 </div>
                 <div>
                   <button
@@ -880,105 +904,118 @@ export default function DetailAgendaForm() {
                 aria-labelledby="headingThree"
                 data-bs-parent="#accordionExample"
               >
-                <div className="accordion-body mt-3" style={{ lineHeight: "20px" }}>
-                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map((agenda, index) => (
-                    <div key={index}>
-                      <div
-                        className="row"
-                        style={{ cursor: "pointer", padding: "10px 0" }}
-                        onClick={() => toggleAccordion(index)}
-                      >
-                        <div className="col-sm-3">
-                          <strong style={{ color: "#64b5f6", textDecoration: "underline" }}>
-                            คนที่ {index + 1} : {agenda.firstName} {agenda.lastName || "-"}
-                          </strong>
+                <div
+                  className="accordion-body mt-3"
+                  style={{ lineHeight: "20px" }}
+                >
+                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map(
+                    (agenda, index) => (
+                      <div key={index}>
+                        <div
+                          className="row"
+                          style={{ cursor: "pointer", padding: "10px 0" }}
+                          onClick={() => toggleAccordion(index)}
+                        >
+                          <div className="col-sm-3">
+                            <strong
+                              style={{
+                                color: "#64b5f6",
+                                textDecoration: "underline",
+                              }}
+                            >
+                              คนที่ {index + 1} : {agenda.firstName}{" "}
+                              {agenda.lastName || "-"}
+                            </strong>
+                          </div>
+                          <div className="col-sm-9">
+                            <i
+                              className={openIndex === index}
+                              style={{ marginLeft: "10px" }}
+                            ></i>
+                          </div>
                         </div>
-                        <div className="col-sm-9">
-                          <i
-                            className={openIndex === index}
-                            style={{ marginLeft: "10px" }}
-                          ></i>
-                        </div>
+                        {openIndex === index && (
+                          <div
+                            style={{ marginLeft: "20px", padding: "10px 0" }}
+                          >
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Care :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.care || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Affection :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.affection || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Rest :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.rest || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Empathy :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.empathy || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Goal Of Care :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.goalOfCare || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Information :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.information || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Ventilation :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.ventilation || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Empowerment :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.empowerment || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>Resource :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.resource || "-"}</p>
+                              </div>
+                            </div>
+                            <hr />
+                          </div>
+                        )}
                       </div>
-                      {openIndex === index && (
-                        <div style={{ marginLeft: "20px", padding: "10px 0" }}>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Care :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.care || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Affection :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.affection || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Rest :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.rest || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Empathy :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.empathy || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Goal Of Care :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.goalOfCare || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Information :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.information || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Ventilation :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.ventilation || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Empowerment :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.empowerment || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-3">
-                              <strong>Resource :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.resource || "-"}</p>
-                            </div>
-                          </div>
-                          <hr />
-                        </div>
-                      )}
-                    </div>
-                  )) || "ไม่มีข้อมูล"}
+                    )
+                  ) || "ไม่มีข้อมูล"}
                 </div>
                 <div>
                   <button
@@ -991,7 +1028,6 @@ export default function DetailAgendaForm() {
                 </div>
               </div>
             </div>
-
 
             <div className="accordion-item">
               <h2 className="accordion-header" id="headingFour">
@@ -1011,18 +1047,27 @@ export default function DetailAgendaForm() {
                 className="accordion-collapse collapse"
                 aria-labelledby="headingFour"
               >
-                <div className="accordion-body mt-2" style={{ lineHeight: "20px" }}>
+                <div
+                  className="accordion-body mt-2"
+                  style={{ lineHeight: "20px" }}
+                >
                   {AgendaForms.Zaritburdeninterview ? (
                     <div>
                       <div className="row">
                         <div className="col-sm-2">
-                          <strong >คะแนนรวม :</strong>
+                          <strong>คะแนนรวม :</strong>
                         </div>
                         <div className="col-sm-9">
                           <div className="row">
                             <div className="col-8 col-sm-6">
-                              <p className={getGroupStyle(AgendaForms.Zaritburdeninterview.totalScore)}>
-                                {AgendaForms.Zaritburdeninterview.totalScore || '0'} คะแนน
+                              <p
+                                className={getGroupStyle(
+                                  AgendaForms.Zaritburdeninterview.totalScore
+                                )}
+                              >
+                                {AgendaForms.Zaritburdeninterview.totalScore ||
+                                  "0"}{" "}
+                                คะแนน
                               </p>
                             </div>
                           </div>
@@ -1035,8 +1080,14 @@ export default function DetailAgendaForm() {
                         <div className="col-sm-9">
                           <div className="row">
                             <div className="col-8 col-sm-6">
-                              <p className={getGroupStyle(AgendaForms.Zaritburdeninterview.totalScore)}>
-                                {getGroupMessage(AgendaForms.Zaritburdeninterview.totalScore)}
+                              <p
+                                className={getGroupStyle(
+                                  AgendaForms.Zaritburdeninterview.totalScore
+                                )}
+                              >
+                                {getGroupMessage(
+                                  AgendaForms.Zaritburdeninterview.totalScore
+                                )}
                               </p>
                             </div>
                           </div>
@@ -1046,15 +1097,13 @@ export default function DetailAgendaForm() {
                   ) : (
                     <p>ไม่มีข้อมูล</p>
                   )}
-                  <script>
-                    window.location.reload();
-                  </script>
+                  <script>window.location.reload();</script>
                 </div>
                 <div>
                   <button
                     className="btn m-4"
                     style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick('Zaritburdeninterview Form')}
+                    onClick={() => handleEditClick("Zaritburdeninterview Form")}
                   >
                     แก้ไขข้อมูล
                   </button>
@@ -1064,7 +1113,6 @@ export default function DetailAgendaForm() {
           </div>
 
           {/* Zarit Burden Interview */}
-
         </div>
       </div>
       {isModalOpen && modalContent && (
@@ -1087,4 +1135,3 @@ export default function DetailAgendaForm() {
     </main>
   );
 }
-
