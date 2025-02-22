@@ -1,4 +1,4 @@
-import React, {useCallback,useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import "../../css/sidebar.css";
 import "../../css/stylechat.css";
 import logow from "../../img/logow.png";
@@ -11,14 +11,14 @@ import { useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
 const socketnew = io("http://localhost:5000");
 const ChatComponent = () => {
-  const [users, setUsers] = useState([]); 
-  const [selectedUserId, setSelectedUserId] = useState(null); 
+  const [users, setUsers] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
   const [selectedUserSurname, setSelectedUserSurname] = useState("");
-  const [messages, setMessages] = useState([]); 
-  const [input, setInput] = useState(""); 
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
   const [file, setFile] = useState(null);
-  const [socket, setSocket] = useState(null); 
+  const [socket, setSocket] = useState(null);
   const [data, setData] = useState([]);
   const [token, setToken] = useState("");
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
@@ -40,14 +40,50 @@ const ChatComponent = () => {
   const bellRef = useRef(null);
   const [isActive, setIsActive] = useState(false);
   const messageRefs = useRef({});
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
     abnormal: 0,
     normal: 0,
   });
+  const hasFetchedUserData = useRef(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [placeholder, setPlaceholder] = useState("พิมพ์ข้อความ...");
 
-  
+  useEffect(() => {
+    const updatePlaceholder = () => {
+      if (window.innerWidth < 500) {
+        setPlaceholder("พิมพ์...");
+      } else {
+        setPlaceholder("พิมพ์ข้อความ...");
+      }
+    };
+
+    updatePlaceholder();
+
+    window.addEventListener("resize", updatePlaceholder);
+    return () => window.removeEventListener("resize", updatePlaceholder);
+  }, []);
+
+  const handleUserClick = (userId) => {
+    setSelectedUserId(userId);
+    setIsChatOpen(true);
+    if (textareaRef.current) {
+      textareaRef.current.innerText = "";
+      textareaRef.current.style.height = "40px";
+    }
+    setFile(null);
+    setFilePreview(null);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "40px";
+    }
+  };
+
+  const goBackToUserList = () => {
+    setIsChatOpen(false);
+    setSelectedUserId();
+  };
+
   const getUnreadCount = useCallback(
     (type) => {
       const filteredByType = alerts.filter(
@@ -76,7 +112,7 @@ const ChatComponent = () => {
   }, [alerts, userId]);
 
   useEffect(() => {
-    socket?.on("newAlert", (alert) => {
+    socketnew?.on("newAlert", (alert) => {
       console.log("Received newAlert:", alert);
 
       if (alert.MPersonnel?.id === userId) {
@@ -107,7 +143,7 @@ const ChatComponent = () => {
       });
     });
 
-    socket?.on("deletedAlert", (data) => {
+    socketnew?.on("deletedAlert", (data) => {
       setAlerts((prevAlerts) => {
         const filteredAlerts = prevAlerts.filter(
           (alert) => alert.patientFormId !== data.patientFormId
@@ -120,24 +156,23 @@ const ChatComponent = () => {
     });
 
     return () => {
-      socket?.off("newAlert");
-      socket?.off("deletedAlert");
+      socketnew?.off("newAlert");
+      socketnew?.off("deletedAlert");
     };
   }, [userId]);
 
-    useEffect(() => {
-      const currentUserId = sender._id;
-  
-      const unreadAlerts = alerts.filter(
-        (alert) =>
-          Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
-      );
-      setUnreadCount(unreadAlerts.length);
-    }, [alerts,sender._id]);
+  useEffect(() => {
+    const currentUserId = sender._id;
 
+    const unreadAlerts = alerts.filter(
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+    setUnreadCount(unreadAlerts.length);
+  }, [alerts, sender._id]);
 
   const openModal = (image) => {
-    setCurrentImage(image); 
+    setCurrentImage(image);
     setModalOpen(true);
   };
 
@@ -157,16 +192,18 @@ const ChatComponent = () => {
     }
     return text;
   };
-
   const handleInput = (e) => {
     const textarea = textareaRef.current;
 
-    // ตั้งค่าเริ่มต้นให้แน่ใจว่าไม่มี padding หรือความสูงแปลกปลอม
-    textarea.style.height = "50px"; // ตั้งค่าใหม่ทุกครั้งก่อนคำนวณ
-    const newHeight = Math.max(textarea.scrollHeight, 50); // คำนวณความสูง
-    textarea.style.height = `${newHeight}px`; // ตั้งค่าความสูงใหม่
+    // รีเซ็ตความสูงก่อนคำนวณใหม่
+    textarea.style.height = "auto";
 
-    setInput(e.target.value); // อัปเดตข้อความ
+    // คำนวณความสูงใหม่ โดยมีขั้นต่ำ 45px และสูงสุด 100px
+    const newHeight = Math.min(Math.max(textarea.scrollHeight, 45), 100);
+
+    textarea.style.height = `${newHeight}px`;
+
+    setInput(e.target.value);
   };
 
   const fetchUserData = (token) => {
@@ -182,16 +219,20 @@ const ChatComponent = () => {
     })
       .then((res) => res.json())
       .then((data) => {
+        if (data.data === "token expired") {
+          alert("Token expired login again");
+          window.localStorage.clear();
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 0);
+          return null;
+        }
         setData(data.data);
         setSender({
           name: data.data.name,
           surname: data.data.surname,
           _id: data.data._id,
-        }); // ตั้งค่า sender
-        if (data.data == "token expired") {
-          window.localStorage.clear();
-          window.location.href = "./";
-        }
+        });
         return data.data;
       })
       .catch((error) => {
@@ -227,8 +268,8 @@ const ChatComponent = () => {
   }, []);
 
   const fetchAndSetAlerts = (token, userId) => {
-     fetchAlerts(token, userId)
-        .then((alerts, userId) => {
+    fetchAlerts(token, userId)
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -241,6 +282,8 @@ const ChatComponent = () => {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return;
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 
@@ -393,7 +436,7 @@ const ChatComponent = () => {
     return () => {
       newSocket.disconnect();
     };
-  }, [sender?._id]); 
+  }, [sender?._id]);
 
   useEffect(() => {
     if (selectedUserId) {
@@ -495,22 +538,25 @@ const ChatComponent = () => {
 
   const sendMessage = async () => {
     if (input.length > 10000) {
-      alert("ข้อความเกินความยาวสูงสุดที่กำหนดไว้ 1000 ตัวอักษร");
+      alert("ข้อความเกินความยาวสูงสุดที่กำหนดไว้ 10000 ตัวอักษร");
       return;
     }
+    
     if (input.trim() || file) {
       const formData = new FormData();
       formData.append("message", input);
       formData.append("roomId", selectedUserId);
       formData.append("senderId", sender._id);
-      //   formData.append("recipientModel", "User");
       formData.append("senderModel", "MPersonnel");
-      //   if (senderModel === 'MPersonnel') {
-      //     formData.append('recipientId', selectedUserId);
-      //     formData.append('recipientModel', 'User');
-      //   }
-      if (file) formData.append("image", file); // เพิ่มไฟล์ใน FormData
+      if (file) formData.append("image", file);
 
+      setInput("");
+      setFile(null);
+      setFilePreview(null);
+      if (textareaRef.current) {
+        textareaRef.current.innerText = "";
+        textareaRef.current.style.height = "40px";
+      }
       try {
         const response = await fetch("http://localhost:5000/sendchat", {
           method: "POST",
@@ -519,18 +565,14 @@ const ChatComponent = () => {
 
         const result = await response.json();
 
-        if (response.ok) {
-          //   setMessages((prev) => [...prev, result.newChat]);
+        if  (response.ok) {
           setInput("");
-          setFile(null); // ล้างไฟล์
+          setFile(null);
           setFilePreview(null);
-          //   socket.emit("sendMessage", {
-          //     roomId: selectedUserId,
-          //     message: input,
-          //     senderId: sender._id,
-          //   });
-          const textarea = textareaRef.current;
-          textarea.style.height = "50px";
+          if (textareaRef.current) {
+            textareaRef.current.innerText = "";
+            textareaRef.current.style.height = "40px";
+          }
         } else {
           console.error("Failed to send message:", result.message);
         }
@@ -567,13 +609,12 @@ const ChatComponent = () => {
     };
   }, [socket, selectedUserId]);
 
-  // ฟังก์ชันส่ง Event "markAsRead" เมื่อผู้ใช้เลื่อนผ่านข้อความ
   const markAsRead = (messageId) => {
     if (socket) {
       socket.emit("markAsRead", {
         roomId: selectedUserId,
         messageId,
-        userId: sender._id, // ส่ง ID ผู้ใช้ปัจจุบัน
+        userId: sender._id,
       });
     }
   };
@@ -583,23 +624,21 @@ const ChatComponent = () => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const messageId = entry.target.dataset.id; // ใช้ data-id เพื่อเก็บ messageId
+            const messageId = entry.target.dataset.id;
             if (messageId) {
-              markAsRead(messageId); // อัปเดตเมื่อข้อความปรากฏใน viewport
+              markAsRead(messageId);
             }
           }
         });
       },
-      { threshold: 0.1 } // 10% ของข้อความที่ปรากฏใน viewport จะถูกพิจารณาว่าเห็น
+      { threshold: 0.1 }
     );
 
-    // สร้าง observer สำหรับข้อความทุกข้อความ
     Object.values(messageRefs.current).forEach((ref) => {
       if (ref) observer.observe(ref);
     });
 
     return () => {
-      // ล้าง observer เมื่อ component ถูกลบ
       observer.disconnect();
     };
   }, [messages, socket]);
@@ -689,14 +728,18 @@ const ChatComponent = () => {
     }
   }, [messages]);
 
+  // const isImageFile = (url) => {
+  //   return (
+  //     url.endsWith(".jpg?alt=media") ||
+  //     url.endsWith(".png?alt=media") ||
+  //     url.endsWith(".jpeg?alt=media") ||
+  //     url.endsWith(".gif?alt=media")
+  //   );
+  // };
   const isImageFile = (url) => {
-    return (
-      url.endsWith(".jpg?alt=media") ||
-      url.endsWith(".png?alt=media") ||
-      url.endsWith(".jpeg?alt=media") ||
-      url.endsWith(".gif?alt=media")
-    );
+    return /\.(jpg|jpeg|png|gif)$/i.test(url.split("?")[0]);
   };
+
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
@@ -719,19 +762,19 @@ const ChatComponent = () => {
 
   function shortenFileName(fileName, maxLength = 15) {
     if (fileName.length <= maxLength) {
-      return fileName; // หากความยาวน้อยกว่าหรือเท่ากับ maxLength ให้คืนค่าชื่อไฟล์เดิม
+      return fileName;
     }
 
     const extensionIndex = fileName.lastIndexOf(".");
-    const extension = fileName.slice(extensionIndex); // รับส่วนต่อท้าย (เช่น .pdf)
+    const extension = fileName.slice(extensionIndex);
 
-    const nameWithoutExtension = fileName.slice(0, extensionIndex); // ชื่อไฟล์โดยไม่มีนามสกุล
-    const shortenedName = nameWithoutExtension.slice(0, maxLength - 3) + "..."; // ตัดชื่อไฟล์และเพิ่ม ...
+    const nameWithoutExtension = fileName.slice(0, extensionIndex);
+    const shortenedName = nameWithoutExtension.slice(0, maxLength - 3) + "...";
 
-    return shortenedName + extension; // คืนค่าชื่อไฟล์ที่ตัดพร้อมนามสกุล
+    return shortenedName + extension;
   }
   function formatFileSize(bytes) {
-    if (!bytes) return ""; // ถ้า bytes เป็น null หรือ undefined ให้คืนค่าว่าง
+    if (!bytes) return "";
 
     const units = ["B", "KB", "MB", "GB", "TB"];
     let unitIndex = 0;
@@ -753,6 +796,24 @@ const ChatComponent = () => {
     setIsActive(!isActive);
   };
 
+  const ImageModal = ({ isOpen, image, onClose }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div
+        onClick={onClose}
+        className="image-model-chat"
+        style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+      >
+        <button onClick={onClose} className="modal-chat-close">
+          <i className="bi bi-x-circle-fill icon-chat"></i>
+        </button>
+        <div className="modal-contents" onClick={(e) => e.stopPropagation()}>
+          <img src={image} alt="Modal" className="image-in-model-chat" />
+        </div>
+      </div>
+    );
+  };
   return (
     <main className="bodychat">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -799,11 +860,7 @@ const ChatComponent = () => {
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
-              {/* {countUnreadUsers() !== 0 && (
-              <span className="notification-countchat">
-                {countUnreadUsers()}
-              </span>
-            )} */}
+
               {userUnreadCounts.map((user) => {
                 if (String(user.userId) === String(sender._id)) {
                   return (
@@ -868,16 +925,16 @@ const ChatComponent = () => {
             </ul>
           </div>
         </div>
-
-        <div
+        <div className="chat-container">
+          {/* <div
           className="chat-mpersonnel"
           style={{ display: "flex", flexDirection: "row", height: "100vh" }}
-        >
+        > */}
           {/* Sidebar เลือก User */}
-          <div className="chat-user-list">
-            <div className="search-bar1">
+          <div className={`chat-user-list ${isChatOpen ? "hidden" : ""}`}>
+            <div className="search-bar-chat">
               <input
-                className="search-text1"
+                className="search-text-chat"
                 type="text"
                 placeholder="ค้นหา"
                 value={searchKeyword}
@@ -894,14 +951,13 @@ const ChatComponent = () => {
                       .includes(searchKeyword.toLowerCase())
                 )
                 .sort((a, b) => {
-                  // ตรวจสอบว่า latestChat มีอยู่หรือไม่เพื่อหลีกเลี่ยง Error
                   const dateA = a.latestChat?.createdAt
                     ? new Date(a.latestChat.createdAt)
                     : 0;
                   const dateB = b.latestChat?.createdAt
                     ? new Date(b.latestChat.createdAt)
                     : 0;
-                  return dateB - dateA; // เรียงลำดับจากใหม่ไปเก่า
+                  return dateB - dateA;
                 })
                 .map((user) => (
                   <div
@@ -909,7 +965,8 @@ const ChatComponent = () => {
                     className={`user-item-chat ${
                       selectedUserId === user._id ? "selected" : ""
                     }`}
-                    onClick={() => setSelectedUserId(user._id)}
+                    // onClick={() => setSelectedUserId(user._id)}
+                    onClick={() => handleUserClick(user._id)}
                   >
                     <div className="user-avatar">
                       {user.name?.charAt(0) || ""}
@@ -940,55 +997,53 @@ const ChatComponent = () => {
                           <div className="user-latest-message-time">
                             {formatTime(user.latestChat.createdAt)}
                           </div>
+                          {/* <>
                           {user.unreadCount[sender._id] > 0 && (
                             <div className="unread-count">
                               {user.unreadCount[sender._id]}
                             </div>
                           )}
+                          </> */}
                         </div>
                       )}
                     </div>
+                    {user.unreadCount[sender._id] > 0 && (
+                      <div className="unread-container">
+                        <div className="unread-count">
+                          {user.unreadCount[sender._id]}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
             </div>
           </div>
 
           {/* Main Chat Section */}
-          <div
-            className="main-chat-section"
-            style={{
-              flex: 1,
-              padding: "1rem",
-              display: "flex",
-              flexDirection: "column",
-              height: "100vh",
-            }}
-          >
+          <div className={`main-chat-section ${isChatOpen ? "active" : ""}`}>
             {selectedUserId ? (
               <>
-                <h3>
-                  ห้องแช็ต คุณ{selectedUserName} {selectedUserSurname}
-                </h3>
-                <div
-                  className="chat-section"
-                  ref={chatSectionRef}
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    border: "1px solid #ccc",
-                    padding: "1rem",
-                    // paddingBottom: "5rem",
-                    marginBottom: "2.7rem",
-                  }}
-                >
+                <div className="chat-header">
+                  <button
+                    className="back-to-user-list"
+                    onClick={goBackToUserList}
+                  >
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                  <p className="name-chat">
+                    {/* ห้องแช็ต */}
+                    คุณ{" "}{selectedUserName} {selectedUserSurname}
+                  </p>
+                </div>
+                <div className="chat-section" ref={chatSectionRef}>
                   {messages.map((msg, idx) => (
                     <div
                       key={idx}
                       // ref={messageEndRef}
                       ref={(el) => {
-                        messageRefs.current[msg._id] = el; // เก็บ ref ใน messageRefs โดยอิงจาก messageId
+                        messageRefs.current[msg._id] = el;
                       }}
-                      data-id={msg._id} // เก็บ messageId ไว้ใน data attribute
+                      data-id={msg._id}
                       //   className={`message ${msg.readBy.includes(sender._id) ? "read" : "unread"}`}
                       className={`message ${
                         Array.isArray(msg.readBy) &&
@@ -1000,34 +1055,33 @@ const ChatComponent = () => {
                       {(idx === 0 ||
                         new Date(msg.createdAt).getDate() !==
                           new Date(messages[idx - 1].createdAt).getDate()) && (
-                        <p className="chat-date">
-                          {formatDatenotTime(msg.createdAt)}
-                        </p>
+                        <div className="dateContainer">
+                          <p className="chat-date">
+                            {formatDatenotTime(msg.createdAt)}
+                          </p>
+                        </div>
                       )}
-                      <div
-                        style={
-                          {
-                            //   display: "flex",
-                            //   flexDirection:
-                            //     msg.sender?._id === sender._id ? "row-reverse" : "row", // Right side for sender, left side for others
-                            //   alignItems: "flex-end",
-                            //   marginBottom: "10px",
-                          }
-                        }
-                      >
+                      <div>
                         {/* Message Sender Info */}
                         {msg.sender?._id !== sender._id && (
+                          // <div
+                          //   style={{
+                          //     display: "flex",
+                          //     flexDirection: "column",
+                          //     alignItems:
+                          //       msg.sender?._id === sender._id
+                          //         ? "flex-end"
+                          //         : "flex-start",
+                          //     marginBottom: "1px",
+                          //     marginLeft: "8px",
+                          //   }}
+                          // >
                           <div
-                            style={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems:
-                                msg.sender?._id === sender._id
-                                  ? "flex-end"
-                                  : "flex-start",
-                              marginBottom: "1px",
-                              marginLeft: "8px",
-                            }}
+                            className={`message-sender-info ${
+                              msg.sender?._id === sender._id
+                                ? "align-end"
+                                : "align-start"
+                            }`}
                           >
                             <span className="message-time">
                               {msg.sender?.nametitle
@@ -1043,37 +1097,24 @@ const ChatComponent = () => {
                           </div>
                         )}
                         <div
-                          style={{
-                            display: "flex",
-                            flexDirection:
-                              msg.sender?._id === sender._id
-                                ? "row-reverse"
-                                : "row",
-                            alignItems: "flex-end",
-                            marginBottom: "0.7rem",
-                            maxWidth: "100%",
-                          }}
+                          className={`message-info ${
+                            msg.sender?._id === sender._id
+                              ? "row-reverse-chat"
+                              : "row-chat"
+                          }`}
                         >
                           {/* Message Box */}
                           <div
+                            className="message-box"
                             style={{
-                              maxWidth: "70%",
-                              padding: "10px",
-                              borderRadius: "10px",
                               backgroundColor:
                                 msg.senderModel === "MPersonnel"
                                   ? msg.sender._id === sender._id
                                     ? "#DCF8C6"
-                                    : "#E0E0E0" // ถ้า sender เป็น MPersonnel
+                                    : "#d1c4e9"
                                   : msg.senderModel === "User"
                                   ? "#B3E5FC"
-                                  : "#E0E0E0",
-                              border: "1px solid #ddd",
-                              margin: "5px",
-                              wordBreak: "break-all",
-                              overflow: "hidden",
-                              whiteSpace: "pre-wrap",
-                              fontSize: "16px",
+                                  : "#d1c4e9",
                             }}
                           >
                             {msg.image ? (
@@ -1082,91 +1123,39 @@ const ChatComponent = () => {
                                   <img
                                     src={msg.image}
                                     alt={msg.imageName || "unknown image"}
-                                    style={{
-                                      maxWidth: "250px",
-                                      maxHeight: "250px",
-                                      borderRadius: "5px",
-                                      marginTop: "5px",
-                                      cursor: "pointer",
-                                    }}
-                                    onClick={() => openModal(msg.image)} // Pass image to openModal
+                                    className="image-box-chat"
+                                    onClick={() => openModal(msg.image)}
                                   />
-
-                                  {/* Modal for full-screen image */}
+                                  {/* 
                                   {isModalOpen &&
                                     currentImage === msg.image && (
                                       <div
                                         onClick={closeModal}
-                                        style={{
-                                          position: "fixed",
-                                          top: 0,
-                                          left: 0,
-                                          right: 0,
-                                          bottom: 0,
-                                          backgroundColor: "rgba(8, 5, 4, 0.6)",
-                                          display: "flex",
-                                          justifyContent: "center",
-                                          alignItems: "center",
-                                          zIndex: 1000,
-                                        }}
+                                        className="image-model-chat"
                                       >
                                         <div
                                           className="modal-contents"
-                                          style={
-                                            {
-                                              // position: "relative",
-                                              // maxWidth: "90%",
-                                              // maxHeight: "90%",
-                                            }
-                                          }
-                                          onClick={(e) => e.stopPropagation()} // Prevent closing when clicking the image
+                                          onClick={(e) => e.stopPropagation()}
                                         >
-                                          {/* Close Button */}
                                           <button
                                             onClick={closeModal}
-                                            style={{
-                                              position: "absolute",
-                                              //   top: "0px",
-                                              right: "20px",
-                                              backgroundColor: "transparent",
-                                              border: "none",
-                                              // padding: "10px",
-                                              cursor: "pointer",
-                                              zIndex: 1050, // Make sure it's above the image
-                                            }}
+                                            className="modal-chat-close"
                                           >
                                             <i
-                                              className="bi bi-x-circle-fill"
-                                              style={{
-                                                fontSize: "40px",
-                                                color: "#fff",
-                                              }}
-                                            ></i>{" "}
-                                            {/* Close Icon */}
+                                              className="bi bi-x-circle-fill icon-chat"
+                                            ></i>
                                           </button>
                                           <img
                                             src={currentImage}
                                             alt={
                                               msg.imageName || "unknown image"
                                             }
-                                            style={{
-                                              //   width: "100%",
-                                              maxHeight: " 90vh",
-                                              marginLeft: "auto",
-                                              marginRight: "auto",
-                                              objectFit: "cover",
-                                            }}
+                                            className="image-in-model-chat"
+                                         
                                           />
-                                          {/* Close Button */}
-                                          {/* <span
-                                      className="close"
-                                      
-                                    >
-                                      &times;
-                                    </span> */}
                                         </div>
                                       </div>
-                                    )}
+                                    )} */}
                                 </div>
                               ) : (
                                 <a
@@ -1200,30 +1189,10 @@ const ChatComponent = () => {
                               //   {msg.message}
                               // </span>
                             )}
-
-                            {/* {msg.image && (
-                          <div>
-                            <img
-                              src={msg.image}
-                              alt={msg.imageName}
-                              style={{
-                                maxWidth: "250px",
-                                maxHeight: "250px",
-                                borderRadius: "5px",
-                                marginTop: "5px",
-                              }}
-                            />
-                          </div>
-                        )} */}
                           </div>
                           {/* <small>Read by: {msg.readBy.length} users</small> */}
 
-                          <span
-                            className="message-time"
-                            style={{
-                              alignSelf: "flex-end",
-                            }}
-                          >
+                          <span className="message-time time">
                             {formatTime(msg.createdAt)}
                           </span>
                         </div>
@@ -1233,106 +1202,83 @@ const ChatComponent = () => {
                   ))}
                 </div>
 
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "10px",
-                    paddingTop: "0.5rem",
-                    paddingBottom: "0.5rem",
-                    backgroundColor: "#fff",
-                    borderTop: "1px solid #ddd",
-                    position: "sticky", // ตรึงไว้ด้านล่าง
-                    bottom: 0,
-                    zIndex: 100,
-                  }}
-                >
-                  <div className="file-input-wrapper">
-                    <input
-                      id="file-input"
-                      type="file"
-                      onChange={(e) => handleFileChange(e)}
-                      accept="*"
-                      style={{ display: "none" }}
-                    />
-                    <label htmlFor="file-input" style={{ cursor: "pointer" }}>
-                      <i className="bi bi-card-image"></i>
-                    </label>
-                  </div>
-
+                <div className="input-chat-container">
                   {/* แสดงตัวอย่างไฟล์ที่เลือก */}
                   {file && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                      }}
-                    >
-                      {filePreview ? (
-                        <img
-                          src={filePreview}
-                          alt="Preview"
-                          style={{
-                            maxWidth: "50px",
-                            maxHeight: "50px",
-                            borderRadius: "5px",
-                          }}
-                        />
-                      ) : (
-                        <span>{file.name}</span>
-                      )}
-                      <button
-                        onClick={() => clearFile()}
-                        style={{
-                          backgroundColor: "transparent",
-                          border: "none",
-                          cursor: "pointer",
-                          color: "#ff4d4d",
-                        }}
-                      >
-                        ✕
-                      </button>
+                    <div className="file-preview">
+                      <div className="file-preview-content">
+                        {filePreview ? (
+                          <img
+                            src={filePreview}
+                            alt="Preview"
+                            className="file-preview-image"
+                          />
+                        ) : (
+                          <div className="file-info">
+                            <i className="bi bi-file-earmark"></i>
+                            <span className="file-name">{file.name}</span>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => clearFile()}
+                          className="clear-file-button"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   )}
+                  <div className="input-controls">
+                    <div className="file-input-wrapper">
+                      <input
+                        id="file-input"
+                        type="file"
+                        onChange={(e) => handleFileChange(e)}
+                        accept="*"
+                        style={{ display: "none" }}
+                      />
+                      <label htmlFor="file-input" style={{ cursor: "pointer" }}>
+                        <i className="bi bi-card-image"></i>
+                      </label>
+                    </div>
 
-                  {/* Input สำหรับข้อความ */}
-                  <textarea
-                    ref={textareaRef}
-                    value={input}
-                    onInput={handleInput}
-                    onKeyDown={(e) => {
-                      // ส่งข้อความเมื่อกด Enter (ไม่กด Shift)
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault(); // ป้องกันการขึ้นบรรทัดใหม่
-                        sendMessage(); // เรียกฟังก์ชันส่งข้อความ
-                      }
-                    }}
-                    placeholder="พิมพ์ข้อความ"
-                    style={{
-                      fontSize: ".8rem",
-                      padding: "10px",
-                      border: "1px solid #ddd",
-                      borderRadius: "5px",
-                      width: "100%",
-                      resize: "none",
-                      //   overflowY: "hidden",
-                      minHeight: "50px",
-                      maxHeight: "200px",
-                      boxSizing: "border-box",
-                      lineHeight: "20px",
-                    }}
-                  />
-                  {(input.trim() || file) && (
-                    <button
-                      className="send-button"
-                      type="submit"
-                      onClick={sendMessage}
-                    >
-                      <i className="bi bi-send"></i>
-                    </button>
-                  )}
-                  {/* <button  style={{ padding: '10px 20px', backgroundColor: '#007BFF', color: '#fff', border: 'none', borderRadius: '5px' }}  onClick={sendMessage}>Send</button> */}
+                    <div
+                      ref={textareaRef}
+                      contentEditable
+                      role="textbox"
+                      className="chat-textarea"
+                      onInput={(e) => {
+                        setInput(e.target.innerText);
+                        if (textareaRef.current) {
+                          textareaRef.current.style.height = "40px";
+                          textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+                        }
+                      }}
+                      
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const text = e.clipboardData.getData("text/plain"); 
+                        document.execCommand("insertText", false, text);
+                      }}
+                      placeholder={placeholder}
+                    />
+
+                    {(input.trim() || file) && (
+                      <button
+                        className="send-button"
+                        type="submit"
+                        onClick={sendMessage}
+                      >
+                        <i className="bi bi-send"></i>
+                      </button>
+                    )}
+                  </div>
                 </div>
               </>
             ) : (
@@ -1342,117 +1288,124 @@ const ChatComponent = () => {
             )}
           </div>
         </div>
-{showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
-          </div>
-          <div className="notifications-filter">
-            <div
-              className={`notification-box ${
-                filterType === "all" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("all")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-bell"></i>
-                ทั้งหมด
-              </div>
-              <div className="notification-right">
-                {unreadCount > 0 && (
-                  <span className="notification-count-noti">{unreadCount}</span>
-                )}
-                <i className="bi bi-chevron-right"></i>
-              </div>
+        {showNotifications && (
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
             </div>
-            <div
-              className={`notification-box ${
-                filterType === "abnormal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("abnormal")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-exclamation-triangle"></i>
-                ผิดปกติ
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${
+                  filterType === "all" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
+                </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCount}
+                    </span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.abnormal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.abnormal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
+              <div
+                className={`notification-box ${
+                  filterType === "abnormal" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-            </div>
-            <div
-              className={`notification-box ${
-                filterType === "normal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("normal")}
-            >
-              <div className="notification-item">
-                {" "}
-                <i className="bi bi-journal-text"></i>
-                บันทึกอาการ
+              <div
+                className={`notification-box ${
+                  filterType === "normal" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.normal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.normal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
-              </div>
-            </div>
 
-            <div
-              className={`notification-box ${
-                filterType === "assessment" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("assessment")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-clipboard-check"></i>
-                ประเมินอาการ
+              <div
+                className={`notification-box ${
+                  filterType === "assessment" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.assessment > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.assessment}
-                  </span>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
                 )}
-                <i class="bi bi-chevron-right"></i>
               </div>
-            </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          <div className="selected-filter">
-            <p>
-              การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-            </p>
-            <p
-              className="mark-all-read-btn"
-              onClick={() => markAllByTypeAsViewed(filterType)}
-            >
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-          </div>
-          {filteredAlerts.length > 0 ? (
-            <div>
-              {renderAlerts(
-                filteredAlerts,
-                token,
-                userId,
-                navigate,
-                setAlerts,
-                setUnreadCount,
-                formatDate
-              )}
-            </div>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
+        <ImageModal
+          isOpen={isModalOpen}
+          image={currentImage}
+          onClose={closeModal}
+        />
       </div>
     </main>
   );

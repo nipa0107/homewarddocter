@@ -38,6 +38,7 @@ export default function DetailAgendaForm() {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
+  const hasFetchedUserData = useRef(false);
 
   useEffect(() => {
     socket.on("newAlert", (alert) => {
@@ -116,6 +117,8 @@ export default function DetailAgendaForm() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 

@@ -34,6 +34,7 @@ export default function UpdateOTP() {
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
   const dataemail = location.state?.dataemail;
+  const hasFetchedUserData = useRef(false);
 
 
   const handleKeyDown = (event, index) => {
@@ -283,6 +284,8 @@ export default function UpdateOTP() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 

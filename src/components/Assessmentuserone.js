@@ -1,4 +1,4 @@
-import React, { useCallback,useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
@@ -59,7 +59,7 @@ export default function Assessmentuserone() {
   const bellRef = useRef(null);
   const [historyass, setHistoryAss] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
-  const [historyVisible, setHistoryVisible] = useState(false); 
+  const [historyVisible, setHistoryVisible] = useState(false);
   const [history, setHistory] = useState([]);
   const [assessmentId, setAssessmentId] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -86,14 +86,13 @@ export default function Assessmentuserone() {
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const textareaDetailRef = useRef(null);
   const textareaSuggestionRef = useRef(null);
-
+  const hasFetchedUserData = useRef(false);
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
     abnormal: 0,
     normal: 0,
   });
 
-  
   const getUnreadCount = useCallback(
     (type) => {
       const filteredByType = alerts.filter(
@@ -171,7 +170,6 @@ export default function Assessmentuserone() {
     };
   }, [userId]);
 
-
   useEffect(() => {
     const currentUserId = sender._id;
 
@@ -180,8 +178,8 @@ export default function Assessmentuserone() {
         Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
 
-    setUnreadCount(unreadAlerts.length); 
-  }, [alerts,sender._id]);
+    setUnreadCount(unreadAlerts.length);
+  }, [alerts, sender._id]);
 
   useEffect(() => {
     socket?.on("TotalUnreadCounts", (data) => {
@@ -221,7 +219,7 @@ export default function Assessmentuserone() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -251,7 +249,7 @@ export default function Assessmentuserone() {
         PPS,
       });
     }
-  }, [isEditMode, suggestion, detail, statusName, PPS]);
+  }, [isEditMode]);
 
   const isDataChanged = () => {
     return (
@@ -269,9 +267,6 @@ export default function Assessmentuserone() {
     setPPS(originalData.PPS);
     setIsEditMode(false);
   };
-
- 
-
 
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
@@ -304,7 +299,7 @@ export default function Assessmentuserone() {
   };
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token, userId)
-          .then((alerts, userId) => {
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -317,6 +312,8 @@ export default function Assessmentuserone() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return;
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 
@@ -452,7 +449,7 @@ export default function Assessmentuserone() {
 
       fetchData();
     }
-  }, [patientFormsone.user,patientFormsone._id]);
+  }, [patientFormsone.user, patientFormsone._id]);
 
   useEffect(() => {
     if (patientFormsone && patientFormsone.user) {
@@ -471,7 +468,7 @@ export default function Assessmentuserone() {
 
       fetchMedicalInfo();
     }
-  }, [patientFormsone.user,patientFormsone ]);
+  }, [patientFormsone.user, patientFormsone]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -562,13 +559,39 @@ export default function Assessmentuserone() {
         `http://localhost:5000/assessment/${assessmentId}`
       );
       const data = await response.json();
-      setHistory(data.data.history); 
-      setHistoryVisible(true); 
+      setHistory(data.data.history);
+      setHistoryVisible(true);
     } catch (error) {
       console.error("Error fetching history:", error);
     }
   };
+  const [chartWidth, setChartWidth] = useState("100%");
+  const [chartHeight, setChartHeight] = useState(300);
+  
+  useEffect(() => {
+    const updateChartSize = () => {
+      if (window.innerWidth < 576) {
+        setChartWidth("100%"); 
+        setChartHeight(200);
+      } else if (window.innerWidth < 768) {
+        setChartWidth("100%");
+        setChartHeight(220);
+      } else if (window.innerWidth < 992) {
+        setChartWidth("100%");
+        setChartHeight(270);
+      } else {
+        setChartWidth("100%");
+        setChartHeight(300);
+      }
+    };
+  
+    updateChartSize(); // เรียกใช้ครั้งแรก
+    window.addEventListener("resize", updateChartSize); // 📌 อัปเดตเมื่อ resize
+  
+    return () => window.removeEventListener("resize", updateChartSize); // ลบ event เมื่อ component ออกจาก DOM
+  }, []);
 
+  
   const handleUpdateAssessment = async (e) => {
     e.preventDefault();
     try {
@@ -584,7 +607,7 @@ export default function Assessmentuserone() {
         }),
       });
       setTimeout(() => {
-        toast.success("แก้ไขสำเร็จ"); 
+        toast.success("แก้ไขสำเร็จ");
       }, 1000);
       setIsEditMode(false);
       fetchAssessments(); // รีเฟรชข้อมูลใหม่
@@ -758,7 +781,7 @@ export default function Assessmentuserone() {
         setUserAge(ageDiff);
       }
     }
-  }, [currentDate,birthday]);
+  }, [currentDate, birthday]);
 
   const logOut = () => {
     window.localStorage.clear();
@@ -913,11 +936,14 @@ export default function Assessmentuserone() {
     const dateTime = new Date(dateTimeString);
     const day = dateTime.getDate().toString().padStart(2, "0");
     const month = (dateTime.getMonth() + 1).toString().padStart(2, "0");
-    // const year = dateTime.getFullYear();
+    const year = (dateTime.getFullYear() + 543).toString().slice(-2);
     const hours = dateTime.getHours().toString().padStart(2, "0");
     const minutes = dateTime.getMinutes().toString().padStart(2, "0");
-    return `${day}/${month}\n${hours}:${minutes}`;
+    return `${day}/${month}/${year}\n${hours}:${minutes}`;
   };
+
+  const dynamicFontSize = window.innerWidth < 768 ? 10 : 12;
+
 
   useEffect(() => {
     const fetchSymptomsCount = async () => {
@@ -940,7 +966,6 @@ export default function Assessmentuserone() {
     fetchSymptomsCount();
   }, [patientFormsone.user, patientFormsone._id]);
 
-  
   useEffect(() => {
     const fetchUnreadCount = async () => {
       try {
@@ -984,18 +1009,17 @@ export default function Assessmentuserone() {
     });
   };
 
-  
   const adjustTextareaHeight = (textarea) => {
     if (!textarea) return;
 
     textarea.style.height = "auto";
 
     if (textarea.scrollHeight > 100) {
-      textarea.style.height = "200px"; 
-      textarea.style.overflowY = "auto"; 
+      textarea.style.height = "200px";
+      textarea.style.overflowY = "auto";
     } else {
       textarea.style.height = textarea.scrollHeight + "px";
-      textarea.style.overflowY = "hidden"; 
+      textarea.style.overflowY = "hidden";
     }
   };
   useEffect(() => {
@@ -1015,8 +1039,8 @@ export default function Assessmentuserone() {
     textarea.style.height = textarea.scrollHeight + "px";
 
     if (textarea.scrollHeight > 200) {
-      textarea.style.overflowY = "auto"; 
-      textarea.style.height = "200px"; 
+      textarea.style.overflowY = "auto";
+      textarea.style.height = "200px";
     } else {
       textarea.style.overflowY = "hidden";
     }
@@ -1277,15 +1301,17 @@ export default function Assessmentuserone() {
 
               <p className="textheadSymptom-center">อาการและอาการแสดง</p>
 
-              {patientFormsone.Symptoms &&
-                patientFormsone.Symptoms.map((symptom, index) => (
-                  <div className="symptom-item" key={index}>
-                    <label className="title-symtom">{`อาการที่ ${
-                      index + 1
-                    }: `}</label>
-                    <span className="text-symtom">{symptom}</span>
-                  </div>
-                ))}
+              <div className="symptom-item-container">
+                {patientFormsone.Symptoms &&
+                  patientFormsone.Symptoms.map((symptom, index) => (
+                    <div className="symptom-item" key={index}>
+                      <label className="title-symtom">{`อาการที่ ${
+                        index + 1
+                      }: `}</label>
+                      <span className="text-symtom">{symptom}</span>
+                    </div>
+                  ))}
+              </div>
 
               <p className="textheadSymptom-center">
                 ความถี่ของอาการ
@@ -1316,7 +1342,7 @@ export default function Assessmentuserone() {
                   </span>
                 </p>
               </div>
-              <div className="inline-container">
+              <div className="inline-container help">
                 <label className="textheadSymptom">
                   สิ่งที่อยากให้ทีมแพทย์ช่วยเหลือเพิ่มเติม:
                 </label>
@@ -1332,7 +1358,7 @@ export default function Assessmentuserone() {
               </div>
             </div>
           </div>
-          
+
           {/* <div className="contentinass"> */}
           <div className="contentgraphs">
             <div className="selecttime">
@@ -1355,21 +1381,22 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
+                 <div className="chart-wrapper"> 
                 <div className="chart-containerass1">
-                  <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width={chartWidth} height={chartHeight}>
+
                     <ComposedChart
                       // width={1000}
                       // height={300}
                       data={patientdata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                       margin={
+                           timeRange === "1month"
+                             ? { top: 10, right: 30, left: 0, bottom: 0 }  // ลด bottom เป็น 0
+                             : { top: 10, right: 30, left: 0, bottom: 10 } // ค่าปกติ
+                         }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
+                      {/* <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
                         interval="preserveStartEnd"
@@ -1380,10 +1407,34 @@ export default function Assessmentuserone() {
                             ? false
                             : { fontSize: 10, lineHeight: 1.5 }
                         }
-                      />{" "}
+                      />{" "} */}
+                        <XAxis 
+                          dataKey="createdAt"
+                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          interval="preserveStartEnd"
+                          minTickGap={5}
+                          tickLine={timeRange === "1month" ? false : true}
+                          tick={
+                            timeRange === "1month"
+                              ? false
+                              : (props) => {
+                                  const { x, y, payload } = props;
+                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
+                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  return (
+                                    <g transform={`translate(${x},${y+10})`}>
+                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
+                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
+                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                          }
+                        />
                       <YAxis
                         domain={[30, 40]}
-                        tick={{ fontSize: 10 }}
+                        tick={{ fontSize: window.innerWidth < 768 ? 8 : 10 }} 
                         ticks={[30, 32, 34, 36, 38, 40]}
                         // hide={timeRange !== "1month"}
                       />
@@ -1396,7 +1447,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Min",
                           fill: "#00b300",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <ReferenceLine
@@ -1407,7 +1458,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Max",
                           fill: "#ff0000",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <Area
@@ -1422,32 +1473,16 @@ export default function Assessmentuserone() {
                         dataKey="Temperature"
                         stroke="#e5713f"
                         strokeWidth={3}
-                        // dot={timeRange === "1month" ? false : <CustomDot />}
                         dot={timeRange === "1month" ? false : { r: 4 }}
                         isAnimationActive={true}
                         animationDuration={1500}
                         connectNulls={true}
                       >
-                        {/* {timeRange !== "1month" && (
-                          <LabelList
-                            dataKey="Temperature"
-                            position="inside"
-                            style={{ fill: "white", fontSize: "10" }}
-                          />
-                        )} */}
-                      </Line>
-                      {/* {timeRange === "1month" && (
-                      <Brush
-                        tickFormatter={formatDateTime}
-                        dataKey="createdAt"
-                        height={15}
-                        style={{ fontSize: "10" }}
-                        stroke="#878787"
-                      />
-                    )} */}
+                      </Line>                    
                     </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
+                  </ResponsiveContainer>    
+                </div>          
+                </div>          
               )}
               {timeRange === "1month" &&
                 patientdata &&
@@ -1458,6 +1493,8 @@ export default function Assessmentuserone() {
                   </p>
                 )}
             </div>
+
+            
             <div className="contentgraph">
               <div className="inline-containers">
                 <div className="graph-label">
@@ -1466,30 +1503,46 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
+                <div className="chart-wrapper"> 
                 <div className="chart-containerass1">
-                  <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width={chartWidth} height={chartHeight}>
                     <ComposedChart
                       data={patientdata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-                    >
+                      margin={
+                        timeRange === "1month"
+                          ? { top: 10, right: 30, left: 0, bottom: 0 } 
+                          : { top: 10, right: 30, left: 0, bottom: 10 } 
+                      }>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="createdAt"
-                        tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
-                        minTickGap={5}
-                        tickLine={timeRange === "1month" ? false : true}
-                        tick={
-                          timeRange === "1month"
-                            ? false
-                            : { fontSize: 10, lineHeight: 1.5 }
-                        }
-                      />
+                      <XAxis 
+                          dataKey="createdAt"
+                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          interval="preserveStartEnd"
+                          minTickGap={5}
+                          tickLine={timeRange === "1month" ? false : true}
+                          tick={
+                            timeRange === "1month"
+                              ? false
+                              : (props) => {
+                                  const { x, y, payload } = props;
+                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
+                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  return (
+                                    <g transform={`translate(${x},${y+10})`}>
+                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
+                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
+                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                          }
+                        />
                       <YAxis
-                        domain={[80, 200]} // หรือใช้ auto
-                        tickCount={12} // จำนวน tick (ช่วงจะแบ่งอัตโนมัติ)
+                        domain={[80, 200]} 
+                        tickCount={12}
                         ticks={[80, 100, 120, 140, 160, 180, 200]}
-                        tick={{ fontSize: 10 }}
+                        tick={{ fontSize: window.innerWidth < 768 ? 8 : 10 }} 
                       />
                       <Tooltip content={<CustomTooltipSBP />} />
                       <ReferenceLine
@@ -1500,7 +1553,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Min",
                           fill: "#00b300",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <ReferenceLine
@@ -1511,10 +1564,9 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Max",
                           fill: "#ff0000",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
-                      {/* <Legend verticalAlign="top" align="center" wrapperStyle={{ color: '#000' }} /> */}
                       <Area
                         type="monotone"
                         dataKey="SBP"
@@ -1532,42 +1584,11 @@ export default function Assessmentuserone() {
                         isAnimationActive={true}
                         animationDuration={1500}
                         connectNulls={true}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="SBP" />
-                        //   )
-                        // }
-                        // legendType="none"
                       >
-                        {/* {timeRange !== "1month" && (
-                          <LabelList
-                            dataKey="SBP"
-                            position="inside"
-                            style={{ fill: "white", fontSize: "10" }}
-                            dot={
-                              timeRange === "1month" ? (
-                                false
-                              ) : (
-                                <CustomDot dataKey="SBP" />
-                              )
-                            }
-                          />
-                        )} */}
                       </Line>
-
-                      {/* {timeRange === "1month" && (
-                      <Brush
-                        tickFormatter={formatDateTime}
-                        dataKey="createdAt"
-                        height={15}
-                        style={{ fontSize: "10" }}
-                        stroke="#878787"
-                      />
-                    )} */}
                     </ComposedChart>
                   </ResponsiveContainer>
+                </div>
                 </div>
               )}
               {timeRange === "1month" &&
@@ -1579,6 +1600,7 @@ export default function Assessmentuserone() {
                   </p>
                 )}
             </div>
+
             <div className="contentgraph">
               <div className="inline-containers">
                 <div className="graph-label">
@@ -1587,25 +1609,42 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
+                <div className="chart-wrapper">
                 <div className="chart-containerass1">
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
                     <ComposedChart
                       data={patientdata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                           timeRange === "1month"
+                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
+                             : { top: 10, right: 30, left: 0, bottom: 10 } 
+                         }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="createdAt"
-                        tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
-                        minTickGap={5}
-                        tickLine={timeRange === "1month" ? false : true}
-                        tick={
-                          timeRange === "1month"
-                            ? false
-                            : { fontSize: 10, lineHeight: 1.5 }
-                        }
-                      />
+                        <XAxis 
+                          dataKey="createdAt"
+                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          interval="preserveStartEnd"
+                          minTickGap={5}
+                          tickLine={timeRange === "1month" ? false : true}
+                          tick={
+                            timeRange === "1month"
+                              ? false
+                              : (props) => {
+                                  const { x, y, payload } = props;
+                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
+                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  return (
+                                    <g transform={`translate(${x},${y+10})`}>
+                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
+                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
+                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                          }
+                        />
                       <YAxis
                         domain={[50, 120]}
                         ticks={[50, 60, 70, 80, 90, 100, 110, 120]}
@@ -1621,7 +1660,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Min",
                           fill: "#00b300",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <ReferenceLine
@@ -1632,7 +1671,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Max",
                           fill: "#ff0000",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
 
@@ -1677,6 +1716,7 @@ export default function Assessmentuserone() {
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
+                </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
@@ -1695,27 +1735,44 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
+                <div className="chart-wrapper">
                 <div className="chart-containerass1">
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
                       data={patientdata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                           timeRange === "1month"
+                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
+                             : { top: 10, right: 30, left: 0, bottom: 10 } 
+                         }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="createdAt"
-                        tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
-                        minTickGap={5}
-                        tickLine={timeRange === "1month" ? false : true}
-                        tick={
-                          timeRange === "1month"
-                            ? false
-                            : { fontSize: 10, lineHeight: 1.5 }
-                        }
-                      />{" "}
+                        <XAxis 
+                          dataKey="createdAt"
+                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          interval="preserveStartEnd"
+                          minTickGap={5}
+                          tickLine={timeRange === "1month" ? false : true}
+                          tick={
+                            timeRange === "1month"
+                              ? false
+                              : (props) => {
+                                  const { x, y, payload } = props;
+                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
+                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  return (
+                                    <g transform={`translate(${x},${y+10})`}>
+                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
+                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
+                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                          }
+                        />{" "}
                       {/* {timeRange === "1month" && (
                         <YAxis
                           tick={{ fontSize: 10 }}
@@ -1736,7 +1793,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Min",
                           fill: "#00b300",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <ReferenceLine
@@ -1747,7 +1804,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Max",
                           fill: "#ff0000",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <Area
@@ -1762,37 +1819,15 @@ export default function Assessmentuserone() {
                         dataKey="PulseRate"
                         stroke="rgb(224, 44, 98)"
                         strokeWidth={3}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="PulseRate" />
-                        //   )
-                        // }
                         dot={timeRange === "1month" ? false : { r: 4 }}
                         connectNulls={true}
                         isAnimationActive={true}
                         animationDuration={1500}
                       >
-                        {/* {timeRange !== "1month" && (
-                          <LabelList
-                            dataKey="PulseRate"
-                            position="inside"
-                            style={{ fill: "white", fontSize: "10" }}
-                          />
-                        )} */}
                       </Line>
-                      {/* {timeRange === "1month" && (
-                      <Brush
-                        tickFormatter={formatDateTime}
-                        dataKey="createdAt"
-                        height={15}
-                        style={{ fontSize: "10" }}
-                        stroke="#878787"
-                      />
-                    )} */}
                     </ComposedChart>
                   </ResponsiveContainer>
+                </div>
                 </div>
               )}
               {timeRange === "1month" &&
@@ -1813,8 +1848,9 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
+                <div className="chart-wrapper">
                 <div className="chart-containerass1">
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
@@ -1824,21 +1860,37 @@ export default function Assessmentuserone() {
                       //     ? { top: 0, right: 0, left: -30, bottom: 0 }
                       //     : { right: 28, left: 28 }
                       // }
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                           timeRange === "1month"
+                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
+                             : { top: 10, right: 30, left: 0, bottom: 10 } 
+                         }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="createdAt"
-                        tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
-                        minTickGap={5}
-                        tickLine={timeRange === "1month" ? false : true}
-                        tick={
-                          timeRange === "1month"
-                            ? false
-                            : { fontSize: 10, lineHeight: 1.5 }
-                        }
-                      />{" "}
+                        <XAxis 
+                          dataKey="createdAt"
+                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          interval="preserveStartEnd"
+                          minTickGap={5}
+                          tickLine={timeRange === "1month" ? false : true}
+                          tick={
+                            timeRange === "1month"
+                              ? false
+                              : (props) => {
+                                  const { x, y, payload } = props;
+                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
+                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  return (
+                                    <g transform={`translate(${x},${y+10})`}>
+                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
+                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
+                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                          }
+                        />{" "}
                       <YAxis
                         tick={{ fontSize: 10 }}
                         ticks={[0, 10, 20, 30, 40]}
@@ -1853,7 +1905,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Min",
                           fill: "#00b300",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <ReferenceLine
@@ -1864,7 +1916,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Max",
                           fill: "#ff0000",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <Area
@@ -1911,6 +1963,7 @@ export default function Assessmentuserone() {
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
+                </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
@@ -1929,13 +1982,18 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
+                <div className="chart-wrapper">
                 <div className="chart-containerass1">
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
                       data={patientdata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                           timeRange === "1month"
+                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
+                             : { top: 10, right: 30, left: 0, bottom: 10 } 
+                         }
                       // margin={
                       //   timeRange === "1month"
                       //     ? { top: 0, right: 0, left: -30, bottom: 0 }
@@ -1943,18 +2001,30 @@ export default function Assessmentuserone() {
                       // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="createdAt"
-                        tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
-                        minTickGap={5}
-                        tickLine={timeRange === "1month" ? false : true}
-                        tick={
-                          timeRange === "1month"
-                            ? false
-                            : { fontSize: 10, lineHeight: 1.5 }
-                        }
-                      />
+                        <XAxis 
+                          dataKey="createdAt"
+                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          interval="preserveStartEnd"
+                          minTickGap={5}
+                          tickLine={timeRange === "1month" ? false : true}
+                          tick={
+                            timeRange === "1month"
+                              ? false
+                              : (props) => {
+                                  const { x, y, payload } = props;
+                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
+                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  return (
+                                    <g transform={`translate(${x},${y+10})`}>
+                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
+                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
+                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                          }
+                        />
 
                       <YAxis
                         domain={[0, 10]}
@@ -1972,7 +2042,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Med",
                           fill: "#00b300",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
 
@@ -2016,6 +2086,7 @@ export default function Assessmentuserone() {
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
+                </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
@@ -2035,13 +2106,18 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
+                <div className="chart-wrapper">
                 <div className="chart-containerass1">
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
                     <ComposedChart
                       // width={1000}
                       // height={300}
                       data={patientdata}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                      margin={
+                           timeRange === "1month"
+                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
+                             : { top: 10, right: 30, left: 0, bottom: 10 } 
+                         }
                       // margin={
                       //   timeRange === "1month"
                       //     ? { top: 0, right: 0, left: -30, bottom: 0 }
@@ -2049,18 +2125,30 @@ export default function Assessmentuserone() {
                       // }
                     >
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="createdAt"
-                        tickFormatter={formatDateTime}
-                        interval="preserveStartEnd"
-                        minTickGap={5}
-                        tickLine={timeRange === "1month" ? false : true}
-                        tick={
-                          timeRange === "1month"
-                            ? false
-                            : { fontSize: 10, lineHeight: 1.5 }
-                        }
-                      />
+                        <XAxis 
+                          dataKey="createdAt"
+                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          interval="preserveStartEnd"
+                          minTickGap={5}
+                          tickLine={timeRange === "1month" ? false : true}
+                          tick={
+                            timeRange === "1month"
+                              ? false
+                              : (props) => {
+                                  const { x, y, payload } = props;
+                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
+                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  return (
+                                    <g transform={`translate(${x},${y+10})`}>
+                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
+                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
+                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                      </text>
+                                    </g>
+                                  );
+                                }
+                          }
+                        />
                       {/* {timeRange === "1month" && ( */}
                       <YAxis
                         domain={[60, 180]}
@@ -2077,7 +2165,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Min",
                           fill: "#00b300",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
                       <ReferenceLine
@@ -2088,7 +2176,7 @@ export default function Assessmentuserone() {
                           position: "right",
                           value: "Max",
                           fill: "#ff0000",
-                          fontSize: 12,
+                          fontSize: dynamicFontSize,
                         }}
                       />
 
@@ -2112,6 +2200,7 @@ export default function Assessmentuserone() {
                       ></Line>
                     </ComposedChart>
                   </ResponsiveContainer>
+                </div>
                 </div>
               )}
               {timeRange === "1month" &&
@@ -2174,71 +2263,58 @@ export default function Assessmentuserone() {
               </div>
 
               <div className="content-in-ass">
-                <div className="inline-container">
+                <div className="assessment-section pps-section">
                   <label className="title-ass-inside">PPS: </label>
                   <p className="text-ass-inside">{PPS || "-"}</p>
                 </div>
-                <div className="inline-container">
+                <div className="assessment-section">
                   <label className="title-ass-inside">ผลการประเมินอาการ:</label>
-                  <div className="btn-group-status-name">
-                    {statusName === "ปกติ" && (
-                      <div
-                        className="btn-ass btn-normal"
-                        onClick={() => handleButtonClick("ปกติ")}
-                      >
-                        ปกติ
-                      </div>
-                    )}
-                    {statusName === "ผิดปกติ" && (
-                      <div
-                        className="btn-ass btn-abnormal"
-                        onClick={() => handleButtonClick("ผิดปกติ")}
-                      >
-                        ผิดปกติ
-                      </div>
-                    )}
-                    {statusName === "เคสฉุกเฉิน" && (
-                      <div
-                        className="btn-ass btn-Emergency"
-                        onClick={() => handleButtonClick("เคสฉุกเฉิน")}
-                      >
-                        เคสฉุกเฉิน
-                      </div>
-                    )}
-                    {statusName === "สิ้นสุดการรักษา" && (
-                      <div
-                        className="btn-ass btn-completed"
-                        onClick={() => handleButtonClick("สิ้นสุดการรักษา")}
-                      >
-                        สิ้นสุดการรักษา
-                      </div>
-                    )}
-                    <input type="hidden" value={statusName} />
+                  <div
+                    className={`status-indicator ${
+                      statusName === "ปกติ"
+                        ? "btn-normal"
+                        : statusName === "ผิดปกติ"
+                        ? "btn-abnormal"
+                        : statusName === "เคสฉุกเฉิน"
+                        ? "btn-Emergency"
+                        : "btn-completed"
+                    }`}
+                    onClick={() => handleButtonClick(statusName)}
+                  >
+                    {statusName}
                   </div>
                 </div>
-                <div className="inline-container">
-                  <label className="title-ass-inside">รายละเอียดสำหรับแพทย์: </label>
+                <div className="assessment-section">
+                  <label className="title-ass-inside">
+                    รายละเอียดสำหรับแพทย์:{" "}
+                  </label>
                   <p className="text-ass-inside">{detail || "-"}</p>
                 </div>
-                <div className="inline-container">
-                  <label className="title-ass-inside">คำแนะนำสำหรับผู้ป่วย: </label>
+                <div className="assessment-section">
+                  <label className="title-ass-inside">
+                    คำแนะนำสำหรับผู้ป่วย:{" "}
+                  </label>
                   <p className="text-ass-inside">{suggestion || "-"}</p>
                 </div>
-                <div className="inline-container">
+                <div className="assessment-section">
                   <label className="title-ass-inside">ผู้ประเมิน: </label>
                   <p className="text-ass-inside">
                     {mpersonnel.nametitle} {mpersonnel.name}{" "}
                     {mpersonnel.surname}
                   </p>
                 </div>
-                <div className="inline-container">
+                <div className="assessment-section">
                   <label className="title-ass-inside">วันที่ประเมิน: </label>
                   <p className="text-ass-inside">{formatDate(dateass)}</p>
                 </div>
                 {historyass.length > 0 && (
-                  <div className="inline-container">
-                    <label className="title-ass-inside">วันที่แก้ไขล่าสุด: </label>
-                    <p className="text-ass-inside">{formatDate(dateModified)}</p>
+                  <div className="assessment-section">
+                    <label className="title-ass-inside">
+                      วันที่แก้ไขล่าสุด:{" "}
+                    </label>
+                    <p className="text-ass-inside">
+                      {formatDate(dateModified)}
+                    </p>
                   </div>
                 )}
               </div>
@@ -2249,11 +2325,10 @@ export default function Assessmentuserone() {
                 <b className="textass" align="center">
                   ประเมินอาการ
                 </b>
-                
               </div>
               <div className="content-in-ass">
                 <form onSubmit={handleSubmit}>
-                  <div className="inline-container">
+                  <div className="inline-ass">
                     <label className="title-ass">PPS:</label>
                     <select
                       className="form-select select"
@@ -2273,7 +2348,7 @@ export default function Assessmentuserone() {
                       <option value="100">100</option>
                     </select>
                   </div>
-                  <div className="inline-container">
+                  <div className="inline-ass">
                     <label className="title-ass">ประเมินอาการ:</label>
                     <div className="btn-group-status-name">
                       <div
@@ -2318,20 +2393,20 @@ export default function Assessmentuserone() {
                     </div>
                   </div>
 
-                  <div className="inline-container">
+                  <div className="inline-ass">
                     <label className="title-ass">รายละเอียดสำหรับแพทย์: </label>
                     <textarea
-                      className="form-control"
+                      className="form-control form-control-ass"
                       onChange={(e) => handleInputChange(e, setDetail)}
                       rows="2" // กำหนดจำนวนแถวเริ่มต้น
                       style={{ resize: "vertical" }}
                     ></textarea>
                   </div>
 
-                  <div className="inline-container">
+                  <div className="inline-ass">
                     <label className="title-ass">คำแนะนำสำหรับผู้ป่วย: </label>
                     <textarea
-                      className="form-control"
+                      className="form-control form-control-ass"
                       onChange={(e) => handleInputChange(e, setSuggestion)}
                       // rows="1"
                       // style={{
@@ -2524,7 +2599,9 @@ export default function Assessmentuserone() {
                       <div className="history-item-body">
                         <p>
                           PPS:{" "}
-                          <strong><span className="pps">{item.PPS}</span></strong>
+                          <strong>
+                            <span className="pps">{item.PPS}</span>
+                          </strong>
                         </p>
                         <div className="history-item-header">
                           {/* <div className="mb-3"> */}
@@ -2555,24 +2632,34 @@ export default function Assessmentuserone() {
                         </div>
                         <p>
                           รายละเอียดสำหรับแพทย์:{" "}
-                          <strong><span className="detail">{item.detail|| "-"}</span></strong>
+                          <strong>
+                            <span className="detail">{item.detail || "-"}</span>
+                          </strong>
                         </p>
                         <p>
                           คำแนะนำสำหรับผู้ป่วย:{" "}
-                          <strong><span className="suggestion">{item.suggestion|| "-"}</span></strong>
+                          <strong>
+                            <span className="suggestion">
+                              {item.suggestion || "-"}
+                            </span>
+                          </strong>
                         </p>
                         <p>
                           แก้ไขโดย:{" "}
-                          <strong><span className="updatedBy">
-                            {item.updatedBy?.name || "N/A"}{" "}
-                            {item.updatedBy?.surname || "N/A"}
-                          </span></strong>
+                          <strong>
+                            <span className="updatedBy">
+                              {item.updatedBy?.name || "N/A"}{" "}
+                              {item.updatedBy?.surname || "N/A"}
+                            </span>
+                          </strong>
                         </p>
                         <p>
                           วันที่แก้ไข:{" "}
-                          <strong><span className="date">
-                            {formatDate(item.updatedAt)}
-                          </span></strong>
+                          <strong>
+                            <span className="date">
+                              {formatDate(item.updatedAt)}
+                            </span>
+                          </strong>
                         </p>
                       </div>
                       <hr className="history-separator" />
@@ -2584,117 +2671,119 @@ export default function Assessmentuserone() {
           </div>
         )}
 
-      {showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
-          </div>
-          <div className="notifications-filter">
-            <div
-              className={`notification-box ${
-                filterType === "all" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("all")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-bell"></i>
-                ทั้งหมด
-              </div>
-              <div className="notification-right">
-                {unreadCount > 0 && (
-                  <span className="notification-count-noti">{unreadCount}</span>
-                )}
-                <i className="bi bi-chevron-right"></i>
-              </div>
+        {showNotifications && (
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
             </div>
-            <div
-              className={`notification-box ${
-                filterType === "abnormal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("abnormal")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-exclamation-triangle"></i>
-                ผิดปกติ
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${
+                  filterType === "all" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
+                </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCount}
+                    </span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.abnormal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.abnormal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
+              <div
+                className={`notification-box ${
+                  filterType === "abnormal" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-            </div>
-            <div
-              className={`notification-box ${
-                filterType === "normal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("normal")}
-            >
-              <div className="notification-item">
-                {" "}
-                <i className="bi bi-journal-text"></i>
-                บันทึกอาการ
+              <div
+                className={`notification-box ${
+                  filterType === "normal" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.normal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.normal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
-              </div>
-            </div>
 
-            <div
-              className={`notification-box ${
-                filterType === "assessment" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("assessment")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-clipboard-check"></i>
-                ประเมินอาการ
+              <div
+                className={`notification-box ${
+                  filterType === "assessment" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.assessment > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.assessment}
-                  </span>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
                 )}
-                <i class="bi bi-chevron-right"></i>
               </div>
-            </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          <div className="selected-filter">
-            <p>
-              การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-            </p>
-            <p
-              className="mark-all-read-btn"
-              onClick={() => markAllByTypeAsViewed(filterType)}
-            >
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-          </div>
-          {filteredAlerts.length > 0 ? (
-            <div>
-              {renderAlerts(
-                filteredAlerts,
-                token,
-                userId,
-                navigate,
-                setAlerts,
-                setUnreadCount,
-                formatDate
-              )}
-            </div>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
         {showScrollTopButton && (
           <button
             className="scroll-to-top-btn"

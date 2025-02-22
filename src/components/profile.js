@@ -26,6 +26,7 @@ export default function Home() {
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const hasFetchedUserData = useRef(false);
 
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
@@ -173,6 +174,14 @@ export default function Home() {
     })
       .then((res) => res.json())
       .then((data) => {
+        if (data.data === "token expired") {
+          alert("Token expired login again");
+          window.localStorage.clear();
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 0);
+          return null; 
+        }
         setSender({
           name: data.data.name,
           surname: data.data.surname,
@@ -181,10 +190,6 @@ export default function Home() {
         setData(data.data);
         setDataemail(data.data);
         setIsEmailVerified(data.data.isEmailVerified);
-        if (data.data === "token expired") {
-          window.localStorage.clear();
-          window.location.href = "./";
-        }
         return data.data;
       })
       .catch((error) => {
@@ -207,6 +212,9 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; // ป้องกันการเรียกซ้ำ
+    hasFetchedUserData.current = true;
+    
     const token = window.localStorage.getItem("token");
     setToken(token);
 

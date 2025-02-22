@@ -32,6 +32,7 @@ export default function AddEquipPatient() {
     const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const hasFetchedUserData = useRef(false);
 
    useEffect(() => {
      socket?.on('newAlert', (alert) => {
@@ -139,16 +140,21 @@ export default function AddEquipPatient() {
         })
             .then((res) => res.json())
             .then((data) => {
+                if (data.data === "token expired") {
+                    alert("Token expired login again");
+                    window.localStorage.clear();
+                    setTimeout(() => {
+                      window.location.replace("./");
+                    }, 0);
+                    return null; 
+                  }
+
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
                     _id: data.data._id,
                   });
                 setProfiledata(data.data);
-                if (data.data === "token expired") {
-                    window.localStorage.clear();
-                    window.location.href = "./";
-                }
                 return data.data;
             })
             .catch((error) => {
@@ -171,6 +177,8 @@ export default function AddEquipPatient() {
     };
 
     useEffect(() => {
+        if (hasFetchedUserData.current) return; // ป้องกันการเรียกซ้ำ
+        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 

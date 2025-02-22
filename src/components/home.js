@@ -37,6 +37,8 @@ export default function Home() {
   const [medicalData, setMedicalData] = useState({});
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const hasFetchedUserData = useRef(false);
+  
    useEffect(() => {
      socket?.on('newAlert', (alert) => {
        console.log('Received newAlert:', alert);
@@ -130,18 +132,6 @@ export default function Home() {
     };
   }, []);
 
-  const getAllUser = () => {
-    fetch('http://localhost:5000/alluser', {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setDatauser(data.data);
-      });
-  };
 
   const logOut = () => {
     window.localStorage.clear();
@@ -166,12 +156,17 @@ export default function Home() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setData(data.data);
-        if (data.data == "token expired") {
+        if (data.data === "token expired") {
+          alert("Token expired login again");
           window.localStorage.clear();
-          window.location.href = "./";
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 0);
+          return null; 
         }
-        return data.data;
+  
+        setData(data.data);
+        return data.data; 
       })
       .catch((error) => {
         console.error("Error verifying token:", error);
@@ -194,6 +189,9 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return;
+    hasFetchedUserData.current = true;
+
     const token = window.localStorage.getItem("token");
     setToken(token);
 
@@ -267,56 +265,6 @@ export default function Home() {
     return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
       } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
       } น.`;
-  };
-
-  const fetchAllUsers = async (userId) => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/alluserchat?userId=${userId}`
-      );
-      const data = await response.json();
-
-      const usersWithLastMessage = await Promise.all(
-        data.data.map(async (user) => {
-          const lastMessageResponse = await fetch(
-            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
-          );
-          const lastMessageData = await lastMessageResponse.json();
-
-          const lastMessage = lastMessageData.lastMessage;
-          return { ...user, lastMessage: lastMessage ? lastMessage : null };
-        })
-      );
-
-      const sortedUsers = usersWithLastMessage.sort((a, b) => {
-        if (!a.lastMessage) return 1;
-        if (!b.lastMessage) return -1;
-        return (
-          new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
-        );
-      });
-
-      setAllUsers(sortedUsers);
-    } catch (error) {
-      console.error("Error fetching all users:", error);
-    }
-  };
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchAllUsers(data._id);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [data]);
-
-  const countUnreadUsers = () => {
-    const unreadUsers = allUsers.filter((user) => {
-      const lastMessage = user.lastMessage;
-      return (
-        lastMessage && lastMessage.senderModel === "User" && !lastMessage.isRead
-      );
-    });
-    return unreadUsers.length;
   };
 
   useEffect(() => {

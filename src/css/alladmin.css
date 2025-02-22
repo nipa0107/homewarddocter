@@ -909,3 +909,13 @@ input[type="radio"] {
     font-size: 0.875em;
 }
   
+
+.input-error {
+  border-radius: 4px; 
+  box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); 
+}
+
+.error-text {
+    color: red;
+    font-size: 0.875em;
+}

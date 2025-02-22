@@ -46,6 +46,7 @@ export default function Infopatient({ }) {
     const notificationsRef = useRef(null);
     const bellRef = useRef(null);
     const [caregiverInfo, setCaregiverInfo] = useState(null);
+    const hasFetchedUserData = useRef(false);
 
      const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
      const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
@@ -130,7 +131,7 @@ export default function Infopatient({ }) {
 
        const handleEdit = (caregiver) => {
         console.log("caregiver ที่กำลังแก้ไข:", caregiver);
-        navigate("/updatecaregiver", { state: { caregiver, id }});
+        navigate("/updatecaregiver", { state: { caregiver, id } });
         setSelectedCaregiver(caregiver);
         setFormData({
           user: caregiver.user || "",
@@ -435,6 +436,8 @@ export default function Infopatient({ }) {
     };
 
     useEffect(() => {
+        if (hasFetchedUserData.current) return; 
+        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 
@@ -557,6 +560,12 @@ export default function Infopatient({ }) {
         alert("เกิดข้อผิดพลาดในการลบข้อมูล");
       }
     }
+  };
+
+  
+  const formatIDCardNumber = (id) => {
+    if (!id) return "";
+    return id.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5");
   };
 
     return (
@@ -808,15 +817,32 @@ export default function Infopatient({ }) {
                       <p>
                         <span>ผู้ดูแลคนที่ {index + 1}:</span>
                       </p>
+
                       <div className="caregiver-card">
+
                       <div className="caregiver-info">
+                      <p className="caregiver-row">
+                            <span className="label">เลขบัตรประชาชน</span>{" "}
+                            <span className="caregiver-data">
+                              {formatIDCardNumber(
+                                caregiver.ID_card_number || "-"
+                              )}
+                            </span>
+                          </p>
                         <p>
                           <span>ชื่อ-สกุล:</span> {caregiver.name || "-"}{" "}
                           {caregiver.surname || "-"}
                         </p>
+                       
                         <p>
                           <span>ความสัมพันธ์:</span>{" "}
-                          {caregiver.Relationship || "-"}
+                          {caregiver.userRelationships &&
+                              caregiver.userRelationships.length > 0
+                                ? caregiver.userRelationships
+                                    .map((rel) => rel.relationship)
+                                    .filter((relationship) => relationship)
+                                    .join(", ") || "-"
+                                : "-"}
                         </p>
                         <p>
                           <span>เบอร์โทรศัพท์:</span> {caregiver.tel || "-"}

@@ -28,12 +28,21 @@ export default function Updatecaregiver() {
   const [showOtherInput, setShowOtherInput] = useState(false);
   const [otherRelationship, setOtherRelationship] = useState("");
   const [formData, setFormData] = useState({
-    user: caregiver?.user || "",
+    ID_card_number: caregiver?.ID_card_number || "",
+    // user: caregiver?.user|| "",
+    user: caregiver?.userRelationships?.[0]?.user || "",
     name: caregiver?.name || "",
     surname: caregiver?.surname || "",
     tel: caregiver?.tel || "",
-    Relationship: caregiver?.Relationship || "",
+    // Relationship: caregiver?.Relationship || "",
+    Relationship: caregiver?.userRelationships?.[0]?.relationship || "",
   });
+  const [telError, setTelError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [surnameError, setSurnameError] = useState("");
+  const [otherError, setOtherError] = useState("");
+  const [RelationshiError, setRelationshipError] = useState("");
+  const hasFetchedUserData = useRef(false);
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
@@ -194,6 +203,8 @@ export default function Updatecaregiver() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 
@@ -266,19 +277,111 @@ export default function Updatecaregiver() {
       setFormData((prev) => ({ ...prev, Relationship: value })); // อัปเดต Relationship ตามที่เลือก
     }
   };
+
   const handleOtherRelationshipChange = (e) => {
     const value = e.target.value;
     setOtherRelationship(value);
-    setFormData((prev) => ({ ...prev, Relationship: value })); // อัปเดต Relationship ด้วยค่าอื่นๆ
+
+    // ตรวจสอบว่าเป็นตัวอักษรเท่านั้น
+    if (/[^ก-๙a-zA-Z\s]/.test(value)) {
+      setOtherError("กรุณากรอกเป็นตัวอักษรเท่านั้น");
+    } else {
+      setOtherError(""); // ลบข้อความผิดพลาดเมื่อกรอกถูกต้อง
+    }
+
+    setFormData((prev) => ({ ...prev, Relationship: value }));
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "tel") {
+      if (/[^0-9]/.test(value)) {
+        setTelError("เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้น");
+      } else {
+        setTelError("");
+      }
+    } else if (name === "name" || name === "surname") {
+      if (/[^ก-๙a-zA-Z\s]/.test(value)) {
+        if (name === "name") {
+          setNameError("ชื่อต้องเป็นตัวอักษรเท่านั้น");
+        } else {
+          setSurnameError("นามสกุลต้องเป็นตัวอักษรเท่านั้น");
+        }
+      } else {
+        if (name === "name") setNameError("");
+        if (name === "surname") setSurnameError("");
+      }
+    }
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    const textRegex = /^[ก-๙a-zA-Z\s]+$/;
+
+    if (!formData.name.trim()) {
+      setNameError("กรุณากรอกชื่อ");
+      isValid = false;
+    } else if (!textRegex.test(formData.name)) {
+      setNameError("ชื่อต้องเป็นตัวอักษรเท่านั้น");
+      isValid = false;
+    } else {
+      setNameError("");
+    }
+
+    if (!formData.surname.trim()) {
+      setSurnameError("กรุณากรอกนามสกุล");
+      isValid = false;
+    } else if (!textRegex.test(formData.surname)) {
+      setSurnameError("นามสกุลต้องเป็นตัวอักษรเท่านั้น");
+      isValid = false;
+    } else {
+      setSurnameError("");
+    }
+
+    if (!formData.tel.trim()) {
+      setTelError("กรุณากรอกเบอร์โทรศัพท์");
+      isValid = false;
+    } else if (formData.tel.length !== 10) {
+      setTelError("เบอร์โทรศัพท์ต้องมี 10 หลัก");
+      isValid = false;
+    } else if (!/^\d+$/.test(formData.tel)) {
+      setTelError("เบอร์โทรศัพท์ต้องเป็นตัวเลขเท่านั้น");
+      isValid = false;
+    } else {
+      setTelError("");
+    }
+
+    if (!showOtherInput && !formData.Relationship.trim()) {
+      setRelationshipError("กรุณาเลือกความสัมพันธ์");
+      isValid = false;
+    } else {
+      setRelationshipError("");
+    }
+
+    if (showOtherInput) {
+      if (!otherRelationship.trim()) {
+        setOtherError("กรุณาระบุความสัมพันธ์");
+        isValid = false;
+      } else if (!textRegex.test(otherRelationship)) {
+        setOtherError("ความสัมพันธ์ต้องเป็นตัวอักษรเท่านั้น");
+        isValid = false;
+      } else {
+        setOtherError("");
+      }
+    } else {
+      setOtherError(""); // ล้าง error ถ้าไม่ได้เลือก "อื่นๆ"
+    }
+    return isValid;
   };
 
   const handleSave = async (event) => {
     event.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     try {
       const response = await fetch("http://localhost:5000/updatecaregiver", {
         method: "POST",
@@ -300,6 +403,21 @@ export default function Updatecaregiver() {
       console.error("Error saving data:", error);
       alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
+  };
+
+  useEffect(() => {
+    if (
+      formData.Relationship &&
+      !["พ่อ", "แม่", "ลูก", "ภรรยา", "สามี"].includes(formData.Relationship)
+    ) {
+      setShowOtherInput(true);
+      setOtherRelationship(formData.Relationship);
+    }
+  }, [formData.Relationship]);
+
+  const formatIDCardNumber = (id) => {
+    if (!id) return "";
+    return id.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5");
   };
 
   const formatDate = (dateTimeString) => {
@@ -542,24 +660,39 @@ export default function Updatecaregiver() {
         <div className="adminall card mb-1">
           <form>
             <div className="mb-1">
-              <label>ชื่อ(ผู้ดูแล)</label>
+              <label>เลขประจําตัวประชาชน</label>
               <input
                 type="text"
-                className="form-control"
-                name="name"
-                value={formData.name}
+                readOnly
+                className="form-control gray-background"
+                name="ID_card_number"
+                value={formatIDCardNumber(formData.ID_card_number)}
                 onChange={handleChange}
               />
             </div>
             <div className="mb-1">
-              <label>นามสกุล(ผู้ดูแล)</label>
+              <label>ชื่อ</label>
+              <input
+                type="text"
+                className={`form-control ${nameError ? "input-error" : ""}`}
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+              />
+              {nameError && <span className="error-text">{nameError}</span>}
+            </div>
+            <div className="mb-1">
+              <label>นามสกุล</label>
               <input
                 type="text"
                 name="surname"
-                className="form-control"
+                className={`form-control ${surnameError ? "input-error" : ""}`}
                 value={formData.surname}
                 onChange={handleChange}
               />
+              {surnameError && (
+                <span className="error-text">{surnameError}</span>
+              )}
             </div>
             <div className="mb-1">
               <label>ความสัมพันธ์</label>
@@ -631,29 +764,41 @@ export default function Updatecaregiver() {
                       อื่นๆ
                     </label>
                   </div>
+              
+                </div>
+                {RelationshiError && (
+                    <span className="error-text">{RelationshiError}</span>
+                  )}
                 </div>
                 {showOtherInput && (
                   <div className="mt-2">
                     <label>กรุณาระบุ:</label>
                     <input
                       type="text"
-                      className="form-control"
+                      className={`form-control ${
+                        otherError ? "input-error" : ""
+                      }`}
                       value={otherRelationship}
                       onChange={handleOtherRelationshipChange}
                     />
+                    {otherError && (
+                      <span className="error-text">{otherError}</span>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
+         
             <div className="mb-1">
               <label>เบอร์โทรศัพท์(ผู้ดูแล)</label>
               <input
                 type="text"
                 name="tel"
-                className="form-control"
+                className={`form-control ${telError ? "input-error" : ""}`}
                 value={formData.tel}
+                maxLength="10"
                 onChange={handleChange}
               />
+              {telError && <span className="error-text">{telError}</span>}
             </div>
           </form>
         </div>
