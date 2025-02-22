@@ -449,28 +449,37 @@ export default function Home() {
 
 
   const handleDateFilter = (filterType) => {
-    const now = new Date();
-    let filtered;
+    const now = new Date(); // สร้าง Object ใหม่
+    let filtered = [];
+
     if (filterType === "latest") {
-      // Sort the data by creation date in descending order
+      // เรียงข้อมูลจากล่าสุดไปเก่าสุด
       filtered = [...group3Users].sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
     } else if (filterType === "7days") {
-      filtered = group3Users.filter(
-        (user) =>
-          new Date(user.createdAt) >= new Date(now.setDate(now.getDate() - 7))
-      );
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // คำนวณย้อนหลัง 7 วัน
+
+      filtered = group3Users.filter((user) => {
+        const userDate = new Date(user.createdAt);
+        return userDate >= sevenDaysAgo && userDate <= now; // ตรวจสอบช่วงวันที่
+      });
     } else if (filterType === "30days") {
-      filtered = group3Users.filter(
-        (user) =>
-          new Date(user.createdAt) >= new Date(now.setMonth(now.getMonth() - 1))
-      );
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setMonth(thirtyDaysAgo.getMonth() - 1); // คำนวณย้อนหลัง 30 วัน
+
+      filtered = group3Users.filter((user) => {
+        const userDate = new Date(user.createdAt);
+        return userDate >= thirtyDaysAgo && userDate <= now;
+      });
     } else {
-      filtered = group3Users; // Default to all users
+      filtered = group3Users; // แสดงทั้งหมด
     }
+
     setFilteredUsers(filtered);
   };
+
 
 
   const [stats, setStats] = useState({ totalUsers: 0, totalPatientForms: 0, abnormalCasesCount: 0 });
@@ -545,7 +554,7 @@ export default function Home() {
 
   const COLORS_DIAGNOSIS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28AFF', '#FF6F91', '#FF6361', '#BC5090'];
   const COLORS_GENDER = ['#0088FE', '#f9a8d4', '#9ca3af']; // Male, Female, Unspecified
-  const COLORS_STATUS = ["#4caf50", "#ff9800", "#f44336"]; // สีสำหรับปกติ, ผิดปกติ, และฉุกเฉิน
+  const COLORS_STATUS = ["#1cc88a", "#ff9800", "#f44336"]; // สีสำหรับปกติ, ผิดปกติ, และฉุกเฉิน
   const COLORS_IMMOBILITY = ["#1cc88a", "#4e73df", "#e74a3b"]; // สีสำหรับแต่ละกลุ่ม
 
   const [caseStats, setCaseStats] = useState([]);
@@ -588,10 +597,11 @@ export default function Home() {
           if (total > 0) {
             // คำนวณเปอร์เซ็นต์
             const formattedData = [
-              { name: "กลุ่มที่ 1 (ช่วยเหลือตัวเองดี)", value: ((group1 / total) * 100).toFixed(2) },
-              { name: "กลุ่มที่ 2 (ช่วยเหลือตัวเองได้ปานกลาง)", value: ((group2 / total) * 100).toFixed(2) },
-              { name: "กลุ่มที่ 3 (ช่วยเหลือตัวเองได้น้อย)", value: ((group3 / total) * 100).toFixed(2) },
+              { name: "กลุ่มที่ 1 (ช่วยเหลือตัวเองดี)", value: ((group1 / total) * 100).toFixed(2), count: group1 },
+              { name: "กลุ่มที่ 2 (ช่วยเหลือตัวเองได้ปานกลาง)", value: ((group2 / total) * 100).toFixed(2), count: group2 },
+              { name: "กลุ่มที่ 3 (ช่วยเหลือตัวเองได้น้อย)", value: ((group3 / total) * 100).toFixed(2), count: group3 },
             ];
+
 
             setImmobilityData(formattedData);
           } else {
@@ -616,6 +626,27 @@ export default function Home() {
 
   ];
 
+    useEffect(() => {
+      // ดึงข้อมูล unread count เมื่อเปิดหน้า
+      const fetchUnreadCount = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost:5000/update-unread-count"
+          );
+  
+          if (!response.ok) {
+            throw new Error(`Network response was not ok: ${response.status}`);
+          }
+          const data = await response.json();
+          if (data.success) {
+            setUserUnreadCounts(data.users);
+          }
+        } catch (error) {
+          console.error("Error fetching unread count:", error);
+        }
+      };
+      fetchUnreadCount();
+    }, []);
   return (
 
     <main className="body">
@@ -773,14 +804,14 @@ export default function Home() {
               onClick={() => navigate("/allpatient")}
               style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
             >
-              <div className="card border-left shadow h-100 py-2 hover-card">
-                <div className="card-body pb-0">
+              <div className="card border-left shadow h-100  hover-card" style={{ borderRadius: "5px", overflow: "hidden" }}>
+                <div className="card-body pb-0" style={{ backgroundColor: "#e8f5fd", borderTopLeftRadius: "5px", borderTopRightRadius: "5px" }}>
                   <div className="row no-gutters align-items-start">
                     <div className="col mr-3 text-left">
                       <div className="fs-6 text-primary mb-1" style={{ fontWeight: "bold" }}>
                         <i className="bi bi-people-fill"></i> ผู้ป่วยที่กำลังรักษา
                       </div>
-                      <div className="h2 mb-0 font-weight-bold text-gray-800">
+                      <div className="h2 mb-0 font-weight-bold text-primary">
                         <CountUp end={datauser.filter((user) => user.deletedAt === null).length} />
                       </div>
                     </div>
@@ -789,22 +820,29 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+                <div className="alldetail text-center m-0" style={{
+                  backgroundColor: "#87CEFA",
+                  borderBottomLeftRadius: "5px",
+                  borderBottomRightRadius: "5px",
+                  padding: "10px 0"
+                }}>
+                  <p className="m-0">ดูทั้งหมด <i className="bi bi-arrow-right-circle"></i></p>
+                </div>
               </div>
             </div>
-
             <div
               className="col-xl-4 col-md-6 mb-4 mt-4"
               onClick={() => navigate("/abnormalcase")}
               style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
             >
-              <div className="card border-left shadow h-100 py-2 hover-card abnormal-status-card">
-                <div className="card-body pb-0">
+              <div className="card border-left shadow h-100  hover-card" style={{ borderRadius: "5px", overflow: "hidden" }}>
+                <div className="card-body pb-0" style={{ backgroundColor: "#ffe4e4", borderTopLeftRadius: "5px", borderTopRightRadius: "5px" }}>
                   <div className="row no-gutters align-items-start">
                     <div className="col mr-3 text-left">
                       <div className="fs-6 abnormal-status-text mb-1" style={{ fontWeight: "bold" }}>
                         <i className="bi bi-people-fill"></i> เคสที่มีอาการผิดปกติ
                       </div>
-                      <div className="h2 mb-0 font-weight-bold text-gray-800">
+                      <div className="h2 mb-0 font-weight-bold abnormal-status-text">
                         <CountUp end={stats.abnormalCasesCount} />
                       </div>
                     </div>
@@ -812,6 +850,14 @@ export default function Home() {
                       <img src={VSR} className="patient" alt="patient" />
                     </div>
                   </div>
+                </div>
+                <div className="alldetail text-center m-0" style={{
+                  backgroundColor: "#FF6A6A",
+                  borderBottomLeftRadius: "5px",
+                  borderBottomRightRadius: "5px",
+                  padding: "10px 0"
+                }}>
+                  <p className="m-0">ดูทั้งหมด <i className="bi bi-arrow-right-circle"></i></p>
                 </div>
               </div>
             </div>
@@ -822,14 +868,14 @@ export default function Home() {
               onClick={scrollToTable}
               style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
             >
-              <div className="card border-left shadow h-100 py-2 hover-card group3-status-card">
-                <div className="card-body pb-0">
+              <div className="card border-left shadow h-100  hover-card" style={{ borderRadius: "5px", overflow: "hidden" }}>
+                <div className="card-body pb-0" style={{ backgroundColor: "#fff5e8", borderTopLeftRadius: "5px", borderTopRightRadius: "5px" }}>
                   <div className="row no-gutters align-items-start">
                     <div className="col mr-3 text-left">
                       <div className="fs-6 group3-status-text mb-1" style={{ fontWeight: "bold" }}>
                         <i className="bi bi-people-fill"></i> ผู้ป่วยที่ช่วยเหลือตัวเองได้น้อย
                       </div>
-                      <div className="h2 mb-0 font-weight-bold text-gray-800">
+                      <div className="h2 mb-0 font-weight-bold " style={{ color: "#fb8c00" }}>
                         <CountUp end={group3Count} />
                       </div>
                     </div>
@@ -838,6 +884,14 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
+                <div className="alldetail text-center m-0" style={{
+                  backgroundColor: "#fb8c00",
+                  borderBottomLeftRadius: "5px",
+                  borderBottomRightRadius: "5px",
+                  padding: "10px 0"
+                }}>
+                  <p className="m-0">ดูทั้งหมด <i className="bi bi-arrow-right-circle"></i></p>
+                </div>
               </div>
             </div>
           </div>
@@ -845,35 +899,15 @@ export default function Home() {
           {/* <h6 className="m-0" style={{fontWeight:"bold" , color:"#5ab1f8"}}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6> */}
           <div class="row">
             <div class="col-xl-4 col-lg-5">
-              <div class="card shadow mb-4">
+              <div class="card shadow mb-4" style={{ border: 'none' }}>
                 <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">โรคของผู้ป่วยที่กำลังรักษา</h6>
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
+                  <h6 class="m-0 text-primary" style={{ fontWeight: "bolder" }}>โรคของผู้ป่วยที่กำลังรักษา</h6>
 
                 </div>
                 <div class="card-body pt-2">
                   <div className="chart-pie mb-5 ">
                     <DoughnutChartComponent data={diagnosisData} colors={COLORS_DIAGNOSIS} />
-                    {/* <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          dataKey="value"
-                          isAnimationActive={true}
-                          data={diagnosisData}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={100}
-                          fill="#8884d8"
-                          label={({ name, percent }) => `${(percent * 100).toFixed(2)}%`}
-
-                        >
-                          {diagnosisData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value, name) => [`ผู้ป่วย${name}`]} />
-                      </PieChart>
-                    </ResponsiveContainer> */}
                   </div>
                   <ul>
                     {diagnosisData.map((entry, index) => (
@@ -899,9 +933,10 @@ export default function Home() {
               </div>
             </div>
             <div className="col-xl-4 col-lg-5">
-              <div className="card shadow mb-4">
-                <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 className="m-0 font-weight-bold text-primary">
+              <div class="card shadow mb-4" style={{ border: 'none' }}>
+                <div
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#ffe4e4", border: 'none' }}>
+                  <h6 class="m-0 abnormal-status-text" style={{ fontWeight: "bolder" }}>
                     รวมเคสปกติ/ผิดปกติ/เคสฉุกเฉิน
                   </h6>
                 </div>
@@ -911,23 +946,16 @@ export default function Home() {
                   </div>
                   <ul
                     style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      padding: 0,
+                      marginLeft: "80px",
                       width: "100%",
                       // ใช้พื้นที่เต็มเพื่อให้การจัดชิดซ้ายดูสมเหตุสมผล
                     }}
+
                   >
                     {caseStats.map((entry, index) => (
                       <li
                         key={`legend-${index}`}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginRight: "15px",
-                          marginBottom: "9px",
-                        }}
+                        style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
                       >
                         <span
                           style={{
@@ -940,7 +968,7 @@ export default function Home() {
                           }}
                         ></span>
                         <span style={{ color: COLORS_STATUS[index % COLORS_STATUS.length] }} >
-                          {entry.name} 
+                          {entry.name} : {caseDetails[index].count} เคส
                         </span>
                       </li>
                     ))}
@@ -949,10 +977,10 @@ export default function Home() {
               </div>
             </div>
             <div class="col-xl-4 col-lg-5">
-              <div class="card shadow mb-4">
+              <div class="card shadow mb-4" style={{ border: 'none' }}>
                 <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">ผู้ป่วย 3 กลุ่ม Immobility</h6>
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#fff5e8", border: 'none' }}>
+                  <h6 class="m-0 group3-status-text" style={{ fontWeight: "bolder" }}>ผู้ป่วย 3 กลุ่ม Immobility</h6>
                 </div>
                 <div className="card-body pt-4">
                   {immobilityData.length > 0 ? (
@@ -966,22 +994,11 @@ export default function Home() {
                           colors={COLORS_IMMOBILITY}
                         />
                       </div>
-                      <ul
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          padding: 0,
-                        }}
-                      >
+                      <ul>
                         {immobilityData.map((entry, index) => (
                           <li
                             key={`legend-${index}`}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              marginBottom: "8px",
-                            }}
+                            style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
                           >
                             <span
                               style={{
@@ -990,10 +1007,11 @@ export default function Home() {
                                 height: "15px",
                                 backgroundColor: ["#1cc88a", "#4e73df", "#e74a3b"][index],
                                 borderRadius: "50%",
-                                marginRight: "10px",
+                                marginRight: "5px",
                               }}
                             ></span>
-                            <span style={{ color: COLORS_IMMOBILITY[index % COLORS_IMMOBILITY.length] }}>{entry.name}</span>
+                            <span style={{ color: COLORS_IMMOBILITY[index % COLORS_IMMOBILITY.length] }}>
+                              {entry.name} : {entry.count} เคส</span>
                           </li>
                         ))}
                       </ul>
@@ -1009,10 +1027,10 @@ export default function Home() {
 
           <div class="row">
             <div class="col-xl-4 col-lg-5">
-              <div class="card shadow mb-4">
+              <div class="card shadow mb-4" style={{ border: 'none' }}>
                 <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 class="m-0 font-weight-bold text-primary">สัดส่วนรวมเพศของผู้ป่วย</h6>
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
+                  <h6 class="m-0 text-primary" style={{ fontWeight: "bolder" }}>สัดส่วนรวมเพศของผู้ป่วย</h6>
 
                 </div>
                 <div class="card-body pt-4">
@@ -1059,9 +1077,10 @@ export default function Home() {
               </div>
             </div>
             <div className="col-xl-8 col-lg-7" ref={tableRef}>
-              <div className="card shadow mb-4">
-                <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                  <h6 className="m-0" style={{ fontWeight: "bold" }}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6>
+              <div class="card shadow mb-4" style={{ border: 'none' }}>
+                <div
+                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#ffe4e4", border: 'none' }}>
+                  <h6 class="m-0 abnormal-status-text" style={{ fontWeight: "bolder" }}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6>
                   <div className="filter-options">
                     <div className="dropdown">
                       <a
@@ -1069,7 +1088,7 @@ export default function Home() {
                         id="filterMenuButton"
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
-                        style={{ textDecoration: "none", border: "none", background: "transparent", padding: 0, color: "#5ab1f8" }}
+                        style={{ textDecoration: "none", border: "none", background: "transparent", padding: 0, color: "#FF6A6A" }}
                       >
                         <i className="bi bi-three-dots-vertical"></i>
                       </a>
@@ -1089,11 +1108,6 @@ export default function Home() {
                             30 วัน
                           </a>
                         </li>
-                        {/* <li>
-                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("all")}>
-                            แสดงทั้งหมด
-                          </a>
-                        </li> */}
                       </ul>
                     </div>
                   </div>
@@ -1101,83 +1115,105 @@ export default function Home() {
 
                 <div className="card-body pt-2 pb-2">
                   <div className="table-responsive">
-                    <table className="table custom-table table-hover">
-                      <thead>
-                        <tr>
-                          <th scope="col" style={{ width: "5%" }}>#</th>
-                          <th scope="col">ชื่อ-สกุล</th>
-                          <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
-                          <th scope="col">คะแนนรวม</th>
-                          <th scope="col">วันที่ประเมิน</th>
-                          <th scope="col">สถานะ</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {filteredUsers.slice(indexOfFirstUser, indexOfLastUser).map((user, index) => (
-                          <tr
-                            key={index}
-                            onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
-                            style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
-                          >
-                            <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
-                            <td>{user.user.name} {user.user.surname}</td>
-                            <td>{user.Diagnosis}</td>
-                            <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
-                            <td>{new Date(user.createdAt).toLocaleDateString("th-TH")}</td>
-                            <td>
-                              <a
-                                href=""
-                                onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
-                                style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
-                              >
-                                <i className="bi bi-three-dots"></i>
-                              </a>
-                            </td>
+                    {filteredUsers.length === 0 ? (
+                      <>
+                        <table className="table custom-table table-hover">
+                          <thead>
+                            <tr>
+                              <th scope="col" style={{ width: "5%" }}>#</th>
+                              <th scope="col">ชื่อ-สกุล</th>
+                              <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                              <th scope="col">คะแนนรวม</th>
+                              <th scope="col">วันที่ประเมิน</th>
+                              <th scope="col">สถานะ</th>
+                            </tr>
+                          </thead>
+                        </table>
+                        <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> {/* ข้อความเมื่อไม่มีข้อมูล */}
+                      </>
+                    ) : (
+                      <table className="table custom-table table-hover">
+                        <thead>
+                          <tr>
+                            <th scope="col" style={{ width: "5%" }}>#</th>
+                            <th scope="col">ชื่อ-สกุล</th>
+                            <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                            <th scope="col">คะแนนรวม</th>
+                            <th scope="col">วันที่ประเมิน</th>
+                            <th scope="col">สถานะ</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {filteredUsers.slice(indexOfFirstUser, indexOfLastUser).map((user, index) => (
+                            <tr
+                              key={index}
+                              onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                              style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
+                            >
+                              <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
+                              <td>{user.user.name} {user.user.surname}</td>
+                              <td>{user.Diagnosis}</td>
+                              <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
+                              <td>{new Date(user.createdAt).toLocaleDateString("th-TH")}</td>
+                              <td>
+                                <a
+                                  href=""
+                                  onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                  style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
+                                >
+                                  <i className="bi bi-three-dots"></i>
+                                </a>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
                   </div>
-                  <nav aria-label="Page navigation example" className="mt-3">
-                    <ul className="pagination justify-content-end">
-                      <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                        <a
-                          className="page-link"
-                          href="#"
-                          onClick={() => handleClick(currentPage - 1)}
-                        >
-                          ก่อนหน้า
-                        </a>
-                      </li>
-                      {Array.from({ length: totalPages }, (_, i) => (
+
+                  {/* ปุ่ม "ก่อนหน้า" และ "ถัดไป" จะแสดงเฉพาะเมื่อมีข้อมูล */}
+                  {filteredUsers.length > 0 && (
+                    <nav aria-label="Page navigation example" className="mt-3">
+                      <ul className="pagination justify-content-end">
+                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                          <a
+                            className="page-link"
+                            href="#"
+                            onClick={() => handleClick(currentPage - 1)}
+                          >
+                            ก่อนหน้า
+                          </a>
+                        </li>
+                        {Array.from({ length: totalPages }, (_, i) => (
+                          <li
+                            key={i + 1}
+                            className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                          >
+                            <a
+                              className="page-link"
+                              href="#"
+                              onClick={() => handleClick(i + 1)}
+                            >
+                              {i + 1}
+                            </a>
+                          </li>
+                        ))}
                         <li
-                          key={i + 1}
-                          className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
                         >
                           <a
                             className="page-link"
                             href="#"
-                            onClick={() => handleClick(i + 1)}
+                            onClick={() => handleClick(currentPage + 1)}
                           >
-                            {i + 1}
+                            ถัดไป
                           </a>
                         </li>
-                      ))}
-                      <li
-                        className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
-                      >
-                        <a
-                          className="page-link"
-                          href="#"
-                          onClick={() => handleClick(currentPage + 1)}
-                        // style={{color:"#64b5f6"}}
-                        >
-                          ถัดไป
-                        </a>
-                      </li>
-                    </ul>
-                  </nav>
+                      </ul>
+                    </nav>
+                  )}
                 </div>
+
               </div>
             </div>
           </div>

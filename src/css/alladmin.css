@@ -1,5 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Prompt&display=swap');* {
-	font-family: "Prompt", serif;
+@import url('https://fonts.googleapis.com/css2?family=Prompt&display=swap');
+
+* {
+  font-family: "Prompt", serif;
 }
 
 .add {
@@ -309,9 +311,10 @@ tr.assessmentnull {
 
 .btn-completed {
   background-color: #757575;
-  color:  white;
+  color: white;
 }
-.btn-Emergency{
+
+.btn-Emergency {
   background-color: #FF6A6A;
   color: white;
 }
@@ -324,10 +327,11 @@ tr.assessmentnull {
 
 }
 
-.Emergency-status{
+.Emergency-status {
   color: #FF6A6A;
 
 }
+
 .abnormal-status {
   color: #fb8c00;
 }
@@ -499,9 +503,12 @@ p .label {
 .symtoms-count {
   margin-left: 5;
 }
+
 .evaluated {
-  color: rgb(7, 195, 7); /* Text color for evaluated */
+  color: rgb(7, 195, 7);
+  /* Text color for evaluated */
 }
+
 .assessment-table {
   width: 100%;
   border-collapse: collapse;
@@ -531,9 +538,11 @@ p .label {
   text-align: left;
   font-weight: lighter;
 }
-.diagnosis-legend h5{
+
+.diagnosis-legend h5 {
   margin-left: 15px;
 }
+
 .btn-group {
   gap: 10px;
   display: flex;
@@ -565,11 +574,7 @@ p .label {
   /* Add spacing from the left */
 }
 
-.dashboardcontent {
-  padding: 30px 15px;
-  background: rgba(203, 203, 210, .15);
-    min-height: 200vh;
-}
+
 
 .dashboardincontent {
   display: flex;
@@ -641,24 +646,30 @@ p .label {
   font-size: 1.8rem;
   text-align: right;
 }
+
 @media (min-width: 768px) {
   .col-md-8 {
-      flex: 0 0 66.666667%;
-      max-width: 66.666667%;
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
   }
 }
+
 .add-assessment-btn {
-  border: none; /* เอาขอบออก */
-  background-color: #87CEFA; /* เปลี่ยนสีพื้นหลัง */
+  border: none;
+  /* เอาขอบออก */
+  background-color: #87CEFA;
+  /* เปลี่ยนสีพื้นหลัง */
   color: white;
-  margin-bottom: 20px; /* เพิ่มระยะห่างระหว่างปุ่มและตาราง */
+  margin-bottom: 20px;
+  /* เพิ่มระยะห่างระหว่างปุ่มและตาราง */
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
 }
 
 .add-assessment-btn:hover {
-  background-color: #0056b3; /* เปลี่ยนสีเมื่อ hover */
+  background-color: #0056b3;
+  /* เปลี่ยนสีเมื่อ hover */
 }
 
 .editname {
@@ -669,51 +680,60 @@ p .label {
 .editname:hover {
   color: #87CEFA;
 }
-.btn:hover{
+
+.btn:hover {
   background-color: #87CEFA;
   color: #000;
 }
 
 .verify {
   margin-left: auto;
-  text-decoration: none; 
-  color: #007bff; 
+  text-decoration: none;
+  color: #007bff;
   cursor: pointer;
 }
+
 .form-control {
   display: flex;
-  justify-content: space-between; 
-  align-items: center; 
-  position: relative; 
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
 }
 
 .error-messageotp {
-  display: inline-block; 
+  display: inline-block;
   margin: 0;
 }
 
 .newotp {
-  display: inline-block; 
+  display: inline-block;
   text-decoration: underline;
   color: blue;
   cursor: pointer;
 }
-.nameass{
+
+.nameass {
   margin-left: 110px;
 }
+
 .custom-accordion-header {
-  background-color: #f0f8ff; /* ตัวอย่างสีพื้นหลัง */
-  color: #333; /* สีข้อความ */
+  background-color: #f0f8ff;
+  /* ตัวอย่างสีพื้นหลัง */
+  color: #333;
+  /* สีข้อความ */
   font-weight: bold;
   display: flex;
-  justify-content: space-between; /* กระจายเนื้อหาให้เว้นที่ */
+  justify-content: space-between;
+  /* กระจายเนื้อหาให้เว้นที่ */
   align-items: center;
   padding: 0.75rem 1.25rem;
-  border: none; /* เอาเส้นขอบออก */
+  border: none;
+  /* เอาเส้นขอบออก */
 }
 
 .custom-accordion-header:focus {
-  box-shadow: none; /* เอาเงาออกเมื่อต้องการโฟกัส */
+  box-shadow: none;
+  /* เอาเงาออกเมื่อต้องการโฟกัส */
 }
 
 .custom-accordion-header .bi-chevron-down {
@@ -722,31 +742,41 @@ p .label {
 }
 
 .custom-accordion-header.collapsed .bi-chevron-down {
-  transform: rotate(-90deg); /* หมุนลูกศรเมื่อปิด */
+  transform: rotate(-90deg);
+  /* หมุนลูกศรเมื่อปิด */
 }
+
 .border-left {
-  border-left: 4px solid #64b5f6; /* Replace with your blue color */
+  border: none;
+  /* Replace with your blue color */
   transition: all .25s ease !important;
   /* align-items: start; */
 }
+
 .abnormal-status-card {
-  border-left: 5px solid #FF6A6A; /* ตัวอย่างสีสำหรับสถานะผิดปกติ */
+  border-left: 5px solid #FF6A6A;
+  /* ตัวอย่างสีสำหรับสถานะผิดปกติ */
 }
-.abnormal-status-text{
+
+.abnormal-status-text {
   color: #FF6A6A;
 }
 
 .group3-status-card {
-  border-left: 5px solid #fb8c00; /* ตัวอย่างสีสำหรับสถานะผิดปกติ */
+  border-left: 5px solid #fb8c00;
+  /* ตัวอย่างสีสำหรับสถานะผิดปกติ */
 }
-.group3-status-text{
+
+.group3-status-text {
   color: #fb8c00;
   font-size: 17px;
 }
+
 .chart-area {
   position: relative;
   height: 19rem;
   width: 100%;
+
   @include media-breakpoint-up(md) {
     height: 19rem;
   }
@@ -757,6 +787,7 @@ p .label {
   position: relative;
   height: 10rem;
   width: 100%;
+
   @include media-breakpoint-up(md) {
     height: 20rem;
   }
@@ -767,10 +798,12 @@ p .label {
   position: relative;
   height: 17rem;
   width: 100%;
+
   @include media-breakpoint-up(md) {
     height: calc(20rem - 43px) !important;
   }
 }
+
 .dropdown-menu {
   min-width: 150px;
 }
@@ -779,13 +812,16 @@ p .label {
   font-size: 14px;
   padding: 10px;
 }
+
 .text-left {
   text-align: left !important;
 }
+
 .patient {
   width: 70px;
   height: 70px;
 }
+
 .hover-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
@@ -799,20 +835,26 @@ p .label {
 .user-info-caregiver {
   padding-left: 7%;
 }
+
 .caregiver-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
 .caregiver-card {
-  display: flex; /* จัดการ layout ให้เป็น flexbox */
-  justify-content: space-between; 
+  display: flex;
+  /* จัดการ layout ให้เป็น flexbox */
+  justify-content: space-between;
   /* align-items: flex-start;  */
   gap: 20px;
   line-height: normal;
-  max-width: 80%; /* หรือค่าที่เหมาะสม */
-  width: 100%; /* ให้ขยายเต็มเฉพาะ container */
-  margin: 10px ; /* จัดให้อยู่กึ่งกลาง */
+  max-width: 80%;
+  /* หรือค่าที่เหมาะสม */
+  width: 100%;
+  /* ให้ขยายเต็มเฉพาะ container */
+  margin: 10px;
+  /* จัดให้อยู่กึ่งกลาง */
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -843,33 +885,36 @@ p .label {
 .inline-container-caregiver {
   margin-left: 21px;
   display: flex;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
   gap: 1rem;
   justify-content: flex-start;
 }
 
 .button-container-vertical {
   display: flex;
-  flex-direction: column; 
-  align-items: center; 
-  gap: 10px; 
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   line-height: 2.2rem;
   justify-content: center;
 }
 
 .button-edit {
-  background-color: #ffde59; /* สีเขียว */
+  background-color: #ffde59;
+  /* สีเขียว */
   color: rgb(0, 0, 0);
   border: none;
   /* padding: 10px 20px; */
   border-radius: 5px;
   cursor: pointer;
-  width: 100px; /* กำหนดขนาดความกว้าง */
+  width: 100px;
+  /* กำหนดขนาดความกว้าง */
   text-align: center;
 }
 
 .button-delete {
-  background-color: rgb(236, 78, 78); /* สีแดง */
+  background-color: rgb(236, 78, 78);
+  /* สีแดง */
   color: white;
   border: none;
   /* padding: 10px 20px; */
@@ -878,6 +923,7 @@ p .label {
   width: 100px;
   text-align: center;
 }
+
 /* 
 .button-edit:hover {
   background-color: #45a049;
@@ -889,8 +935,10 @@ p .label {
 
 .relationship-group {
   display: flex;
-  flex-wrap: wrap; /* ทำให้ย่อขนาดเมื่อพื้นที่ไม่พอ */
-  gap: 15px; /* ระยะห่างระหว่างตัวเลือก */
+  flex-wrap: wrap;
+  /* ทำให้ย่อขนาดเมื่อพื้นที่ไม่พอ */
+  gap: 15px;
+  /* ระยะห่างระหว่างตัวเลือก */
   /* margin-top: 10px; */
   margin-left: 2%;
 }
@@ -898,7 +946,6 @@ p .label {
 input[type="radio"] {
   margin-right: 5px;
 }
-
 .input-error {
   border-radius: 4px; 
   box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); 

@@ -51,73 +51,73 @@ export default function AssessinhomesssForm({ }) {
     const [showToTopButton, setShowToTopButton] = useState(false);
     const bellRef = useRef(null);
 
-  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+    const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+    const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const hasFetchedUserData = useRef(false);
 
-   useEffect(() => {
-     socket?.on('newAlert', (alert) => {
-       console.log('Received newAlert:', alert);
-   
-       setAlerts((prevAlerts) => {
-         const isExisting = prevAlerts.some(
-           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
-         );
-   
-         let updatedAlerts;
-   
-         if (isExisting) {
-           
-           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-             updatedAlerts = [...prevAlerts, alert];
-           } else {
-             updatedAlerts = prevAlerts.map((existingAlert) =>
-               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-             );
-           }
-         } else {
-           updatedAlerts = [...prevAlerts, alert];
-         }
-   
-         return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-       });
-     });
-   
-     socket?.on('deletedAlert', (data) => {
-       setAlerts((prevAlerts) => {
-         const filteredAlerts = prevAlerts.filter(
-           (alert) => alert.patientFormId !== data.patientFormId
-         );
-         return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-       });
-     });
-   
-     return () => {
-       socket?.off('newAlert');
-       socket?.off('deletedAlert');
-     };
-   }, []);
-   
-  useEffect(() => {
-    const currentUserId = sender._id;
-  
-    const unreadAlerts = alerts.filter(
-      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
-    );
-  
-    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-  }, [alerts]);
-  
-  
     useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
-      });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
-      };
+        socket?.on('newAlert', (alert) => {
+            console.log('Received newAlert:', alert);
+
+            setAlerts((prevAlerts) => {
+                const isExisting = prevAlerts.some(
+                    (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+                );
+
+                let updatedAlerts;
+
+                if (isExisting) {
+
+                    if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
+                        updatedAlerts = [...prevAlerts, alert];
+                    } else {
+                        updatedAlerts = prevAlerts.map((existingAlert) =>
+                            existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
+                        );
+                    }
+                } else {
+                    updatedAlerts = [...prevAlerts, alert];
+                }
+
+                return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            });
+        });
+
+        socket?.on('deletedAlert', (data) => {
+            setAlerts((prevAlerts) => {
+                const filteredAlerts = prevAlerts.filter(
+                    (alert) => alert.patientFormId !== data.patientFormId
+                );
+                return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            });
+        });
+
+        return () => {
+            socket?.off('newAlert');
+            socket?.off('deletedAlert');
+        };
+    }, []);
+
+    useEffect(() => {
+        const currentUserId = sender._id;
+
+        const unreadAlerts = alerts.filter(
+            (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+        );
+
+        setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
+    }, [alerts]);
+
+
+    useEffect(() => {
+        socket?.on("TotalUnreadCounts", (data) => {
+            console.log("📦 TotalUnreadCounts received:", data);
+            setUserUnreadCounts(data);
+        });
+
+        return () => {
+            socket?.off("TotalUnreadCounts");
+        };
     }, [socket]);
 
     const toggleNotifications = (e) => {
@@ -171,7 +171,7 @@ export default function AssessinhomesssForm({ }) {
                     name: data.data.name,
                     surname: data.data.surname,
                     _id: data.data._id,
-                  });
+                });
                 setData(data.data);
 
 
@@ -360,9 +360,15 @@ export default function AssessinhomesssForm({ }) {
         }
     };
     const scrollToTop = () => {
+        console.log("🔼 Scrolling to top...");  // ตรวจสอบว่าโค้ดเข้าถึงตรงนี้จริงไหม
         const formContent = document.querySelector('.form-content');
-        formContent.scrollTo({ top: 0, behavior: "smooth" });
+        if (formContent) {
+            formContent.scrollTo({ top: 0 });
+        } else {
+            console.log("⚠️ form-content not found!");
+        }
     };
+
 
     useEffect(() => {
         const formContent = document.querySelector('.form-content');
@@ -431,11 +437,32 @@ export default function AssessinhomesssForm({ }) {
         fetchCaregiverData();
     }, [id]);
 
+    useEffect(() => {
+        // โหลดข้อมูลจาก localStorage ถ้ามี
+        const savedFormData = localStorage.getItem(`formData-${userid}`);
+        if (savedFormData) {
+            const parsedData = JSON.parse(savedFormData);
+            setImmobilityData(parsedData.Immobility || {});
+            setNutritionData(parsedData.Nutrition || {});
+            setHousingData(parsedData.Housing || {});
+            setOtherpeopleData(parsedData.OtherPeople || []);
+            setMedicationData(parsedData.Medication || {});
+            setPhysicalexaminationData(parsedData.PhysicalExamination || {});
+            setsssData(parsedData.SSS || {});
+        }
+    }, [userid]);
+
+    const [hasError, setHasError] = useState(false); // ตรวจสอบข้อผิดพลาด
+    const [showError, setShowError] = useState(false); // ควบคุมการแสดงข้อความแจ้งเตือน
+
     const handleNext = async (data) => {
         console.log("Form data at step", activeStep, data);
 
-        // เก็บข้อมูลของแต่ละหน้าลง state (เช่น Immobilitydata, NutritionData)
         if (activeStep === 0) {
+            if (hasError) {
+                setShowError(true); // แสดงข้อความแจ้งเตือน
+                return; // หยุดการทำงานถ้ายังมี error
+            }
             setImmobilityData(Immobilitydata);
         } else if (activeStep === 1) {
             setNutritionData(nutritionData);
@@ -447,7 +474,7 @@ export default function AssessinhomesssForm({ }) {
             setOtherpeopleData(OtherpeopleData);
         } else if (activeStep === 5) { // Physical Examination Step
             const updatedPhysicalExamination = { ...PhysicalexaminationData };
-    
+
             // รวมค่าของ "Other" ในแต่ละฟิลด์
             const fieldsWithOther = [
                 "moodandaffect",
@@ -458,7 +485,7 @@ export default function AssessinhomesssForm({ }) {
                 "thoughtProcess",
                 "thoughtContent"
             ];
-    
+
             fieldsWithOther.forEach((field) => {
                 const values = updatedPhysicalExamination[field] || [];
                 updatedPhysicalExamination[field] = values.map((item) => {
@@ -471,12 +498,12 @@ export default function AssessinhomesssForm({ }) {
                     return { value: item, isOther: false };
                 });
             });
-    
+
             setPhysicalexaminationData(updatedPhysicalExamination);
         } else if (activeStep === 6) {
             setsssData(data);
         }
-
+        setShowError(false); // ซ่อนข้อความแจ้งเตือนเมื่อเปลี่ยนหน้า
         // เมื่อถึงหน้าสุดท้าย ให้ส่งข้อมูลไปยัง backend
         if (activeStep === steps.length - 1) {
             try {
@@ -511,6 +538,7 @@ export default function AssessinhomesssForm({ }) {
                 const result = await response.json();
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
+                    localStorage.removeItem(`formData-${userid}`); // ล้างข้อมูลหลังจากส่งสำเร็จ
                     setTimeout(() => {
                         navigate("/assessinhomesssuser", { state: { id } });
                     }, 1000);
@@ -525,16 +553,25 @@ export default function AssessinhomesssForm({ }) {
                 console.error('Error saving data:', error);
             }
         } else {
-            // หากไม่ใช่หน้าสุดท้าย ให้เลื่อนไปยังหน้าถัดไป
+            // เรียก `scrollToTop()` พร้อม setTimeout เพื่อให้แน่ใจว่าหน้าถูกอัปเดตก่อน
+            setTimeout(() => {
+                scrollToTop();
+            }, 0); // หน่วงเวลาเล็กน้อย
+
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
     };
 
     const handleBack = () => {
+        setTimeout(() => {
+            scrollToTop();
+        }, 0); // หน่วงเวลาเล็กน้อย
         setActiveStep(activeStep - 1);
     };
 
-    const [Immobilitydata, setImmobilityData] = useState({
+    const storedFormData = JSON.parse(localStorage.getItem(`formData-${userid}`)) || {};
+
+    const [Immobilitydata, setImmobilityData] = useState(storedFormData.Immobility || {
         Pick_up_food: 0,
         Clean_up: 0,
         Put_on_clothes: 0,
@@ -553,36 +590,53 @@ export default function AssessinhomesssForm({ }) {
         Taking_medicine: 0,
         totalScore: 0
     });
-    const [nutritionData, setNutritionData] = useState({});
-    const [HousingData, setHousingData] = useState({});
 
-    const [medicationData, setMedicationData] = useState({});
-    const [PhysicalexaminationData, setPhysicalexaminationData] = useState({});
-    const [sssData, setsssData] = useState({});
-    const [OtherpeopleData, setOtherpeopleData] = useState([]);
+    const [nutritionData, setNutritionData] = useState(storedFormData.Nutrition || {});
+    const [HousingData, setHousingData] = useState(storedFormData.Housing || {});
+    const [medicationData, setMedicationData] = useState(storedFormData.Medication || {});
+    const [PhysicalexaminationData, setPhysicalexaminationData] = useState(storedFormData.PhysicalExamination || {});
+    const [sssData, setsssData] = useState(storedFormData.SSS || {});
+    const [OtherpeopleData, setOtherpeopleData] = useState(storedFormData.OtherPeople || []);
 
+    useEffect(() => {
+        const formData = {
+            Immobility: Immobilitydata,
+            Nutrition: {
+                ...nutritionData,
+                gender: nutritionData.gender || gender, // ตรวจสอบ gender ก่อนส่ง
+                userAge: nutritionData.userAge || userAge,
+                userAgeInMonths: nutritionData.userAgeInMonths || userAgeInMonths,
+            },
+            Housing: HousingData,
+            OtherPeople: OtherpeopleData,
+            Medication: medicationData,
+            PhysicalExamination: PhysicalexaminationData,
+            SSS: sssData,
+        };
+        localStorage.setItem(`formData-${userid}`, JSON.stringify(formData));
+    }, [Immobilitydata, nutritionData, HousingData, OtherpeopleData, medicationData, PhysicalexaminationData, sssData]);
 
-  useEffect(() => {
-    // ดึงข้อมูล unread count เมื่อเปิดหน้า
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
-        );
+    useEffect(() => {
+        // ดึงข้อมูล unread count เมื่อเปิดหน้า
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:5000/update-unread-count"
+                );
 
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    fetchUnreadCount();
-  }, []);
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.success) {
+                    setUserUnreadCounts(data.users);
+                }
+            } catch (error) {
+                console.error("Error fetching unread count:", error);
+            }
+        };
+        fetchUnreadCount();
+    }, []);
     return (
         <main className="bodyform">
             <ToastContainer />
@@ -692,7 +746,7 @@ export default function AssessinhomesssForm({ }) {
                     <FormProvider {...methods}>
                         <form onSubmit={methods.handleSubmit(handleNext)}>
                             {activeStep === 0 && (
-                                <Immobility Immobilitydata={Immobilitydata} setImmobilityData={setImmobilityData} />
+                                <Immobility Immobilitydata={Immobilitydata} setImmobilityData={setImmobilityData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
                             )}
                             {activeStep === 1 && (
                                 <Nutrition onDataChange={(data) => setNutritionData(data)} />

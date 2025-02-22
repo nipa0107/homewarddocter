@@ -1295,10 +1295,10 @@ export default function DetailAssessinhomeForm() {
                                   </div>
                                   <div className="row">
                                     <div className="col-sm-3">
-                                      <strong>บทบาท :</strong>
+                                      <strong>ความสัมพันธ์ :</strong>
                                     </div>
                                     <div className="col-sm-9">
-                                      <p>{cg.role || "-"}</p>
+                                      <p>{cg.relationship || "-"}</p>
                                     </div>
                                   </div>
                                   <div className="row">
@@ -1425,10 +1425,10 @@ export default function DetailAssessinhomeForm() {
                                   </div>
                                   <div className="row">
                                     <div className="col-sm-3">
-                                      <strong>บทบาท :</strong>
+                                      <strong>ความสัมพันธ์ :</strong>
                                     </div>
                                     <div className="col-sm-9">
-                                      <p>{cg.role || "-"}</p>
+                                      <p>{cg.relationship || "-"}</p>
                                     </div>
                                   </div>
                                   <div className="row">

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import CountUp from 'react-countup';
+import Paper from '../../img/exam.png'
 
 export const Zarit = ({ ZaritData, setZaritData }) => {
-    const { control, setValue, watch } = useFormContext();
+    const { control } = useFormContext();
     const [totalScore, setTotalScore] = useState(0);
     const [burdenMessage, setBurdenMessage] = useState('');
 
@@ -49,32 +50,48 @@ export const Zarit = ({ ZaritData, setZaritData }) => {
     }, [ZaritData]);
 
     const renderQuestion = (label, name) => (
-        <tr>
-            <td>{label}</td>
-            {[4, 3, 2, 1, 0].map((value) => (
-                <td key={value}>
-                    <Controller
-                        name={name}
-                        control={control}
-                        render={({ field }) => (
-                            <input
-                                type="radio"
-                                value={value}
-                                checked={field.value === String(value)}
-                                onChange={(e) => {
-                                    field.onChange(e.target.value);
-                                    setZaritData((prevData) => ({
-                                        ...prevData,
-                                        [name]: e.target.value,
-                                    }));
-                                }}
-                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+        <div className="card m-3 mt-4" style={{ width: "105%" }}>
+            <div className="card-header pt-3" style={{ backgroundColor: "#e8f5fd" }}>
+                <p>{label}<span style={{ color: 'red' }}> *</span></p>
+            </div>
+            <div className="card-body" >
+                <div className="row p-3 " style={{ marginRight: "auto", marginLeft: "auto" }}>
+                    {[4, 3, 2, 1, 0].map((value, index) => (
+                        <div className="col-2 text-center" key={value} style={{ marginRight: "auto", marginLeft: "auto" }}>
+                            <Controller
+                                name={name}
+                                control={control}
+                                render={({ field }) => (
+
+                                    <div className="form-check">
+                                        <label className="form-check-label d-block" style={{ marginRight: "30px" }}>
+                                            {value}
+                                        </label>
+
+                                        <input
+
+                                            className="form-check-input "
+                                            type="radio"
+                                            style={{ transform: 'scale(1.3)', border: "1px solid #777", marginRight: "auto", marginLeft: "auto" }}
+                                            value={value}
+                                            checked={field.value === String(value)}
+                                            onChange={(e) => {
+                                                field.onChange(e.target.value);
+                                                setZaritData((prevData) => ({
+                                                    ...prevData,
+                                                    [name]: e.target.value,
+                                                }));
+                                            }}
+                                        />
+
+                                    </div>
+                                )}
                             />
-                        )}
-                    />
-                </td>
-            ))}
-        </tr>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
 
     const getGroupStyle = () => {
@@ -89,74 +106,61 @@ export const Zarit = ({ ZaritData, setZaritData }) => {
         }
         return 'text-dark'; // Default (Black) if score is not yet available
     };
-    
-    
 
     return (
         <div>
-            <div className="info3 card">
+            <div className="title-form mt-1">
                 <div className="header">
                     <b>Zarit burden interview</b>
                 </div>
-                <div className="m-4">
-                    <b>ประเมินภาระการดูแล</b><span style={{ color: 'red' }}> *</span>
-                    <div style={{ marginLeft: '26px', marginTop: '10px', lineHeight: '25px' }}>
-                        <p>4 = แทบทุกครั้ง</p>
-                        <p>3 = ค่อนข้างบ่อย</p>
-                        <p>2 = บางครั้ง</p>
-                        <p>1 = นานๆครั้ง</p>
-                        <p>0 = ไม่มีเลย</p>
-                    </div>
-                    <table className="feedback-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>4</th>
-                                <th>3</th>
-                                <th>2</th>
-                                <th>1</th>
-                                <th>0</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {[
-                                { name: 'question_1', label: 'คุณรู้สึกว่าไม่มีเวลาสำหรับตัวคุณเองเพราะต้องใช้เวลาดูแลญาติของคุณหรือไม่' },
-                                { name: 'question_2', label: 'คุณรู้สึกเครียดเพราะต้องดูแลญาติของคุณในขณะที่ยังต้องรับผิดชอบครอบครัวและงานของคุณหรือไม่?' },
-                                { name: 'question_3', label: 'คุณรู้สึกโกรธกับญาติของคุณหรือไม่?' },
-                                { name: 'question_4', label: 'คุณรู้สึกว่าอาการของญาติทำให้ความสัมพันธ์ระหว่างคุณกับสมาชิกคนอื่นๆ ในครอบครัว และเพื่อนๆ ชวนนี้เป็นไปในทางลบหรือไม่?' },
-                                { name: 'question_5', label: 'คุณรู้สึกเหนื่อยล้าเมื่อต้องอยู่ใกล้กับญาติของคุณหรือไม่?' },
-                                { name: 'question_6', label: 'คุณรู้สึกเป็นทุกข์กับสังคมเพราะการดูแลญาติของคุณหรือไม่?' },
-                                { name: 'question_7', label: 'คุณรู้สึกว่าคุณไม่มีความเป็นตัวของตัวเองที่คุณอยากได้เพราะญาติของคุณหรือไม่?' },
-                                { name: 'question_8', label: 'คุณรู้สึกว่าการดูแลญาติทำให้ชีวิตทางสังคมมีปัญหาหรือไม่?' },
-                                { name: 'question_9', label: 'คุณรู้สึกว่าอาการหรือความรู้สึกของคุณเองนั้นแย่ลงที่เกิดจากญาติของคุณหรือไม่?' },
-                                { name: 'question_10', label: 'คุณรู้สึกไม่แน่ใจว่าจะต้องทำอย่างไรกับปัญหานี้หรือไม่?' },
-                                { name: 'question_11', label: 'คุณรู้สึกว่าคุณสูญเสียความสามารถในการตัดสินใจเพียงเพราะญาติของคุณหรือไม่?' },
-                                { name: 'question_12', label: 'คุณรู้สึกว่าคุณควรจะทำหน้าที่ดูแลญาติของคุณได้ดีกว่านี้หรือไม่?' },
-                            ].map((item, index) => renderQuestion(item.label, item.name))}
-                        </tbody>
-                    </table>
+                <div style={{ marginLeft: '26px' }}>
+                    <p style={{ color: "#666" }}>
+                        <img src={Paper} className="zarit" alt="assessment" /> แบบประเมินภาระการดูแลผู้ป่วยในบ้าน
+                    </p>
                 </div>
             </div>
-            <div className="info3 card mt-3">
-                <div className="header">
-                    <b>การประเมินผล</b>
+            <div className="m-4">
+                <p style={{ color: 'red' , marginLeft: '26px' }}>* = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
+                <b style={{ marginLeft: '26px'}}>การให้คะแนน</b>
+                <div style={{ marginLeft: '26px', marginTop: '10px', lineHeight: '25px' }}>
+                    <p>4 = แทบทุกครั้ง , 3 = ค่อนข้างบ่อย , 2 = บางครั้ง , 1 = นานๆครั้ง , 0 = ไม่มีเลย</p>
                 </div>
-                <div className='m-4'>
-                    <div className='grid' align="center">
-                        <div className='col'>
-                            <b>คะแนนรวม = </b>
-                        </div>
-                        <div className='col'>
-                            <b>{totalScore !== null && (
-                                <div className={`text-center mt-1 ${getGroupStyle()}`}>
-                                    <h4><CountUp end={totalScore} duration={2} /> คะแนน</h4>
-                                    <p>{burdenMessage}</p>
-                                </div>
-                            )}</b>
+
+                {/* แสดงคำถามเป็น Card */}
+                {[
+                    { name: 'question_1', label: '1. คุณรู้สึกว่าไม่มีเวลาสำหรับตัวคุณเองเพราะต้องใช้เวลาดูแลญาติของคุณหรือไม่' },
+                    { name: 'question_2', label: '2. คุณรู้สึกเครียดเพราะต้องดูแลญาติของคุณในขณะที่ยังต้องรับผิดชอบครอบครัวและงานของคุณหรือไม่?' },
+                    { name: 'question_3', label: '3. คุณรู้สึกโกรธกับญาติของคุณหรือไม่?' },
+                    { name: 'question_4', label: '4. คุณรู้สึกว่าอาการของญาติทำให้ความสัมพันธ์ระหว่างคุณกับสมาชิกคนอื่นๆ ในครอบครัว และเพื่อนๆ ชวนนี้เป็นไปในทางลบหรือไม่?' },
+                    { name: 'question_5', label: '5. คุณรู้สึกเหนื่อยล้าเมื่อต้องอยู่ใกล้กับญาติของคุณหรือไม่?' },
+                    { name: 'question_6', label: '6. คุณรู้สึกเป็นทุกข์กับสังคมเพราะการดูแลญาติของคุณหรือไม่?' },
+                    { name: 'question_7', label: '7. คุณรู้สึกว่าคุณไม่มีความเป็นตัวของตัวเองที่คุณอยากได้เพราะญาติของคุณหรือไม่?' },
+                    { name: 'question_8', label: '8. คุณรู้สึกว่าการดูแลญาติทำให้ชีวิตทางสังคมมีปัญหาหรือไม่?' },
+                    { name: 'question_9', label: '9. คุณรู้สึกว่าอาการหรือความรู้สึกของคุณเองนั้นแย่ลงที่เกิดจากญาติของคุณหรือไม่?' },
+                    { name: 'question_10', label: '10. คุณรู้สึกไม่แน่ใจว่าจะต้องทำอย่างไรกับปัญหานี้หรือไม่?' },
+                    { name: 'question_11', label: '11. คุณรู้สึกว่าคุณสูญเสียความสามารถในการตัดสินใจเพียงเพราะญาติของคุณหรือไม่?' },
+                    { name: 'question_12', label: '12. คุณรู้สึกว่าคุณควรจะทำหน้าที่ดูแลญาติของคุณได้ดีกว่านี้หรือไม่?' },
+                ].map((item, index) => renderQuestion(item.label, item.name))}
+                
+                <div className="card m-3 mt-4 shadow mb-5 rounded" style={{ width: "105%" , backgroundColor:"#95d7ff" , border:"none" }}>
+                   
+                    <div className="card-body" >
+                        <div className="row"style={{marginLeft:"1px"}}>
+                        <h4 className='text-center' >ประเมินผลคะแนน</h4>
+                            <div className="col mt-2" style={{borderRadius:"5px" ,backgroundColor:"white"}}>
+                                <b>{totalScore !== null && (
+                                    <div className={`text-center m-3 ${getGroupStyle()}`} >
+                                        <h1><CountUp end={totalScore} duration={2} /> คะแนน</h1>
+                                        <h5>{burdenMessage}</h5>
+                                    </div>
+                                )}</b>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
         </div>
     );
 };

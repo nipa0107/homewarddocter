@@ -32,6 +32,24 @@ export const Nutrition = ({ onDataChange }) => {
     cooks: [],
     nutritionStatus: '',
   });
+  
+  // ดึงข้อมูลจาก localStorage เมื่อหน้ารีเฟรช
+  useEffect(() => {
+    const storedData = localStorage.getItem('nutritionData');
+    if (storedData) {
+      const storedNutritionData = JSON.parse(storedData);
+      setNutritionData(storedNutritionData);
+
+      // ใช้ setValue จาก react-hook-form เพื่ออัปเดตค่าในฟอร์ม
+      Object.keys(storedNutritionData).forEach((key) => {
+        setValue(key, storedNutritionData[key]);
+      });
+
+      // กำหนดค่า tdee และ activityLevel จาก localStorage
+      setTdee(storedNutritionData.tdee || 0);
+      setActivityLevel(storedNutritionData.activityLevel || "");
+    }
+  }, [setValue]);
 
   useEffect(() => {
     if (gender) {
@@ -110,9 +128,6 @@ export const Nutrition = ({ onDataChange }) => {
     }
   }, [birthday]);
 
-
-
-
   useEffect(() => {
     const calculateBmr = () => {
       const weight = parseFloat(getValues('weight'));
@@ -163,6 +178,10 @@ export const Nutrition = ({ onDataChange }) => {
         ...prev,
         tdee: Math.round(calculatedTdee),
       }));
+      localStorage.setItem('nutritionData', JSON.stringify({
+        ...nutritionData,
+        tdee: Math.round(calculatedTdee),
+      }));
     };
 
     calculateTdee();
@@ -180,11 +199,11 @@ export const Nutrition = ({ onDataChange }) => {
       bmr: Math.round(bmr),
       tdee: Math.round(tdee),
     };
-
+    // เก็บข้อมูลลงใน localStorage
+    localStorage.setItem('nutritionData', JSON.stringify(updatedData));
     setNutritionData(updatedData);
     onDataChange(updatedData);
   };
-
 
 
   return (
@@ -229,7 +248,7 @@ export const Nutrition = ({ onDataChange }) => {
             <Controller
               name="weight"
               control={control}
-              defaultValue={0}
+              defaultValue={nutritionData.weight}
               render={({ field }) => (
                 <input
                   type="number"
@@ -255,7 +274,7 @@ export const Nutrition = ({ onDataChange }) => {
             <Controller
               name="height"
               control={control}
-              defaultValue=""
+              defaultValue={nutritionData.height}
               render={({ field }) => (
                 <input
                   type="number"

@@ -58,12 +58,21 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                         {isOpen && (
                             <div>
                                 <div className="m-2">
-                                    <label className="form-label">{`1. ชื่อ - นามสกุล :`}</label>
+                                    <label className="form-label">1. ชื่อ :</label>
                                     <input
                                         type="text"
                                         className="form-control"
-                                        disabled
-                                        value={`${cg.firstName || ""} ${cg.lastName || ""}`}
+                                        value={cg.firstName || ""}
+                                        onChange={(e) => handleCaregiverChange(type, index, "firstName", e.target.value)}
+                                    />
+                                </div>
+                                <div className="m-2">
+                                    <label className="form-label">2. นามสกุล :</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={cg.lastName || ""}
+                                        onChange={(e) => handleCaregiverChange(type, index, "lastName", e.target.value)}
                                     />
                                 </div>
                                 <div className="m-2">
@@ -81,9 +90,9 @@ const OtherPeopleForm = ({ formData, onSave }) => {
                                     <label className="form-label mt-2">3. บทบาท :</label>
                                     <select
                                         className="form-select"
-                                        value={cg.role}
+                                        value={cg.relationship}
                                         onChange={(e) =>
-                                            handleCaregiverChange(type, index, "role", e.target.value)
+                                            handleCaregiverChange(type, index, "relationship", e.target.value)
                                         }
                                     >
                                         <option value="">เลือกบทบาท</option>
