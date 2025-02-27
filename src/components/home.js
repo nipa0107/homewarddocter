@@ -223,7 +223,11 @@ export default function Home() {
           }, 0);
           return null; 
         }
-  
+        setSender({
+          name: data.data.name,
+          surname: data.data.surname,
+          _id: data.data._id,
+        });
         setData(data.data);
         return data.data; 
       })
