@@ -474,7 +474,7 @@ export default function UpdateProfile() {
             <a href="chat" style={{ position: "relative" }}>
               <i className="bi bi-chat-dots"></i>
               {userUnreadCounts.map((user) => {
-                if (String(user.userId) === String(sender._id)) {
+                if (user?.userId && String(user.userId) === String(sender._id)) {
                   return (
                     <div key={user.userId}>
                       {user.totalUnreadCount > 0 && (
