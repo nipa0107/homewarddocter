@@ -309,24 +309,23 @@ export default function Updatepatient() {
   };
 
   const filteredAlerts =
-       
-    filterType === "unread"
-          ? alerts.filter(((alert)) => !alert.viewedBy.includes(userId))
-            : filterType === "assessment"
-                ? alerts.filter(
-                    (alert) =>
-                        alert.alertType === "assessment" &&
-                        alert.alertMessage !== "เคสฉุกเฉิน"
-                )
-                : filterType === "abnormal"
-                    ? alerts.filter(
-                        (alert) =>
-                            alert.alertType === "abnormal" ||
-                            alert.alertMessage === "เคสฉุกเฉิน"
-                    )
-                    : filterType === "normal"
-                        ? alerts.filter((alert) => alert.alertType === "normal")
-                      : alerts;
+  filterType === "unread"
+      ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+      : filterType === "assessment"
+          ? alerts.filter(
+              (alert) =>
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน"
+          )
+          : filterType === "abnormal"
+              ? alerts.filter(
+                  (alert) =>
+                      alert.alertType === "abnormal" ||
+                      alert.alertMessage === "เคสฉุกเฉิน"
+              )
+              : filterType === "normal"
+                  ? alerts.filter((alert) => alert.alertType === "normal")
+                  : alerts;
 
     const getFilterLabel = (type) => {
         switch (type) {
