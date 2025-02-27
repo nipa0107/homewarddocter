@@ -87,6 +87,8 @@ export default function Assessreadiness() {
     setUnreadCountsByType(updatedCounts);
   }, [alerts, userId]);
 
+  const hasFetchedUserData = useRef(false);
+
   useEffect(() => {
     socket?.on("newAlert", (alert) => {
       console.log("Received newAlert:", alert);
@@ -278,6 +280,8 @@ export default function Assessreadiness() {
   }, [datauser]);
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 

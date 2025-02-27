@@ -68,6 +68,8 @@ export default function Assessreadiness1() {
         }
     };
 
+  const hasFetchedUserData = useRef(false);
+
     useEffect(() => {
         fetchLatestAssessments();
     }, []);
@@ -245,6 +247,8 @@ export default function Assessreadiness1() {
     };
 
     useEffect(() => {
+        if (hasFetchedUserData.current) return; 
+        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 

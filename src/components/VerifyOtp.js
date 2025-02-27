@@ -25,7 +25,7 @@ export default function VerifyOtp() {
   const [allUsers, setAllUsers] = useState([]);
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
-
+  const hasFetchedUserData = useRef(false);
   const [data, setData] = useState([]);
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const { username, email } = location.state || {}; // รับ username และ email
@@ -282,6 +282,8 @@ export default function VerifyOtp() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 

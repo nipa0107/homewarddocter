@@ -40,7 +40,7 @@ export default function DetailAssessinhomeForm() {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
-
+  const hasFetchedUserData = useRef(false);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
 
@@ -186,6 +186,8 @@ export default function DetailAssessinhomeForm() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 

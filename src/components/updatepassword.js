@@ -34,7 +34,7 @@ function Updatepassword() {
   const [datauser, setDatauser] = useState([]);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
-
+  const hasFetchedUserData = useRef(false);
   const [passwordError, setPasswordError] = useState("");
   const [newpasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
@@ -197,6 +197,8 @@ function Updatepassword() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 

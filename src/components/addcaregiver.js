@@ -40,6 +40,7 @@ export default function AddCaregiver() {
     const [filterType, setFilterType] = useState("all");
     const [userId, setUserId] = useState("");
     const [data, setData] = useState([]);
+    const hasFetchedUserData = useRef(false);
 
     useEffect(() => {
        socket?.on("newAlert", (alert) => {
@@ -159,16 +160,21 @@ export default function AddCaregiver() {
        })
          .then((res) => res.json())
          .then((data) => {
+          if (data.data === "token expired") {
+            alert("Token expired login again");
+            window.localStorage.clear();
+            setTimeout(() => {
+              window.location.replace("./");
+            }, 0);
+            return null; 
+          }
            setSender({
              name: data.data.name,
              surname: data.data.surname,
              _id: data.data._id,
            });
+
            setData(data.data);
-           if (data.data == "token expired") {
-             window.localStorage.clear();
-             window.location.href = "./";
-           }
            return data.data;
          })
          .catch((error) => {
@@ -191,6 +197,8 @@ export default function AddCaregiver() {
      };
    
      useEffect(() => {
+      if (hasFetchedUserData.current) return; // ป้องกันการเรียกซ้ำ
+      hasFetchedUserData.current = true;
        const token = window.localStorage.getItem("token");
        setToken(token);
    

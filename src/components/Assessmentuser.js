@@ -36,7 +36,8 @@ export default function Assessmentuser() {
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const [vitalStatuses, setVitalStatuses] = useState({});
- 
+  const hasFetchedUserData = useRef(false);
+
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
     abnormal: 0,
@@ -182,16 +183,21 @@ export default function Assessmentuser() {
     })
       .then((res) => res.json())
       .then((data) => {
+        if (data.data === "token expired") {
+          alert("Token expired login again");
+          window.localStorage.clear();
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 0);
+          return null; 
+        }
         setSender({
           name: data.data.name,
           surname: data.data.surname,
           _id: data.data._id,
         });
         setData(data.data);
-        if (data.data === "token expired") {
-          window.localStorage.clear();
-          window.location.href = "./";
-        }
+
         return data.data;
       })
       .catch((error) => {
@@ -213,6 +219,9 @@ export default function Assessmentuser() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
+
     const token = window.localStorage.getItem("token");
     setToken(token);
 

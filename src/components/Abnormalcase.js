@@ -65,6 +65,7 @@ export default function Abnormalcaser({ }) {
             console.error("Error fetching latest assessments:", error);
         }
     };
+    const hasFetchedUserData = useRef(false);
 
     useEffect(() => {
         fetchLatestAssessments();
@@ -215,6 +216,14 @@ export default function Abnormalcaser({ }) {
         })
             .then((res) => res.json())
             .then((data) => {
+                if (data.data === "token expired") {
+                    alert("Token expired login again");
+                    window.localStorage.clear();
+                    setTimeout(() => {
+                      window.location.replace("./");
+                    }, 0);
+                    return null; 
+                  }
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
@@ -263,6 +272,9 @@ export default function Abnormalcaser({ }) {
     };
 
     useEffect(() => {
+        if (hasFetchedUserData.current) return;
+        hasFetchedUserData.current = true;
+
         const token = window.localStorage.getItem("token");
         setToken(token);
 

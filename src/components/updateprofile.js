@@ -36,6 +36,7 @@ export default function UpdateProfile() {
   const [nameError, setNameError] = useState("");
   const [surnameError, setSurnameError] = useState("");
   const [nametitleError, setNametitleError] = useState("");
+  const hasFetchedUserData = useRef(false);
 
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
@@ -280,6 +281,8 @@ export default function UpdateProfile() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
 

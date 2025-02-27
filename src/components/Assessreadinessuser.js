@@ -38,6 +38,7 @@ export default function Assessreadinessuser({ }) {
     const bellRef = useRef(null);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const hasFetchedUserData = useRef(false);
     const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
         assessment: 0,
@@ -243,6 +244,8 @@ export default function Assessreadinessuser({ }) {
     };
 
     useEffect(() => {
+        if (hasFetchedUserData.current) return; 
+        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 

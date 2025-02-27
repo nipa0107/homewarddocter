@@ -59,7 +59,7 @@ export default function Updatemedicalinformation() {
         abnormal: 0,
         normal: 0,
     });
-
+    const hasFetchedUserData = useRef(false);
 
     const fetchLatestAssessments = async () => {
         try {
@@ -258,6 +258,8 @@ export default function Updatemedicalinformation() {
     };
 
     useEffect(() => {
+        if (hasFetchedUserData.current) return; 
+        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 

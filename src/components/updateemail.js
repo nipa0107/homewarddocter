@@ -30,6 +30,8 @@ export default function UpdateEmail() {
     const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
     const [emailError, setEmailError] = useState("");
     const [data, setData] = useState([]);
+    const hasFetchedUserData = useRef(false);
+
   useEffect(() => {
     socket?.on('newAlert', (alert) => {
       console.log('Received newAlert:', alert);
@@ -175,6 +177,8 @@ export default function UpdateEmail() {
     };
   
     useEffect(() => {
+      if (hasFetchedUserData.current) return; 
+      hasFetchedUserData.current = true;
       const token = window.localStorage.getItem("token");
       setToken(token);
   

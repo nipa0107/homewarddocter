@@ -37,6 +37,8 @@ export default function Home() {
   const [medicalData, setMedicalData] = useState({});
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const hasFetchedUserData = useRef(false);
+  
   const [latestAssessments, setLatestAssessments] = useState({});
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
@@ -213,17 +215,17 @@ export default function Home() {
     })
       .then((res) => res.json())
       .then((data) => {
-        setSender({
-          name: data.data.name,
-          surname: data.data.surname,
-          _id: data.data._id,
-        });
-        setData(data.data);
         if (data.data === "token expired") {
+          alert("Token expired login again");
           window.localStorage.clear();
-          window.location.href = "./";
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 0);
+          return null; 
         }
-        return data.data;
+  
+        setData(data.data);
+        return data.data; 
       })
       .catch((error) => {
         console.error("Error verifying token:", error);
@@ -261,6 +263,9 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (hasFetchedUserData.current) return;
+    hasFetchedUserData.current = true;
+
     const token = window.localStorage.getItem("token");
     setToken(token);
 

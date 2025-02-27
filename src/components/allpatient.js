@@ -26,6 +26,7 @@ export default function Allpatient({ }) {
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const hasFetchedUserData = useRef(false);
   const [latestAssessments, setLatestAssessments] = useState({});
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
@@ -197,6 +198,14 @@ export default function Allpatient({ }) {
     })
       .then((res) => res.json())
       .then((data) => {
+        if (data.data === "token expired") {
+          alert("Token expired login again");
+          window.localStorage.clear();
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 0);
+          return null; 
+        }
         setSender({
           name: data.data.name,
           surname: data.data.surname,
@@ -290,7 +299,9 @@ export default function Allpatient({ }) {
     };
   
     useEffect(() => {
-      const token = window.localStorage.getItem("token");
+      if (hasFetchedUserData.current) return; 
+    hasFetchedUserData.current = true;
+    const token = window.localStorage.getItem("token");
       setToken(token);
   
       if (token) {

@@ -46,6 +46,7 @@ export default function Infopatient({ }) {
     const notificationsRef = useRef(null);
     const bellRef = useRef(null);
     const [caregiverInfo, setCaregiverInfo] = useState(null);
+    const hasFetchedUserData = useRef(false);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
     const [latestAssessments, setLatestAssessments] = useState({});
@@ -502,6 +503,8 @@ export default function Infopatient({ }) {
     };
 
     useEffect(() => {
+        if (hasFetchedUserData.current) return; 
+        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 
