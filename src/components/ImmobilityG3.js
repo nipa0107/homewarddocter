@@ -1,51 +1,42 @@
 import React, { useCallback, useEffect, useState, useRef } from "react";
+import "../css/alladmin.css";
 import "../css/sidebar.css";
-import "../css/alladmin.css"
-import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import { fetchAlerts } from './Alert/alert';
-import { renderAlerts } from './Alert/renderAlerts';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import io from 'socket.io-client';
+import { useNavigate, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { fetchAlerts } from "./Alert/alert";
+import { renderAlerts } from "./Alert/renderAlerts";
+import io from "socket.io-client";
 const socket = io("http://localhost:5000");
 
-export default function Updatepatient() {
-    const location = useLocation();
-    const { id, user } = location.state;
+export default function ImmobilityG3({ }) {
+    const navigate = useNavigate();
     const [data, setData] = useState([]);
+    const [isActive, setIsActive] = useState(false);
+    const [token, setToken] = useState("");
+    const [patientForms, setPatientForms] = useState("");
+    const [datauser, setDatauser] = useState([]);
+    const location = useLocation();
+    const { id } = location.state || {};
     const [username, setUsername] = useState("");
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [tel, setTel] = useState("");
     const [gender, setGender] = useState("");
     const [birthday, setBirthday] = useState("");
-    const [ID_card_number, setIDCardNumber] = useState("");
-    const [nationality, setNationality] = useState("");
-    const [Address, setAddress] = useState("");
-    const [caregiverName, setCaregiverName] = useState('');
-    const [caregiverSurname, setCaregiverSurname] = useState('');
-    const [Relationship, setRelationship] = useState('');
-    const [caregiverTel, setCaregiverTel] = useState('');
-    const navigate = useNavigate();
-    const [isActive, setIsActive] = useState(false);
-    const [token, setToken] = useState("");
-    const [otherGender, setOtherGender] = useState("");
-    const [showOtherInput, setShowOtherInput] = useState(false);
-    const [otherRelationship, setOtherRelationship] = useState("");
-    const [medicalData, setMedicalData] = useState({});
-    const [userId, setUserId] = useState("");
-    const [allUsers, setAllUsers] = useState([]);
+    const [assessments, setAssessments] = useState([]);
+    const [mpersonnel, setMPersonnel] = useState([]);
+    const [userAge, setUserAge] = useState(0);
+    const [userAgeInMonths, setUserAgeInMonths] = useState(0);
+    const [userData, setUserData] = useState(null);
+    const [medicalData, setMedicalData] = useState([]);
     const [alerts, setAlerts] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
+    const [userId, setUserId] = useState("");
     const bellRef = useRef(null);
+    const [relatedPatientForms, setRelatedPatientForms] = useState([]);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
     const [latestAssessments, setLatestAssessments] = useState({});
@@ -178,6 +169,10 @@ export default function Updatepatient() {
         };
     }, []);
 
+    useEffect(() => {
+        getAllUser();
+    }, []);
+
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
@@ -199,61 +194,12 @@ export default function Updatepatient() {
     };
 
     useEffect(() => {
-        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
 
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
-
-    const FormatDate = (date) => {
-        const formattedDate = new Date(date);
-        // ตรวจสอบว่า date เป็น NaN หรือไม่
-        if (isNaN(formattedDate.getTime())) {
-            return ""; // ถ้าเป็น NaN ให้ส่งค่าว่างกลับไป
-        }
-        return formattedDate.toISOString().split('T')[0];
-    };
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/getuser/${id}`);
-                const data = await response.json();
-                setUsername(data.username);
-                setName(data.name);
-                setSurname(data.surname);
-                setEmail(data.email);
-                setPassword(data.password);
-                setTel(data.tel);
-                setGender(data.gender);
-                setBirthday(data.birthday);
-                setIDCardNumber(data.ID_card_number);
-                setNationality(data.nationality);
-                setAddress(data.Address);
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-            }
-        };
-
-        const fetchCaregiverData = async () => {
-            try {
-                const response = await fetch(`http://localhost:5000/getcaregiver/${id}`);
-                const caregiverData = await response.json();
-                if (caregiverData.status === 'ok') {
-                    setCaregiverName(caregiverData.data.name);
-                    setCaregiverSurname(caregiverData.data.surname);
-                    setCaregiverTel(caregiverData.data.tel);
-                    setRelationship(caregiverData.data.Relationship);
-                }
-            } catch (error) {
-                console.error("Error fetching caregiver data:", error);
-            }
-        };
-
-        fetchData();
-        fetchCaregiverData();
-    }, [id]);
 
 
     const fetchUserData = (token) => {
@@ -286,6 +232,22 @@ export default function Updatepatient() {
             });
     };
 
+    const getAllUser = () => {
+        fetch("http://localhost:5000/alluser", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data, "AllUser");
+                setDatauser(data.data);
+                console.log(datauser, "Datauser");
+            });
+    };
+
+
     const fetchAndSetAlerts = (token, userId) => {
         fetchAlerts(token, userId)
             .then((alerts, userId) => {
@@ -309,6 +271,7 @@ export default function Updatepatient() {
                 .then((user) => {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
+                    getAllUser();
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
@@ -397,59 +360,219 @@ export default function Updatepatient() {
                 return "ไม่ทราบ";
         }
     };
+    //Immobility
+    const [group3Users, setGroup3Users] = useState([]); // เก็บข้อมูลผู้ใช้อยู่ในกลุ่มที่ 3
+
+    useEffect(() => {
+        const fetchGroup3Users = async () => {
+            try {
+                const response = await fetch("http://localhost:5000/immobility/group3");
+                const result = await response.json();
+                if (response.ok) {
+                    setGroup3Users(result.data); // เก็บข้อมูลที่ดึงมา
+                } else {
+                    console.error("Failed to fetch group 3 data:", result.error);
+                }
+            } catch (error) {
+                console.error("Error fetching group 3 users:", error);
+            }
+        };
+
+        fetchGroup3Users(); // เรียกฟังก์ชันดึงข้อมูล
+    }, []);
+
+    const [filteredUsers, setFilteredUsers] = useState(group3Users);
+
+    useEffect(() => {
+        setFilteredUsers(group3Users);
+    }, [group3Users]);
+
+
+    const [selectedFilter, setSelectedFilter] = useState("all"); // ค่าดีฟอลต์
+
+    const handleDateFilter = (filterType) => {
+        setSelectedFilter(filterType); // อัปเดตค่าตัวเลือกที่เลือก
+        const now = new Date();
+        let filtered = [];
+
+        if (filterType === "latest") {
+            // เรียงข้อมูลจากล่าสุดไปเก่าสุด
+            filtered = [...group3Users].sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+        } else if (filterType === "7days") {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // คำนวณย้อนหลัง 7 วัน
+            filtered = group3Users.filter((user) => {
+                const userDate = new Date(user.createdAt);
+                return userDate >= sevenDaysAgo && userDate <= now;
+            });
+        } else if (filterType === "30days") {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setMonth(thirtyDaysAgo.getMonth() - 1); // คำนวณย้อนหลัง 30 วัน
+            filtered = group3Users.filter((user) => {
+                const userDate = new Date(user.createdAt);
+                return userDate >= thirtyDaysAgo && userDate <= now;
+            });
+        } else {
+            filtered = group3Users; // แสดงทั้งหมด
+        }
+
+        setFilteredUsers(filtered);
+    };
+
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/getuser`);
+                const data = await response.json();
+                setUserData(data);
+                setUsername(data.username);
+                setName(data.name);
+                setSurname(data.surname);
+                setGender(data.gender);
+                setBirthday(data.birthday);
+            } catch (error) {
+                console.error("Error fetching caremanual data:", error);
+            }
+        };
+
+        fetchData();
+    },);
+
+    useEffect(() => {
+        if (userData && userData._id) {
+            const fetchMedicalInfo = async () => {
+                try {
+                    const response = await fetch(
+                        `http://localhost:5000/medicalInformation/${userData._id}`
+                    );
+                    const data = await response.json();
+                    console.log("Medical Information:", data);
+                    setMedicalData(data.data);
+                    console.log("22:", medicalData);
+                } catch (error) {
+                    console.error("Error fetching medical information:", error);
+                }
+            };
+
+            fetchMedicalInfo();
+        }
+    }, [userData]);
+
+    useEffect(() => {
+        if (id) {
+            const fetchPatientFormDetails = async () => {
+                try {
+                    const response = await fetch(`http://localhost:5000/getpatientform/${id}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        setPatientForms([data.data]); // Set the specific PatientForm details
+                    } else {
+                        console.error("Failed to fetch PatientForm details:", data.error);
+                    }
+                } catch (error) {
+                    console.error("Error fetching PatientForm details:", error);
+                }
+            };
+
+            fetchPatientFormDetails();
+        }
+    }, [id]);
+
+
+    const fetchAndMatchAlerts = async () => {
+        try {
+            // ดึงข้อมูล alerts
+            const alertsData = await fetchAlerts(token);
+            setAlerts(alertsData);
+
+            // กรองข้อมูล patientForms ที่ตรงกับ patientFormId ของ Alert
+            const matchedPatientForms = patientForms.filter((form) =>
+                alertsData.some((alert) => alert.patientFormId === form._id)
+            );
+
+            setRelatedPatientForms(matchedPatientForms);
+            console.log("Matched Patient Forms:", matchedPatientForms);
+        } catch (error) {
+            console.error("Error fetching or matching alerts:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (patientForms.length > 0) {
+            fetchAndMatchAlerts();
+        }
+    }, [patientForms]);
+
+    const fetchAssessments = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/allAssessment`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setAssessments(data.data);
+            console.log("AssessmentForms:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAssessments();
+    }, []);
+
+    const fetchMpersonnel = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setMPersonnel(data.data);
+            console.log("Mpersonnel:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchMpersonnel();
+    }, []);
 
     const currentDate = new Date();
 
-    const Updatepatient = async () => {
-        try {
-            const userData = {
-                username,
-                name,
-                surname,
-                email,
-                password,
-                tel,
-                gender,
-                birthday,
-                ID_card_number,
-                nationality,
-                Address,
-                user: id, // เชื่อมโยงกับผู้ใช้
-                caregivername: caregiverName, // เปลี่ยนเป็น lowercase ตาม Backend
-                caregiversurname: caregiverSurname,
-                caregivertel: caregiverTel,
-                Relationship
-            };
+    useEffect(() => {
+        if (birthday) {
+            const userBirthday = new Date(birthday);
+            const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
+            const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
+            setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
 
-            const response = await fetch(`http://localhost:5000/updateuserinfo`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(userData),
-            });
-
-            if (response.ok) {
-                const updatedUser = await response.json();
-                console.log("แก้ไขทั่วไปแล้ว:", updatedUser);
-                toast.success("แก้ไขข้อมูลสำเร็จ");
-                setTimeout(() => {
-                    navigate("/infopatient", { state: { id: id, user: user } });
-                }, 1100);
+            if (
+                monthDiff < 0 ||
+                (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
+            ) {
+                setUserAge(ageDiff - 1);
             } else {
-                toast.error("ไม่สามารถแก้ไขทั่วไปได้:", response.statusText);
+                setUserAge(ageDiff);
             }
-        } catch (error) {
-            console.error("เกิดข้อผิดพลาดในการแก้ไขผู้ใช้:", error);
         }
-    };
+    }, [currentDate]);
 
     const logOut = () => {
         window.localStorage.clear();
         window.location.href = "./";
     };
-
+    // bi-list
     const handleToggleSidebar = () => {
         setIsActive(!isActive);
     };
@@ -481,24 +604,6 @@ export default function Updatepatient() {
             } น.`;
     };
 
-
-    const handleRelationshipChange = (e) => {
-        const value = e.target.value;
-        setRelationship(value);
-        if (value === "อื่นๆ") {
-            setShowOtherInput(true);
-        } else {
-            setShowOtherInput(false);
-            setOtherRelationship("");
-        }
-    };
-
-    const handleOtherRelationshipChange = (e) => {
-        const value = e.target.value;
-        setOtherRelationship(value);
-        setRelationship(value); // Update gender to the value of otherGender
-    };
-
     useEffect(() => {
         // ดึงข้อมูล unread count เมื่อเปิดหน้า
         const fetchUnreadCount = async () => {
@@ -520,46 +625,63 @@ export default function Updatepatient() {
         };
         fetchUnreadCount();
     }, []);
+
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const tableRef = useRef(null); // เพิ่ม useRef สำหรับตาราง
+    const usersPerPage = 4;
+    // Calculate the current users to display
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = group3Users.slice(indexOfFirstUser, indexOfLastUser);
+
+    const handleClick = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+    // Calculate total pages
+    const totalPages = Math.ceil(group3Users.length / usersPerPage);
+
+
     return (
         <main className="body">
-            <div className={`sidebar ${isActive ? 'active' : ''}`}>
+            <div className={`sidebar ${isActive ? "active" : ""}`}>
                 <div class="logo_content">
                     <div class="logo">
-                        <div class="logo_name" >
-                            <img src={logow} className="logow" alt="logo" ></img>
+                        <div class="logo_name">
+                            <img src={logow} className="logow" alt="logo"></img>
                         </div>
                     </div>
-                    <i class='bi bi-list' id="btn" onClick={handleToggleSidebar}></i>
+                    <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
                 </div>
                 <ul class="nav-list">
                     <li>
                         <a href="home">
                             <i class="bi bi-house"></i>
-                            <span class="links_name" >หน้าหลัก</span>
+                            <span class="links_name">หน้าหลัก</span>
                         </a>
                     </li>
                     <li>
-                        <a href="assessment" >
+                        <a href="assessment">
                             <i class="bi bi-clipboard2-pulse"></i>
-                            <span class="links_name" >ติดตาม/ประเมินอาการ</span>
+                            <span class="links_name">ติดตาม/ประเมินอาการ</span>
                         </a>
                     </li>
                     <li>
-                        <a href="allpatient" >
+                        <a href="allpatient">
                             <i class="bi bi-people"></i>
-                            <span class="links_name" >จัดการข้อมูลการดูแลผู้ป่วย</span>
+                            <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
                         </a>
                     </li>
                     <li>
-                        <a href="assessreadiness" >
-                            <i class="bi bi-clipboard-check"></i>
-                            <span class="links_name" >ประเมินความพร้อมการดูแล</span>
+                        <a href="assessreadiness">
+                            <i className="bi bi-clipboard-check"></i>
+                            <span className="links_name">ประเมินความพร้อมการดูแล</span>
                         </a>
                     </li>
                     <li>
-                        <a href="assessinhomesss" >
-                            <i class="bi bi-house-check"></i>
-                            <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
+                        <a href="assessinhomesss">
+                            <i className="bi bi-house-check"></i>
+                            <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
                         </a>
                     </li>
                     <li>
@@ -585,20 +707,29 @@ export default function Updatepatient() {
                     <div class="nav-logout">
                         <li>
                             <a href="./" onClick={logOut}>
-                                <i class='bi bi-box-arrow-right' id="log_out" onClick={logOut}></i>
-                                <span class="links_name" >ออกจากระบบ</span>
+                                <i
+                                    class="bi bi-box-arrow-right"
+                                    id="log_out"
+                                    onClick={logOut}
+                                ></i>
+                                <span class="links_name">ออกจากระบบ</span>
                             </a>
                         </li>
                     </div>
                 </ul>
             </div>
+
             <div className="home_content">
                 <div className="homeheader">
-                    <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
+                    <div className="header">ผู้ป่วยที่ช่วยเหลือตัวเองได้น้อย</div>
                     <div className="profile_details">
                         <ul className="nav-list">
                             <li>
-                                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                                <a
+                                    ref={bellRef}
+                                    className="bell-icon"
+                                    onClick={toggleNotifications}
+                                >
                                     {showNotifications ? (
                                         <i className="bi bi-bell-fill"></i>
                                     ) : (
@@ -620,6 +751,163 @@ export default function Updatepatient() {
                         </ul>
                     </div>
                 </div>
+
+                <div className="breadcrumbs mt-4">
+                    <ul>
+                        <li>
+                            <a href="home">
+                                <i class="bi bi-house-fill"></i>
+                            </a>
+                        </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li>
+                            <a>รายชื่อผู้ป่วยที่ช่วยเหลือตัวเองได้น้อย</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="container-fluid">
+                    <div className="align-item-end mb-3">
+                        <button className="dropdown btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            {selectedFilter === "all"
+                                ? "เลือกการแสดงข้อมูล"
+                                : selectedFilter === "latest"
+                                    ? "ล่าสุด"
+                                    : selectedFilter === "7days"
+                                        ? "7 วัน"
+                                        : "30 วัน"}
+                        </button>
+                        <ul className="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a
+                                    className={`dropdown-item ${selectedFilter === "latest" ? "active" : ""}`}
+                                    href="#"
+                                    onClick={() => handleDateFilter("latest")}
+                                >
+                                    ล่าสุด
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    className={`dropdown-item ${selectedFilter === "7days" ? "active" : ""}`}
+                                    href="#"
+                                    onClick={() => handleDateFilter("7days")}
+                                >
+                                    7 วัน
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    className={`dropdown-item ${selectedFilter === "30days" ? "active" : ""}`}
+                                    href="#"
+                                    onClick={() => handleDateFilter("30days")}
+                                >
+                                    30 วัน
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="table-responsive">
+                        {filteredUsers.length === 0 ? (
+                            <>
+                                <table className="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style={{ width: "5%" }}>#</th>
+                                            <th scope="col">ชื่อ-สกุล</th>
+                                            <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                                            <th scope="col">คะแนนรวม</th>
+                                            <th scope="col">วันที่ประเมิน</th>
+                                            <th scope="col">สถานะ</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> {/* ข้อความเมื่อไม่มีข้อมูล */}
+                            </>
+                        ) : (
+                            <table className="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style={{ width: "5%" }}>#</th>
+                                        <th scope="col">ชื่อ-สกุล</th>
+                                        <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                                        <th scope="col">คะแนนรวม</th>
+                                        <th scope="col"  style={{ width: "30%" }}>วันที่ประเมิน</th>
+                                        <th scope="col">สถานะ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredUsers.slice(indexOfFirstUser, indexOfLastUser).map((user, index) => (
+                                        <tr
+                                            key={index}
+                                            onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                            style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
+                                        >
+                                            <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
+                                            <td>{user.user.name} {user.user.surname}</td>
+                                            <td style={{ width: "25%" }}>{user.Diagnosis}</td>
+                                            <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
+                                            <td  style={{ width: "30%" }}>{formatDate(user.createdAt)}</td>
+                                            <td>
+                                                <a
+                                                    href=""
+                                                    onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                                    style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
+                                                >
+                                                    รายละเอียด
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                        {/* {filteredUsers.length > 0 && (
+                            <nav aria-label="Page navigation example" className="mt-3">
+                                <ul className="pagination justify-content-end">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <a
+                                            className="page-link"
+                                            href="#"
+                                            onClick={() => handleClick(currentPage - 1)}
+                                        >
+                                            ก่อนหน้า
+                                        </a>
+                                    </li>
+                                    {Array.from({ length: totalPages }, (_, i) => (
+                                        <li
+                                            key={i + 1}
+                                            className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                                        >
+                                            <a
+                                                className="page-link"
+                                                href="#"
+                                                onClick={() => handleClick(i + 1)}
+                                            >
+                                                {i + 1}
+                                            </a>
+                                        </li>
+                                    ))}
+                                    <li
+                                        className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                                    >
+                                        <a
+                                            className="page-link"
+                                            href="#"
+                                            onClick={() => handleClick(currentPage + 1)}
+                                        >
+                                            ถัดไป
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        )} */}
+                    </div>
+                </div>
+
                 {showNotifications && (
                     <div className="notifications-dropdown" ref={notificationsRef}>
                         <div className="notifications-head">
@@ -727,230 +1015,7 @@ export default function Updatepatient() {
                         )}
                     </div>
                 )}
-                <div className="breadcrumbs mt-4">
-                    <ul>
-                        <li>
-                            <a href="home">
-                                <i class="bi bi-house-fill"></i>
-                            </a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="infopatient" onClick={() => navigate("/infopatient", { state: { id: id, user: user } })}>ข้อมูลการดูแลผู้ป่วย</a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a>แก้ไขข้อมูลทั่วไป</a>
-                        </li>
-                    </ul>
-                </div>
-                <h3>แก้ไขข้อมูลทั่วไป</h3>
-                <div className="adminall card mb-1">
-                    <div className="mb-1">
-                        <label>ชื่อ</label>
-                        <input
-                            value={name}
-                            type="text"
-                            className="form-control"
-                            onChange={(e) => setName(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-1">
-                        <label>นามสกุล</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            value={surname}
-                            onChange={(e) => setSurname(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-1">
-                        <label>เพศ</label>
-                        <input
-                            type="text"
-                            value={gender}
-                            readOnly
-                            className="form-control gray-background"
-                            onChange={(e) => setGender(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-1">
-                        <label>วันเกิด</label>
-                        <input
-                            value={FormatDate(birthday)}
-                            type="date"
-                            className="form-control"
-                            onChange={(e) => setBirthday(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="mb-1">
-                        <label>เลขประจำตัวบัตรประชาชน</label>
-                        <input
-                            value={ID_card_number}
-                            type="text"
-                            className="form-control gray-background"
-                            readOnly
-                            onChange={(e) => setIDCardNumber(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="mb-1">
-                        <label>สัญชาติ</label>
-                        <input
-                            value={nationality}
-                            type="text"
-                            className="form-control"
-                            onChange={(e) => setNationality(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="mb-1">
-                        <label>ที่อยู่</label>
-                        <input
-                            value={Address}
-                            type="text"
-                            className="form-control"
-                            onChange={(e) => setAddress(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-1">
-                        <label>เบอร์โทรศัพท์</label>
-                        <input
-                            type="text"
-                            value={tel}
-                            className="form-control"
-                            onChange={(e) => setTel(e.target.value)}
-                        />
-                    </div>
-                    {/* <div className="mb-1">
-                        <label>ชื่อ(ผู้ดูแล)</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            value={caregiverName}
-                            onChange={(e) => setCaregiverName(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-1">
-                        <label>นามสกุล(ผู้ดูแล)</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            value={caregiverSurname}
-                            onChange={(e) => setCaregiverSurname(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-1">
-                        <label>ความสัมพันธ์</label>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="พ่อ"
-                                    checked={Relationship === "พ่อ"}
-                                    onChange={handleRelationshipChange}
-                                />
-                                พ่อ
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="แม่"
-                                    checked={Relationship === "แม่"}
-                                    onChange={handleRelationshipChange}
-                                />
-                                แม่
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="ลูก"
-                                    checked={Relationship === "ลูก"}
-                                    onChange={handleRelationshipChange}
-                                />
-                                ลูก
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="ภรรยา"
-                                    checked={Relationship === "ภรรยา"}
-                                    onChange={handleRelationshipChange}
-                                />
-                                ภรรยา
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="สามี"
-                                    checked={Relationship === "สามี"}
-                                    onChange={handleRelationshipChange}
-                                />
-                                สามี
-                            </label>
-                        </div>
-                        <div>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="อื่นๆ"
-                                    checked={showOtherInput}
-                                    onChange={handleRelationshipChange}
-                                />
-                                อื่นๆ
-                            </label>
-                            {showOtherInput && (
-                                <div className="mt-2">
-                                    <label>กรุณาระบุ:</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={otherRelationship}
-                                        onChange={handleOtherRelationshipChange}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="mb-1">
-                        <label>เบอร์โทรศัพท์(ผู้ดูแล)</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            value={caregiverTel}
-                            onChange={(e) => setCaregiverTel(e.target.value)}
-                        />
-                    </div> */}
-
-                </div>
-                <div className="btn-group">
-                    <div className="btn-next">
-                        <button type="button" onClick={Updatepatient} className="btn btn-outline py-2">
-                            บันทึก
-                        </button>
-                    </div>
-                </div>
             </div>
-            <div></div>
         </main>
     );
-}   
+}

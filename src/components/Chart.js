@@ -14,7 +14,7 @@ const DoughnutChartComponent = ({ data, colors = ['#0088FE', '#f9a8d4', '#9ca3af
             cy="50%"
             outerRadius={100}
             innerRadius={60}
-            label={({ name, percent }) => `${(percent * 100).toFixed(2)}%`}
+            label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
             animationBegin={0}
             animationDuration={1000}
           >
@@ -22,7 +22,7 @@ const DoughnutChartComponent = ({ data, colors = ['#0088FE', '#f9a8d4', '#9ca3af
               <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
+          <Tooltip formatter={(value) => `${value.toFixed(0)}%`} />
           {/* <Legend verticalAlign="bottom" align="center" /> */}
         </PieChart>
         

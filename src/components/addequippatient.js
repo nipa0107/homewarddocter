@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -16,6 +16,7 @@ export default function AddEquipPatient() {
     const location = useLocation();
     const { id, user } = location.state;
     const [data, setData] = useState([]);
+    const [equipments, setEquipments] = useState([]);
     const [profiledata, setProfiledata] = useState([]);
     const [validationMessage, setValidationMessage] = useState("");
     const [isActive, setIsActive] = useState(false);
@@ -30,102 +31,170 @@ export default function AddEquipPatient() {
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
     const bellRef = useRef(null);
-  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+    const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+    const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+    const [latestAssessments, setLatestAssessments] = useState({});
+    const [unreadCountsByType, setUnreadCountsByType] = useState({
+        assessment: 0,
+        abnormal: 0,
+        normal: 0,
+    });
 
-   useEffect(() => {
-     socket?.on('newAlert', (alert) => {
-       console.log('Received newAlert:', alert);
-   
-       setAlerts((prevAlerts) => {
-         const isExisting = prevAlerts.some(
-           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
-         );
-   
-         let updatedAlerts;
-   
-         if (isExisting) {
-           
-           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-             updatedAlerts = [...prevAlerts, alert];
-           } else {
-             updatedAlerts = prevAlerts.map((existingAlert) =>
-               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-             );
-           }
-         } else {
-           updatedAlerts = [...prevAlerts, alert];
-         }
-   
-         return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-       });
-     });
-   
-     socket?.on('deletedAlert', (data) => {
-       setAlerts((prevAlerts) => {
-         const filteredAlerts = prevAlerts.filter(
-           (alert) => alert.patientFormId !== data.patientFormId
-         );
-         return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-       });
-     });
-   
-     return () => {
-       socket?.off('newAlert');
-       socket?.off('deletedAlert');
-     };
-   }, []);
-   
- 
-   
-   useEffect(() => {
-     const currentUserId = sender._id;
-   
-     const unreadAlerts = alerts.filter(
-       (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
-     );
-   
-     setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-   }, [alerts]);
-  
-  
+    const fetchLatestAssessments = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/latest-assessments");
+            const data = await response.json();
+            console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+
+            if (data.status === "ok") {
+                const assessmentsMap = data.data.reduce((acc, item) => {
+                    acc[item._id] = item.latestStatusName;
+                    return acc;
+                }, {});
+                console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+
+                setLatestAssessments(assessmentsMap);
+            }
+        } catch (error) {
+            console.error("Error fetching latest assessments:", error);
+        }
+    };
+
     useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
-      });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
-      };
-    }, [socket]);
+        fetchLatestAssessments();
+    }, []);
+    useEffect(() => {
+        fetchLatestAssessments();
+    }, []);
+
+    const getUnreadCount = useCallback(
+        (type) => {
+            const filteredByType = alerts.filter(
+                (alert) =>
+                    (type === "assessment" &&
+                        alert.alertType === "assessment" &&
+                        alert.alertMessage !== "เคสฉุกเฉิน") ||
+                    (type === "abnormal" &&
+                        (alert.alertType === "abnormal" ||
+                            alert.alertMessage === "เคสฉุกเฉิน")) ||
+                    (type === "normal" && alert.alertType === "normal")
+            );
+            return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+                .length;
+        },
+        [alerts, userId]
+    );
+
+    useEffect(() => {
+        if (!userId) return;
+        const updatedCounts = {
+            assessment: getUnreadCount("assessment"),
+            abnormal: getUnreadCount("abnormal"),
+            normal: getUnreadCount("normal"),
+        };
+        setUnreadCountsByType(updatedCounts);
+    }, [alerts, userId]);
+
+    useEffect(() => {
+        socket?.on("newAlert", (alert) => {
+            console.log("Received newAlert:", alert);
+
+            if (alert.MPersonnel?.id === userId) {
+                console.log("Ignoring alert from self");
+                return;
+            }
+
+            setAlerts((prevAlerts) => {
+                const isExisting = prevAlerts.some(
+                    (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+                );
+
+                let updatedAlerts;
+
+                if (isExisting) {
+                    updatedAlerts = prevAlerts.map((existingAlert) =>
+                        existingAlert.patientFormId === alert.patientFormId
+                            ? alert
+                            : existingAlert
+                    );
+                } else {
+                    updatedAlerts = [...prevAlerts, alert];
+                }
+
+                return [...updatedAlerts].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+            });
+        });
+
+        socket?.on("deletedAlert", (data) => {
+            setAlerts((prevAlerts) => {
+                const filteredAlerts = prevAlerts.filter(
+                    (alert) => alert.patientFormId !== data.patientFormId
+                );
+
+                return [...filteredAlerts].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+            });
+        });
+
+        return () => {
+            socket?.off("newAlert");
+            socket?.off("deletedAlert");
+        };
+    }, [userId]);
+
+    useEffect(() => {
+        const currentUserId = sender._id;
+
+        const unreadAlerts = alerts.filter(
+            (alert) =>
+                Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+        );
+
+        setUnreadCount(unreadAlerts.length);
+    }, [alerts, sender._id]);
+
+    useEffect(() => {
+        socket?.on("TotalUnreadCounts", (data) => {
+            console.log("📦 TotalUnreadCounts received:", data);
+            setUserUnreadCounts(data);
+        });
+
+        return () => {
+            socket?.off("TotalUnreadCounts");
+        };
+    }, []);
 
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         } else {
-          setShowNotifications(true);
+            setShowNotifications(true);
         }
         // setShowNotifications(prev => !prev);
-      };
-    
-      const handleClickOutside = (e) => {
+    };
+
+    const handleClickOutside = (e) => {
         if (
-          notificationsRef.current && !notificationsRef.current.contains(e.target) &&
-          !bellRef.current.contains(e.target)
+            notificationsRef.current &&
+            !notificationsRef.current.contains(e.target) &&
+            !bellRef.current.contains(e.target)
         ) {
-          setShowNotifications(false);
+            setShowNotifications(false);
         }
-      };
-    
-      useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-    
+    };
+
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+
         return () => {
-          document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
-      }, []);
+    }, []);
+
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -139,26 +208,24 @@ export default function AddEquipPatient() {
         })
             .then((res) => res.json())
             .then((data) => {
+                setProfiledata(data.data);
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
                     _id: data.data._id,
-                  });
-                setProfiledata(data.data);
+                });
                 if (data.data === "token expired") {
                     window.localStorage.clear();
                     window.location.href = "./";
                 }
                 return data.data;
-            })
-            .catch((error) => {
-                console.error("Error verifying token:", error);
             });
+
     };
 
     const fetchAndSetAlerts = (token, userId) => {
-        fetchAlerts(token)
-            .then((alerts) => {
+        fetchAlerts(token, userId)
+            .then((alerts, userId) => {
                 setAlerts(alerts);
                 const unreadAlerts = alerts.filter(
                     (alert) => !alert.viewedBy.includes(userId)
@@ -178,34 +245,53 @@ export default function AddEquipPatient() {
             fetchUserData(token)
                 .then((user) => {
                     setUserId(user._id);
-                    fetchAndSetAlerts(token, user._id);      
+                    fetchAndSetAlerts(token, user._id);
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
                 });
         }
-    }, []);
+    }, [token]);
 
-    const markAllAlertsAsViewed = () => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed", {
+    const markAllByTypeAsViewed = (type) => {
+        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ userId: userId }),
+            body: JSON.stringify({ userId: userId, type: type }),
         })
             .then((res) => res.json())
             .then((data) => {
-                const updatedAlerts = alerts.map((alert) => ({
-                    ...alert,
-                    viewedBy: [...alert.viewedBy, userId],
-                }));
-                setAlerts(updatedAlerts);
-                setUnreadCount(0);
+                if (data.message === "All selected alerts marked as viewed") {
+                    const updatedAlerts = alerts.map((alert) => {
+                        if (
+                            type === "all" ||
+                            ((alert.alertType === type ||
+                                (type === "abnormal" &&
+                                    (alert.alertType === "abnormal" ||
+                                        alert.alertMessage === "เคสฉุกเฉิน")) ||
+                                (type === "assessment" &&
+                                    alert.alertType === "assessment" &&
+                                    alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                                !alert.viewedBy.includes(userId))
+                        ) {
+                            return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+                        }
+                        return alert;
+                    });
+
+                    setAlerts(updatedAlerts);
+                    // setUnreadCount(0);
+                    const unreadAlerts = updatedAlerts.filter(
+                        (alert) => !alert.viewedBy.includes(userId)
+                    );
+                    setUnreadCount(unreadAlerts.length);
+                }
             })
             .catch((error) => {
-                console.error("Error marking all alerts as viewed:", error);
+                console.error("Error marking alerts as viewed:", error);
             });
     };
 
@@ -216,13 +302,43 @@ export default function AddEquipPatient() {
     const filteredAlerts =
         filterType === "unread"
             ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
-            : alerts;
+            : filterType === "assessment"
+                ? alerts.filter(
+                    (alert) =>
+                        alert.alertType === "assessment" &&
+                        alert.alertMessage !== "เคสฉุกเฉิน"
+                )
+                : filterType === "abnormal"
+                    ? alerts.filter(
+                        (alert) =>
+                            alert.alertType === "abnormal" ||
+                            alert.alertMessage === "เคสฉุกเฉิน"
+                    )
+                    : filterType === "normal"
+                        ? alerts.filter((alert) => alert.alertType === "normal")
+                        : alerts;
 
+    const getFilterLabel = (type) => {
+        switch (type) {
+            case "all":
+                return "ทั้งหมด";
+            case "unread":
+                return "ยังไม่อ่าน";
+            case "normal":
+                return "บันทึกอาการ";
+            case "abnormal":
+                return "ผิดปกติ";
+            case "assessment":
+                return "ประเมินอาการ";
+            default:
+                return "ไม่ทราบ";
+        }
+    };
     useEffect(() => {
-        getAllEquip();
+        fetchAllEquip();
     }, []);
 
-    const getAllEquip = () => {
+    const fetchAllEquip = () => {
         fetch("http://localhost:5000/allequip", {
             method: "GET",
             headers: {
@@ -231,72 +347,80 @@ export default function AddEquipPatient() {
         })
             .then((res) => res.json())
             .then((data) => {
-                setData(data.data);
-            });
-    };
-
-    const handleCheckboxChange = (e, equipmentName, equipmentType) => {
-        const isChecked = e.target.checked;
-        let updatedEquipments;
-
-        if (isChecked) {
-            updatedEquipments = [
-                ...selectedEquipments,
-                {
-                    equipmentname_forUser: equipmentName,
-                    equipmenttype_forUser: equipmentType,
-                },
-            ];
-        } else {
-            updatedEquipments = selectedEquipments.filter(
-                (equip) => equip.equipmentname_forUser !== equipmentName
-            );
-        }
-
-        setSelectedEquipments(updatedEquipments);
-
-        // Check for duplicates and update validation messages
-        const validationMessages = {};
-        updatedEquipments.forEach((equip, index) => {
-            const duplicates = updatedEquipments.filter(
-                (e) => e.equipmentname_forUser === equip.equipmentname_forUser
-            ).length;
-
-            if (duplicates > 1) {
-                validationMessages[equip.equipmentname_forUser] = "มีอุปกรณ์นี้อยู่แล้ว";
-            }
-        });
-
-        setEquipValidationMessages(validationMessages);
-        setValidationMessage(""); // Clear general validation message
-    };
-
-    const handleSelectAll = (equipmentType, isChecked) => {
-        let updatedEquipments = [...selectedEquipments];
-
-        data
-            .filter((equipment) => equipment.equipment_type === equipmentType)
-            .forEach((equipment) => {
-                if (isChecked) {
-                    if (
-                        !updatedEquipments.some(
-                            (equip) => equip.equipmentname_forUser === equipment.equipment_name
-                        )
-                    ) {
-                        updatedEquipments.push({
-                            equipmentname_forUser: equipment.equipment_name,
-                            equipmenttype_forUser: equipmentType,
-                        });
-                    }
+                if (Array.isArray(data.data)) {
+                    setEquipments(data.data); // ตั้งค่า `equipments` แทน `data`
                 } else {
-                    updatedEquipments = updatedEquipments.filter(
-                        (equip) => equip.equipmentname_forUser !== equipment.equipment_name
-                    );
+                    setEquipments([]); // ป้องกัน error ถ้า API คืนค่าผิด
                 }
+            })
+            .catch((error) => {
+                console.error("Error fetching equipment data:", error);
             });
-
-        setSelectedEquipments(updatedEquipments);
     };
+
+
+    // const handleCheckboxChange = (e, equipmentName, equipmentType) => {
+    //     const isChecked = e.target.checked;
+    //     let updatedEquipments;
+
+    //     if (isChecked) {
+    //         updatedEquipments = [
+    //             ...selectedEquipments,
+    //             {
+    //                 equipmentname_forUser: equipmentName,
+    //                 equipmenttype_forUser: equipmentType,
+    //             },
+    //         ];
+    //     } else {
+    //         updatedEquipments = selectedEquipments.filter(
+    //             (equip) => equip.equipmentname_forUser !== equipmentName
+    //         );
+    //     }
+
+    //     setSelectedEquipments(updatedEquipments);
+
+
+    //     const validationMessages = {};
+    //     updatedEquipments.forEach((equip, index) => {
+    //         const duplicates = updatedEquipments.filter(
+    //             (e) => e.equipmentname_forUser === equip.equipmentname_forUser
+    //         ).length;
+
+    //         if (duplicates > 1) {
+    //             validationMessages[equip.equipmentname_forUser] = "มีอุปกรณ์นี้อยู่แล้ว";
+    //         }
+    //     });
+
+    //     setEquipValidationMessages(validationMessages);
+    //     setValidationMessage(""); 
+    // };
+
+    // const handleSelectAll = (equipmentType, isChecked) => {
+    //     let updatedEquipments = [...selectedEquipments];
+
+    //     data
+    //         .filter((equipment) => equipment.equipment_type === equipmentType)
+    //         .forEach((equipment) => {
+    //             if (isChecked) {
+    //                 if (
+    //                     !updatedEquipments.some(
+    //                         (equip) => equip.equipmentname_forUser === equipment.equipment_name
+    //                     )
+    //                 ) {
+    //                     updatedEquipments.push({
+    //                         equipmentname_forUser: equipment.equipment_name,
+    //                         equipmenttype_forUser: equipmentType,
+    //                     });
+    //                 }
+    //             } else {
+    //                 updatedEquipments = updatedEquipments.filter(
+    //                     (equip) => equip.equipmentname_forUser !== equipment.equipment_name
+    //                 );
+    //             }
+    //         });
+
+    //     setSelectedEquipments(updatedEquipments);
+    // };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -383,27 +507,82 @@ export default function AddEquipPatient() {
             } น.`;
     };
 
-  useEffect(() => {
-    // ดึงข้อมูล unread count เมื่อเปิดหน้า
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+    useEffect(() => {
+        // ดึงข้อมูล unread count เมื่อเปิดหน้า
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:5000/update-unread-count"
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.success) {
+                    setUserUnreadCounts(data.users);
+                }
+            } catch (error) {
+                console.error("Error fetching unread count:", error);
+            }
+        };
+        fetchUnreadCount();
+    }, []);
+
+    const toggleAllCheckboxes = () => {
+        const allSelected = equipments.every(equipment =>
+            selectedEquipments.some(equip => equip.equipmentname_forUser === equipment.equipment_name)
         );
 
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
+        if (allSelected) {
+            setSelectedEquipments([]);
+        } else {
+            setSelectedEquipments(equipments.map(equipment => ({
+                equipmentname_forUser: equipment.equipment_name,
+                equipmenttype_forUser: equipment.equipment_type
+            })));
         }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
     };
-    fetchUnreadCount();
-  }, []);
+
+
+    const handleCheckboxChange = (e, equipmentName, equipmentType) => {
+        const isChecked = e ? e.target.checked : !selectedEquipments.some(equip => equip.equipmentname_forUser === equipmentName);
+        let updatedEquipments;
+
+        if (isChecked) {
+            updatedEquipments = [
+                ...selectedEquipments,
+                {
+                    equipmentname_forUser: equipmentName,
+                    equipmenttype_forUser: equipmentType,
+                },
+            ];
+        } else {
+            updatedEquipments = selectedEquipments.filter(
+                (equip) => equip.equipmentname_forUser !== equipmentName
+            );
+        }
+
+        setSelectedEquipments(updatedEquipments);
+
+        // ตรวจสอบอุปกรณ์ซ้ำและสร้าง validation message
+        const validationMessages = {};
+        updatedEquipments.forEach((equip) => {
+            const duplicates = updatedEquipments.filter(
+                (e) => e.equipmentname_forUser === equip.equipmentname_forUser
+            ).length;
+
+            if (duplicates > 1) {
+                validationMessages[equip.equipmentname_forUser] = "มีอุปกรณ์นี้อยู่แล้ว";
+            }
+        });
+
+        setEquipValidationMessages(validationMessages);
+        setValidationMessage(""); // เคลียร์ข้อความแจ้งเตือนทั่วไป
+    };
+
+
+
     return (
         <main className="body">
             <ToastContainer />
@@ -452,19 +631,19 @@ export default function AddEquipPatient() {
                             <i className="bi bi-chat-dots"></i>
                             <span className="links_name">แช็ต</span>
                             {userUnreadCounts.map((user) => {
-                if (String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
+                                if (String(user.userId) === String(sender._id)) {
+                                    return (
+                                        <div key={user.userId}>
+                                            {user.totalUnreadCount > 0 && (
+                                                <div className="notification-countchat">
+                                                    {user.totalUnreadCount}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })}
                         </a>
                     </li>
                     <div className="nav-logout">
@@ -517,29 +696,94 @@ export default function AddEquipPatient() {
                     <div className="notifications-dropdown" ref={notificationsRef}>
                         <div className="notifications-head">
                             <h2 className="notifications-title">การแจ้งเตือน</h2>
+                        </div>
+                        <div className="notifications-filter">
+                            <div
+                                className={`notification-box ${filterType === "all" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("all")}
+                            >
+                                <div className="notification-item">
+                                    <i className="bi bi-bell"></i>
+                                    ทั้งหมด
+                                </div>
+                                <div className="notification-right">
+                                    {unreadCount > 0 && (
+                                        <span className="notification-count-noti">{unreadCount}</span>
+                                    )}
+                                    <i className="bi bi-chevron-right"></i>
+                                </div>
+                            </div>
+                            <div
+                                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("abnormal")}
+                            >
+                                <div className="notification-item">
+                                    <i className="bi bi-exclamation-triangle"></i>
+                                    ผิดปกติ
+                                </div>
+                                <div className="notification-right">
+                                    {unreadCountsByType.abnormal > 0 && (
+                                        <span className="notification-count-noti">
+                                            {unreadCountsByType.abnormal}
+                                        </span>
+                                    )}
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                            </div>
+                            <div
+                                className={`notification-box ${filterType === "normal" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("normal")}
+                            >
+                                <div className="notification-item">
+                                    {" "}
+                                    <i className="bi bi-journal-text"></i>
+                                    บันทึกอาการ
+                                </div>
+                                <div className="notification-right">
+                                    {unreadCountsByType.normal > 0 && (
+                                        <span className="notification-count-noti">
+                                            {unreadCountsByType.normal}
+                                        </span>
+                                    )}
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                            </div>
+
+                            <div
+                                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("assessment")}
+                            >
+                                <div className="notification-item">
+                                    <i className="bi bi-clipboard-check"></i>
+                                    ประเมินอาการ
+                                </div>
+                                <div className="notification-right">
+                                    {unreadCountsByType.assessment > 0 && (
+                                        <span className="notification-count-noti">
+                                            {unreadCountsByType.assessment}
+                                        </span>
+                                    )}
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="selected-filter">
+                            <p>
+                                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+                            </p>
                             <p
-                                className="notifications-allread"
-                                onClick={markAllAlertsAsViewed}
+                                className="mark-all-read-btn"
+                                onClick={() => markAllByTypeAsViewed(filterType)}
                             >
                                 ทำเครื่องหมายว่าอ่านทั้งหมด
                             </p>
-                            <div className="notifications-filter">
-                                <button
-                                    className={filterType === "all" ? "active" : ""}
-                                    onClick={() => handleFilterChange("all")}
-                                >
-                                    ดูทั้งหมด
-                                </button>
-                                <button
-                                    className={filterType === "unread" ? "active" : ""}
-                                    onClick={() => handleFilterChange("unread")}
-                                >
-                                    ยังไม่อ่าน
-                                </button>
-                            </div>
                         </div>
                         {filteredAlerts.length > 0 ? (
-                            <>
+                            <div>
                                 {renderAlerts(
                                     filteredAlerts,
                                     token,
@@ -549,7 +793,7 @@ export default function AddEquipPatient() {
                                     setUnreadCount,
                                     formatDate
                                 )}
-                            </>
+                            </div>
                         ) : (
                             <p className="no-notification">ไม่มีการแจ้งเตือน</p>
                         )}
@@ -590,94 +834,78 @@ export default function AddEquipPatient() {
                     </ul>
                 </div>
                 <h3>เพิ่มอุปกรณ์สำหรับผู้ป่วย</h3>
-                <div className="adminall card mb-1">
+                <div className="table-responsive">
                     <form onSubmit={handleSubmit}>
-                        {["อุปกรณ์ติดตัว", "อุปกรณ์เสริม", "อุปกรณ์อื่นๆ"].map(
-                            (equipmentType) => {
-                                const isAllSelected = data
-                                    .filter(
+                        <table className="table table-hover" style={{ width: "60%" }}>
+                            <thead>
+                                <tr>
+                                    <th style={{ width: "10%" }}>
+                                        <input
+                                            style={{ marginLeft: "20px", cursor: "pointer" }}
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            onChange={toggleAllCheckboxes} 
+                                        />
+                                    </th>
+                                    <th style={{ width: "10%" }}>#</th>
+                                    <th>ชื่ออุปกรณ์</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {["อุปกรณ์ติดตัว", "อุปกรณ์เสริม", "อุปกรณ์อื่นๆ"].map((equipmentType) => {
+                                    const equipmentList = equipments.filter(
                                         (equipment) => equipment.equipment_type === equipmentType
-                                    )
-                                    .every((equipment) =>
-                                        selectedEquipments.some(
-                                            (equip) =>
-                                                equip.equipmentname_forUser ===
-                                                equipment.equipment_name
-                                        )
                                     );
 
-                                return (
-                                    <div key={equipmentType} className="mb-1">
-                                        <h4 className="equipment-type-title">
-                                            <b>{equipmentType}</b>
-                                        </h4>
-                                        <table className="equipment-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>
+                                    if (equipmentList.length === 0) {
+                                        return (
+                                            <tr key={equipmentType} className="table-light">
+                                                <td colSpan="3" className="text-center">
+                                                    ไม่มีข้อมูล {equipmentType}
+                                                </td>
+                                            </tr>
+                                        );
+                                    }
+
+                                    return (
+                                        <React.Fragment key={equipmentType}>
+                                            {/* หัวข้อประเภทอุปกรณ์ */}
+                                            <tr>
+                                                <td colSpan="3" className="fw-bold text-left"
+                                                    style={{ backgroundColor: "#e8f5fd", cursor: "default" }}>
+                                                    {equipmentType}
+                                                </td>
+                                            </tr>
+
+                                            {/* รายการอุปกรณ์ */}
+                                            {equipmentList.map((equipment, index) => (
+                                                <tr key={equipment._id}
+                                                    onClick={() => handleCheckboxChange(null, equipment.equipment_name, equipmentType)}
+                                                    style={{ cursor: "pointer" }}>
+                                                    <td style={{ width: "10%" }}>
                                                         <input
+                                                            style={{ marginLeft: "20px", pointerEvents: "none" }} // ป้องกัน input รับคลิกตรงๆ
+                                                            className="form-check-input"
                                                             type="checkbox"
-                                                            checked={isAllSelected}
-                                                            onChange={(e) =>
-                                                                handleSelectAll(equipmentType, e.target.checked)
-                                                            }
+                                                            checked={selectedEquipments.some(equip => equip.equipmentname_forUser === equipment.equipment_name)}
+                                                            readOnly
                                                         />
-                                                    </th>
-                                                    <th>ลำดับ</th>
-                                                    <th>ชื่ออุปกรณ์</th>
+                                                    </td>
+                                                    <td style={{ width: "10%" }}>{index + 1}</td>
+                                                    <td>{equipment.equipment_name}</td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                {Array.isArray(data) && data.length > 0 ? (
-                                                    data
-                                                        .filter(
-                                                            (equipment) =>
-                                                                equipment.equipment_type === equipmentType
-                                                        )
-                                                        .map((equipment, index) => (
-                                                            <tr key={equipment._id}>
-                                                                <td>
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        value={equipment.equipment_name}
-                                                                        checked={selectedEquipments.some(
-                                                                            (equip) =>
-                                                                                equip.equipmentname_forUser ===
-                                                                                equipment.equipment_name
-                                                                        )}
-                                                                        onChange={(e) =>
-                                                                            handleCheckboxChange(
-                                                                                e,
-                                                                                equipment.equipment_name,
-                                                                                equipmentType
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                </td>
-                                                                <td>{index + 1}</td>
-                                                                <td>{equipment.equipment_name}</td>
-                                                                {equipValidationMessages[equipment.equipment_name] && (
-                                                                    <td style={{ color: "red" }}>
-                                                                        {equipValidationMessages[equipment.equipment_name]}
-                                                                    </td>
-                                                                )}
-                                                            </tr>
-                                                        ))
-                                                ) : (
-                                                    <tr>
-                                                        <td colSpan="3">ไม่มีข้อมูล{equipmentType}</td>
-                                                    </tr>
-                                                )}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                );
-                            }
-                        )}
+                                            ))}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+
                         {validationMessage && (
-                            <div style={{ color: "red" }}>{validationMessage}</div>
+                            <div style={{ color: "red", textAlign: "center" }}>{validationMessage}</div>
                         )}
-                        <div className="btn-group">
+
+                        <div className="btn-group mt-3">
                             <div className="btn-next">
                                 <button type="submit" className="btn btn-outline py-2">
                                     บันทึก
@@ -686,9 +914,8 @@ export default function AddEquipPatient() {
                         </div>
                     </form>
                 </div>
-                <div className="btn-group">
-                    <div className="btn-pre"></div>
-                </div>
+
+
 
             </div>
         </main>

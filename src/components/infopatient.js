@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import "../css/styles.css";
@@ -46,101 +46,150 @@ export default function Infopatient({ }) {
     const notificationsRef = useRef(null);
     const bellRef = useRef(null);
     const [caregiverInfo, setCaregiverInfo] = useState(null);
-
-     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-     const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
-     const [selectedCaregiver, setSelectedCaregiver] = useState(null);
-     const [formData, setFormData] = useState({
-       user: "",
-       name: "",
-       surname: "",
-       tel: "",
-       Relationship: "",
-     });
-     const handleAddCaregiver = () => {
+    const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+    const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+    const [latestAssessments, setLatestAssessments] = useState({});
+    const [unreadCountsByType, setUnreadCountsByType] = useState({
+        assessment: 0,
+        abnormal: 0,
+        normal: 0,
+    });
+    const [selectedCaregiver, setSelectedCaregiver] = useState(null);
+    const [formData, setFormData] = useState({
+        user: "",
+        name: "",
+        surname: "",
+        tel: "",
+        Relationship: "",
+    });
+    const handleAddCaregiver = () => {
         navigate("/addcaregiver", { state: { Iduser: id, id } }); // `userId` อาจเป็น ID ของผู้ป่วย
-      };
-    
-
-   useEffect(() => {
-     socket?.on('newAlert', (alert) => {
-       console.log('Received newAlert:', alert);
-   
-       setAlerts((prevAlerts) => {
-         const isExisting = prevAlerts.some(
-           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
-         );
-   
-         let updatedAlerts;
-   
-         if (isExisting) {
-           
-           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-             updatedAlerts = [...prevAlerts, alert];
-           } else {
-             updatedAlerts = prevAlerts.map((existingAlert) =>
-               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-             );
-           }
-         } else {
-           updatedAlerts = [...prevAlerts, alert];
-         }
-   
-         return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-       });
-     });
-   
-     socket?.on('deletedAlert', (data) => {
-       setAlerts((prevAlerts) => {
-         const filteredAlerts = prevAlerts.filter(
-           (alert) => alert.patientFormId !== data.patientFormId
-         );
-         return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-       });
-     });
-   
-     return () => {
-       socket?.off('newAlert');
-       socket?.off('deletedAlert');
-     };
-   }, []);
-   
-     useEffect(() => {
-       const currentUserId = sender._id;
-     
-       const unreadAlerts = alerts.filter(
-         (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
-       );
-     
-       setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-     }, [alerts]);
-     
-     
-       useEffect(() => {
-         socket?.on("TotalUnreadCounts", (data) => {
-           console.log("📦 TotalUnreadCounts received:", data);
-           setUserUnreadCounts(data);
-         });
-     
-         return () => {
-           socket?.off("TotalUnreadCounts");
-         };
-       }, [socket]);
+    };
 
 
-       const handleEdit = (caregiver) => {
-        console.log("caregiver ที่กำลังแก้ไข:", caregiver);
-        navigate("/updatecaregiver", { state: { caregiver, id }});
-        setSelectedCaregiver(caregiver);
-        setFormData({
-          user: caregiver.user || "",
-          name: caregiver.name || "",
-          surname: caregiver.surname || "",
-          tel: caregiver.tel || "",
-          Relationship: caregiver.Relationship || "",
+    const fetchLatestAssessments = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/latest-assessments");
+            const data = await response.json();
+            console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+
+            if (data.status === "ok") {
+                const assessmentsMap = data.data.reduce((acc, item) => {
+                    acc[item._id] = item.latestStatusName;
+                    return acc;
+                }, {});
+                console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+
+                setLatestAssessments(assessmentsMap);
+            }
+        } catch (error) {
+            console.error("Error fetching latest assessments:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchLatestAssessments();
+    }, []);
+
+    const getUnreadCount = useCallback(
+        (type) => {
+            const filteredByType = alerts.filter(
+                (alert) =>
+                    (type === "assessment" &&
+                        alert.alertType === "assessment" &&
+                        alert.alertMessage !== "เคสฉุกเฉิน") ||
+                    (type === "abnormal" &&
+                        (alert.alertType === "abnormal" ||
+                            alert.alertMessage === "เคสฉุกเฉิน")) ||
+                    (type === "normal" && alert.alertType === "normal")
+            );
+            return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+                .length;
+        },
+        [alerts, userId]
+    );
+    useEffect(() => {
+        if (!userId) return;
+        const updatedCounts = {
+            assessment: getUnreadCount("assessment"),
+            abnormal: getUnreadCount("abnormal"),
+            normal: getUnreadCount("normal"),
+        };
+        setUnreadCountsByType(updatedCounts);
+    }, [alerts, userId]);
+
+    useEffect(() => {
+        socket?.on("newAlert", (alert) => {
+            console.log("Received newAlert:", alert);
+
+            if (alert.MPersonnel?.id === userId) {
+                console.log("Ignoring alert from self");
+                return;
+            }
+
+            setAlerts((prevAlerts) => {
+                const isExisting = prevAlerts.some(
+                    (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+                );
+
+                let updatedAlerts;
+
+                if (isExisting) {
+                    updatedAlerts = prevAlerts.map((existingAlert) =>
+                        existingAlert.patientFormId === alert.patientFormId
+                            ? alert
+                            : existingAlert
+                    );
+                } else {
+                    updatedAlerts = [...prevAlerts, alert];
+                }
+
+                return [...updatedAlerts].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+            });
         });
-      };
-   
+
+        socket?.on("deletedAlert", (data) => {
+            setAlerts((prevAlerts) => {
+                const filteredAlerts = prevAlerts.filter(
+                    (alert) => alert.patientFormId !== data.patientFormId
+                );
+
+                return [...filteredAlerts].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
+            });
+        });
+
+        return () => {
+            socket?.off("newAlert");
+            socket?.off("deletedAlert");
+        };
+    }, [userId]);
+
+    useEffect(() => {
+        const currentUserId = sender._id;
+
+        const unreadAlerts = alerts.filter(
+            (alert) =>
+                Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+        );
+
+        setUnreadCount(unreadAlerts.length);
+    }, [alerts, sender._id]);
+
+    useEffect(() => {
+        socket?.on("TotalUnreadCounts", (data) => {
+            console.log("📦 TotalUnreadCounts received:", data);
+            setUserUnreadCounts(data);
+        });
+
+        return () => {
+            socket?.off("TotalUnreadCounts");
+        };
+    }, []);
+
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
@@ -153,7 +202,8 @@ export default function Infopatient({ }) {
 
     const handleClickOutside = (e) => {
         if (
-            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+            notificationsRef.current &&
+            !notificationsRef.current.contains(e.target) &&
             !bellRef.current.contains(e.target)
         ) {
             setShowNotifications(false);
@@ -161,12 +211,28 @@ export default function Infopatient({ }) {
     };
 
     useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
+
+    const handleEdit = (caregiver) => {
+        console.log("caregiver ที่กำลังแก้ไข:", caregiver);
+        navigate("/updatecaregiver", { state: { caregiver, id } });
+        setSelectedCaregiver(caregiver);
+        setFormData({
+            user: caregiver.user || "",
+            name: caregiver.name || "",
+            surname: caregiver.surname || "",
+            tel: caregiver.tel || "",
+            Relationship: caregiver.Relationship || "",
+        });
+    };
+
+
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -184,9 +250,9 @@ export default function Infopatient({ }) {
                     name: data.data.name,
                     surname: data.data.surname,
                     _id: data.data._id,
-                  });
+                });
                 setData(data.data);
-                if (data.data == "token expired") {
+                if (data.data === "token expired") {
                     window.localStorage.clear();
                     window.location.href = "./";
                 }
@@ -196,7 +262,6 @@ export default function Infopatient({ }) {
                 console.error("Error verifying token:", error);
             });
     };
-
 
     useEffect(() => {
         const fetchData = async () => {
@@ -226,22 +291,24 @@ export default function Infopatient({ }) {
             try {
                 const response = await fetch(`http://localhost:5000/getcaregiver/${id}`);
                 const caregiverData = await response.json();
-                if (caregiverData.status === 'ok') {
+
+                if (caregiverData.status === "ok" && caregiverData.data.length > 0) {
                     setCaregiverInfo(caregiverData.data);
-                    setCaregiverName(caregiverData.data.name);
-                    setCaregiverSurname(caregiverData.data.surname);
-                    setCaregiverTel(caregiverData.data.tel);
-                    setRelationship(caregiverData.data.Relationship);
+                    setCaregiverName(caregiverData.data[0].name);
+                    setCaregiverSurname(caregiverData.data[0].surname);
+                    setCaregiverTel(caregiverData.data[0].tel);
+                    setRelationship(caregiverData.data[0].relationship); // ✅ ใช้ relationship ที่ถูกต้อง
+                } else {
+                    setCaregiverInfo([]);
                 }
             } catch (error) {
-                if (error.response && error.response.status === 404) {
-                    setCaregiverInfo(null);
-                  } else {
-                    console.error("Error fetching caregiver info:", error);
-                  }            }
+                console.error("Error fetching caregiver info:", error);
+                setCaregiverInfo([]);
+            }
         };
         fetchCaregiverData();
     }, [id]);
+
 
 
     useEffect(() => {
@@ -421,8 +488,8 @@ export default function Infopatient({ }) {
     }
 
     const fetchAndSetAlerts = (token, userId) => {
-        fetchAlerts(token)
-            .then((alerts) => {
+        fetchAlerts(token, userId)
+            .then((alerts, userId) => {
                 setAlerts(alerts);
                 const unreadAlerts = alerts.filter(
                     (alert) => !alert.viewedBy.includes(userId)
@@ -440,38 +507,55 @@ export default function Infopatient({ }) {
 
         if (token) {
             fetchUserData(token)
-                .then(user => {
+                .then((user) => {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
-
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
                 });
         }
-    }, []);
+    }, [token]);
 
-
-    const markAllAlertsAsViewed = () => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed", {
+    const markAllByTypeAsViewed = (type) => {
+        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ userId: userId }),
+            body: JSON.stringify({ userId: userId, type: type }),
         })
             .then((res) => res.json())
             .then((data) => {
-                const updatedAlerts = alerts.map((alert) => ({
-                    ...alert,
-                    viewedBy: [...alert.viewedBy, userId],
-                }));
-                setAlerts(updatedAlerts);
-                setUnreadCount(0);
+                if (data.message === "All selected alerts marked as viewed") {
+                    const updatedAlerts = alerts.map((alert) => {
+                        if (
+                            type === "all" ||
+                            ((alert.alertType === type ||
+                                (type === "abnormal" &&
+                                    (alert.alertType === "abnormal" ||
+                                        alert.alertMessage === "เคสฉุกเฉิน")) ||
+                                (type === "assessment" &&
+                                    alert.alertType === "assessment" &&
+                                    alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                                !alert.viewedBy.includes(userId))
+                        ) {
+                            return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+                        }
+                        return alert;
+                    });
+
+                    setAlerts(updatedAlerts);
+                    // setUnreadCount(0);
+                    const unreadAlerts = updatedAlerts.filter(
+                        (alert) => !alert.viewedBy.includes(userId)
+                    );
+                    setUnreadCount(unreadAlerts.length);
+                }
             })
             .catch((error) => {
-                console.error("Error marking all alerts as viewed:", error);
+                console.error("Error marking alerts as viewed:", error);
             });
     };
 
@@ -479,9 +563,41 @@ export default function Infopatient({ }) {
         setFilterType(type);
     };
 
-    const filteredAlerts = filterType === "unread"
-        ? alerts.filter(alert => !alert.viewedBy.includes(userId))
-        : alerts;
+    const filteredAlerts =
+        filterType === "unread"
+            ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+            : filterType === "assessment"
+                ? alerts.filter(
+                    (alert) =>
+                        alert.alertType === "assessment" &&
+                        alert.alertMessage !== "เคสฉุกเฉิน"
+                )
+                : filterType === "abnormal"
+                    ? alerts.filter(
+                        (alert) =>
+                            alert.alertType === "abnormal" ||
+                            alert.alertMessage === "เคสฉุกเฉิน"
+                    )
+                    : filterType === "normal"
+                        ? alerts.filter((alert) => alert.alertType === "normal")
+                        : alerts;
+
+    const getFilterLabel = (type) => {
+        switch (type) {
+            case "all":
+                return "ทั้งหมด";
+            case "unread":
+                return "ยังไม่อ่าน";
+            case "normal":
+                return "บันทึกอาการ";
+            case "abnormal":
+                return "ผิดปกติ";
+            case "assessment":
+                return "ประเมินอาการ";
+            default:
+                return "ไม่ทราบ";
+        }
+    };
 
     const formatDate = (dateTimeString) => {
         const dateTime = new Date(dateTimeString);
@@ -511,53 +627,121 @@ export default function Infopatient({ }) {
             } น.`;
     };
 
-  useEffect(() => {
-    // ดึงข้อมูล unread count เมื่อเปิดหน้า
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+    useEffect(() => {
+        // ดึงข้อมูล unread count เมื่อเปิดหน้า
+        const fetchUnreadCount = async () => {
+            try {
+                const response = await fetch(
+                    "http://localhost:5000/update-unread-count"
+                );
+
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.success) {
+                    setUserUnreadCounts(data.users);
+                }
+            } catch (error) {
+                console.error("Error fetching unread count:", error);
+            }
+        };
+        fetchUnreadCount();
+    }, []);
+
+    const handleDelete = async (caregiverId) => {
+        if (window.confirm("คุณต้องการลบข้อมูลผู้ดูแลนี้หรือไม่?")) {
+            try {
+                const response = await fetch(`http://localhost:5000/deletecaregiver`, {
+                    method: "POST", // ใช้ POST หรือ DELETE ตาม API ของคุณ
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ _id: caregiverId }), // ส่ง `_id` ของผู้ดูแลไป
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("ลบข้อมูลสำเร็จ");
+                    // อัปเดต caregiverInfo เพื่อรีเฟรชข้อมูล
+                    setCaregiverInfo((prev) =>
+                        prev.filter((caregiver) => caregiver._id !== caregiverId)
+                    );
+                } else {
+                    alert(`เกิดข้อผิดพลาด: ${data.error}`);
+                }
+            } catch (error) {
+                console.error("Error deleting caregiver:", error);
+                alert("เกิดข้อผิดพลาดในการลบข้อมูล");
+            }
+        }
+    };
+    const toggleAllCheckboxes = () => {
+        const allSelected = sortedEquipment.every(equipment =>
+            selectedEquipments.includes(equipment.equipmentname_forUser)
         );
 
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    fetchUnreadCount();
-  }, []);
-
-  const handleDelete = async (caregiverId) => {
-    if (window.confirm("คุณต้องการลบข้อมูลผู้ดูแลนี้หรือไม่?")) {
-      try {
-        const response = await fetch(`http://localhost:5000/deletecaregiver`, {
-          method: "POST", // ใช้ POST หรือ DELETE ตาม API ของคุณ
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ _id: caregiverId }), // ส่ง `_id` ของผู้ดูแลไป
-        });
-
-        const data = await response.json();
-        if (response.ok) {
-          alert("ลบข้อมูลสำเร็จ");
-          // อัปเดต caregiverInfo เพื่อรีเฟรชข้อมูล
-          setCaregiverInfo((prev) =>
-            prev.filter((caregiver) => caregiver._id !== caregiverId)
-          );
+        if (allSelected) {
+            setSelectedEquipments([]);
         } else {
-          alert(`เกิดข้อผิดพลาด: ${data.error}`);
+            setSelectedEquipments(sortedEquipment.map(equipment => equipment.equipmentname_forUser));
         }
-      } catch (error) {
-        console.error("Error deleting caregiver:", error);
-        alert("เกิดข้อผิดพลาดในการลบข้อมูล");
-      }
-    }
-  };
+    };
+
+
+    const [sortConfig, setSortConfig] = useState({ key: "createdAt", direction: "asc" });
+
+    const requestSort = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const sortedEquipment = [...medicalEquipment].sort((a, b) => {
+        if (sortConfig.key) {
+            let valueA = a[sortConfig.key];
+            let valueB = b[sortConfig.key];
+
+            // ถ้าเป็นวันที่ ต้องแปลงเป็น Date object
+            if (sortConfig.key === "createdAt") {
+                valueA = new Date(valueA);
+                valueB = new Date(valueB);
+            } else {
+                valueA = valueA.toString().toLowerCase();
+                valueB = valueB.toString().toLowerCase();
+            }
+
+            if (valueA < valueB) return sortConfig.direction === "asc" ? -1 : 1;
+            if (valueA > valueB) return sortConfig.direction === "asc" ? 1 : -1;
+            return 0;
+        }
+        return 0;
+    });
+
+    const getSortIcon = (key) => {
+        return (
+            <i
+                className={`bi ${sortConfig.key === key ?
+                    (sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill")
+                    : "bi-caret-down-fill" // ค่าเริ่มต้นเป็นลูกศรลง
+                    }`}
+            ></i>
+        );
+    };
+
+    const handleRowClick = (equipmentName) => {
+        setSelectedEquipments((prevSelected) =>
+            prevSelected.includes(equipmentName)
+                ? prevSelected.filter((name) => name !== equipmentName)
+                : [...prevSelected, equipmentName]
+        );
+    };
+
+    const formatIDCardNumber = (id) => {
+        if (!id) return "";
+        return id.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5");
+    };
+
 
     return (
         <main className="body">
@@ -606,19 +790,19 @@ export default function Infopatient({ }) {
                             <i className="bi bi-chat-dots"></i>
                             <span className="links_name">แช็ต</span>
                             {userUnreadCounts.map((user) => {
-                if (String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
+                                if (String(user.userId) === String(sender._id)) {
+                                    return (
+                                        <div key={user.userId}>
+                                            {user.totalUnreadCount > 0 && (
+                                                <div className="notification-countchat">
+                                                    {user.totalUnreadCount}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })}
                         </a>
                     </li>
                     <div class="nav-logout">
@@ -635,22 +819,104 @@ export default function Infopatient({ }) {
                 <div className="notifications-dropdown" ref={notificationsRef}>
                     <div className="notifications-head">
                         <h2 className="notifications-title">การแจ้งเตือน</h2>
-                        <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                            ทำเครื่องหมายว่าอ่านทั้งหมด
-                        </p>
-                        <div className="notifications-filter">
-                            <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                                ดูทั้งหมด
-                            </button>
-                            <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                                ยังไม่อ่าน
-                            </button>
+                    </div>
+                    <div className="notifications-filter">
+                        <div
+                            className={`notification-box ${filterType === "all" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("all")}
+                        >
+                            <div className="notification-item">
+                                <i className="bi bi-bell"></i>
+                                ทั้งหมด
+                            </div>
+                            <div className="notification-right">
+                                {unreadCount > 0 && (
+                                    <span className="notification-count-noti">{unreadCount}</span>
+                                )}
+                                <i className="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div
+                            className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("abnormal")}
+                        >
+                            <div className="notification-item">
+                                <i className="bi bi-exclamation-triangle"></i>
+                                ผิดปกติ
+                            </div>
+                            <div className="notification-right">
+                                {unreadCountsByType.abnormal > 0 && (
+                                    <span className="notification-count-noti">
+                                        {unreadCountsByType.abnormal}
+                                    </span>
+                                )}
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div
+                            className={`notification-box ${filterType === "normal" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("normal")}
+                        >
+                            <div className="notification-item">
+                                {" "}
+                                <i className="bi bi-journal-text"></i>
+                                บันทึกอาการ
+                            </div>
+                            <div className="notification-right">
+                                {unreadCountsByType.normal > 0 && (
+                                    <span className="notification-count-noti">
+                                        {unreadCountsByType.normal}
+                                    </span>
+                                )}
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <div
+                            className={`notification-box ${filterType === "assessment" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("assessment")}
+                        >
+                            <div className="notification-item">
+                                <i className="bi bi-clipboard-check"></i>
+                                ประเมินอาการ
+                            </div>
+                            <div className="notification-right">
+                                {unreadCountsByType.assessment > 0 && (
+                                    <span className="notification-count-noti">
+                                        {unreadCountsByType.assessment}
+                                    </span>
+                                )}
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
                         </div>
                     </div>
+                    <div className="selected-filter">
+                        <p>
+                            การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+                        </p>
+                        <p
+                            className="mark-all-read-btn"
+                            onClick={() => markAllByTypeAsViewed(filterType)}
+                        >
+                            ทำเครื่องหมายว่าอ่านทั้งหมด
+                        </p>
+                    </div>
                     {filteredAlerts.length > 0 ? (
-                        <>
-                            {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                        </>
+                        <div>
+                            {renderAlerts(
+                                filteredAlerts,
+                                token,
+                                userId,
+                                navigate,
+                                setAlerts,
+                                setUnreadCount,
+                                formatDate
+                            )}
+                        </div>
                     ) : (
                         <p className="no-notification">ไม่มีการแจ้งเตือน</p>
                     )}
@@ -707,411 +973,334 @@ export default function Infopatient({ }) {
                 </div>
                 <br></br>
                 <h3>ข้อมูลการดูแลผู้ป่วย</h3>
-                <div className="info3 card mb-1">
-                    <div className="header">
-                        <b>ข้อมูลทั่วไป</b>
-                    </div>
-                    <div className="user-info mt-3">
-                        <div className="left-info">
-                            <p>
-                                <span>ชื่อ-สกุล</span>
-                            </p>
-                            <p>
-                                <span>เลขบัตรประชาชน</span>
-                            </p>
-                            <p>
-                                <span>อายุ</span>
-                            </p>
-                            <p>
-                                <span>เพศ</span>
-                            </p>
-                            <p>
-                                <span>สัญชาติ</span>
-                            </p>
-                            <p>
-                                <span>ที่อยู่</span>
-                            </p>
-                            <p>
-                                <span>เบอร์โทรศัพท์</span>
-                            </p>
-                            {/* <p>
-                                <span>ผู้ดูแล</span>
-                            </p>
-                            <p>
-                                <span>ความสัมพันธ์</span>
-                            </p>
-                            <p>
-                                <span>เบอร์โทรศัพท์ผู้ดูแล</span>
-                            </p> */}
+                <div className="forminfo mb-4">
+                    <fieldset className="user-fieldset">
+                        <legend><i className="bi bi-person-fill"></i> ข้อมูลทั่วไป</legend>
+                        <div className="user-info mt-3">
+                            <div className="row">
+                                {[
+                                    { label: "ชื่อ-สกุล", value: `${name || '-'} ${surname || '-'}` },
+                                    { label: "เลขบัตรประชาชน", value: `${formatIDCardNumber(ID_card_number || '-')}` },
+                                    { label: "อายุ", value: userAge },
+                                    { label: "เพศ", value: gender || '-' },
+                                    { label: "สัญชาติ", value: nationality || '-' },
+                                    { label: "ที่อยู่", value: Address || '-' },
+                                    { label: "เบอร์โทรศัพท์", value: tel || '-' }
+                                ].map((item, index) => (
+                                    <React.Fragment key={index}>
+                                        <div className="col-sm-3" style={{ color: "#444" }}>
+                                            <p><span>{item.label} :</span></p>
+                                        </div>
+                                        <div className="col-sm-9">
+                                            <p><b>{item.value}</b></p>
+                                        </div>
+                                        <div className="w-100 d-none d-md-block"></div>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+
                         </div>
-                        <div className="right-info">
-                            <p>
-                                <b>{name || '-'}</b> <b>{surname || '-'}</b>
-                            </p>
-                            <p>
-                                <b>{ID_card_number || '-'}</b>
-                            </p>
-                            <p>
-                                <b>{userAge}</b>
-                            </p>
-                            <p>
-                                <b>{gender || '-'}</b>
-                            </p>
-                            <p>
-                                <b>{nationality || '-'}</b>
-                            </p>
-                            <p>
-                                <b>{Address || '-'}</b>
-                            </p>
-                            <p>
-                                <b>{tel || '-'}</b>
-                            </p>
-                            {/* <p>
-                                <b>{caregiverName || '-'}</b> <b>{caregiverSurname || '-'}</b>
-                            </p>
-                            <p>
-                                <b>{Relationship || '-'}</b>
-                            </p>
-                            <p>
-                                <b>{caregiverTel || '-'}</b>
-                            </p> */}
+
+                        <div className="btn-group mb-4">
+                            <div className="editimg1">
+                                <button onClick={() => navigate("/updatepatient", { state: { id } })}>
+                                    <i className="bi bi-pencil-square"></i> แก้ไข
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    <div className="btn-group mb-4">
-                        <div className="editimg1">
-                            <button
-                                onClick={() =>
-                                    navigate("/updatepatient", {
-                                        state: { id },
-                                    })
-                                }
-                            >
-                                แก้ไข
-                            </button>
-                        </div>
-                        {/* <div className="deleteimg1">
-                            <button onClick={() => deleteUser()}>ลบ</button>
-                        </div> */}
-                    </div>
+                    </fieldset>
                 </div>
-                <div className="info3 card mb-1">
-          <div className="header">
-            <b>ข้อมูลผู้ดูแล</b>
-          </div>
-          
-          <div>
-            {caregiverInfo && caregiverInfo.length > 0 ? (
-              <div>
-                <div className="user-info-caregiver">
-                  {caregiverInfo.map((caregiver, index) => (
-                    <div className="inline-container-caregiver" key={index}>
-                      <p>
-                        <span>ผู้ดูแลคนที่ {index + 1}:</span>
-                      </p>
-                      <div className="caregiver-card">
-                      <div className="caregiver-info">
-                        <p>
-                          <span>ชื่อ-สกุล:</span> {caregiver.name || "-"}{" "}
-                          {caregiver.surname || "-"}
-                        </p>
-                        <p>
-                          <span>ความสัมพันธ์:</span>{" "}
-                          {caregiver.Relationship || "-"}
-                        </p>
-                        <p>
-                          <span>เบอร์โทรศัพท์:</span> {caregiver.tel || "-"}
-                        </p>
-                        </div>
-                        <div class="button-container-vertical">
-                      <button class="button-edit" 
-                      onClick={() => handleEdit(caregiver)}>
-                        แก้ไข
-                      </button>
-                       {/* <button  class="button-delete" 
-                      onClick={() => handleDelete(caregiver._id)}>
-                        ลบ 
-                      </button> */}
-                    </div>
-                      </div>
-                
-               
-                    </div>
-                  ))}
-                 </div>
-                 {/* <div className="btn-group mb-4">
+
+                <div className="forminfo mb-4">
+                    <fieldset className="user-fieldset">
+                        <legend><i class="bi bi-person-fill"></i> ข้อมูลผู้ดูแล</legend>
+                        <div>
+                            {caregiverInfo && caregiverInfo.length > 0 ? (
+                                <div>
+                                    <div className="user-info-caregiver">
+                                        {caregiverInfo.map((caregiver, index) => (
+                                            <div className="inline-container-caregiver" key={index}>
+                                                <p>
+                                                    <span><b>ผู้ดูแลคนที่ {index + 1} :</b> </span>
+                                                    {/* <span class=""
+                                                        onClick={() => handleEdit(caregiver)}>
+                                                        <i class="bi bi-pencil-square"></i> แก้ไข
+                                                    </span> */}
+                                                </p>
+                                                <div className="caregiver-card mb-4">
+                                                    <div className="row">
+                                                        {[
+                                                            {
+                                                                label: "เลขประจําตัวประชาชน", value: `${formatIDCardNumber(
+                                                                    caregiver.ID_card_number || "-"
+                                                                )}`
+                                                            },
+                                                            { label: "ชื่อ-สกุล", value: `${caregiver.name || "-"} ${caregiver.surname || "-"}` },
+                                                            { label: "ความสัมพันธ์", value: caregiver.relationship || "ไม่ระบุ" }
+                                                        ].map((item, index) => (
+                                                            <React.Fragment key={index}>
+                                                                <div className="col-sm-4" style={{ color: "#444" }}><p><span>{item.label} :</span></p></div>
+                                                                <div className="col-sm-8 fw-bold text-dark"><p><span>{item.value}</span></p></div>
+                                                                <div className="w-100 d-none d-md-block"></div>
+                                                            </React.Fragment>
+                                                        ))}
+                                                        <div className="col-sm-4 " style={{ color: "#444" }}><p><span>เบอร์โทรศัพท์ :</span></p></div>
+                                                        <div className="col-sm-8 d-flex justify-content-between align-items-center fw-bold text-dark">
+                                                            <p><span>{caregiver.tel || "-"}</span></p>
+                                                            <button className="button-edit ms-auto p-1" onClick={() => handleEdit(caregiver)}>
+                                                                <i className="bi bi-pencil-square"></i> แก้ไข
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+
+
+
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {/* <div className="btn-group mb-4">
                   <div className="adddata">
                     <button onClick={handleAddCaregiver}>เพิ่มผู้ดูแล</button>
                   </div>
                 </div> */}
-             
-              </div>
-            ) : (
-              <div>
-                <p className="no-equipment">ไม่มีข้อมูลผู้ดูแล</p>
-                <div className="btn-group mb-4">
-                  {/* <div className="adddata">
+
+                                </div>
+                            ) : (
+                                <div>
+                                    <p className="no-equipment">ไม่มีข้อมูลผู้ดูแล</p>
+                                    <div className="btn-group mb-4">
+                                        {/* <div className="adddata">
                     <button onClick={handleAddCaregiver}>เพิ่มผู้ดูแล</button>
                   </div> */}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-                <br></br>
-                <div className="info3 card mb-1">
-                    <div className="header"><b>ข้อมูลการเจ็บป่วย</b></div>
-                    {medicalInfo ? (
-                        <>
-                            <div className="user-info mt-3">
-                                <div className="left-info">
-                                    <p><span>HN</span></p>
-                                    <p><span>AN</span></p>
-                                    <p><span>วันที่ Admit</span></p>
-                                    <p><span>วันที่ D/C</span></p>
-                                    <p><span>Diagnosis</span></p>
-                                    <p><span>แพทย์ผู้ดูแล</span></p>
-                                    <p><span>Chief_complaint</span></p>
-                                    <p><span>Present illness</span></p>
-                                    <p><span>File Present illness</span></p>
-                                    <p><span>Management plan</span></p>
-                                    <p><span>File Management plan</span></p>
-                                    <p><span>Phychosocial assessment</span></p>
-                                    <p><span>File Phychosocial assessment</span></p>
+                                    </div>
                                 </div>
-                                <div className="right-info">
-                                    <p><b>{medicalInfo.HN || "-"}</b></p>
-                                    <p><b>{medicalInfo.AN || "-"}</b></p>
-                                    <p>
-                                        <b>{medicalInfo.Date_Admit
-                                            ? new Date(medicalInfo.Date_Admit).toLocaleDateString(
-                                                "th-TH",
-                                                { day: "numeric", month: "long", year: "numeric" }
-                                            )
-                                            : "-"}</b>
-                                    </p>
-                                    <p>
-                                        <b>{medicalInfo.Date_DC
-                                            ? new Date(medicalInfo.Date_DC).toLocaleDateString(
-                                                "th-TH",
-                                                { day: "numeric", month: "long", year: "numeric" }
-                                            )
-                                            : "-"}</b>
-                                    </p>
-                                    <p><b>{medicalInfo.Diagnosis || "-"}</b></p>
-                                    <p>
-                                        <b>
-                                            {(mdata.nametitle || mdata.name || mdata.surname)
-                                                ? `${mdata.nametitle || ""} ${mdata.name || ""} ${mdata.surname || ""}`.trim()
-                                                : "-"
-                                            }
-                                        </b>
-                                    </p>
-                                    <p><b>{medicalInfo.Chief_complaint || "-"}</b></p>
-                                    <p><b>{medicalInfo.Present_illness || "-"}</b></p>
-                                    <p>
-                                        <b>
-                                            {medicalInfo.fileP ? (
-                                                <a
-                                                    style={{ color: "grey" }}
-                                                    href=""
-                                                    onClick={() => {
-                                                        // const filePath = medicalInfo.fileP.replace(/\\/g, "/");
-                                                        // const fileName = filePath.split("/").pop();
-                                                        // console.log("fileName:", fileName);
-                                                        window.open(`${medicalInfo.fileP}`, "_blank");
-                                                    }}
-                                                >
-                                                    {medicalInfo.filePName}
-                                                </a>
-                                            ) : (
-                                                "-"
-                                            )}
-                                        </b>
-                                    </p>
-
-                                    <p><b>{medicalInfo.Management_plan || "-"}</b></p>
-                                    <p>
-                                        <b>
-                                            {medicalInfo.fileM ? (
-                                                <a
-                                                    style={{ color: "grey" }}
-                                                    href=""
-                                                    onClick={() => {
-                                                        // const filePath = medicalInfo.fileM.replace(/\\/g, "/");
-                                                        // const fileName = filePath.split("/").pop();
-                                                        // console.log("fileName:", fileName);
-                                                        window.open(`${medicalInfo.fileM}`, "_blank");
-                                                    }}
-                                                >
-                                                    {medicalInfo.fileMName}
-                                                </a>
-                                            ) : (
-                                                "-"
-                                            )}
-                                        </b>
-                                    </p>
-                                    <p><b>{medicalInfo.Phychosocial_assessment || "-"}</b></p>
-                                    <p>
-                                        <b>
-                                            {medicalInfo.filePhy ? (
-                                                <a
-                                                    style={{ color: "grey" }}
-                                                    href=""
-                                                    onClick={() => {
-                                                        // const filePath = medicalInfo.filePhy.replace(/\\/g, "/");
-                                                        // const fileName = filePath.split("/").pop();
-                                                        // console.log("fileName:", fileName);
-                                                        window.open(`${medicalInfo.filePhy}`, "_blank");
-                                                    }}
-                                                >
-                                                    {medicalInfo.filePhyName}
-                                                </a>
-                                            ) : (
-                                                "-"
-                                            )}
-                                        </b>
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="btn-group mb-4">
-                                <div className="editimg1">
-                                    <button
-                                        onClick={() =>
-                                            navigate("/updatemedicalinformation", {
-                                                state: { id },
-                                            })
-                                        }
-                                    >
-                                        แก้ไข
-                                    </button>
-                                </div>
-                                {/* <div className="deleteimg1">
-                                    <button onClick={handleDeleteMedicalInfo}>ลบ</button>
-                                </div> */}
-                            </div>
-                        </>
-                    ) : (
-                        <div>
-                            <p className="no-equipment">ไม่พบข้อมูล</p>
-                            <div className="btn-group">
-                                {/* <div className="adddata">
-                                    <button onClick={() => navigate("/addmdinformation", { state: { id } })}>
-                                        เพิ่มข้อมูล
-                                    </button>
-                                </div> */}
-                            </div>
+                            )}
                         </div>
-                    )}
+                    </fieldset>
                 </div>
-                <br></br>
-                <div className="info3 card mb-1">
-                    <div className="header">
-                        <b>อุปกรณ์ทางการแพทย์</b>
-                    </div>
-                    {medicalEquipment && medicalEquipment.length > 0 ? (
-                        <>
-                            {Object.entries(
-                                medicalEquipment.reduce((acc, equipment) => {
-                                    if (!acc[equipment.equipmenttype_forUser]) {
-                                        acc[equipment.equipmenttype_forUser] = [];
-                                    }
-                                    acc[equipment.equipmenttype_forUser].push(equipment);
-                                    return acc;
-                                }, {})
-                            ).map(([type, equipments]) => {
-                                // Determine if all items in this category are selected
-                                const allSelected = equipments.every(equipment =>
-                                    selectedEquipments.includes(equipment.equipmentname_forUser)
-                                );
+                <div className="forminfo mb-4">
+                    <fieldset className="user-fieldset">
+                        <legend><i className="bi bi-journal-medical"></i> ข้อมูลการเจ็บป่วย</legend>
+                        {medicalInfo ? (
+                            <>
+                                <div className="user-info mt-3">
+                                    <div className="row">
+                                        {[
+                                            { label: "HN", value: medicalInfo.HN || "-" },
+                                            { label: "AN", value: medicalInfo.AN || "-" },
+                                            {
+                                                label: "วันที่ Admit",
+                                                value: medicalInfo.Date_Admit
+                                                    ? new Date(medicalInfo.Date_Admit).toLocaleDateString("th-TH", {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                    })
+                                                    : "-",
+                                            },
+                                            {
+                                                label: "วันที่ D/C",
+                                                value: medicalInfo.Date_DC
+                                                    ? new Date(medicalInfo.Date_DC).toLocaleDateString("th-TH", {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                    })
+                                                    : "-",
+                                            },
+                                            { label: "Diagnosis", value: medicalInfo.Diagnosis || "-" },
+                                            {
+                                                label: "แพทย์ผู้ดูแล",
+                                                value: (mdata.nametitle || mdata.name || mdata.surname)
+                                                    ? `${mdata.nametitle || ""} ${mdata.name || ""} ${mdata.surname || ""}`.trim()
+                                                    : "-",
+                                            },
+                                            { label: "Chief complaint", value: medicalInfo.Chief_complaint || "-" },
+                                            { label: "Present illness", value: medicalInfo.Present_illness || "-" },
+                                            {
+                                                label: (
+                                                    <>
+                                                        <i class="bi bi-file-earmark-pdf"></i> File Present illness
+                                                    </>
+                                                ),
+                                                value: medicalInfo.fileP ? (
+                                                    <a
+                                                        className="blue-500"
+                                                        href=""
+                                                        onClick={() => {
+                                                            // const filePath = medicalInfo.fileP.replace(/\\/g, "/");
+                                                            // const fileName = filePath.split("/").pop();
+                                                            // console.log("fileName:", fileName);
+                                                            window.open(`${medicalInfo.fileP}`, "_blank");
+                                                        }}
+                                                    >
+                                                        {medicalInfo.filePName}
+                                                    </a>
+                                                ) : "-",
+                                            },
 
-                                return (
-                                    <div key={type} className="equipment-category">
-                                        <h4 className="mt-3"><b>{type}</b></h4>
-                                        <table className="equipment-table mb-5">
-                                            <thead>
-                                                <tr>
-                                                    <th>
+                                            { label: "Management plan", value: medicalInfo.Management_plan || "-" },
+                                            {
+                                                label: (
+                                                    <>
+                                                        <i class="bi bi-file-earmark-pdf"></i> File Management plan
+                                                    </>
+                                                ),
+                                                value: medicalInfo.fileM ? (
+                                                    <a
+                                                        className="blue-500"
+                                                        href=""
+                                                        onClick={() => {
+                                                            // const filePath = medicalInfo.fileM.replace(/\\/g, "/");
+                                                            // const fileName = filePath.split("/").pop();
+                                                            // console.log("fileName:", fileName);
+                                                            window.open(`${medicalInfo.fileM}`, "_blank");
+                                                        }}
+                                                    >
+                                                        {medicalInfo.fileMName}
+                                                    </a>
+                                                ) : "-",
+                                            },
+                                            { label: "Phychosocial assessment", value: medicalInfo.Phychosocial_assessment || "-" },
+                                            {
+                                                label: (
+                                                    <>
+                                                        <i class="bi bi-file-earmark-pdf"></i> File Phychosocial assessment
+                                                    </>
+                                                ),
+                                                value: medicalInfo.filePhy ? (
+                                                    <a
+                                                        className="blue-500"
+                                                        href=""
+                                                        onClick={() => {
+                                                            // const filePath = medicalInfo.filePhy.replace(/\\/g, "/");
+                                                            // const fileName = filePath.split("/").pop();
+                                                            // console.log("fileName:", fileName);
+                                                            window.open(`${medicalInfo.filePhy}`, "_blank");
+                                                        }}
+                                                    >
+                                                        {medicalInfo.filePhyName}
+                                                    </a>
+                                                ) : "-",
+                                            },
+                                        ].map((item, index) => (
+                                            <React.Fragment key={index}>
+                                                <div className="col-sm-5" style={{ color: "#444" }}>
+                                                    <p><span>{item.label} :</span></p>
+                                                </div>
+                                                <div className="col-sm-7">
+                                                    <p><b>{item.value}</b></p>
+                                                </div>
+                                                <div className="w-100 d-none d-md-block"></div>
+                                            </React.Fragment>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="btn-group mb-4">
+                                    <div className="editimg1">
+                                        <button onClick={() => navigate("/updatemedicalinformation", { state: { id } })}>
+                                            <i className="bi bi-pencil-square"></i> แก้ไข
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div>
+                                <p className="no-equipment">ไม่พบข้อมูล</p>
+                            </div>
+                        )}
+                    </fieldset>
+                </div>
+
+                <div className="forminfo mb-1">
+                    <fieldset className="user-fieldset">
+                        <legend>
+                            <i className="bi bi-prescription2"></i> อุปกรณ์ทางการแพทย์
+                        </legend>
+                        {medicalEquipment && medicalEquipment.length > 0 ? (
+                            <>
+                                <div className="equipment-category">
+                                    <table className="equipment-table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="form-check-input"
+                                                        onChange={toggleAllCheckboxes}
+                                                    />
+                                                </th>
+                                                <th scope="col">#</th>
+                                                <th scope="col" onClick={() => requestSort("equipmentname_forUser")} style={{ cursor: "pointer" }}>
+                                                    ชื่ออุปกรณ์ {getSortIcon("equipmentname_forUser")}
+                                                </th>
+                                                <th scope="col" onClick={() => requestSort("equipmenttype_forUser")} style={{ cursor: "pointer" }}>
+                                                    ประเภทอุปกรณ์ {getSortIcon("equipmenttype_forUser")}
+                                                </th>
+                                                <th scope="col" onClick={() => requestSort("createdAt")} style={{ cursor: "pointer" }}>
+                                                    วันที่เพิ่ม {getSortIcon("createdAt")}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {sortedEquipment.map((equipment, index) => (
+                                                <tr
+                                                    key={equipment._id}
+                                                    onClick={() => handleRowClick(equipment.equipmentname_forUser)}
+                                                    style={{ cursor: "pointer" }}
+                                                >
+                                                    <td onClick={(e) => e.stopPropagation()}>
                                                         <input
                                                             type="checkbox"
-                                                            checked={allSelected}
-                                                            onChange={() => {
-                                                                if (allSelected) {
-                                                                    // Unselect all items in this category
-                                                                    setSelectedEquipments(prevSelected =>
-                                                                        prevSelected.filter(name =>
-                                                                            !equipments.some(equipment => equipment.equipmentname_forUser === name)
-                                                                        )
-                                                                    );
-                                                                } else {
-                                                                    // Select all items in this category
-                                                                    setSelectedEquipments(prevSelected => [
-                                                                        ...prevSelected,
-                                                                        ...equipments
-                                                                            .filter(equipment => !prevSelected.includes(equipment.equipmentname_forUser))
-                                                                            .map(equipment => equipment.equipmentname_forUser)
-                                                                    ]);
-                                                                }
+                                                            className="form-check-input"
+                                                            checked={selectedEquipments.includes(equipment.equipmentname_forUser)}
+                                                            onChange={(e) => {
+                                                                e.stopPropagation(); // ป้องกันไม่ให้ `tr` ทำงานซ้ำ
+                                                                handleRowClick(equipment.equipmentname_forUser);
                                                             }}
                                                         />
-                                                    </th>
-                                                    <th>ลำดับ</th>
-                                                    <th>ชื่ออุปกรณ์</th>
-                                                    <th>วันที่เพิ่ม</th>
+                                                    </td>
+                                                    <td>{index + 1}</td>
+                                                    <td>{equipment.equipmentname_forUser}</td>
+                                                    <td>{equipment.equipmenttype_forUser}</td>
+                                                    <td>{formatDate(equipment.createdAt)}</td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                {equipments.map((equipment, index) => (
-                                                    <tr key={equipment._id}>
-                                                        <td>
-                                                            <input
-                                                                type="checkbox"
-                                                                className="mb-2"
-                                                                checked={selectedEquipments.includes(equipment.equipmentname_forUser)}
-                                                                onChange={() =>
-                                                                    handleCheckboxChange(equipment.equipmentname_forUser)
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td>{index + 1}</td>
-                                                        <td>{equipment.equipmentname_forUser}</td>
-                                                        <td>
-                                                            {new Date(equipment.createdAt).toLocaleDateString("th-TH", {
-                                                                day: "numeric",
-                                                                month: "long",
-                                                                year: "numeric",
-                                                            })}
-                                                        </td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                            ))}
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                                {/* ปุ่มควบคุม */}
+                                <div className="btn-group mt-4 mb-3">
+                                    <div className="adddata">
+                                        <button onClick={() => navigate("/addequippatient", { state: { id } })}>
+                                            <i className="bi bi-plus-circle"></i> เพิ่มอุปกรณ์
+                                        </button>
                                     </div>
-                                );
-                            })}
-                            <div className="btn-group mb-4">
-                                <div className="adddata">
-                                    <button onClick={() => navigate("/addequippatient", { state: { id } })}>
-                                        เพิ่มอุปกรณ์
-                                    </button>
+                                    <div className="deleteimg1 mt-2">
+                                        <button onClick={handleDeleteSelected}>
+                                            <i className="bi bi-trash"></i> ลบอุปกรณ์
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="deleteimg1 mt-2">
-                                    <button onClick={handleDeleteSelected}>ลบอุปกรณ์</button>
+                            </>
+                        ) : (
+                            <>
+                                <div className="no-equipment text-center mt-3">ไม่พบข้อมูล</div>
+                                <div className="btn-group mb-4">
+                                    <div className="adddata">
+                                        <button onClick={() => navigate("/addequippatient", { state: { id } })}>
+                                            <i className="bi bi-plus-circle"></i> เพิ่มอุปกรณ์
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div className="no-equipment">ไม่พบข้อมูล</div>
-                            <div className="btn-group mb-4">
-                                <div className="adddata">
-                                    <button onClick={() => navigate("/addequippatient", { state: { id } })}>
-                                        เพิ่มอุปกรณ์
-                                    </button>
-                                </div>
-                            </div>
-                        </>
-                    )}
+                            </>
+                        )}
+                    </fieldset>
                 </div>
 
             </div>

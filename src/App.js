@@ -35,8 +35,8 @@ import Assessreadinessuser from "./components/Assessreadinessuser";
 import MultiStepForm from "./components/MultiStepForm";
 import DetailAssessinhomesss from "./components/DetailAssessinhomeForm";
 import DetailAgenda from "./components/DetailAgendaForm";
-import Abnormalcase from "./components/Abnormalcase"
-// import Immobility from "./components/Immobility";
+import Abnormalcase from "./components/Abnormalcase";
+import ImmobilityG3 from "./components/ImmobilityG3";
 
 import Emailverification from "./components/email-verification";
 import VerifyOtp from "./components/VerifyOtp";
@@ -251,6 +251,15 @@ function App() {
             element={
               <PrivateRoute
                 element={<Abnormalcase />}
+                isLoggedIn={isLoggedIn}
+              />
+            }
+          />
+          <Route
+            path="/immobilityg3"
+            element={
+              <PrivateRoute
+                element={<ImmobilityG3 />}
                 isLoggedIn={isLoggedIn}
               />
             }

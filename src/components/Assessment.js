@@ -1,4 +1,4 @@
-import React, { useCallback,useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import "../css/assessment.css";
@@ -26,12 +26,12 @@ export default function Assessment() {
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const [latestAssessments, setLatestAssessments] = useState({});
-    const [unreadCountsByType, setUnreadCountsByType] = useState({
-      assessment: 0,
-      abnormal: 0,
-      normal: 0,
-    });
-  
+  const [unreadCountsByType, setUnreadCountsByType] = useState({
+    assessment: 0,
+    abnormal: 0,
+    normal: 0,
+  });
+
 
   const fetchLatestAssessments = async () => {
     try {
@@ -183,6 +183,7 @@ export default function Assessment() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -276,7 +277,7 @@ export default function Assessment() {
 
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token, userId)
-          .then((alerts, userId) => {
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -355,20 +356,20 @@ export default function Assessment() {
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
       : filterType === "assessment"
-      ? alerts.filter(
+        ? alerts.filter(
           (alert) =>
             alert.alertType === "assessment" &&
             alert.alertMessage !== "เคสฉุกเฉิน"
         )
-      : filterType === "abnormal"
-      ? alerts.filter(
-          (alert) =>
-            alert.alertType === "abnormal" ||
-            alert.alertMessage === "เคสฉุกเฉิน"
-        )
-      : filterType === "normal"
-      ? alerts.filter((alert) => alert.alertType === "normal")
-      : alerts;
+        : filterType === "abnormal"
+          ? alerts.filter(
+            (alert) =>
+              alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน"
+          )
+          : filterType === "normal"
+            ? alerts.filter((alert) => alert.alertType === "normal")
+            : alerts;
 
   const getFilterLabel = (type) => {
     switch (type) {
@@ -451,11 +452,9 @@ export default function Assessment() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
 
@@ -642,8 +641,7 @@ export default function Assessment() {
                   .filter((user) => user.deletedAt === null)
                   .map((i, index) => {
                     console.log(
-                      `User ID: ${i._id}, Matched Status: ${
-                        latestAssessments[i._id]
+                      `User ID: ${i._id}, Matched Status: ${latestAssessments[i._id]
                       }`
                     );
 
@@ -791,117 +789,113 @@ export default function Assessment() {
             </tbody>
           </table>
         </div>
-      {showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
-          </div>
-          <div className="notifications-filter">
-            <div
-              className={`notification-box ${
-                filterType === "all" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("all")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-bell"></i>
-                ทั้งหมด
-              </div>
-              <div className="notification-right">
-                {unreadCount > 0 && (
-                  <span className="notification-count-noti">{unreadCount}</span>
-                )}
-                <i className="bi bi-chevron-right"></i>
-              </div>
+        {showNotifications && (
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
             </div>
-            <div
-              className={`notification-box ${
-                filterType === "abnormal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("abnormal")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-exclamation-triangle"></i>
-                ผิดปกติ
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${filterType === "all" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
+                </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">{unreadCount}</span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.abnormal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.abnormal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
+              <div
+                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-            </div>
-            <div
-              className={`notification-box ${
-                filterType === "normal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("normal")}
-            >
-              <div className="notification-item">
-                {" "}
-                <i className="bi bi-journal-text"></i>
-                บันทึกอาการ
+              <div
+                className={`notification-box ${filterType === "normal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.normal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.normal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
-              </div>
-            </div>
 
-            <div
-              className={`notification-box ${
-                filterType === "assessment" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("assessment")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-clipboard-check"></i>
-                ประเมินอาการ
+              <div
+                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.assessment > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.assessment}
-                  </span>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
                 )}
-                <i class="bi bi-chevron-right"></i>
               </div>
-            </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          <div className="selected-filter">
-            <p>
-              การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-            </p>
-            <p
-              className="mark-all-read-btn"
-              onClick={() => markAllByTypeAsViewed(filterType)}
-            >
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-          </div>
-          {filteredAlerts.length > 0 ? (
-            <div>
-              {renderAlerts(
-                filteredAlerts,
-                token,
-                userId,
-                navigate,
-                setAlerts,
-                setUnreadCount,
-                formatDate
-              )}
-            </div>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
       </div>
     </main>
   );

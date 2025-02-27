@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/form.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
 import logow from "../img/logow.png";
@@ -50,13 +50,76 @@ export default function AssessinhomesssForm({ }) {
     const notificationsRef = useRef(null);
     const [showToTopButton, setShowToTopButton] = useState(false);
     const bellRef = useRef(null);
-
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+    const [latestAssessments, setLatestAssessments] = useState({});
+    const [unreadCountsByType, setUnreadCountsByType] = useState({
+        assessment: 0,
+        abnormal: 0,
+        normal: 0,
+    });
+
+
+    const fetchLatestAssessments = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/latest-assessments");
+            const data = await response.json();
+            console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+
+            if (data.status === "ok") {
+                const assessmentsMap = data.data.reduce((acc, item) => {
+                    acc[item._id] = item.latestStatusName;
+                    return acc;
+                }, {});
+                console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+
+                setLatestAssessments(assessmentsMap);
+            }
+        } catch (error) {
+            console.error("Error fetching latest assessments:", error);
+        }
+    };
 
     useEffect(() => {
-        socket?.on('newAlert', (alert) => {
-            console.log('Received newAlert:', alert);
+        fetchLatestAssessments();
+    }, []);
+
+    const getUnreadCount = useCallback(
+        (type) => {
+            const filteredByType = alerts.filter(
+                (alert) =>
+                    (type === "assessment" &&
+                        alert.alertType === "assessment" &&
+                        alert.alertMessage !== "เคสฉุกเฉิน") ||
+                    (type === "abnormal" &&
+                        (alert.alertType === "abnormal" ||
+                            alert.alertMessage === "เคสฉุกเฉิน")) ||
+                    (type === "normal" && alert.alertType === "normal")
+            );
+            return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+                .length;
+        },
+        [alerts, userId]
+    );
+
+    useEffect(() => {
+        if (!userId) return;
+        const updatedCounts = {
+            assessment: getUnreadCount("assessment"),
+            abnormal: getUnreadCount("abnormal"),
+            normal: getUnreadCount("normal"),
+        };
+        setUnreadCountsByType(updatedCounts);
+    }, [alerts, userId]);
+
+    useEffect(() => {
+        socket?.on("newAlert", (alert) => {
+            console.log("Received newAlert:", alert);
+
+            if (alert.MPersonnel?.id === userId) {
+                console.log("Ignoring alert from self");
+                return;
+            }
 
             setAlerts((prevAlerts) => {
                 const isExisting = prevAlerts.some(
@@ -66,47 +129,49 @@ export default function AssessinhomesssForm({ }) {
                 let updatedAlerts;
 
                 if (isExisting) {
-
-                    if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-                        updatedAlerts = [...prevAlerts, alert];
-                    } else {
-                        updatedAlerts = prevAlerts.map((existingAlert) =>
-                            existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-                        );
-                    }
+                    updatedAlerts = prevAlerts.map((existingAlert) =>
+                        existingAlert.patientFormId === alert.patientFormId
+                            ? alert
+                            : existingAlert
+                    );
                 } else {
                     updatedAlerts = [...prevAlerts, alert];
                 }
 
-                return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                return [...updatedAlerts].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
             });
         });
 
-        socket?.on('deletedAlert', (data) => {
+        socket?.on("deletedAlert", (data) => {
             setAlerts((prevAlerts) => {
                 const filteredAlerts = prevAlerts.filter(
                     (alert) => alert.patientFormId !== data.patientFormId
                 );
-                return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+                return [...filteredAlerts].sort(
+                    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                );
             });
         });
 
         return () => {
-            socket?.off('newAlert');
-            socket?.off('deletedAlert');
+            socket?.off("newAlert");
+            socket?.off("deletedAlert");
         };
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         const currentUserId = sender._id;
 
         const unreadAlerts = alerts.filter(
-            (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+            (alert) =>
+                Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
         );
 
-        setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-    }, [alerts]);
-
+        setUnreadCount(unreadAlerts.length);
+    }, [alerts, sender._id]);
 
     useEffect(() => {
         socket?.on("TotalUnreadCounts", (data) => {
@@ -117,7 +182,7 @@ export default function AssessinhomesssForm({ }) {
         return () => {
             socket?.off("TotalUnreadCounts");
         };
-    }, [socket]);
+    }, []);
 
     const toggleNotifications = (e) => {
         e.stopPropagation();
@@ -131,7 +196,8 @@ export default function AssessinhomesssForm({ }) {
 
     const handleClickOutside = (e) => {
         if (
-            notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+            notificationsRef.current &&
+            !notificationsRef.current.contains(e.target) &&
             !bellRef.current.contains(e.target)
         ) {
             setShowNotifications(false);
@@ -139,12 +205,13 @@ export default function AssessinhomesssForm({ }) {
     };
 
     useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
+
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
             method: "POST",
@@ -164,8 +231,7 @@ export default function AssessinhomesssForm({ }) {
                     _id: data.data._id,
                 });
                 setData(data.data);
-
-                if (data.data == "token expired") {
+                if (data.data === "token expired") {
                     window.localStorage.clear();
                     window.location.href = "./";
                 }
@@ -175,23 +241,21 @@ export default function AssessinhomesssForm({ }) {
                 console.error("Error verifying token:", error);
             });
     };
-    useEffect(() => {
-        const token = window.localStorage.getItem("token");
-        setToken(token);
 
-        if (token) {
-            fetchUserData(token)
-                .then(user => {
-                    setUserId(user._id);
-                    setMPersonnel(user._id);
-                    fetchAndSetAlerts(token, user._id);
+    const fetchAndSetAlerts = (token, userId) => {
+        fetchAlerts(token, userId)
+            .then((alerts, userId) => {
+                setAlerts(alerts);
+                const unreadAlerts = alerts.filter(
+                    (alert) => !alert.viewedBy.includes(userId)
+                ).length;
+                setUnreadCount(unreadAlerts);
+            })
+            .catch((error) => {
+                console.error("Error fetching alerts:", error);
+            });
+    };
 
-                })
-                .catch((error) => {
-                    console.error("Error verifying token:", error);
-                });
-        }
-    }, []);
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -267,20 +331,6 @@ export default function AssessinhomesssForm({ }) {
         }
     }, [currentDate]);
 
-    const fetchAndSetAlerts = (token, userId) => {
-        fetchAlerts(token)
-            .then((alerts) => {
-                setAlerts(alerts);
-                const unreadAlerts = alerts.filter(
-                    (alert) => !alert.viewedBy.includes(userId)
-                ).length;
-                setUnreadCount(unreadAlerts);
-            })
-            .catch((error) => {
-                console.error("Error fetching alerts:", error);
-            });
-    };
-
     useEffect(() => {
         const token = window.localStorage.getItem("token");
         setToken(token);
@@ -289,8 +339,8 @@ export default function AssessinhomesssForm({ }) {
             fetchUserData(token)
                 .then(user => {
                     setUserId(user._id);
+                    setMPersonnel(user._id);
                     fetchAndSetAlerts(token, user._id);
-
 
                 })
                 .catch((error) => {
@@ -299,27 +349,45 @@ export default function AssessinhomesssForm({ }) {
         }
     }, []);
 
-
-    const markAllAlertsAsViewed = () => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed", {
+    const markAllByTypeAsViewed = (type) => {
+        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ userId: userId }),
+            body: JSON.stringify({ userId: userId, type: type }),
         })
             .then((res) => res.json())
             .then((data) => {
-                const updatedAlerts = alerts.map((alert) => ({
-                    ...alert,
-                    viewedBy: [...alert.viewedBy, userId],
-                }));
-                setAlerts(updatedAlerts);
-                setUnreadCount(0);
+                if (data.message === "All selected alerts marked as viewed") {
+                    const updatedAlerts = alerts.map((alert) => {
+                        if (
+                            type === "all" ||
+                            ((alert.alertType === type ||
+                                (type === "abnormal" &&
+                                    (alert.alertType === "abnormal" ||
+                                        alert.alertMessage === "เคสฉุกเฉิน")) ||
+                                (type === "assessment" &&
+                                    alert.alertType === "assessment" &&
+                                    alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                                !alert.viewedBy.includes(userId))
+                        ) {
+                            return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+                        }
+                        return alert;
+                    });
+
+                    setAlerts(updatedAlerts);
+                    // setUnreadCount(0);
+                    const unreadAlerts = updatedAlerts.filter(
+                        (alert) => !alert.viewedBy.includes(userId)
+                    );
+                    setUnreadCount(unreadAlerts.length);
+                }
             })
             .catch((error) => {
-                console.error("Error marking all alerts as viewed:", error);
+                console.error("Error marking alerts as viewed:", error);
             });
     };
 
@@ -327,9 +395,41 @@ export default function AssessinhomesssForm({ }) {
         setFilterType(type);
     };
 
-    const filteredAlerts = filterType === "unread"
-        ? alerts.filter(alert => !alert.viewedBy.includes(userId))
-        : alerts;
+    const filteredAlerts =
+        filterType === "unread"
+            ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+            : filterType === "assessment"
+                ? alerts.filter(
+                    (alert) =>
+                        alert.alertType === "assessment" &&
+                        alert.alertMessage !== "เคสฉุกเฉิน"
+                )
+                : filterType === "abnormal"
+                    ? alerts.filter(
+                        (alert) =>
+                            alert.alertType === "abnormal" ||
+                            alert.alertMessage === "เคสฉุกเฉิน"
+                    )
+                    : filterType === "normal"
+                        ? alerts.filter((alert) => alert.alertType === "normal")
+                        : alerts;
+
+    const getFilterLabel = (type) => {
+        switch (type) {
+            case "all":
+                return "ทั้งหมด";
+            case "unread":
+                return "ยังไม่อ่าน";
+            case "normal":
+                return "บันทึกอาการ";
+            case "abnormal":
+                return "ผิดปกติ";
+            case "assessment":
+                return "ประเมินอาการ";
+            default:
+                return "ไม่ทราบ";
+        }
+    };
 
     const logOut = () => {
         window.localStorage.clear();
@@ -516,7 +616,7 @@ export default function AssessinhomesssForm({ }) {
                         },
                         Housing: HousingData,
                         OtherPeople: {
-                            existingCaregivers: OtherpeopleData.existingCaregivers,
+                            existingCaregivers: OtherpeopleData.existingCaregivers || [],
                             newCaregivers: OtherpeopleData.newCaregivers || [],
                         },
                         Medication: medicationData,
@@ -660,30 +760,112 @@ export default function AssessinhomesssForm({ }) {
             </div>
 
             {showNotifications && (
-                <div className="notifications-dropdown" ref={notificationsRef}>
-                    <div className="notifications-head">
-                        <h2 className="notifications-title">การแจ้งเตือน</h2>
-                        <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                            ทำเครื่องหมายว่าอ่านทั้งหมด
-                        </p>
-                        <div className="notifications-filter">
-                            <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                                ดูทั้งหมด
-                            </button>
-                            <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                                ยังไม่อ่าน
-                            </button>
-                        </div>
-                    </div>
-                    {filteredAlerts.length > 0 ? (
-                        <>
-                            {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                        </>
-                    ) : (
-                        <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                    )}
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
+            </div>
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${filterType === "all" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
                 </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">{unreadCount}</span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "normal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+
+              <div
+                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
             )}
+          </div>
+        )}
             <div className="sidebarform">
                 <div className="sideassessment">
                     <div>

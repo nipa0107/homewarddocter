@@ -209,7 +209,9 @@ tr.assessmentnull {
     font-weight: bold;
 
 }
-
+.form-check-input{
+    border:1px solid #666;
+}
 
 .btn-group {
     gap: 10px;
@@ -283,7 +285,6 @@ tr.assessmentnull {
     color: black;
     border: none;
     cursor: pointer;
-
 }
 
 .adddata {

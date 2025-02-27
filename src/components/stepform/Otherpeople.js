@@ -473,6 +473,8 @@ export const Otherpeople = ({ onDataChange }) => {
                           <option value="คู่สมรส">คู่สมรส (สามี/ภรรยา)</option>
                           <option value="ญาติ">ญาติ</option>
                           <option value="ปู่/ย่า/ตา/ยาย">ปู่/ย่า/ตา/ยาย</option>
+                          <option value="ลุง/ป้า">ลุง/ป้า</option>
+                          <option value="น้า/อา">น้า/อา</option>
                           <option value="พี่ชาย/พี่สาว">พี่ชาย/พี่สาว</option>
                           <option value="น้องชาย/น้องสาว">น้องชาย/น้องสาว</option>
                           <option value="ผู้ปกครอง">ผู้ปกครอง</option>

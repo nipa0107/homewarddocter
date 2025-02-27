@@ -381,3 +381,37 @@ hr{
     align-items: flex-end;
 
 }
+
+/* ✅ ปรับ Sidebar ให้แสดงเฉพาะไอคอนบน iPad */
+@media screen and (max-width: 1024px) {
+    .sidebar {
+        width: 82px;
+        overflow: hidden; /* ป้องกัน UI เพี้ยน */
+        transition: width 0.3s ease;
+    }
+    .sidebar .links_name, .sidebar .logo_name {
+        display: none; /* ซ่อนชื่อเมนู */
+    }
+    .sidebar ul li a {
+        justify-content: center;
+    }
+    .sidebar #btn {
+        left: 50%;
+    }
+    .home_content {
+        width: calc(100% - 82px);
+        left: 82px;
+    }
+    
+    /* ✅ เมนูเปิดแล้วให้แสดงตัวหนังสือ */
+    .sidebar.active {
+        width: 320px;
+    }
+    .sidebar.active .links_name, 
+    .sidebar.active .logo_name {
+        display: inline-block !important; /* แสดงตัวหนังสือเมื่อ Sidebar เปิด */
+    }
+    .sidebar.active ul li a {
+        justify-content: flex-start;
+    }
+}
