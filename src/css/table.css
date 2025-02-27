@@ -1,0 +1,98 @@
+.table-container {
+  /* width: 100%; */
+  /* max-width: 100%; */
+  overflow-x: auto;
+  /* เพิ่มแถบเลื่อนแนวนอนเมื่อหน้าจอเล็ก */
+  -webkit-overflow-scrolling: touch;
+  /* ทำให้เลื่อนลื่นขึ้นบนมือถือ */
+}
+
+.table-all {
+  width: 100%;
+  min-width: 600px;
+  border-collapse: collapse;
+  margin: 0 auto;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+  padding: 15px;
+  border-collapse: collapse;
+  border-spacing: 1;
+  border-radius: 0.5rem;
+  line-height: 2rem;
+}
+
+.table-all th {
+  font-size: 1rem;
+  background-color: #87CEFA;
+  color: #000;
+  text-transform: uppercase;
+  border-bottom: 2px solid #87CEFA;
+}
+
+.table-all th:first-child {
+  border-top-left-radius: 0.5rem;
+}
+
+.table-all th:last-child {
+  border-top-right-radius: 0.5rem;
+}
+
+.table-all th,
+.table-all td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  word-wrap: break-word;
+  /* white-space: normal; */
+  /* white-space: nowrap;  */
+}
+
+.table-all td {
+  white-space: normal;
+}
+
+.table-all th {
+  white-space: nowrap;
+}
+
+.table-all th i.bi-caret-up-fill,
+.table-all th i.bi-caret-down-fill {
+  color: #757575;
+  align-items: center;
+}
+
+
+@media (max-width: 1120px) {}
+
+@media (max-width: 992px) {
+
+  /* .table-container {
+    width: 95%;
+    margin: 0 auto;
+    justify-content: center;
+} */
+  .table-all {
+    width: 100%;
+  }
+
+  .table-all th,
+  .table-all td {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 767px) {
+  /* .table-container {
+        width: 90%;
+        margin: 0 auto;
+    } */
+
+  .table-all th,
+  .table-all td {
+    padding: 6px;
+  }
+
+  .table-all .buttongroup-in-table button {
+    padding: 4px 6px;
+  }
+}

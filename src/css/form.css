@@ -633,24 +633,6 @@ p .label {
     display: flex;
 }
 
-.textassesment {
-    text-align: center;
-    font-size: 1rem;
-    margin: 10px 0;
-}
-
-.textassesment label {
-    margin-left: 1%;
-    margin-right: 0.5rem;
-    color: #333; 
-    font-weight: normal; 
-}
-
-.textassesment span {
-    color: #000; /* สีเข้มสำหรับข้อมูล */
-    font-weight: bold; /* ใช้ตัวหนาสำหรับค่า */
-  }
-
 /* .inline-container .text {
     flex: 1;
     margin: 0;

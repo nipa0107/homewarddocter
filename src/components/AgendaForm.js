@@ -15,7 +15,7 @@ import { CaregiverAgenda } from './stepform/CaregiverAgenda';
 import { CaregiverAssessment } from './stepform/CaregiverAssessment';
 import { Zarit } from './stepform/Zaritburdeninterview';
 import io from 'socket.io-client';
-import MultiStep from "react-multistep";
+// import MultiStep from "react-multistep";
 const socket = io("http://localhost:5000");
 
 export default function AgendaForm({ }) {

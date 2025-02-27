@@ -28,9 +28,10 @@
   }
   .notifications-dropdown {
     position: absolute;
-    top: 2.5rem;
+    top: 3rem;
     right: 16rem;
-    width:65vh;
+    width: 480px;
+    max-width: 90vw;
     background-color: #fff;
     border: 1px solid #ddd;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -38,9 +39,12 @@
     padding: 10px;
     overflow-y: auto;
     max-height: 90vh;
-    border-radius: 0.5em;
+    border-radius: 0.8em;
+    transition: all 0.3s ease-in-out;
+
   
   }
+
   .alert-item p {
     margin: 5px 0;
     font-size: 0.9rem;
@@ -180,9 +184,10 @@
     padding: 8px;
     border-radius: 6px;
     font-size: 14px;
-    display: flex;  /* ใช้ flexbox เพื่อให้ข้อความและปุ่มอยู่ในบรรทัดเดียวกัน */
-    justify-content: space-between; /* ให้ข้อความอยู่ซ้ายและปุ่มอยู่ขวา */
-    align-items: center;  /* จัดให้อยู่แนวตั้งกลาง */
+    display: flex;  
+    justify-content: space-between; 
+    align-items: center;  
+    flex-wrap: wrap; 
   }
   
   .selected-filter p {
@@ -199,6 +204,7 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    white-space: nowrap;
     /* transition: background-color 0.3s; */
   }
   
@@ -327,4 +333,32 @@
   white-space: normal;         
   word-wrap: break-word;      
   max-width: 100%;            
+}
+
+@media screen and (max-width: 1120px) {
+
+}
+
+@media screen and (max-width: 992px) {
+
+}
+
+@media screen and (max-width: 768px) {
+  .notifications-dropdown {
+      width: 90%;
+      left: 50%; 
+      transform: translateX(-50%);
+      top: 4rem;
+      max-height: 70vh; 
+      right: auto;
+  }
+  .selected-filter {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+   .mark-all-read-btn {
+    align-self: flex-start; 
+}
 }

@@ -13,7 +13,9 @@ export const fetchAlerts = async (token,userId) => {
     }
 
     const alertData = await response.json();
-    return alertData.alerts;
+    const filteredAlerts = alertData.alerts.filter(alert => alert.user);
+
+    return filteredAlerts;
   } catch (error) {
     console.error("Error fetching alerts:", error);
     throw error;

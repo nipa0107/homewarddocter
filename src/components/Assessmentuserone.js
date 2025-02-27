@@ -925,8 +925,14 @@ export default function Assessmentuserone() {
   };
 
   const handleBreadcrumbClick = () => {
-    navigate("/assessmentuser", { state: { id: patientFormsone.user } });
+    const waitForUser = setInterval(() => {
+      if (patientFormsone?.user) {
+        clearInterval(waitForUser);
+        navigate("/assessmentuser", { state: { id: patientFormsone.user } });
+      }
+    }, 500);
   };
+  
 
   const handleButtonClick = (value) => {
     setStatusName(value);
@@ -1209,42 +1215,48 @@ export default function Assessmentuserone() {
           </ul>
         </div>
 
-        <div className="toolbar"></div>
         <div className="content">
-          <div>
-            <p className="headerassesment">
-              {name} {surname}
+        <div className="patient-card-ass patient-card-style">
+            <p className="patient-name">
+              <label>ข้อมูลผู้ป่วย</label>
             </p>
-            {birthday ? (
-              <p className="textassesment">
-                <label>อายุ:</label>{" "}
-                <span>
-                  {userAge} ปี {userAgeInMonths} เดือน
-                </span>{" "}
-                <label>เพศ:</label> <span>{gender}</span>
-              </p>
-            ) : (
-              <p className="textassesment">
-                <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
-                <label>เพศ:</label> <span>{gender}</span>
-              </p>
-            )}
-            <p className="textassesment">
-              <label>HN:</label>{" "}
-              <span>
-                {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-              </span>
-              <label>AN:</label>{" "}
-              <span>
-                {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-              </span>
-              <label>ผู้ป่วยโรค:</label>{" "}
-              <span>
-                {medicalData && medicalData.Diagnosis
-                  ? medicalData.Diagnosis
-                  : "ไม่มีข้อมูล"}
-              </span>
-            </p>
+
+            <div className="info-container">
+              <div className="info-row">
+                <div className="info-item">
+                  <label>ชื่อ-สกุล:</label>{" "}
+                  <span>
+                    {name} {surname}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>อายุ:</label>{" "}
+                  <span>
+                    {birthday
+                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                      : "0 ปี 0 เดือน"}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>เพศ:</label> <span>{gender}</span>
+                </div>
+              </div>
+
+              <div className="info-row">
+                <div className="info-item">
+                  <label>HN:</label>{" "}
+                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item">
+                  <label>AN:</label>{" "}
+                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item full-width">
+                  <label>ผู้ป่วยโรค:</label>{" "}
+                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="contentin-outmost">
             <div className="divdate">
@@ -1484,11 +1496,11 @@ export default function Assessmentuserone() {
                 </div>          
                 </div>          
               )}
-              {timeRange === "1month" &&
+             {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)}{" "}{" "}-{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1595,7 +1607,7 @@ export default function Assessmentuserone() {
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1722,7 +1734,7 @@ export default function Assessmentuserone() {
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1834,7 +1846,7 @@ export default function Assessmentuserone() {
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1969,7 +1981,7 @@ export default function Assessmentuserone() {
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -2092,7 +2104,7 @@ export default function Assessmentuserone() {
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -2207,7 +2219,7 @@ export default function Assessmentuserone() {
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}

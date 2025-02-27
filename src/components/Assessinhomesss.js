@@ -533,21 +533,25 @@ export default function Assessinhomesss({ }) {
         <div class="container-fluid">
           
         </div>
+        <div className="content-toolbar">
         <div className="toolbar">
           <p className="countadmin1">
             จำนวนผู้ป่วยทั้งหมด :{" "}
             {datauser.filter((user) => user.deletedAt === null).length} คน
           </p>
         </div>
+        </div>
+
         <div className="content">
-          <table className="table">
+        <div className="table-container">
+        <table className=" table-all table-user">
             <thead>
               <tr>
                 <th>HN</th>
                 <th>AN</th>
                 <th>ชื่อ-สกุล</th>
                 <th>ผู้ป่วยโรค</th>
-                <th>สถานะ</th>
+                <th>รายละเอียด</th>
               </tr>
             </thead>
             <tbody>
@@ -615,6 +619,7 @@ export default function Assessinhomesss({ }) {
                     )}
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </main>

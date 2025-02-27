@@ -25,7 +25,7 @@ export default function Assessment() {
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
-  const [latestAssessments, setLatestAssessments] = useState({});
+  // const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
       assessment: 0,
       abnormal: 0,
@@ -33,30 +33,30 @@ export default function Assessment() {
     });
     const hasFetchedUserData = useRef(false);
 
+//สถานะล่าสุด
+  // const fetchLatestAssessments = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:5000/latest-assessments");
+  //     const data = await response.json();
+  //     console.log("Raw latestAssessments data:", data); 
 
-  const fetchLatestAssessments = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/latest-assessments");
-      const data = await response.json();
-      console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+  //     if (data.status === "ok") {
+  //       const assessmentsMap = data.data.reduce((acc, item) => {
+  //         acc[item._id] = item.latestStatusName;
+  //         return acc;
+  //       }, {});
+  //       console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
 
-      if (data.status === "ok") {
-        const assessmentsMap = data.data.reduce((acc, item) => {
-          acc[item._id] = item.latestStatusName;
-          return acc;
-        }, {});
-        console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+  //       setLatestAssessments(assessmentsMap);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching latest assessments:", error);
+  //   }
+  // };
 
-        setLatestAssessments(assessmentsMap);
-      }
-    } catch (error) {
-      console.error("Error fetching latest assessments:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchLatestAssessments();
-  }, []);
+  // useEffect(() => {
+  //   fetchLatestAssessments();
+  // }, []);
 
   const getUnreadCount = useCallback(
     (type) => {
@@ -234,52 +234,84 @@ export default function Assessment() {
       });
   };
 
+  // useEffect(() => {
+  //   const fetchMedicalData = async () => {
+  //     const promises = datauser.map(async (user) => {
+  //       if (user.deletedAt === null) {
+  //         try {
+  //           const response = await fetch(
+  //             `http://localhost:5000/medicalInformation/${user._id}`
+  //           );
+  //           const medicalInfo = await response.json();
+  //           return {
+  //             userId: user._id,
+  //             hn: medicalInfo.data?.HN,
+  //             an: medicalInfo.data?.AN,
+  //             diagnosis: medicalInfo.data?.Diagnosis,
+  //           };
+  //         } catch (error) {
+  //           console.error(
+  //             `Error fetching medical information for user ${user._id}:`,
+  //             error
+  //           );
+  //           return {
+  //             userId: user._id,
+  //             hn: "Error",
+  //             an: "Error",
+  //             diagnosis: "Error fetching data",
+  //           };
+  //         }
+  //       }
+  //       return null;
+  //     });
+
+  //     const results = await Promise.all(promises);
+  //     const medicalDataMap = results.reduce((acc, result) => {
+  //       if (result) {
+  //         acc[result.userId] = result;
+  //       }
+  //       return acc;
+  //     }, {});
+  //     setMedicalData(medicalDataMap);
+  //   };
+
+  //   if (datauser.length > 0) {
+  //     fetchMedicalData();
+  //   }
+  // }, [datauser]);
   useEffect(() => {
     const fetchMedicalData = async () => {
-      const promises = datauser.map(async (user) => {
-        if (user.deletedAt === null) {
-          try {
-            const response = await fetch(
-              `http://localhost:5000/medicalInformation/${user._id}`
-            );
-            const medicalInfo = await response.json();
-            return {
-              userId: user._id,
-              hn: medicalInfo.data?.HN,
-              an: medicalInfo.data?.AN,
-              diagnosis: medicalInfo.data?.Diagnosis,
-            };
-          } catch (error) {
-            console.error(
-              `Error fetching medical information for user ${user._id}:`,
-              error
-            );
-            return {
-              userId: user._id,
-              hn: "Error",
-              an: "Error",
-              diagnosis: "Error fetching data",
-            };
-          }
+      if (datauser.length === 0) return; 
+  
+      const userIds = datauser
+        .filter((user) => user.deletedAt === null)
+        .map((user) => user._id); 
+  
+      if (userIds.length === 0) return;
+  
+      try {
+        const response = await fetch("http://localhost:5000/medicalInformation/batch", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ userIds }),
+        });
+  
+        const result = await response.json();
+        if (result.status === "ok") {
+          setMedicalData(result.data); 
+        } else {
+          console.error("Error fetching medical data:", result.message);
         }
-        return null;
-      });
-
-      const results = await Promise.all(promises);
-      const medicalDataMap = results.reduce((acc, result) => {
-        if (result) {
-          acc[result.userId] = result;
-        }
-        return acc;
-      }, {});
-      setMedicalData(medicalDataMap);
+      } catch (error) {
+        console.error("Error fetching medical data:", error);
+      }
     };
-
-    if (datauser.length > 0) {
-      fetchMedicalData();
-    }
+  
+    fetchMedicalData();
   }, [datauser]);
-
+  
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token, userId)
           .then((alerts, userId) => {
@@ -625,15 +657,18 @@ export default function Assessment() {
             onChange={(e) => setSearchKeyword(e.target.value)}
           />
         </div>
-
+        <div className="content-toolbar">
         <div className="toolbar">
           <p className="countadmin1">
             จำนวนผู้ป่วยทั้งหมด :{" "}
             {datauser.filter((user) => user.deletedAt === null).length} คน
           </p>
         </div>
+        </div>
+
         <div className="content">
-          <table className="ass-table">
+        <div className="table-container">
+          <table className="table-all table-user">
             <thead>
               <tr>
                 <th>HN </th>
@@ -649,11 +684,11 @@ export default function Assessment() {
                 datauser
                   .filter((user) => user.deletedAt === null)
                   .map((i, index) => {
-                    console.log(
-                      `User ID: ${i._id}, Matched Status: ${
-                        latestAssessments[i._id]
-                      }`
-                    );
+                    // console.log(
+                    //   `User ID: ${i._id}, Matched Status: ${
+                    //     latestAssessments[i._id]
+                    //   }`
+                    // );
 
                     const userBirthday = i.birthday
                       ? new Date(i.birthday)
@@ -798,6 +833,7 @@ export default function Assessment() {
               )}
             </tbody>
           </table>
+        </div>
         </div>
       {showNotifications && (
         <div className="notifications-dropdown" ref={notificationsRef}>

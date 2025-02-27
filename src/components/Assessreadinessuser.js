@@ -584,33 +584,49 @@ export default function Assessreadinessuser({ }) {
                     </ul>
                 </div>
                 <div className="content">
-                    <div className="">
-                        <p className="headerassesment">
-                            {name} {surname}
-                        </p>
-                        {birthday ? (
-                            <p className="textassesment">
-                                <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
-                            </p>
-                        ) : (
-                            <p className="textassesment"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
-                        )}
-                        <p className="textassesment">
+                <div className="patient-card patient-card-style">
+            <p className="patient-name">
+              <label>ข้อมูลผู้ป่วย</label>
+            </p>
 
-                            <label>HN:</label>
-                            {medicalData && medicalData.HN
-                                ? medicalData.HN
-                                : "ไม่มีข้อมูล"}
-                            <label>AN:</label>
-                            {medicalData && medicalData.AN
-                                ? medicalData.AN
-                                : "ไม่มีข้อมูล"}
-                            <label>ผู้ป่วยโรค:</label>
-                            {medicalData && medicalData.Diagnosis
-                                ? medicalData.Diagnosis
-                                : "ไม่มีข้อมูล"}
-                        </p>
-                    </div>
+            <div className="info-container">
+              <div className="info-row">
+                <div className="info-item">
+                  <label>ชื่อ-สกุล:</label>{" "}
+                  <span>
+                    {name} {surname}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>อายุ:</label>{" "}
+                  <span>
+                    {birthday
+                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                      : "0 ปี 0 เดือน"}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>เพศ:</label> <span>{gender}</span>
+                </div>
+              </div>
+
+              <div className="info-row">
+                <div className="info-item">
+                  <label>HN:</label>{" "}
+                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item">
+                  <label>AN:</label>{" "}
+                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item full-width">
+                  <label>ผู้ป่วยโรค:</label>{" "}
+                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="content-toolbar">
                     <div className="toolbar">
                         {readinessForms && readinessForms.length > 0 && (
 
@@ -623,7 +639,8 @@ export default function Assessreadinessuser({ }) {
                             </button>
                         )}
                     </div>
-                    <br></br>
+                    </div>
+                    {/* <br></br> */}
                     <table className="table mt-5">
                         <thead>
                             <tr>

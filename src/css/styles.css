@@ -21,6 +21,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	padding: 20px;
 }
 
 .formcontainer {
@@ -28,33 +29,34 @@
 	height: 500px;
 	display: flex;
 	border-radius: 10px;
+	overflow: hidden;
+	background-color: white;
 }
 
-.left {
+.left, .right {
 	flex: 1;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	background-color: #87CEFA;
-	border-top-left-radius: 10px;
-	border-bottom-left-radius: 10px;
-}
+  }
 
-.left h1 {
-	color: white;
+.left {
+  background-color: #87CEFA;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 .right {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	background-color: white;
-	border-top-right-radius: 10px;
-	border-bottom-right-radius: 10px;
+  background-color: white;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
+.left h1, h5 {
+	color: white;
+	margin-bottom: 0;
+}
+
 
 .btnlogin {
 	background-color: #87CEFA;
@@ -92,7 +94,8 @@
 
 #errormessage {
 	color: red;
-	font-size: 1.5vh;
+	font-size: 1rem;
+	text-align: center;
 }
 
 .box {
@@ -103,13 +106,13 @@
 	padding: 0;
 	margin: 0;
   }
-  th,
+  /* th,
   td {
 	width: 20%;
-  }
+  } */
   
   .table {
-	width: 85%; 
+	width: 90%; 
 	margin :0 auto;
 	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1); 
 	/* line-height: 50px;  */
@@ -310,4 +313,145 @@
 .to-top:hover {
     text-decoration: none;
     color: #FF87CA;
+}
+
+
+
+/* รายละเอียดผู้ป่วย */
+
+.headerassesment {
+	text-align: center;
+	font-size: 1.2rem;
+	font-weight: bold;
+	margin-bottom: 0;
+  }
+  
+.textassesment {
+    text-align: center;
+    font-size: 1rem;
+    margin: 10px 0;
+}
+
+.textassesment label {
+    margin-left: 1%;
+    margin-right: 0.5rem;
+    color: #333; 
+    font-weight: normal; 
+}
+
+.textassesment span {
+    color: #000; 
+    font-weight: bold; 
+  }
+
+  
+/* รายละเอียดผู้ป่วย */
+.patient-card, .table-container {
+    width: 100%;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+.patient-card-style {
+	/* width: 90%; */
+	/* max-width: 500px; */
+	padding: 15px;
+	margin: 16px auto;
+	background: #ffffff;
+	border-radius:  0.5rem;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e5e5;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.patient-name {
+	font-weight: bold;
+	color: #2c3e50;
+	margin-bottom: 0px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	/* font-size: 1.2rem; */
+	border-bottom: 1px solid #ddd;
+	padding-bottom: 8px;
+}
+
+.info-row {
+	display: flex;
+	justify-content: center;
+	gap: 12px;
+	flex-wrap: wrap;
+	padding: 6px 0;
+	/* border-bottom: 1px solid #eee; */
+}
+
+.info-row:last-child {
+	border-bottom: none;
+}
+
+.info-row p {
+	margin: 0;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.patient-name label{
+	font-weight: bold;
+	color: #1565c0;
+}
+.info-row label {
+	font-weight: 500;
+	color: #555;
+}
+
+.patient-name span,
+.info-row span {
+	color: #2c3e50;
+	font-weight: bold;
+	background-color: #f0f7ff;
+	padding: 2px 8px;
+	border-radius: 4px;
+	display: inline;
+}
+
+/* Responsive */
+@media screen and (max-width: 992px) {
+    .patient-card, .table-container {
+        max-width: 95%;
+    }
+
+	.patient-name span,
+	.info-row span {
+		font-size: 0.9rem;
+	}
+}
+
+@media screen and (max-width: 767px) {
+	.patient-card, .table-container {
+        max-width: 90%;
+    }
+	.info-row {
+		flex-direction: column;
+		align-items: center;
+		border-bottom: none;
+	}
+
+	.patient-name span,
+	.info-row span {
+		font-size: 0.9rem;
+	}
+	.formcontainer {
+		flex-direction: column;
+		height: auto;
+	  }
+	  .left, .right {
+		border-radius: 0;
+		padding: 20px;
+	  }
+	  .errormessage {
+		font-size:0.8rem;
+	  }
 }

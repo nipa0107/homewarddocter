@@ -14,11 +14,8 @@
   margin-bottom: 20px;
 }
 
-.headerassesment {
-  text-align: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 0;
+.patient-card-ass{
+  width: 80%;
 }
 
 /* ----------ส่วนสัญญาณชีพ---------- */
@@ -143,10 +140,10 @@
 
 .textheadSymptom-center {
   text-align: center;
-  font-size: 1.1rem;
+  /* font-size: 1rem; */
   font-weight: 700;
   /* color: #444; */
-  color: #455ede;
+  color: #1565c0;
   padding: 0.5rem;
   margin-bottom: 0;
 }
@@ -831,9 +828,9 @@
 
 /* responsive */
 @media (max-width: 1120px) {
-
   /* V/S */
-  .contentin-outmost {
+  .contentin-outmost ,
+  .patient-card-ass{
     width: 90%;
   }
 
@@ -843,7 +840,7 @@
   }
 
   .textheadSymptom-center {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .patient-data {
@@ -908,7 +905,7 @@
 
   /* V/S */
   .textheadSymptom-center {
-    font-size: 1rem;
+    font-size: 0.9rem;
     /* padding-top: 1rem; */
     margin-bottom: 0;
   }
@@ -1046,7 +1043,7 @@
   }
 
   .textheadSymptom-center {
-    font-size: 1rem;
+    font-size: 0.9rem;
   }
 
   .left-column,
@@ -1185,19 +1182,11 @@
 }
 
 
-
-
-
-
 .textheadSymptom-center-ass {
   margin: 0;
   font-size: 1.1rem;
   font-weight: bold;
 }
-
-
-
-
 
 @keyframes slideUp {
   0% {
@@ -1454,65 +1443,4 @@
   background-color: #ff1f1f;
 }
 
-
-
-/* สถานะหน้า ass */
-.tableass th:nth-child(1),
-.tableass td:nth-child(1) {
-  width: 25%;
-}
-
-.tableass td:nth-child(2) .tableass th:nth-child(2),
-.tableass th:nth-child(3),
-.tableass td:nth-child(3) {
-  width: 20%;
-}
-
-.tableass th:nth-child(4) .tableass td:nth-child(4) .tableass th:nth-child(5),
-.tableass td:nth-child(5) {
-  width: 20%;
-}
-/* สำหรับสถานะ รอประเมิน */
-.waiting-for-assessment {
-  display: inline-flex;
-  align-items: center;
-  text-align: center;
-  justify-content: center;
-  padding: 0 1rem;
-  width: 80%;
-  font-size: 0.9rem;
-  border-radius: 15px;
-  background-color: #fff8e1;
-  border: 1px solid #ffca28;
-  color: #ff8f00;
-  font-weight: bold;
-  min-width: 50px;
-}
-
-.waiting-for-assessment .icon {
-  margin-right: .5rem;
-  font-size: .5rem;
-  color: #ff8f00;
-}
-
-
-.status-normal {
-  color: #1fc657;
-}
-
-.status-abnormal {
-  color: #fb8c00;
-}
-
-.status-emergency {
-  color: #FF6A6A;
-}
-
-.status-finished {
-  color: #757575;
-}
-
-.status-no-record {
-  color: #B2B2B2;
-}
 

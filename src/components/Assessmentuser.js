@@ -1,4 +1,4 @@
-import React, {  useCallback,useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
@@ -37,6 +37,7 @@ export default function Assessmentuser() {
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const [vitalStatuses, setVitalStatuses] = useState({});
   const hasFetchedUserData = useRef(false);
+  const [sortOrder, setSortOrder] = useState("desc"); // เริ่มต้นใหม่สุดมาก่อน
 
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
@@ -44,8 +45,7 @@ export default function Assessmentuser() {
     normal: 0,
   });
 
-
- const getUnreadCount = useCallback(
+  const getUnreadCount = useCallback(
     (type) => {
       const filteredByType = alerts.filter(
         (alert) =>
@@ -129,7 +129,7 @@ export default function Assessmentuser() {
         Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
     setUnreadCount(unreadAlerts.length);
-  }, [alerts,sender._id]);
+  }, [alerts, sender._id]);
 
   useEffect(() => {
     socket?.on("TotalUnreadCounts", (data) => {
@@ -189,7 +189,7 @@ export default function Assessmentuser() {
           setTimeout(() => {
             window.location.replace("./");
           }, 0);
-          return null; 
+          return null;
         }
         setSender({
           name: data.data.name,
@@ -206,7 +206,7 @@ export default function Assessmentuser() {
   };
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token, userId)
-          .then((alerts, userId) => {
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -219,7 +219,7 @@ export default function Assessmentuser() {
   };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
 
     const token = window.localStorage.getItem("token");
@@ -236,7 +236,6 @@ export default function Assessmentuser() {
         });
     }
   }, []);
-
 
   const markAllByTypeAsViewed = (type) => {
     fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
@@ -580,6 +579,16 @@ export default function Assessmentuser() {
     });
   };
 
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === "desc" ? "asc" : "desc");
+  };
+
+  const sortedForms = [...patientForms].sort((a, b) => {
+    return sortOrder === "desc"
+      ? new Date(b.createdAt) - new Date(a.createdAt)
+      : new Date(a.createdAt) - new Date(b.createdAt);
+  });
+
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -713,58 +722,72 @@ export default function Assessmentuser() {
             </li>
           </ul>
         </div>
-        <div className="toolbar"></div>
         <div className="content">
-          <div>
-            <p className="headerassesment">
-              {name} {surname}
+          <div className="patient-card patient-card-style">
+            <p className="patient-name">
+              <label>ข้อมูลผู้ป่วย</label>
             </p>
-            {birthday ? (
-              <p className="textassesment">
-                <label>อายุ:</label>{" "}
-                <span>
-                  {userAge} ปี {userAgeInMonths} เดือน
-                </span>{" "}
-                <label>เพศ:</label> <span>{gender}</span>
-              </p>
-            ) : (
-              <p className="textassesment">
-                <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
-                <label>เพศ:</label> <span>{gender}</span>
-              </p>
-            )}
-            <p className="textassesment">
-              <label>HN:</label>{" "}
-              <span>
-                {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-              </span>
-              <label>AN:</label>{" "}
-              <span>
-                {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-              </span>
-              <label>ผู้ป่วยโรค:</label>{" "}
-              <span>
-                {medicalData && medicalData.Diagnosis
-                  ? medicalData.Diagnosis
-                  : "ไม่มีข้อมูล"}
-              </span>
-            </p>
-          </div>
 
-          <table className="table tableass">
-            <thead>
-              <tr>
-                <th>วันที่บันทึก</th>
-                <th>ความรุนแรงของอาการ</th>
-                <th>ผลการประเมิน</th>
-                <th>ผู้ประเมิน</th>
-              </tr>
-            </thead>
-            <tbody>
-              {patientForms && patientForms.length > 0 ? (
-                patientForms
-                  .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                  .map((form, index) => (
+            <div className="info-container">
+              <div className="info-row">
+                <div className="info-item">
+                  
+                  <label>ชื่อ-สกุล:</label>{" "}
+                  <span>
+                    {name} {surname}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>อายุ:</label>{" "}
+                  <span>
+                    {birthday
+                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                      : "0 ปี 0 เดือน"}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>เพศ:</label> <span>{gender}</span>
+                </div>
+              </div>
+
+              <div className="info-row">
+                <div className="info-item">
+                  <label>HN:</label>{" "}
+                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item">
+                  <label>AN:</label>{" "}
+                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item full-width">
+                  <label>ผู้ป่วยโรค:</label>{" "}
+                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="table-container">
+            <table className="table-all tableass">
+              <thead>
+                <tr>
+                  <th onClick={toggleSortOrder} style={{ cursor: "pointer" }}>
+                    วันที่บันทึก
+                    <i
+                      className={
+                        sortOrder === "desc"
+                          ? "bi bi-caret-down-fill"
+                          : "bi bi-caret-up-fill"
+                      }
+                    ></i>
+                  </th>
+                  <th>ความรุนแรงของอาการ</th>
+                  <th>ผลการประเมิน</th>
+                  <th>ผู้ประเมิน</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedForms && sortedForms.length > 0 ? (
+                  sortedForms.map((form, index) => (
                     <tr
                       key={index}
                       className="info"
@@ -843,7 +866,9 @@ export default function Assessmentuser() {
                             ) : null
                           )
                         ) : vitalStatuses[form._id] === "สัญญาณชีพผิดปกติ" ? (
-                          <span className="abnormal-status">สัญญาณชีพผิดปกติ</span>
+                          <span className="abnormal-status">
+                            สัญญาณชีพผิดปกติ
+                          </span>
                         ) : (
                           <span className="not-evaluated">สัญญาณชีพปกติ</span>
                         )}
@@ -883,131 +908,134 @@ export default function Assessmentuser() {
                       </td>
                     </tr>
                   ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="assessmentnull"
-                    style={{ textAlign: "center", verticalAlign: "middle" }}
-                  >
-                    ยังไม่มีการบันทึกอาการ
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-     {showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="4"
+                      className="assessmentnull"
+                      style={{ textAlign: "center", verticalAlign: "middle" }}
+                    >
+                      ยังไม่มีการบันทึกอาการ
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-          <div className="notifications-filter">
-            <div
-              className={`notification-box ${
-                filterType === "all" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("all")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-bell"></i>
-                ทั้งหมด
-              </div>
-              <div className="notification-right">
-                {unreadCount > 0 && (
-                  <span className="notification-count-noti">{unreadCount}</span>
-                )}
-                <i className="bi bi-chevron-right"></i>
-              </div>
+        </div>
+        {showNotifications && (
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
             </div>
-            <div
-              className={`notification-box ${
-                filterType === "abnormal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("abnormal")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-exclamation-triangle"></i>
-                ผิดปกติ
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${
+                  filterType === "all" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
+                </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCount}
+                    </span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.abnormal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.abnormal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
+              <div
+                className={`notification-box ${
+                  filterType === "abnormal" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-            </div>
-            <div
-              className={`notification-box ${
-                filterType === "normal" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("normal")}
-            >
-              <div className="notification-item">
-                {" "}
-                <i className="bi bi-journal-text"></i>
-                บันทึกอาการ
+              <div
+                className={`notification-box ${
+                  filterType === "normal" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.normal > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.normal}
-                  </span>
-                )}
-                <i class="bi bi-chevron-right"></i>
-              </div>
-            </div>
 
-            <div
-              className={`notification-box ${
-                filterType === "assessment" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("assessment")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-clipboard-check"></i>
-                ประเมินอาการ
+              <div
+                className={`notification-box ${
+                  filterType === "assessment" ? "active" : ""
+                }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.assessment > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.assessment}
-                  </span>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
                 )}
-                <i class="bi bi-chevron-right"></i>
               </div>
-            </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          <div className="selected-filter">
-            <p>
-              การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-            </p>
-            <p
-              className="mark-all-read-btn"
-              onClick={() => markAllByTypeAsViewed(filterType)}
-            >
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-          </div>
-          {filteredAlerts.length > 0 ? (
-            <div>
-              {renderAlerts(
-                filteredAlerts,
-                token,
-                userId,
-                navigate,
-                setAlerts,
-                setUnreadCount,
-                formatDate
-              )}
-            </div>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
         {showScrollTopButton && (
           <button
             className="scroll-to-top-btn"
