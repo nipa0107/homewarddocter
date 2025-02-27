@@ -278,11 +278,9 @@ export default function DetailAssessinhomeForm() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const formatThaiDate = (dateString) => {
@@ -759,47 +757,60 @@ export default function DetailAssessinhomeForm() {
           </ul>
         </div>
         <br></br>
-        <div className="">
+        <div>
           <p className="headerassesment">
             {name} {surname}
           </p>
           {birthday ? (
             <p className="textassesment">
-              <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน{" "}
-              <label>เพศ:</label>
-              {gender}
+              <label>อายุ:</label>{" "}
+              <span>
+                {userAge} ปี {userAgeInMonths} เดือน
+              </span>{" "}
+              <label>เพศ:</label> <span>{gender}</span>
             </p>
           ) : (
             <p className="textassesment">
-              {" "}
-              <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>
-              {gender}
+              <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
+              <label>เพศ:</label> <span>{gender}</span>
             </p>
           )}
           <p className="textassesment">
-            <label>HN:</label>
-            {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-            <label>AN:</label>
-            {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-            <label>ผู้ป่วยโรค:</label>
-            {medicalData && medicalData.Diagnosis
-              ? medicalData.Diagnosis
-              : "ไม่มีข้อมูล"}
+            <label>HN:</label>{" "}
+            <span>
+              {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
+            </span>
+            <label>AN:</label>{" "}
+            <span>
+              {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
+            </span>
+            <label>ผู้ป่วยโรค:</label>{" "}
+            <span>
+              {medicalData && medicalData.Diagnosis
+                ? medicalData.Diagnosis
+                : "ไม่มีข้อมูล"}
+            </span>
           </p>
-          <p>
-            <p className="textassesment">
-              <p>
-                <label>วันที่บันทึก:</label>
-                {formatDate(AssessinhomeForms.createdAt)}
-              </p>
-              {AssessinhomeForms.updatedAt && (
-                <p>
-                  <label>วันที่แก้ไขล่าสุด:</label>
-                  {formatDate(AssessinhomeForms.updatedAt)}
-                </p>
-              )}
-            </p>
+          <p className="textassesment">
+            <label>วันที่บันทึก:</label>
+            <span>{formatDate(AssessinhomeForms.createdAt)}</span>
           </p>
+          <p className="textassesment">
+            <label>วันที่แก้ไขล่าสุด:</label>
+            <span
+              style={{
+                color: AssessinhomeForms?.updatedAt === AssessinhomeForms?.createdAt ? "#666" : "inherit",
+                fontWeight: AssessinhomeForms?.updatedAt === AssessinhomeForms?.createdAt ? "bold" : "bold"
+              }}
+            >
+              {AssessinhomeForms && AssessinhomeForms.updatedAt
+                ? AssessinhomeForms.updatedAt !== AssessinhomeForms.createdAt
+                  ? formatDate(AssessinhomeForms.updatedAt)
+                  : "-"
+                : "ไม่มีข้อมูล"}
+            </span>
+          </p>
+
         </div>
         <div className="info3 card mt-4">
           {/* <div className="header">
@@ -1021,16 +1032,16 @@ export default function DetailAssessinhomeForm() {
                     </div>
                   </div>
                   <div className="row">
-                  <div className="col-sm-4">
-                    <strong>ภาวะโภชนาการ :</strong>
+                    <div className="col-sm-4">
+                      <strong>ภาวะโภชนาการ :</strong>
                     </div>
                     <div className="col-sm-6">
                       <p>
                         {AssessinhomeForms.Nutrition?.nutritionStatus || "-"}
                       </p>
                     </div>
-                    </div>
                   </div>
+                </div>
 
                 <div>
                   <button
@@ -1249,7 +1260,7 @@ export default function DetailAssessinhomeForm() {
                         <b>1. ผู้ดูแล</b>
                       </h5>
                       {AssessinhomeForms.OtherPeople.existingCaregivers.length >
-                      0 ? (
+                        0 ? (
                         AssessinhomeForms.OtherPeople.existingCaregivers.map(
                           (cg, index) => (
                             <div key={index} style={{ lineHeight: "20px" }}>
@@ -1381,7 +1392,7 @@ export default function DetailAssessinhomeForm() {
                         <b>2. คนในครอบครัว</b>
                       </h5>
                       {AssessinhomeForms.OtherPeople.newCaregivers.length >
-                      0 ? (
+                        0 ? (
                         AssessinhomeForms.OtherPeople.newCaregivers.map(
                           (cg, index) => (
                             <div key={index}>
@@ -1770,12 +1781,12 @@ export default function DetailAssessinhomeForm() {
                             {AssessinhomeForms.PhysicalExamination.moodandaffect
                               ?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.moodandaffect
-                                  .map((item) =>
-                                    item.isOther
-                                      ? `อื่นๆ: ${item.value}`
-                                      : item.value
-                                  )
-                                  .join(", ")
+                                .map((item) =>
+                                  item.isOther
+                                    ? `อื่นๆ: ${item.value}`
+                                    : item.value
+                                )
+                                .join(", ")
                               : "-"}
                           </p>
                         </div>
@@ -1789,12 +1800,12 @@ export default function DetailAssessinhomeForm() {
                             {AssessinhomeForms.PhysicalExamination
                               .appearanceAndBehavior?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.appearanceAndBehavior
-                                  .map((item) =>
-                                    item.isOther
-                                      ? `อื่นๆ: ${item.value}`
-                                      : item.value
-                                  )
-                                  .join(", ")
+                                .map((item) =>
+                                  item.isOther
+                                    ? `อื่นๆ: ${item.value}`
+                                    : item.value
+                                )
+                                .join(", ")
                               : "-"}
                           </p>
                         </div>
@@ -1808,12 +1819,12 @@ export default function DetailAssessinhomeForm() {
                             {AssessinhomeForms.PhysicalExamination.eyeContact
                               ?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.eyeContact
-                                  .map((item) =>
-                                    item.isOther
-                                      ? `อื่นๆ: ${item.value}`
-                                      : item.value
-                                  )
-                                  .join(", ")
+                                .map((item) =>
+                                  item.isOther
+                                    ? `อื่นๆ: ${item.value}`
+                                    : item.value
+                                )
+                                .join(", ")
                               : "-"}
                           </p>
                         </div>
@@ -1827,12 +1838,12 @@ export default function DetailAssessinhomeForm() {
                             {AssessinhomeForms.PhysicalExamination.attention
                               ?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.attention
-                                  .map((item) =>
-                                    item.isOther
-                                      ? `อื่นๆ: ${item.value}`
-                                      : item.value
-                                  )
-                                  .join(", ")
+                                .map((item) =>
+                                  item.isOther
+                                    ? `อื่นๆ: ${item.value}`
+                                    : item.value
+                                )
+                                .join(", ")
                               : "-"}
                           </p>
                         </div>
@@ -1846,12 +1857,12 @@ export default function DetailAssessinhomeForm() {
                             {AssessinhomeForms.PhysicalExamination.orientation
                               ?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.orientation
-                                  .map((item) =>
-                                    item.isOther
-                                      ? `อื่นๆ: ${item.value}`
-                                      : item.value
-                                  )
-                                  .join(", ")
+                                .map((item) =>
+                                  item.isOther
+                                    ? `อื่นๆ: ${item.value}`
+                                    : item.value
+                                )
+                                .join(", ")
                               : "-"}
                           </p>
                         </div>
@@ -1865,12 +1876,12 @@ export default function DetailAssessinhomeForm() {
                             {AssessinhomeForms.PhysicalExamination
                               .thoughtProcess?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.thoughtProcess
-                                  .map((item) =>
-                                    item.isOther
-                                      ? `อื่นๆ: ${item.value}`
-                                      : item.value
-                                  )
-                                  .join(", ")
+                                .map((item) =>
+                                  item.isOther
+                                    ? `อื่นๆ: ${item.value}`
+                                    : item.value
+                                )
+                                .join(", ")
                               : "-"}
                           </p>
                         </div>
@@ -1884,12 +1895,12 @@ export default function DetailAssessinhomeForm() {
                             {AssessinhomeForms.PhysicalExamination
                               .thoughtContent?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.thoughtContent
-                                  .map((item) =>
-                                    item.isOther
-                                      ? `อื่นๆ: ${item.value}`
-                                      : item.value
-                                  )
-                                  .join(", ")
+                                .map((item) =>
+                                  item.isOther
+                                    ? `อื่นๆ: ${item.value}`
+                                    : item.value
+                                )
+                                .join(", ")
                               : "-"}
                           </p>
                         </div>

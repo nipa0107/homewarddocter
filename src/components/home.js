@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, PureComponent } from "react";
+import React, { useCallback, useEffect, useState, useRef, PureComponent } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "../css/noti.css";
@@ -36,74 +36,142 @@ export default function Home() {
   const [completedCount, setCompletedCount] = useState(0);
   const [medicalData, setMedicalData] = useState({});
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const hasFetchedUserData = useRef(false);
   
-   useEffect(() => {
-     socket?.on('newAlert', (alert) => {
-       console.log('Received newAlert:', alert);
-   
-       setAlerts((prevAlerts) => {
-         const isExisting = prevAlerts.some(
-           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
-         );
-   
-         let updatedAlerts;
-   
-         if (isExisting) {
-           
-           if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-             updatedAlerts = [...prevAlerts, alert];
-           } else {
-             updatedAlerts = prevAlerts.map((existingAlert) =>
-               existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-             );
-           }
-         } else {
-           updatedAlerts = [...prevAlerts, alert];
-         }
-   
-         return updatedAlerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-       });
-     });
-   
-     socket?.on('deletedAlert', (data) => {
-       setAlerts((prevAlerts) => {
-         const filteredAlerts = prevAlerts.filter(
-           (alert) => alert.patientFormId !== data.patientFormId
-         );
-         return filteredAlerts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-       });
-     });
-   
-     return () => {
-       socket?.off('newAlert');
-       socket?.off('deletedAlert');
-     };
-   }, []);
-   
-  
+  const [latestAssessments, setLatestAssessments] = useState({});
+  const [unreadCountsByType, setUnreadCountsByType] = useState({
+    assessment: 0,
+    abnormal: 0,
+    normal: 0,
+  });
+
+  const fetchLatestAssessments = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/latest-assessments");
+      const data = await response.json();
+      console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+
+      if (data.status === "ok") {
+        const assessmentsMap = data.data.reduce((acc, item) => {
+          acc[item._id] = item.latestStatusName;
+          return acc;
+        }, {});
+        console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+
+        setLatestAssessments(assessmentsMap);
+      }
+    } catch (error) {
+      console.error("Error fetching latest assessments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLatestAssessments();
+  }, []);
+
+  const getUnreadCount = useCallback(
+    (type) => {
+      const filteredByType = alerts.filter(
+        (alert) =>
+          (type === "assessment" &&
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน") ||
+          (type === "abnormal" &&
+            (alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน")) ||
+          (type === "normal" && alert.alertType === "normal")
+      );
+      return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+        .length;
+    },
+    [alerts, userId]
+  );
+  useEffect(() => {
+    if (!userId) return;
+    const updatedCounts = {
+      assessment: getUnreadCount("assessment"),
+      abnormal: getUnreadCount("abnormal"),
+      normal: getUnreadCount("normal"),
+    };
+    setUnreadCountsByType(updatedCounts);
+  }, [alerts, userId]);
+
+  useEffect(() => {
+    socket?.on("newAlert", (alert) => {
+      console.log("Received newAlert:", alert);
+
+      if (alert.MPersonnel?.id === userId) {
+        console.log("Ignoring alert from self");
+        return;
+      }
+
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+
+        let updatedAlerts;
+
+        if (isExisting) {
+          updatedAlerts = prevAlerts.map((existingAlert) =>
+            existingAlert.patientFormId === alert.patientFormId
+              ? alert
+              : existingAlert
+          );
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+
+        return [...updatedAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      });
+    });
+
+    socket?.on("deletedAlert", (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+
+        return [...filteredAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      });
+    });
+
+    return () => {
+      socket?.off("newAlert");
+      socket?.off("deletedAlert");
+    };
+  }, [userId]);
+
   useEffect(() => {
     const currentUserId = sender._id;
-  
+
     const unreadAlerts = alerts.filter(
-      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
-  
-    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-  }, [alerts]);
-  
-  
-    useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
-      });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
-      };
-    }, [socket]);
+
+    setUnreadCount(unreadAlerts.length);
+  }, [alerts, sender._id]);
+
+  useEffect(() => {
+    socket?.on("TotalUnreadCounts", (data) => {
+      console.log("📦 TotalUnreadCounts received:", data);
+      setUserUnreadCounts(data);
+    });
+
+    return () => {
+      socket?.off("TotalUnreadCounts");
+    };
+  }, []);
+
+  useEffect(() => {
+    getAllUser();
+  }, []);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -117,7 +185,8 @@ export default function Home() {
 
   const handleClickOutside = (e) => {
     if (
-      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
       !bellRef.current.contains(e.target)
     ) {
       setShowNotifications(false);
@@ -131,16 +200,6 @@ export default function Home() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
-
-
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./";
-  };
-
-  const handleToggleSidebar = () => {
-    setIsActive(!isActive);
-  };
 
 
   const fetchUserData = (token) => {
@@ -173,13 +232,28 @@ export default function Home() {
       });
   };
 
+  const getAllUser = () => {
+    fetch("http://localhost:5000/alluser", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data, "AllUser");
+        setDatauser(data.data);
+        console.log(datauser, "Datauser");
+      });
+  };
+
+
   const fetchAndSetAlerts = (token, userId) => {
-    fetchAlerts(token)
-      .then((alerts) => {
-        console.log("เช็คhome:", alerts);
+    fetchAlerts(token, userId)
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
-          (alert) => !alert.viewedBy.includes(userId) // ตรวจสอบว่า userId ไม่อยู่ใน viewedBy
+          (alert) => !alert.viewedBy.includes(userId)
         ).length;
         setUnreadCount(unreadAlerts);
       })
@@ -198,35 +272,55 @@ export default function Home() {
     if (token) {
       fetchUserData(token)
         .then((user) => {
-          setUserId(user._id); // ตั้งค่า userId
-          fetchAndSetAlerts(token, user._id); // ส่ง userId ไปที่ fetchAndSetAlerts
+          setUserId(user._id);
+          fetchAndSetAlerts(token, user._id);
+          getAllUser();
         })
         .catch((error) => {
           console.error("Error verifying token:", error);
         });
     }
-  }, []);
+  }, [token]);
 
-  const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+  const markAllByTypeAsViewed = (type) => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ userId: userId }),
+      body: JSON.stringify({ userId: userId, type: type }),
     })
       .then((res) => res.json())
       .then((data) => {
-        const updatedAlerts = alerts.map((alert) => ({
-          ...alert,
-          viewedBy: [...alert.viewedBy, userId],
-        }));
-        setAlerts(updatedAlerts);
-        setUnreadCount(0);
+        if (data.message === "All selected alerts marked as viewed") {
+          const updatedAlerts = alerts.map((alert) => {
+            if (
+              type === "all" ||
+              ((alert.alertType === type ||
+                (type === "abnormal" &&
+                  (alert.alertType === "abnormal" ||
+                    alert.alertMessage === "เคสฉุกเฉิน")) ||
+                (type === "assessment" &&
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                !alert.viewedBy.includes(userId))
+            ) {
+              return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+            }
+            return alert;
+          });
+
+          setAlerts(updatedAlerts);
+          // setUnreadCount(0);
+          const unreadAlerts = updatedAlerts.filter(
+            (alert) => !alert.viewedBy.includes(userId)
+          );
+          setUnreadCount(unreadAlerts.length);
+        }
       })
       .catch((error) => {
-        console.error("Error marking all alerts as viewed:", error);
+        console.error("Error marking alerts as viewed:", error);
       });
   };
 
@@ -237,7 +331,47 @@ export default function Home() {
   const filteredAlerts =
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
-      : alerts;
+      : filterType === "assessment"
+        ? alerts.filter(
+          (alert) =>
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน"
+        )
+        : filterType === "abnormal"
+          ? alerts.filter(
+            (alert) =>
+              alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน"
+          )
+          : filterType === "normal"
+            ? alerts.filter((alert) => alert.alertType === "normal")
+            : alerts;
+
+  const getFilterLabel = (type) => {
+    switch (type) {
+      case "all":
+        return "ทั้งหมด";
+      case "unread":
+        return "ยังไม่อ่าน";
+      case "normal":
+        return "บันทึกอาการ";
+      case "abnormal":
+        return "ผิดปกติ";
+      case "assessment":
+        return "ประเมินอาการ";
+      default:
+        return "ไม่ทราบ";
+    }
+  };
+
+  const logOut = () => {
+    window.localStorage.clear();
+    window.location.href = "./";
+  };
+  // bi-list
+  const handleToggleSidebar = () => {
+    setIsActive(!isActive);
+  };
 
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
@@ -626,27 +760,28 @@ export default function Home() {
 
   ];
 
-    useEffect(() => {
-      // ดึงข้อมูล unread count เมื่อเปิดหน้า
-      const fetchUnreadCount = async () => {
-        try {
-          const response = await fetch(
-            "http://localhost:5000/update-unread-count"
-          );
-  
-          if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-          }
-          const data = await response.json();
-          if (data.success) {
-            setUserUnreadCounts(data.users);
-          }
-        } catch (error) {
-          console.error("Error fetching unread count:", error);
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
+
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
         }
-      };
-      fetchUnreadCount();
-    }, []);
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    fetchUnreadCount();
+  }, []);
+
   return (
 
     <main className="body">
@@ -726,7 +861,7 @@ export default function Home() {
           <div className="profile_details">
             <ul className="nav-list">
               <li>
-              <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
                   {showNotifications ? (
                     <i className="bi bi-bell-fill"></i>
                   ) : (
@@ -749,55 +884,113 @@ export default function Home() {
           </div>
         </div>
         {showNotifications && (
-                  <div className="notifications-dropdown" ref={notificationsRef}>
-                    <div className="notifications-head">
-                      <h2 className="notifications-title">การแจ้งเตือน</h2>
-                      <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                        ทำเครื่องหมายว่าอ่านทั้งหมด
-                      </p>
-                      <div className="notifications-filter">
-                        <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                          ดูทั้งหมด
-                        </button>
-                        <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                          ยังไม่อ่าน
-                        </button>
-                      </div>
-                    </div>
-                    {filteredAlerts.length > 0 ? (
-                      <>
-                        {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                      </>
-                    ) : (
-                      <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                    )}
-                  </div>
-                )}{showNotifications && (
-                          <div className="notifications-dropdown" ref={notificationsRef}>
-                            <div className="notifications-head">
-                              <h2 className="notifications-title">การแจ้งเตือน</h2>
-                              <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                                ทำเครื่องหมายว่าอ่านทั้งหมด
-                              </p>
-                              <div className="notifications-filter">
-                                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                                  ดูทั้งหมด
-                                </button>
-                                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                                  ยังไม่อ่าน
-                                </button>
-                              </div>
-                            </div>
-                            {filteredAlerts.length > 0 ? (
-                              <>
-                                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                              </>
-                            ) : (
-                              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                            )}
-                          </div>
-                        )}
-        <div class="container-fluid bg-light">
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
+            </div>
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${filterType === "all" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
+                </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">{unreadCount}</span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "normal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+
+              <div
+                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
+          </div>
+        )}
+        <div class="container-fluid bg-light" >
           <div class="row">
             <div
               className="col-xl-4 col-md-6 mb-4 mt-4"
@@ -865,7 +1058,7 @@ export default function Home() {
 
             <div
               className="col-xl-4 col-md-6 mb-4 mt-4"
-              onClick={scrollToTable}
+              onClick={() => navigate("/immobilityg3")}
               style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
             >
               <div className="card border-left shadow h-100  hover-card" style={{ borderRadius: "5px", overflow: "hidden" }}>
@@ -879,7 +1072,7 @@ export default function Home() {
                         <CountUp end={group3Count} />
                       </div>
                     </div>
-                    <div className="col-auto">
+                    <div className="col-md-3 .offset-md-3">
                       <img src={Pt} className="patient" alt="patient" />
                     </div>
                   </div>
@@ -909,25 +1102,55 @@ export default function Home() {
                   <div className="chart-pie mb-5 ">
                     <DoughnutChartComponent data={diagnosisData} colors={COLORS_DIAGNOSIS} />
                   </div>
-                  <ul>
+                  <div className="row">
+                    <ul>
+                      {diagnosisData.map((entry, index) => (
+                        <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                          <div className="col-11 text-left">
+                            <span
+                              style={{
+                                display: 'inline-block',
+                                width: '12px',
+                                height: '12px',
+                                backgroundColor: COLORS[index % COLORS.length],
+                                borderRadius: '50%',
+                                marginRight: '10px',
+                              }}
+                            ></span>
+                            <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
+                              {entry.name} :
+                            </span>
+                          </div>
+                          <div className="col-2 text-end">
+                            <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
+                            <b>{entry.value} เคส</b>
+                            </span>
+                          </div>
+
+                        </li>
+                      ))}
+                    </ul>
+
+                  </div>
+                  {/* <ul>
                     {diagnosisData.map((entry, index) => (
                       <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                         <span
                           style={{
                             display: 'inline-block',
-                            width: '15px',
-                            height: '15px',
+                            width: '10px',
+                            height: '10px',
                             backgroundColor: COLORS[index % COLORS.length],
-                            borderRadius: '50%', // ทำให้เป็นวงกลม
+                            borderRadius: '50%',
                             marginRight: '10px',
                           }}
                         ></span>
                         <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
-                          ผู้ป่วย{entry.name} : {entry.value} เคส
+                          {entry.name} : {entry.value} เคส
                         </span>
                       </li>
                     ))}
-                  </ul>
+                  </ul> */}
 
                 </div>
               </div>
@@ -940,18 +1163,43 @@ export default function Home() {
                     รวมเคสปกติ/ผิดปกติ/เคสฉุกเฉิน
                   </h6>
                 </div>
-                <div className="card-body pt-6">
+                <div className="card-body pt-2">
                   <div className="chart-pie mb-5">
                     <DoughnutChartComponent data={caseStats} colors={COLORS_STATUS} />
                   </div>
-                  <ul
-                    style={{
-                      marginLeft: "80px",
-                      width: "100%",
-                      // ใช้พื้นที่เต็มเพื่อให้การจัดชิดซ้ายดูสมเหตุสมผล
-                    }}
+                  <div className="row">
+                    <ul>
+                      {caseStats.map((entry, index) => (
+                        <li
+                          key={`legend-${index}`}
+                          style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
+                        >
+                          <div className="col-md-5 ms-md-auto text-left">
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: "12px",
+                                height: "12px",
+                                backgroundColor: COLORS_STATUS[index % COLORS_STATUS.length],
+                                borderRadius: "50%",
+                                marginRight: "10px",
+                              }}
+                            ></span>
+                            <span style={{ color: COLORS_STATUS[index % COLORS_STATUS.length] }} >
+                              {entry.name} :
+                            </span>
+                          </div>
+                          <div className="col-md-3 ms-auto text-end">
+                            <span style={{ color: COLORS_STATUS[index % COLORS_STATUS.length] }} >
+                              <b>{caseDetails[index].count} เคส</b>
+                            </span>
+                          </div>
 
-                  >
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {/* <ul>
                     {caseStats.map((entry, index) => (
                       <li
                         key={`legend-${index}`}
@@ -972,7 +1220,7 @@ export default function Home() {
                         </span>
                       </li>
                     ))}
-                  </ul>
+                  </ul> */}
                 </div>
               </div>
             </div>
@@ -982,7 +1230,7 @@ export default function Home() {
                   class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#fff5e8", border: 'none' }}>
                   <h6 class="m-0 group3-status-text" style={{ fontWeight: "bolder" }}>ผู้ป่วย 3 กลุ่ม Immobility</h6>
                 </div>
-                <div className="card-body pt-4">
+                <div className="card-body pt-2">
                   {immobilityData.length > 0 ? (
                     <>
                       <div className="chart-pie mb-5">
@@ -994,27 +1242,40 @@ export default function Home() {
                           colors={COLORS_IMMOBILITY}
                         />
                       </div>
-                      <ul>
-                        {immobilityData.map((entry, index) => (
-                          <li
-                            key={`legend-${index}`}
-                            style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
-                          >
-                            <span
-                              style={{
-                                display: "inline-block",
-                                width: "15px",
-                                height: "15px",
-                                backgroundColor: ["#1cc88a", "#4e73df", "#e74a3b"][index],
-                                borderRadius: "50%",
-                                marginRight: "5px",
-                              }}
-                            ></span>
-                            <span style={{ color: COLORS_IMMOBILITY[index % COLORS_IMMOBILITY.length] }}>
-                              {entry.name} : {entry.count} เคส</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div className="row">
+                        <ul>
+                          {immobilityData.map((entry, index) => (
+                            <li
+                              key={`legend-${index}`}
+                              style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
+                            >
+                              <div className="col-11 text-left">
+                                <span
+                                  style={{
+                                    display: "inline-block",
+                                    width: "12px",
+                                    height: "12px",
+                                    backgroundColor: ["#1cc88a", "#4e73df", "#e74a3b"][index],
+                                    borderRadius: "50%",
+                                    marginRight: "5px",
+                                  }}
+                                ></span>
+                                <span style={{ color: COLORS_IMMOBILITY[index % COLORS_IMMOBILITY.length] }}>
+                                  {entry.name} :</span>
+                              </div>
+                              <div className="col-2 text-end">
+                                <span style={{ color: COLORS_IMMOBILITY[index % COLORS_IMMOBILITY.length] }}>
+                                <b>{entry.count} เคส</b></span>
+                              </div>
+
+
+                            </li>
+                          ))}
+                        </ul>
+
+
+                      </div>
+
                     </>
                   ) : (
                     <p>ไม่มีข้อมูลสำหรับกราฟนี้</p>
@@ -1030,7 +1291,7 @@ export default function Home() {
               <div class="card shadow mb-4" style={{ border: 'none' }}>
                 <div
                   class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
-                  <h6 class="m-0 text-primary" style={{ fontWeight: "bolder" }}>สัดส่วนรวมเพศของผู้ป่วย</h6>
+                  <h6 class="m-0 text-primary" style={{ fontWeight: "bolder" }}>สัดส่วนเพศผู้ป่วย</h6>
 
                 </div>
                 <div class="card-body pt-4">
@@ -1076,7 +1337,7 @@ export default function Home() {
 
               </div>
             </div>
-            <div className="col-xl-8 col-lg-7" ref={tableRef}>
+            {/* <div className="col-xl-8 col-lg-7" ref={tableRef}>
               <div class="card shadow mb-4" style={{ border: 'none' }}>
                 <div
                   class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#ffe4e4", border: 'none' }}>
@@ -1129,7 +1390,7 @@ export default function Home() {
                             </tr>
                           </thead>
                         </table>
-                        <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> {/* ข้อความเมื่อไม่มีข้อมูล */}
+                        <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> 
                       </>
                     ) : (
                       <table className="table custom-table table-hover">
@@ -1148,7 +1409,7 @@ export default function Home() {
                             <tr
                               key={index}
                               onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
-                              style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
+                              style={{ cursor: "pointer" }} 
                             >
                               <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
                               <td>{user.user.name} {user.user.surname}</td>
@@ -1171,7 +1432,6 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* ปุ่ม "ก่อนหน้า" และ "ถัดไป" จะแสดงเฉพาะเมื่อมีข้อมูล */}
                   {filteredUsers.length > 0 && (
                     <nav aria-label="Page navigation example" className="mt-3">
                       <ul className="pagination justify-content-end">
@@ -1215,7 +1475,7 @@ export default function Home() {
                 </div>
 
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

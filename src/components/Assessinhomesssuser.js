@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
@@ -10,7 +10,7 @@ import io from "socket.io-client";
 
 const socket = io("http://localhost:5000");
 
-export default function Assessinhomesssuser({}) {
+export default function Assessinhomesssuser({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [isActive, setIsActive] = useState(false);
@@ -40,11 +40,75 @@ export default function Assessinhomesssuser({}) {
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const [latestAssessments, setLatestAssessments] = useState({});
+  const [unreadCountsByType, setUnreadCountsByType] = useState({
+    assessment: 0,
+    abnormal: 0,
+    normal: 0,
+  });
+
+
+  const fetchLatestAssessments = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/latest-assessments");
+      const data = await response.json();
+      console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+
+      if (data.status === "ok") {
+        const assessmentsMap = data.data.reduce((acc, item) => {
+          acc[item._id] = item.latestStatusName;
+          return acc;
+        }, {});
+        console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+
+        setLatestAssessments(assessmentsMap);
+      }
+    } catch (error) {
+      console.error("Error fetching latest assessments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLatestAssessments();
+  }, []);
+
+  const getUnreadCount = useCallback(
+    (type) => {
+      const filteredByType = alerts.filter(
+        (alert) =>
+          (type === "assessment" &&
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน") ||
+          (type === "abnormal" &&
+            (alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน")) ||
+          (type === "normal" && alert.alertType === "normal")
+      );
+      return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+        .length;
+    },
+    [alerts, userId]
+  );
+
+  useEffect(() => {
+    if (!userId) return;
+    const updatedCounts = {
+      assessment: getUnreadCount("assessment"),
+      abnormal: getUnreadCount("abnormal"),
+      normal: getUnreadCount("normal"),
+    };
+    setUnreadCountsByType(updatedCounts);
+  }, [alerts, userId]);
   const hasFetchedUserData = useRef(false);
 
   useEffect(() => {
     socket?.on("newAlert", (alert) => {
       console.log("Received newAlert:", alert);
+
+      if (alert.MPersonnel?.id === userId) {
+        console.log("Ignoring alert from self");
+        return;
+      }
 
       setAlerts((prevAlerts) => {
         const isExisting = prevAlerts.some(
@@ -54,21 +118,17 @@ export default function Assessinhomesssuser({}) {
         let updatedAlerts;
 
         if (isExisting) {
-          if (alert.alertMessage === "เป็นเคสฉุกเฉิน") {
-            updatedAlerts = [...prevAlerts, alert];
-          } else {
-            updatedAlerts = prevAlerts.map((existingAlert) =>
-              existingAlert.patientFormId === alert.patientFormId
-                ? alert
-                : existingAlert
-            );
-          }
+          updatedAlerts = prevAlerts.map((existingAlert) =>
+            existingAlert.patientFormId === alert.patientFormId
+              ? alert
+              : existingAlert
+          );
         } else {
           updatedAlerts = [...prevAlerts, alert];
         }
 
-        return updatedAlerts.sort(
-          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        return [...updatedAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
       });
     });
@@ -78,8 +138,9 @@ export default function Assessinhomesssuser({}) {
         const filteredAlerts = prevAlerts.filter(
           (alert) => alert.patientFormId !== data.patientFormId
         );
-        return filteredAlerts.sort(
-          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+
+        return [...filteredAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
       });
     });
@@ -88,7 +149,7 @@ export default function Assessinhomesssuser({}) {
       socket?.off("newAlert");
       socket?.off("deletedAlert");
     };
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     const currentUserId = sender._id;
@@ -98,8 +159,8 @@ export default function Assessinhomesssuser({}) {
         Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
 
-    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-  }, [alerts]);
+    setUnreadCount(unreadAlerts.length);
+  }, [alerts, sender._id]);
 
   useEffect(() => {
     socket?.on("TotalUnreadCounts", (data) => {
@@ -110,7 +171,7 @@ export default function Assessinhomesssuser({}) {
     return () => {
       socket?.off("TotalUnreadCounts");
     };
-  }, [socket]);
+  }, []);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -139,6 +200,7 @@ export default function Assessinhomesssuser({}) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -166,15 +228,20 @@ export default function Assessinhomesssuser({}) {
           _id: data.data._id,
         });
         setData(data.data);
+        if (data.data === "token expired") {
+          window.localStorage.clear();
+          window.location.href = "./";
+        }
         return data.data;
       })
       .catch((error) => {
         console.error("Error verifying token:", error);
       });
   };
+
   const fetchAndSetAlerts = (token, userId) => {
-    fetchAlerts(token)
-      .then((alerts) => {
+    fetchAlerts(token, userId)
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -203,28 +270,47 @@ export default function Assessinhomesssuser({}) {
           console.error("Error verifying token:", error);
         });
     }
-  }, []);
+  }, [token]);
 
-  const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+  const markAllByTypeAsViewed = (type) => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ userId: userId }),
+      body: JSON.stringify({ userId: userId, type: type }),
     })
       .then((res) => res.json())
       .then((data) => {
-        const updatedAlerts = alerts.map((alert) => ({
-          ...alert,
-          viewedBy: [...alert.viewedBy, userId],
-        }));
-        setAlerts(updatedAlerts);
-        setUnreadCount(0);
+        if (data.message === "All selected alerts marked as viewed") {
+          const updatedAlerts = alerts.map((alert) => {
+            if (
+              type === "all" ||
+              ((alert.alertType === type ||
+                (type === "abnormal" &&
+                  (alert.alertType === "abnormal" ||
+                    alert.alertMessage === "เคสฉุกเฉิน")) ||
+                (type === "assessment" &&
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                !alert.viewedBy.includes(userId))
+            ) {
+              return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+            }
+            return alert;
+          });
+
+          setAlerts(updatedAlerts);
+          // setUnreadCount(0);
+          const unreadAlerts = updatedAlerts.filter(
+            (alert) => !alert.viewedBy.includes(userId)
+          );
+          setUnreadCount(unreadAlerts.length);
+        }
       })
       .catch((error) => {
-        console.error("Error marking all alerts as viewed:", error);
+        console.error("Error marking alerts as viewed:", error);
       });
   };
 
@@ -235,7 +321,38 @@ export default function Assessinhomesssuser({}) {
   const filteredAlerts =
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
-      : alerts;
+      : filterType === "assessment"
+        ? alerts.filter(
+          (alert) =>
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน"
+        )
+        : filterType === "abnormal"
+          ? alerts.filter(
+            (alert) =>
+              alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน"
+          )
+          : filterType === "normal"
+            ? alerts.filter((alert) => alert.alertType === "normal")
+            : alerts;
+
+  const getFilterLabel = (type) => {
+    switch (type) {
+      case "all":
+        return "ทั้งหมด";
+      case "unread":
+        return "ยังไม่อ่าน";
+      case "normal":
+        return "บันทึกอาการ";
+      case "abnormal":
+        return "ผิดปกติ";
+      case "assessment":
+        return "ประเมินอาการ";
+      default:
+        return "ไม่ทราบ";
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -349,11 +466,9 @@ export default function Assessinhomesssuser({}) {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const [AssessinhomeForms, setAssessinhomeForms] = useState({});
@@ -508,191 +623,262 @@ export default function Assessinhomesssuser({}) {
         </ul>
       </div>
 
-            <div className="home_content">
-                <div className="homeheader">
+      <div className="home_content">
+        <div className="homeheader">
 
-                    <div className="header">แบบประเมินเยี่ยมบ้าน</div>
-                    <div className="profile_details">
-                        <ul className="nav-list">
-                            <li>
-                                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
-                                    {showNotifications ? (
-                                        <i className="bi bi-bell-fill"></i>
-                                    ) : (
-                                        <i className="bi bi-bell"></i>
-                                    )}
-                                    {unreadCount > 0 && (
-                                        <span className="notification-count">{unreadCount}</span>
-                                    )}
-                                </a>
-                            </li>
-                            <li>
-                                <a href="profile">
-                                    <i className="bi bi-person"></i>
-                                    <span className="links_name">
-                                        {data && data.nametitle + data.name + " " + data.surname}
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                {showNotifications && (
-                    <div className="notifications-dropdown" ref={notificationsRef}>
-                        <div className="notifications-head">
-                            <h2 className="notifications-title">การแจ้งเตือน</h2>
-                            <p className="notifications-allread" onClick={markAllAlertsAsViewed}>
-                                ทำเครื่องหมายว่าอ่านทั้งหมด
-                            </p>
-                            <div className="notifications-filter">
-                                <button className={filterType === "all" ? "active" : ""} onClick={() => handleFilterChange("all")}>
-                                    ดูทั้งหมด
-                                </button>
-                                <button className={filterType === "unread" ? "active" : ""} onClick={() => handleFilterChange("unread")}>
-                                    ยังไม่อ่าน
-                                </button>
-                            </div>
-                        </div>
-                        {filteredAlerts.length > 0 ? (
-                            <>
-                                {renderAlerts(filteredAlerts, token, userId, navigate, setAlerts, setUnreadCount, formatDate)}
-                            </>
-                        ) : (
-                            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                        )}
-                    </div>
-                )}
-                <div className="breadcrumbs mt-4">
-                    <ul>
-                        <li>
-                            <a href="home">
-                                <i class="bi bi-house-fill"></i>
-                            </a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="assessinhomesss" className="info">
-                                แบบประเมินเยี่ยมบ้าน
-                            </a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a>บันทึกการประเมิน</a>
-                        </li>
-                    </ul>
-                </div>
-                <div className="toolbar"></div>
-                <div className="content">
-                <div className="patient-card patient-card-style">
-            <p className="patient-name">
-              <label>ข้อมูลผู้ป่วย</label>
-            </p>
-
-            <div className="info-container">
-              <div className="info-row">
-                <div className="info-item">
-                  
-                  <label>ชื่อ-สกุล:</label>{" "}
-                  <span>
-                    {name} {surname}
+          <div className="header">แบบประเมินเยี่ยมบ้าน</div>
+          <div className="profile_details">
+            <ul className="nav-list">
+              <li>
+                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                  {showNotifications ? (
+                    <i className="bi bi-bell-fill"></i>
+                  ) : (
+                    <i className="bi bi-bell"></i>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="notification-count">{unreadCount}</span>
+                  )}
+                </a>
+              </li>
+              <li>
+                <a href="profile">
+                  <i className="bi bi-person"></i>
+                  <span className="links_name">
+                    {data && data.nametitle + data.name + " " + data.surname}
                   </span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        {showNotifications && (
+          <div className="notifications-dropdown" ref={notificationsRef}>
+            <div className="notifications-head">
+              <h2 className="notifications-title">การแจ้งเตือน</h2>
+            </div>
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${filterType === "all" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
                 </div>
-                <div className="info-item">
-                  <label>อายุ:</label>{" "}
-                  <span>
-                    {birthday
-                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
-                      : "0 ปี 0 เดือน"}
-                  </span>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">{unreadCount}</span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
                 </div>
-                <div className="info-item">
-                  <label>เพศ:</label> <span>{gender}</span>
+              </div>
+              <div
+                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "normal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
                 </div>
               </div>
 
-              <div className="info-row">
-                <div className="info-item">
-                  <label>HN:</label>{" "}
-                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+              <div
+                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
                 </div>
-                <div className="info-item">
-                  <label>AN:</label>{" "}
-                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
-                </div>
-                <div className="info-item full-width">
-                  <label>ผู้ป่วยโรค:</label>{" "}
-                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
                 </div>
               </div>
             </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
+                )}
+              </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-                    <div className="content-toolbar">
-                    <div className="toolbar ">
-                    {AgendaForms && AgendaForms.length > 0 && (
+        )}
+        <div className="breadcrumbs mt-4">
+          <ul>
+            <li>
+              <a href="home">
+                <i class="bi bi-house-fill"></i>
+              </a>
+            </li>
+            <li className="arrow">
+              <i class="bi bi-chevron-double-right"></i>
+            </li>
+            <li>
+              <a href="assessinhomesss" className="info">
+                แบบประเมินเยี่ยมบ้าน
+              </a>
+            </li>
+            <li className="arrow">
+              <i class="bi bi-chevron-double-right"></i>
+            </li>
+            <li>
+              <a>บันทึกการประเมิน</a>
+            </li>
+          </ul>
+        </div>
+        <div className="toolbar"></div>
+        <div className="content">
+          <div>
+            <p className="headerassesment">
+              {name} {surname}
+            </p>
+            {birthday ? (
+              <p className="textassesment">
+                <label>อายุ:</label>{" "}
+                <span>
+                  {userAge} ปี {userAgeInMonths} เดือน
+                </span>{" "}
+                <label>เพศ:</label> <span>{gender}</span>
+              </p>
+            ) : (
+              <p className="textassesment">
+                <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
+                <label>เพศ:</label> <span>{gender}</span>
+              </p>
+            )}
+            <p className="textassesment">
+              <label>HN:</label>{" "}
+              <span>
+                {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
+              </span>
+              <label>AN:</label>{" "}
+              <span>
+                {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
+              </span>
+              <label>ผู้ป่วยโรค:</label>{" "}
+              <span>
+                {medicalData && medicalData.Diagnosis
+                  ? medicalData.Diagnosis
+                  : "ไม่มีข้อมูล"}
+              </span>
+            </p>
+          </div>
+          <div className="toolbar ">
+            {AgendaForms && AgendaForms.length > 0 && (
 
-                        <button
-                            className="btn btn-primary add-assessment-btn"
-                            onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
-                        >
-                            <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                            เพิ่มการประเมิน
-                        </button>
-                    )}
-                </div>
-                </div>
-                <div className="nameass mt-5">
-                    <h4>
-                        ประเมิน Agenda
-                    </h4>
-                </div>
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th style={{ width: "10%" }}>#</th>
-                            <th>วันที่บันทึก</th>
-                            <th>วันที่แก้ไขล่าสุด</th>
-                            <th>ผลการประเมิน</th>
-                            <th>ผู้ประเมิน</th>
-                        </tr>
+              <button
+                className="btn btn-primary add-assessment-btn"
+                onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
+              >
+                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                เพิ่มการประเมิน
+              </button>
+            )}
+          </div>
+          <div className="nameass mt-5">
+            <h4>
+              ประเมิน Agenda
+            </h4>
+          </div>
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th style={{ width: "5%" }}>#</th>
+                <th style={{ width: "25%" }}>วันที่บันทึก</th>
+                <th style={{ width: "25%" }}>วันที่แก้ไขล่าสุด</th>
+                <th>ผลการประเมิน</th>
+                <th>ผู้ประเมิน</th>
+              </tr>
 
-                    </thead>
-                    <tbody>
-                        {AgendaForms.length > 0 ? (
-                            AgendaForms.map((form, index) => (
-                                <tr key={form._id}
-                                    onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
-                                    style={{ cursor: "pointer" }}
-                                >
-                                    <td style={{ width: "10%" }}>{index + 1}</td>
-                                    <td>{formatDate(form.createdAt)}</td>
-                                    <td>{formatDate(form.updatedAt)}</td>
-                                    <td> <span className="normal-status">{form.status_agenda}</span></td>
-                                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            // แสดงข้อความเมื่อไม่มีข้อมูล
-                            <tr>
-                                <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                    <a
-                                        className="info"
-                                        onClick={() =>
-                                            navigate("/agendaform", { state: { id: userData._id } })
-                                        }
-                                    >
-                                        <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                                    </a>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
+            </thead>
+            <tbody>
+              {AgendaForms.length > 0 ? (
+                AgendaForms.map((form, index) => (
+                  <tr key={form._id}
+                    onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <td style={{ width: "5%" }}>{index + 1}</td>
+                    <td style={{ width: "25%" }}>{formatDate(form.createdAt)}</td>
+                    <td style={{ width: "25%" }}>
+                      {form.updatedAt && form.updatedAt !== form.createdAt ? (
+                        formatDate(form.updatedAt)
+                      ) : (
+                        <span className="not-evaluated">ยังไม่มีการแก้ไขการประเมิน</span>
+                      )}
+                    </td>
+                    <td><span className="normal-status">{form.status_agenda}</span></td>
+                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                    <a className="info" onClick={() => navigate("/agendaform", { state: { id: userData._id } })}>
+                      <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                    </a>
+                  </td>
+                </tr>
+              )}
+            </tbody>
 
                 </table>
-                <div className="content-toolbar">
                     <div className="toolbar mt-4">
                         {AssessinhomeForms && AssessinhomeForms.length > 0 && (
 
@@ -705,59 +891,64 @@ export default function Assessinhomesssuser({}) {
                             </button>
                         )}
                     </div>
-                    </div>
                     <div className="nameass mt-5">
                         <h4>
                             ประเมิน IN-HOME-SSS
                         </h4>
                     </div>
 
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th style={{ width: "10%" }}>#</th>
-                                <th>วันที่บันทึก</th>
-                                <th>วันที่แก้ไขล่าสุด</th>
-                                <th>ผลการประเมิน</th>
-                                <th>ผู้ประเมิน</th>
-                            </tr>
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th style={{ width: "5%" }}>#</th>
+                <th style={{ width: "25%" }}>วันที่บันทึก</th>
+                <th style={{ width: "25%" }}>วันที่แก้ไขล่าสุด</th>
+                <th>ผลการประเมิน</th>
+                <th>ผู้ประเมิน</th>
+              </tr>
 
-                        </thead>
-                        <tbody>
-                            {AssessinhomeForms.length > 0 ? (
-                                AssessinhomeForms.map((form, index) => (
-                                    <tr key={form._id}
-                                        onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
-                                        style={{ cursor: "pointer" }}
-                                    >
-                                        <td style={{ width: "10%" }}>{index + 1}</td>
-                                        <td>{formatDate(form.createdAt)}</td>
-                                        <td>{formatDate(form.updatedAt)}</td>
-                                        <td> <span className="normal-status">{form.status_inhome}</span></td>
-                                        <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
-                                    </tr>
-                                ))
-                            ) : (
-                                // แสดงข้อความเมื่อไม่มีข้อมูล
-                                <tr>
-                                    <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                                        <a
-                                            className="info"
-                                            onClick={() =>
-                                                navigate("/assessinhomesssform", { state: { id: userData._id } })
-                                            }
-                                        >
-                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                                        </a>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+            </thead>
+            <tbody>
+              {AssessinhomeForms.length > 0 ? (
+                AssessinhomeForms.map((form, index) => (
+                  <tr key={form._id}
+                    onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <td style={{ width: "5%" }}>{index + 1}</td>
+                    <td style={{ width: "25%" }}>{formatDate(form.createdAt)}</td>
+                    <td style={{ width: "25%" }}>
+                      {form.updatedAt && form.updatedAt !== form.createdAt ? (
+                        formatDate(form.updatedAt)
+                      ) : (
+                        <span className="not-evaluated">ยังไม่มีการแก้ไขการประเมิน</span>
+                      )}
+                    </td>
+                    <td> <span className="normal-status">{form.status_inhome}</span></td>
+                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                  </tr>
+                ))
+              ) : (
+                // แสดงข้อความเมื่อไม่มีข้อมูล
+                <tr>
+                  <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                    <a
+                      className="info"
+                      onClick={() =>
+                        navigate("/assessinhomesssform", { state: { id: userData._id } })
+                      }
+                    >
+                      <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                    </a>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
 
-                </div>
-                
-            </div>
-        </main>
-    );
+        </div>
+
+      </div>
+    </main>
+  );
 }

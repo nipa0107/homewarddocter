@@ -1,4 +1,4 @@
-import React, { useCallback,useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import "../css/assessment.css";
@@ -184,6 +184,7 @@ export default function Assessment() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -314,7 +315,7 @@ export default function Assessment() {
   
   const fetchAndSetAlerts = (token, userId) => {
     fetchAlerts(token, userId)
-          .then((alerts, userId) => {
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -395,20 +396,20 @@ export default function Assessment() {
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
       : filterType === "assessment"
-      ? alerts.filter(
+        ? alerts.filter(
           (alert) =>
             alert.alertType === "assessment" &&
             alert.alertMessage !== "เคสฉุกเฉิน"
         )
-      : filterType === "abnormal"
-      ? alerts.filter(
-          (alert) =>
-            alert.alertType === "abnormal" ||
-            alert.alertMessage === "เคสฉุกเฉิน"
-        )
-      : filterType === "normal"
-      ? alerts.filter((alert) => alert.alertType === "normal")
-      : alerts;
+        : filterType === "abnormal"
+          ? alerts.filter(
+            (alert) =>
+              alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน"
+          )
+          : filterType === "normal"
+            ? alerts.filter((alert) => alert.alertType === "normal")
+            : alerts;
 
   const getFilterLabel = (type) => {
     switch (type) {
@@ -491,11 +492,9 @@ export default function Assessment() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
 
@@ -834,7 +833,6 @@ export default function Assessment() {
             </tbody>
           </table>
         </div>
-        </div>
       {showNotifications && (
         <div className="notifications-dropdown" ref={notificationsRef}>
           <div className="notifications-head">
@@ -898,54 +896,53 @@ export default function Assessment() {
               </div>
             </div>
 
-            <div
-              className={`notification-box ${
-                filterType === "assessment" ? "active" : ""
-              }`}
-              onClick={() => handleFilterChange("assessment")}
-            >
-              <div className="notification-item">
-                <i className="bi bi-clipboard-check"></i>
-                ประเมินอาการ
+              <div
+                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
               </div>
-              <div className="notification-right">
-                {unreadCountsByType.assessment > 0 && (
-                  <span className="notification-count-noti">
-                    {unreadCountsByType.assessment}
-                  </span>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
+              <p
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
+              >
+                ทำเครื่องหมายว่าอ่านทั้งหมด
+              </p>
+            </div>
+            {filteredAlerts.length > 0 ? (
+              <div>
+                {renderAlerts(
+                  filteredAlerts,
+                  token,
+                  userId,
+                  navigate,
+                  setAlerts,
+                  setUnreadCount,
+                  formatDate
                 )}
-                <i class="bi bi-chevron-right"></i>
               </div>
-            </div>
+            ) : (
+              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+            )}
           </div>
-          <div className="selected-filter">
-            <p>
-              การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-            </p>
-            <p
-              className="mark-all-read-btn"
-              onClick={() => markAllByTypeAsViewed(filterType)}
-            >
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-          </div>
-          {filteredAlerts.length > 0 ? (
-            <div>
-              {renderAlerts(
-                filteredAlerts,
-                token,
-                userId,
-                navigate,
-                setAlerts,
-                setUnreadCount,
-                formatDate
-              )}
-            </div>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+        )}
       </div>
     </main>
   );

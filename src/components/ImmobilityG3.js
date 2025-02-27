@@ -1,51 +1,50 @@
-import React, { useCallback,useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import { fetchAlerts } from './Alert/alert';
-import { renderAlerts } from './Alert/renderAlerts';
-import io from 'socket.io-client';
+import { fetchAlerts } from "./Alert/alert";
+import { renderAlerts } from "./Alert/renderAlerts";
+import io from "socket.io-client";
 const socket = io("http://localhost:5000");
-export default function Assessreadinessuser({ }) {
+
+export default function ImmobilityG3({ }) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [isActive, setIsActive] = useState(false);
     const [token, setToken] = useState("");
+    const [patientForms, setPatientForms] = useState("");
+    const [datauser, setDatauser] = useState([]);
     const location = useLocation();
-    const { id } = location.state;
+    const { id } = location.state || {};
     const [username, setUsername] = useState("");
     const [name, setName] = useState("");
     const [surname, setSurname] = useState("");
     const [gender, setGender] = useState("");
     const [birthday, setBirthday] = useState("");
-    const [readinessAssessments, setReadinessAssessments] = useState([]);
-    const [MPersonnel, setMPersonnel] = useState([]);
+    const [assessments, setAssessments] = useState([]);
+    const [mpersonnel, setMPersonnel] = useState([]);
     const [userAge, setUserAge] = useState(0);
     const [userAgeInMonths, setUserAgeInMonths] = useState(0);
     const [userData, setUserData] = useState(null);
     const [medicalData, setMedicalData] = useState([]);
-    const [allUsers, setAllUsers] = useState([]);
-    const [datauser, setDatauser] = useState([]);
     const [alerts, setAlerts] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
     const [userId, setUserId] = useState("");
-    const [readinessForms, setReadinessForms] = useState([]);
     const bellRef = useRef(null);
+    const [relatedPatientForms, setRelatedPatientForms] = useState([]);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
-  const hasFetchedUserData = useRef(false);
     const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
         assessment: 0,
         abnormal: 0,
         normal: 0,
     });
-
 
     const fetchLatestAssessments = async () => {
         try {
@@ -88,7 +87,6 @@ export default function Assessreadinessuser({ }) {
         },
         [alerts, userId]
     );
-
     useEffect(() => {
         if (!userId) return;
         const updatedCounts = {
@@ -171,6 +169,10 @@ export default function Assessreadinessuser({ }) {
         };
     }, []);
 
+    useEffect(() => {
+        getAllUser();
+    }, []);
+
     const toggleNotifications = (e) => {
         e.stopPropagation();
         if (showNotifications) {
@@ -192,12 +194,13 @@ export default function Assessreadinessuser({ }) {
     };
 
     useEffect(() => {
-        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
 
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+
 
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
@@ -229,6 +232,22 @@ export default function Assessreadinessuser({ }) {
             });
     };
 
+    const getAllUser = () => {
+        fetch("http://localhost:5000/alluser", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                console.log(data, "AllUser");
+                setDatauser(data.data);
+                console.log(datauser, "Datauser");
+            });
+    };
+
+
     const fetchAndSetAlerts = (token, userId) => {
         fetchAlerts(token, userId)
             .then((alerts, userId) => {
@@ -244,8 +263,6 @@ export default function Assessreadinessuser({ }) {
     };
 
     useEffect(() => {
-        if (hasFetchedUserData.current) return; 
-        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 
@@ -254,6 +271,7 @@ export default function Assessreadinessuser({ }) {
                 .then((user) => {
                     setUserId(user._id);
                     fetchAndSetAlerts(token, user._id);
+                    getAllUser();
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
@@ -342,11 +360,73 @@ export default function Assessreadinessuser({ }) {
                 return "ไม่ทราบ";
         }
     };
+    //Immobility
+    const [group3Users, setGroup3Users] = useState([]); // เก็บข้อมูลผู้ใช้อยู่ในกลุ่มที่ 3
+
+    useEffect(() => {
+        const fetchGroup3Users = async () => {
+            try {
+                const response = await fetch("http://localhost:5000/immobility/group3");
+                const result = await response.json();
+                if (response.ok) {
+                    setGroup3Users(result.data); // เก็บข้อมูลที่ดึงมา
+                } else {
+                    console.error("Failed to fetch group 3 data:", result.error);
+                }
+            } catch (error) {
+                console.error("Error fetching group 3 users:", error);
+            }
+        };
+
+        fetchGroup3Users(); // เรียกฟังก์ชันดึงข้อมูล
+    }, []);
+
+    const [filteredUsers, setFilteredUsers] = useState(group3Users);
+
+    useEffect(() => {
+        setFilteredUsers(group3Users);
+    }, [group3Users]);
+
+
+    const [selectedFilter, setSelectedFilter] = useState("all"); // ค่าดีฟอลต์
+
+    const handleDateFilter = (filterType) => {
+        setSelectedFilter(filterType); // อัปเดตค่าตัวเลือกที่เลือก
+        const now = new Date();
+        let filtered = [];
+
+        if (filterType === "latest") {
+            // เรียงข้อมูลจากล่าสุดไปเก่าสุด
+            filtered = [...group3Users].sort(
+                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+        } else if (filterType === "7days") {
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // คำนวณย้อนหลัง 7 วัน
+            filtered = group3Users.filter((user) => {
+                const userDate = new Date(user.createdAt);
+                return userDate >= sevenDaysAgo && userDate <= now;
+            });
+        } else if (filterType === "30days") {
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setMonth(thirtyDaysAgo.getMonth() - 1); // คำนวณย้อนหลัง 30 วัน
+            filtered = group3Users.filter((user) => {
+                const userDate = new Date(user.createdAt);
+                return userDate >= thirtyDaysAgo && userDate <= now;
+            });
+        } else {
+            filtered = group3Users; // แสดงทั้งหมด
+        }
+
+        setFilteredUsers(filtered);
+    };
+
+
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getuser/${id}`);
+                const response = await fetch(`http://localhost:5000/getuser`);
                 const data = await response.json();
                 setUserData(data);
                 setUsername(data.username);
@@ -360,7 +440,7 @@ export default function Assessreadinessuser({ }) {
         };
 
         fetchData();
-    }, [id]);
+    },);
 
     useEffect(() => {
         if (userData && userData._id) {
@@ -373,7 +453,6 @@ export default function Assessreadinessuser({ }) {
                     console.log("Medical Information:", data);
                     setMedicalData(data.data);
                     console.log("22:", medicalData);
-
                 } catch (error) {
                     console.error("Error fetching medical information:", error);
                 }
@@ -383,9 +462,93 @@ export default function Assessreadinessuser({ }) {
         }
     }, [userData]);
 
-    const currentDate = new Date();
+    useEffect(() => {
+        if (id) {
+            const fetchPatientFormDetails = async () => {
+                try {
+                    const response = await fetch(`http://localhost:5000/getpatientform/${id}`);
+                    const data = await response.json();
 
-    const userBirthday = new Date(birthday);
+                    if (data.success) {
+                        setPatientForms([data.data]); // Set the specific PatientForm details
+                    } else {
+                        console.error("Failed to fetch PatientForm details:", data.error);
+                    }
+                } catch (error) {
+                    console.error("Error fetching PatientForm details:", error);
+                }
+            };
+
+            fetchPatientFormDetails();
+        }
+    }, [id]);
+
+
+    const fetchAndMatchAlerts = async () => {
+        try {
+            // ดึงข้อมูล alerts
+            const alertsData = await fetchAlerts(token);
+            setAlerts(alertsData);
+
+            // กรองข้อมูล patientForms ที่ตรงกับ patientFormId ของ Alert
+            const matchedPatientForms = patientForms.filter((form) =>
+                alertsData.some((alert) => alert.patientFormId === form._id)
+            );
+
+            setRelatedPatientForms(matchedPatientForms);
+            console.log("Matched Patient Forms:", matchedPatientForms);
+        } catch (error) {
+            console.error("Error fetching or matching alerts:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (patientForms.length > 0) {
+            fetchAndMatchAlerts();
+        }
+    }, [patientForms]);
+
+    const fetchAssessments = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/allAssessment`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setAssessments(data.data);
+            console.log("AssessmentForms:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchAssessments();
+    }, []);
+
+    const fetchMpersonnel = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
+            setMPersonnel(data.data);
+            console.log("Mpersonnel:", data.data);
+        } catch (error) {
+            console.error("Error fetching patient forms:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchMpersonnel();
+    }, []);
+
+    const currentDate = new Date();
 
     useEffect(() => {
         if (birthday) {
@@ -441,72 +604,6 @@ export default function Assessreadinessuser({ }) {
             } น.`;
     };
 
-
-    const fetchreadinessForms = async () => {
-        try {
-            const response = await fetch(
-                `http://localhost:5000/getReadinessForms/${id}`,
-                {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            const data = await response.json();
-            setReadinessForms(data.data);
-            console.log("Patient Forms1:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
-    };
-
-    useEffect(() => {
-        if (id) {
-            fetchreadinessForms();
-        }
-    }, [id]);
-
-    const fetchMpersonnel = async () => {
-        try {
-            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            setMPersonnel(data.data);
-            console.log("Mpersonnel:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchMpersonnel();
-    }, []);
-
-    const fetchReadinessAssessments = async () => {
-        try {
-            const response = await fetch(`http://localhost:5000/allReadinessAssessment`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            const data = await response.json();
-            setReadinessAssessments(data.data);
-            console.log("AssessmentForms:", data.data);
-        } catch (error) {
-            console.error("Error fetching patient forms:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchReadinessAssessments();
-    }, []);
-
     useEffect(() => {
         // ดึงข้อมูล unread count เมื่อเปิดหน้า
         const fetchUnreadCount = async () => {
@@ -528,6 +625,23 @@ export default function Assessreadinessuser({ }) {
         };
         fetchUnreadCount();
     }, []);
+
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const tableRef = useRef(null); // เพิ่ม useRef สำหรับตาราง
+    const usersPerPage = 4;
+    // Calculate the current users to display
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = group3Users.slice(indexOfFirstUser, indexOfLastUser);
+
+    const handleClick = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+    // Calculate total pages
+    const totalPages = Math.ceil(group3Users.length / usersPerPage);
+
+
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -607,11 +721,15 @@ export default function Assessreadinessuser({ }) {
 
             <div className="home_content">
                 <div className="homeheader">
-                    <div className="header">ประเมินความพร้อมการดูแล</div>
+                    <div className="header">ผู้ป่วยที่ช่วยเหลือตัวเองได้น้อย</div>
                     <div className="profile_details">
                         <ul className="nav-list">
                             <li>
-                                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                                <a
+                                    ref={bellRef}
+                                    className="bell-icon"
+                                    onClick={toggleNotifications}
+                                >
                                     {showNotifications ? (
                                         <i className="bi bi-bell-fill"></i>
                                     ) : (
@@ -633,6 +751,163 @@ export default function Assessreadinessuser({ }) {
                         </ul>
                     </div>
                 </div>
+
+                <div className="breadcrumbs mt-4">
+                    <ul>
+                        <li>
+                            <a href="home">
+                                <i class="bi bi-house-fill"></i>
+                            </a>
+                        </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li>
+                            <a>รายชื่อผู้ป่วยที่ช่วยเหลือตัวเองได้น้อย</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="container-fluid">
+                    <div className="align-item-end mb-3">
+                        <button className="dropdown btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            {selectedFilter === "all"
+                                ? "เลือกการแสดงข้อมูล"
+                                : selectedFilter === "latest"
+                                    ? "ล่าสุด"
+                                    : selectedFilter === "7days"
+                                        ? "7 วัน"
+                                        : "30 วัน"}
+                        </button>
+                        <ul className="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a
+                                    className={`dropdown-item ${selectedFilter === "latest" ? "active" : ""}`}
+                                    href="#"
+                                    onClick={() => handleDateFilter("latest")}
+                                >
+                                    ล่าสุด
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    className={`dropdown-item ${selectedFilter === "7days" ? "active" : ""}`}
+                                    href="#"
+                                    onClick={() => handleDateFilter("7days")}
+                                >
+                                    7 วัน
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    className={`dropdown-item ${selectedFilter === "30days" ? "active" : ""}`}
+                                    href="#"
+                                    onClick={() => handleDateFilter("30days")}
+                                >
+                                    30 วัน
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="table-responsive">
+                        {filteredUsers.length === 0 ? (
+                            <>
+                                <table className="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" style={{ width: "5%" }}>#</th>
+                                            <th scope="col">ชื่อ-สกุล</th>
+                                            <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                                            <th scope="col">คะแนนรวม</th>
+                                            <th scope="col">วันที่ประเมิน</th>
+                                            <th scope="col">สถานะ</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                                <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> {/* ข้อความเมื่อไม่มีข้อมูล */}
+                            </>
+                        ) : (
+                            <table className="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style={{ width: "5%" }}>#</th>
+                                        <th scope="col">ชื่อ-สกุล</th>
+                                        <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                                        <th scope="col">คะแนนรวม</th>
+                                        <th scope="col"  style={{ width: "30%" }}>วันที่ประเมิน</th>
+                                        <th scope="col">สถานะ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredUsers.slice(indexOfFirstUser, indexOfLastUser).map((user, index) => (
+                                        <tr
+                                            key={index}
+                                            onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                            style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
+                                        >
+                                            <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
+                                            <td>{user.user.name} {user.user.surname}</td>
+                                            <td style={{ width: "25%" }}>{user.Diagnosis}</td>
+                                            <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
+                                            <td  style={{ width: "30%" }}>{formatDate(user.createdAt)}</td>
+                                            <td>
+                                                <a
+                                                    href=""
+                                                    onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                                    style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
+                                                >
+                                                    รายละเอียด
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                        {/* {filteredUsers.length > 0 && (
+                            <nav aria-label="Page navigation example" className="mt-3">
+                                <ul className="pagination justify-content-end">
+                                    <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+                                        <a
+                                            className="page-link"
+                                            href="#"
+                                            onClick={() => handleClick(currentPage - 1)}
+                                        >
+                                            ก่อนหน้า
+                                        </a>
+                                    </li>
+                                    {Array.from({ length: totalPages }, (_, i) => (
+                                        <li
+                                            key={i + 1}
+                                            className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
+                                        >
+                                            <a
+                                                className="page-link"
+                                                href="#"
+                                                onClick={() => handleClick(i + 1)}
+                                            >
+                                                {i + 1}
+                                            </a>
+                                        </li>
+                                    ))}
+                                    <li
+                                        className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+                                    >
+                                        <a
+                                            className="page-link"
+                                            href="#"
+                                            onClick={() => handleClick(currentPage + 1)}
+                                        >
+                                            ถัดไป
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        )} */}
+                    </div>
+                </div>
+
                 {showNotifications && (
                     <div className="notifications-dropdown" ref={notificationsRef}>
                         <div className="notifications-head">
@@ -740,151 +1015,6 @@ export default function Assessreadinessuser({ }) {
                         )}
                     </div>
                 )}
-                <div className="breadcrumbs mt-4">
-                    <ul>
-                        <li>
-                            <a href="home">
-                                <i class="bi bi-house-fill"></i>
-                            </a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="assessreadiness" className="info">
-                                ประเมินความพร้อมการดูแล
-                            </a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a>บันทึกการประเมิน</a>
-                        </li>
-                    </ul>
-                </div>
-                <div className="content">
-                <div className="patient-card patient-card-style">
-            <p className="patient-name">
-              <label>ข้อมูลผู้ป่วย</label>
-            </p>
-
-            <div className="info-container">
-              <div className="info-row">
-                <div className="info-item">
-                  <label>ชื่อ-สกุล:</label>{" "}
-                  <span>
-                    {name} {surname}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <label>อายุ:</label>{" "}
-                  <span>
-                    {birthday
-                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
-                      : "0 ปี 0 เดือน"}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <label>เพศ:</label> <span>{gender}</span>
-                </div>
-              </div>
-
-              <div className="info-row">
-                <div className="info-item">
-                  <label>HN:</label>{" "}
-                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
-                </div>
-                <div className="info-item">
-                  <label>AN:</label>{" "}
-                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
-                </div>
-                <div className="info-item full-width">
-                  <label>ผู้ป่วยโรค:</label>{" "}
-                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="content-toolbar">
-                    <div className="toolbar">
-                        {readinessForms && readinessForms.length > 0 && (
-
-                            <button
-                                className="btn btn-primary add-assessment-btn"
-                                onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}
-                            >
-                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                                เพิ่มการประเมิน
-                            </button>
-                        )}
-                    </div>
-                    </div>
-                    {/* <br></br> */}
-                    <table className="table mt-5">
-                        <thead>
-                            <tr>
-                                <th style={{ width: "10%" }}>#</th>
-                                <th>วันที่บันทึก</th>
-                                <th>ผลการประเมินความพร้อม</th>
-                                <th>ผู้บันทึก</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {readinessForms.length > 0 ? (
-                                readinessForms
-                                    // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                                    .map((form, index) => (
-                                        <tr
-                                            key={form._id}
-                                            onClick={() => navigate("/detailassessreadiness", { state: { id: form._id } })}
-                                            style={{ cursor: "pointer"}} // Add cursor pointer to indicate it's clickable
-                                        >
-                                            <td style={{ width: "10%" }}>{index + 1}</td>
-                                            <td>{formatDate(form.createdAt)}</td>
-                                            <td>
-                                                {readinessAssessments.some(
-                                                    (readinessassessment) => readinessassessment.ReadinessForm === form._id
-                                                ) ? (
-                                                    readinessAssessments.map((readinessassessment) =>
-                                                        readinessassessment.ReadinessForm === form._id ? (
-                                                            <span
-                                                                key={readinessassessment._id}
-                                                                className={
-                                                                    readinessassessment.readiness_status === "มีความพร้อม"
-                                                                        ? "normal-status"
-                                                                        : readinessassessment.readiness_status === "ยังไม่มีความพร้อม"
-                                                                            ? "abnormal-status"
-                                                                            : // readinessassessment.status_name === "ผิดปกติ" ? "abnormal-status" :
-                                                                            "end-of-treatment-status"
-                                                                }
-                                                            >
-                                                                {readinessassessment.readiness_status}
-                                                            </span>
-                                                        ) : null
-                                                    )
-                                                ) : (
-                                                    <span className="not-evaluated">
-                                                        ยังไม่ได้ประเมินความพร้อม
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ยังไม่ได้รับการประเมิน"}</td>
-
-                                        </tr>
-                                    ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" style={{ textAlign: "center" }}>
-                                        <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}>
-                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                                        </a>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </main>
     );

@@ -201,6 +201,7 @@ tr.assessmentnull {
 .deleteimg1 button {
   border-radius: 5px;
   width: 8rem;
+  padding: 9px;
   background-color: rgb(236, 78, 78);
   color: white;
   border: none;
@@ -209,25 +210,35 @@ tr.assessmentnull {
 
 .editimg1 button {
   border-radius: 5px;
-  width: 8rem;
+  width: 6rem;
+  padding: 6px;
   background-color: #ffde59;
   color: black;
   border: none;
-  cursor: pointer;
-
+  /* cursor: pointer ; */
+}
+.editimg1 button:hover{
+  background-color: #ffd52d;
+}
+.user-fieldset {
+  border-radius: 8px; /* ทำให้ขอบมน */
 }
 
-.adddata {
-  width: 8rem;
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.user-fieldset legend {
+  font-weight: bold; /* ทำให้ตัวอักษรหนา */
+  padding: 5px 10px; /* ระยะห่างภายใน */
+  color: #333; /* สีตัวอักษร */
+  /* background-color: #e7f5fe;  */
+  font-size: 1.3rem;
+  /* border-bottom: 1px solid #d7eefc; */
 }
+
+
 
 .adddata button {
   border-radius: 5px;
   width: 8rem;
+  padding: 9px;
   background-color: #87CEFA;
   color: white;
   border: none;
@@ -288,7 +299,24 @@ tr.assessmentnull {
   display: flex;
   justify-content: space-between;
   padding-left: 6%;
+  /* border: solid 1px #95d7ff;
+  border-radius: 5px; */
 
+}
+
+.forminfo {
+  background-color: white;
+  position: relative;
+  width: 70%;
+  padding: 1em;
+  border-radius: 8px;
+  border-left: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  border-top: 5px solid #87CEFA;
+  border-bottom: 5px solid #87CEFA;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
+  margin-right: auto;
+  margin-left: auto;
 }
 
 .info3 .header {
@@ -767,7 +795,7 @@ p .label {
 }
 
 .user-info-caregiver {
-  padding-left: 7%;
+  padding-left: 1%;
 }
 
 .caregiver-section {
@@ -787,13 +815,11 @@ p .label {
   /* หรือค่าที่เหมาะสม */
   width: 100%;
   /* ให้ขยายเต็มเฉพาะ container */
-  margin: 10px;
+  margin: 5px;
   /* จัดให้อยู่กึ่งกลาง */
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* .caregiver-card {
@@ -823,7 +849,10 @@ p .label {
   gap: 1rem;
   justify-content: flex-start;
 }
-
+.inline-container-caregiver b{
+  font-weight: bold;
+  color: #007BFF;
+}
 .button-container-vertical {
   display: flex;
   flex-direction: column;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -38,74 +38,138 @@ export default function DetailAssessreadiness() {
   const [readinessAssessments, setReadinessAssessments] = useState([]);
   const bellRef = useRef(null);
   const hasFetchedUserData = useRef(false);
-
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const [latestAssessments, setLatestAssessments] = useState({});
+  const [unreadCountsByType, setUnreadCountsByType] = useState({
+    assessment: 0,
+    abnormal: 0,
+    normal: 0,
+  });
+
+  const fetchLatestAssessments = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/latest-assessments");
+      const data = await response.json();
+      console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+
+      if (data.status === "ok") {
+        const assessmentsMap = data.data.reduce((acc, item) => {
+          acc[item._id] = item.latestStatusName;
+          return acc;
+        }, {});
+        console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+
+        setLatestAssessments(assessmentsMap);
+      }
+    } catch (error) {
+      console.error("Error fetching latest assessments:", error);
+    }
+  };
 
   useEffect(() => {
-    socket?.on('newAlert', (alert) => {
-      console.log('Received newAlert:', alert);
-  
+    fetchLatestAssessments();
+  }, []);
+
+  const getUnreadCount = useCallback(
+    (type) => {
+      const filteredByType = alerts.filter(
+        (alert) =>
+          (type === "assessment" &&
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน") ||
+          (type === "abnormal" &&
+            (alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน")) ||
+          (type === "normal" && alert.alertType === "normal")
+      );
+      return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+        .length;
+    },
+    [alerts, userId]
+  );
+
+  useEffect(() => {
+    if (!userId) return;
+    const updatedCounts = {
+      assessment: getUnreadCount("assessment"),
+      abnormal: getUnreadCount("abnormal"),
+      normal: getUnreadCount("normal"),
+    };
+    setUnreadCountsByType(updatedCounts);
+  }, [alerts, userId]);
+
+  useEffect(() => {
+    socket?.on("newAlert", (alert) => {
+      console.log("Received newAlert:", alert);
+
+      if (alert.MPersonnel?.id === userId) {
+        console.log("Ignoring alert from self");
+        return;
+      }
+
       setAlerts((prevAlerts) => {
         const isExisting = prevAlerts.some(
           (existingAlert) => existingAlert.patientFormId === alert.patientFormId
         );
-  
+
         let updatedAlerts;
-  
+
         if (isExisting) {
-          
-          if (alert.alertMessage === 'เป็นเคสฉุกเฉิน') {
-            updatedAlerts = [...prevAlerts, alert];
-          } else {
-            updatedAlerts = prevAlerts.map((existingAlert) =>
-              existingAlert.patientFormId === alert.patientFormId ? alert : existingAlert
-            );
-          }
+          updatedAlerts = prevAlerts.map((existingAlert) =>
+            existingAlert.patientFormId === alert.patientFormId
+              ? alert
+              : existingAlert
+          );
         } else {
           updatedAlerts = [...prevAlerts, alert];
         }
-  
-        return updatedAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+        return [...updatedAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
       });
     });
-  
-    socket?.on('deletedAlert', (data) => {
+
+    socket?.on("deletedAlert", (data) => {
       setAlerts((prevAlerts) => {
         const filteredAlerts = prevAlerts.filter(
           (alert) => alert.patientFormId !== data.patientFormId
         );
-        return filteredAlerts.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+        return [...filteredAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
       });
     });
-  
+
     return () => {
-      socket?.off('newAlert');
-      socket?.off('deletedAlert');
+      socket?.off("newAlert");
+      socket?.off("deletedAlert");
     };
-  }, []);
-  
+  }, [userId]);
+
   useEffect(() => {
     const currentUserId = sender._id;
-  
+
     const unreadAlerts = alerts.filter(
-      (alert) => Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
     );
-  
-    setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
-  }, [alerts]);
-  
-  
-    useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
-      });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
-      };
-    }, [socket]);
+
+    setUnreadCount(unreadAlerts.length);
+  }, [alerts, sender._id]);
+
+  useEffect(() => {
+    socket?.on("TotalUnreadCounts", (data) => {
+      console.log("📦 TotalUnreadCounts received:", data);
+      setUserUnreadCounts(data);
+    });
+
+    return () => {
+      socket?.off("TotalUnreadCounts");
+    };
+  }, []);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -119,7 +183,8 @@ export default function DetailAssessreadiness() {
 
   const handleClickOutside = (e) => {
     if (
-      notificationsRef.current && !notificationsRef.current.contains(e.target) &&
+      notificationsRef.current &&
+      !notificationsRef.current.contains(e.target) &&
       !bellRef.current.contains(e.target)
     ) {
       setShowNotifications(false);
@@ -127,12 +192,13 @@ export default function DetailAssessreadiness() {
   };
 
   useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -152,7 +218,7 @@ export default function DetailAssessreadiness() {
           _id: data.data._id,
         });
         setData(data.data);
-        if (data.data == "token expired") {
+        if (data.data === "token expired") {
           window.localStorage.clear();
           window.location.href = "./";
         }
@@ -164,8 +230,8 @@ export default function DetailAssessreadiness() {
   };
 
   const fetchAndSetAlerts = (token, userId) => {
-    fetchAlerts(token)
-      .then((alerts) => {
+    fetchAlerts(token, userId)
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -193,28 +259,47 @@ export default function DetailAssessreadiness() {
           console.error("Error verifying token:", error);
         });
     }
-  }, []);
+  }, [token]);
 
-  const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+  const markAllByTypeAsViewed = (type) => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ userId: userId }),
+      body: JSON.stringify({ userId: userId, type: type }),
     })
       .then((res) => res.json())
       .then((data) => {
-        const updatedAlerts = alerts.map((alert) => ({
-          ...alert,
-          viewedBy: [...alert.viewedBy, userId],
-        }));
-        setAlerts(updatedAlerts);
-        setUnreadCount(0);
+        if (data.message === "All selected alerts marked as viewed") {
+          const updatedAlerts = alerts.map((alert) => {
+            if (
+              type === "all" ||
+              ((alert.alertType === type ||
+                (type === "abnormal" &&
+                  (alert.alertType === "abnormal" ||
+                    alert.alertMessage === "เคสฉุกเฉิน")) ||
+                (type === "assessment" &&
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                !alert.viewedBy.includes(userId))
+            ) {
+              return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+            }
+            return alert;
+          });
+
+          setAlerts(updatedAlerts);
+          // setUnreadCount(0);
+          const unreadAlerts = updatedAlerts.filter(
+            (alert) => !alert.viewedBy.includes(userId)
+          );
+          setUnreadCount(unreadAlerts.length);
+        }
       })
       .catch((error) => {
-        console.error("Error marking all alerts as viewed:", error);
+        console.error("Error marking alerts as viewed:", error);
       });
   };
 
@@ -225,7 +310,38 @@ export default function DetailAssessreadiness() {
   const filteredAlerts =
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
-      : alerts;
+      : filterType === "assessment"
+        ? alerts.filter(
+          (alert) =>
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน"
+        )
+        : filterType === "abnormal"
+          ? alerts.filter(
+            (alert) =>
+              alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน"
+          )
+          : filterType === "normal"
+            ? alerts.filter((alert) => alert.alertType === "normal")
+            : alerts;
+
+  const getFilterLabel = (type) => {
+    switch (type) {
+      case "all":
+        return "ทั้งหมด";
+      case "unread":
+        return "ยังไม่อ่าน";
+      case "normal":
+        return "บันทึกอาการ";
+      case "abnormal":
+        return "ผิดปกติ";
+      case "assessment":
+        return "ประเมินอาการ";
+      default:
+        return "ไม่ทราบ";
+    }
+  };
 
   const currentDate = new Date();
 
@@ -304,7 +420,7 @@ export default function DetailAssessreadiness() {
         const data = await response.json();
 
         if (response.ok) {
-          setReadinessForms(data.data); 
+          setReadinessForms(data.data);
         } else {
           console.error(data.message);
         }
@@ -364,7 +480,7 @@ export default function DetailAssessreadiness() {
   const handleStatusChange = (status) => {
     setReadinessStatus(status); // ตรงนี้ควรจะอัปเดต readinessStatus
   };
-  
+
 
   const handleDetailChange = (e) => {
     setDetail(e.target.value);
@@ -374,7 +490,7 @@ export default function DetailAssessreadiness() {
     e.preventDefault();
 
     try {
-     
+
 
       // ทำการบันทึกข้อมูล readiness_status, detail, mpersonnel, readinessForm ID
       const response = await fetch(`http://localhost:5000/addReadinessAssessment`, {
@@ -436,27 +552,27 @@ export default function DetailAssessreadiness() {
 
   const [isEditing, setIsEditing] = useState(false);
 
-    useEffect(() => {
-      // ดึงข้อมูล unread count เมื่อเปิดหน้า
-      const fetchUnreadCount = async () => {
-        try {
-          const response = await fetch(
-            "http://localhost:5000/update-unread-count"
-          );
-  
-          if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-          }
-          const data = await response.json();
-          if (data.success) {
-            setUserUnreadCounts(data.users);
-          }
-        } catch (error) {
-          console.error("Error fetching unread count:", error);
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
+
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
         }
-      };
-      fetchUnreadCount();
-    }, []);
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    fetchUnreadCount();
+  }, []);
   return (
     <main className="body">
       <ToastContainer />
@@ -567,29 +683,94 @@ export default function DetailAssessreadiness() {
           <div className="notifications-dropdown" ref={notificationsRef}>
             <div className="notifications-head">
               <h2 className="notifications-title">การแจ้งเตือน</h2>
+            </div>
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${filterType === "all" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
+                </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">{unreadCount}</span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "normal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+
+              <div
+                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
               <p
-                className="notifications-allread"
-                onClick={markAllAlertsAsViewed}
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
               >
                 ทำเครื่องหมายว่าอ่านทั้งหมด
               </p>
-              <div className="notifications-filter">
-                <button
-                  className={filterType === "all" ? "active" : ""}
-                  onClick={() => handleFilterChange("all")}
-                >
-                  ดูทั้งหมด
-                </button>
-                <button
-                  className={filterType === "unread" ? "active" : ""}
-                  onClick={() => handleFilterChange("unread")}
-                >
-                  ยังไม่อ่าน
-                </button>
-              </div>
             </div>
             {filteredAlerts.length > 0 ? (
-              <>
+              <div>
                 {renderAlerts(
                   filteredAlerts,
                   token,
@@ -599,7 +780,7 @@ export default function DetailAssessreadiness() {
                   setUnreadCount,
                   formatDate
                 )}
-              </>
+              </div>
             ) : (
               <p className="no-notification">ไม่มีการแจ้งเตือน</p>
             )}
@@ -661,16 +842,16 @@ export default function DetailAssessreadiness() {
               : "ไม่มีข้อมูล"}
           </p>
           <p>
-              
-                <p className="textassesment">
-                  <p>
-                    <label>วันที่บันทึก:</label>
-                     {formatDate(readinessForms.createdAt)}
-                  </p>
-                </p>
-              
+
+            <p className="textassesment">
+              <p>
+                <label>วันที่บันทึก:</label>
+                {formatDate(readinessForms.createdAt)}
+              </p>
+            </p>
+
           </p>
-          
+
         </div>
 
 
@@ -687,34 +868,34 @@ export default function DetailAssessreadiness() {
                 </tr>
               </thead>
               <tbody>
-                    {readinessForms.Readiness1 && (
-                      <>
-                        <tr>
-                          <td>
-                            1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน
-                            และให้คำยินยอมก่อนรับบริการใช่หรือไม่?
-                          </td>
-                          <td >{getAnswerElement(readinessForms.Readiness1.question1_1)}</td>
-                        </tr>
-                        <tr>
-                          <td>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่?</td>
-                          <td >{getAnswerElement(readinessForms.Readiness1.question1_2)}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20
-                            กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?
-                          </td>
-                          <td>{getAnswerElement(readinessForms.Readiness1.question1_3)}</td>
-                        </tr>
-                        <tr>
-                          <td>
-                            4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?
-                          </td>
-                          <td>{getAnswerElement(readinessForms.Readiness1.question1_4)}</td>
-                        </tr>
-                      </>
-                    )}
+                {readinessForms.Readiness1 && (
+                  <>
+                    <tr>
+                      <td>
+                        1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน
+                        และให้คำยินยอมก่อนรับบริการใช่หรือไม่?
+                      </td>
+                      <td >{getAnswerElement(readinessForms.Readiness1.question1_1)}</td>
+                    </tr>
+                    <tr>
+                      <td>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่?</td>
+                      <td >{getAnswerElement(readinessForms.Readiness1.question1_2)}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20
+                        กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?
+                      </td>
+                      <td>{getAnswerElement(readinessForms.Readiness1.question1_3)}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?
+                      </td>
+                      <td>{getAnswerElement(readinessForms.Readiness1.question1_4)}</td>
+                    </tr>
+                  </>
+                )}
               </tbody>
             </table>
           </div>
@@ -733,38 +914,38 @@ export default function DetailAssessreadiness() {
               </thead>
               <tbody>
 
-                    {readinessForms.Readiness2 && (
-                      <>
-                        <tr>
-                          <td>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Disease)}</td>
-                        </tr>
-                        <tr>
-                          <td>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Medication)}</td>
-                        </tr>
-                        <tr>
-                          <td>3. Environment : มีการเตรียมสิ่งแวดล้อม ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Environment)}</td>
-                        </tr>
-                        <tr>
-                          <td>4. Treatment : มีการฝึกทักษะที่จำเป็น ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Treatment)}</td>
-                        </tr>
-                        <tr>
-                          <td>5. Health : รู้ข้อจำกัดด้านสุขภาพ ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Health)}</td>
-                        </tr>
-                        <tr>
-                          <td>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Out_patient)}</td>
-                        </tr>
-                        <tr>
-                          <td>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?</td>
-                          <td>{getAnswerElement(readinessForms.Readiness2.Diet)}</td>
-                        </tr>
-                      </>
-                    )}
+                {readinessForms.Readiness2 && (
+                  <>
+                    <tr>
+                      <td>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?</td>
+                      <td>{getAnswerElement(readinessForms.Readiness2.Disease)}</td>
+                    </tr>
+                    <tr>
+                      <td>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?</td>
+                      <td>{getAnswerElement(readinessForms.Readiness2.Medication)}</td>
+                    </tr>
+                    <tr>
+                      <td>3. Environment : มีการเตรียมสิ่งแวดล้อม ?</td>
+                      <td>{getAnswerElement(readinessForms.Readiness2.Environment)}</td>
+                    </tr>
+                    <tr>
+                      <td>4. Treatment : มีการฝึกทักษะที่จำเป็น ?</td>
+                      <td>{getAnswerElement(readinessForms.Readiness2.Treatment)}</td>
+                    </tr>
+                    <tr>
+                      <td>5. Health : รู้ข้อจำกัดด้านสุขภาพ ?</td>
+                      <td>{getAnswerElement(readinessForms.Readiness2.Health)}</td>
+                    </tr>
+                    <tr>
+                      <td>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?</td>
+                      <td>{getAnswerElement(readinessForms.Readiness2.Out_patient)}</td>
+                    </tr>
+                    <tr>
+                      <td>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?</td>
+                      <td>{getAnswerElement(readinessForms.Readiness2.Diet)}</td>
+                    </tr>
+                  </>
+                )}
               </tbody>
             </table>
           </div>
@@ -778,7 +959,7 @@ export default function DetailAssessreadiness() {
               ) : (
                 <div className={`btnass btn-abnormal`}>ยังไม่มีความพร้อม</div>
               )}
-            </div> 
+            </div>
             <p className="detail-info"><b>รายละเอียดเพิ่มเติม :</b> {detail ? detail : '-'}</p>
             <p className="detail-info"><b>ผู้ประเมินความพร้อม :</b> {mpersonnel?.nametitle} {mpersonnel?.name} {mpersonnel?.surname}</p>
             <p className="detail-info"><b>วันที่ประเมินความพร้อม :</b> {formatDate(dateass)}</p>

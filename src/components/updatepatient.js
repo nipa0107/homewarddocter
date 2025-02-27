@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
@@ -11,6 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import io from "socket.io-client";
 const socket = io("http://localhost:5000");
+
 export default function Updatepatient() {
   const location = useLocation();
   const { id, user } = location.state;
@@ -249,8 +250,8 @@ export default function Updatepatient() {
   };
 
   const fetchAndSetAlerts = (token, userId) => {
-    fetchAlerts(token)
-      .then((alerts) => {
+    fetchAlerts(token, userId)
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -308,9 +309,40 @@ export default function Updatepatient() {
   };
 
   const filteredAlerts =
-    filterType === "unread"
+  filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
-      : alerts;
+      : filterType === "assessment"
+          ? alerts.filter(
+              (alert) =>
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน"
+          )
+          : filterType === "abnormal"
+              ? alerts.filter(
+                  (alert) =>
+                      alert.alertType === "abnormal" ||
+                      alert.alertMessage === "เคสฉุกเฉิน"
+              )
+              : filterType === "normal"
+                  ? alerts.filter((alert) => alert.alertType === "normal")
+                  : alerts;
+
+    const getFilterLabel = (type) => {
+        switch (type) {
+            case "all":
+                return "ทั้งหมด";
+            case "unread":
+                return "ยังไม่อ่าน";
+            case "normal":
+                return "บันทึกอาการ";
+            case "abnormal":
+                return "ผิดปกติ";
+            case "assessment":
+                return "ประเมินอาการ";
+            default:
+                return "ไม่ทราบ";
+        }
+    };
 
   const currentDate = new Date();
 

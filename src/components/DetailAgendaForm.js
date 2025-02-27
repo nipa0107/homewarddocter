@@ -209,11 +209,9 @@ export default function DetailAgendaForm() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const formatThaiDate = (dateString) => {
@@ -668,7 +666,7 @@ export default function DetailAgendaForm() {
           </ul>
         </div>
         <br></br>
-        <div className="">
+        {/* <div className="">
           <p className="headerassesment">
             {name} {surname}
           </p>
@@ -703,6 +701,61 @@ export default function DetailAgendaForm() {
               </p>
             </p>
           </p>
+        </div> */}
+        <div>
+          <p className="headerassesment">
+            {name} {surname}
+          </p>
+          {birthday ? (
+            <p className="textassesment">
+              <label>อายุ:</label>{" "}
+              <span>
+                {userAge} ปี {userAgeInMonths} เดือน
+              </span>{" "}
+              <label>เพศ:</label> <span>{gender}</span>
+            </p>
+          ) : (
+            <p className="textassesment">
+              <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
+              <label>เพศ:</label> <span>{gender}</span>
+            </p>
+          )}
+          <p className="textassesment">
+            <label>HN:</label>{" "}
+            <span>
+              {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
+            </span>
+            <label>AN:</label>{" "}
+            <span>
+              {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
+            </span>
+            <label>ผู้ป่วยโรค:</label>{" "}
+            <span>
+              {medicalData && medicalData.Diagnosis
+                ? medicalData.Diagnosis
+                : "ไม่มีข้อมูล"}
+            </span>
+          </p>
+          <p className="textassesment">
+            <label>วันที่บันทึก:</label>
+            <span>{formatDate(AgendaForms.createdAt)}</span>
+          </p>
+          <p className="textassesment">
+            <label>วันที่แก้ไขล่าสุด:</label>
+            <span
+              style={{
+                color: AgendaForms?.updatedAt === AgendaForms?.createdAt ? "#666" : "inherit",
+                fontWeight: AgendaForms?.updatedAt === AgendaForms?.createdAt ? "bold" : "bold"
+              }}
+            >
+              {AgendaForms && AgendaForms.updatedAt
+                ? AgendaForms.updatedAt !== AgendaForms.createdAt
+                  ? formatDate(AgendaForms.updatedAt)
+                  : "-"
+                : "ไม่มีข้อมูล"}
+            </span>
+          </p>
+
         </div>
         {/* <h4>รายละเอียดการประเมิน Agenda</h4> */}
         <div className="info3 card mt-4">
@@ -738,25 +791,25 @@ export default function DetailAgendaForm() {
                     <div class="col-sm-3">
                       <strong>Idea :</strong>
                     </div>
-                    
-                        <div class="col-sm-6">
-                          <p>
-                            {AgendaForms.PatientAgenda?.patient_idea || "-"}
-                          </p>
-                        </div>
-                      
+
+                    <div class="col-sm-6">
+                      <p>
+                        {AgendaForms.PatientAgenda?.patient_idea || "-"}
+                      </p>
+                    </div>
+
                   </div>
                   <div class="row ">
                     <div class="col-sm-3">
                       <strong>Feeling :</strong>
                     </div>
-                    
-                        <div class="col-sm-6">
-                          <p>
-                            {AgendaForms.PatientAgenda?.patient_feeling || "-"}
-                          </p>
-                        </div>
-                      
+
+                    <div class="col-sm-6">
+                      <p>
+                        {AgendaForms.PatientAgenda?.patient_feeling || "-"}
+                      </p>
+                    </div>
+
                   </div>
                   <div class="row ">
                     <div class="col-sm-3">
