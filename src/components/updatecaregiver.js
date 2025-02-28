@@ -643,7 +643,7 @@ export default function Updatecaregiver() {
               <i className="bi bi-chat-dots"></i>
               <span className="links_name">แช็ต</span>
               {userUnreadCounts.map((user) => {
-                if (String(user.userId) === String(sender._id)) {
+                if (user?.userId && String(user.userId) === String(sender._id)) {
                   return (
                     <div key={user.userId}>
                       {user.totalUnreadCount > 0 && (

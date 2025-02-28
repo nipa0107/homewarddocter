@@ -541,7 +541,7 @@ const ChatComponent = () => {
       alert("ข้อความเกินความยาวสูงสุดที่กำหนดไว้ 10000 ตัวอักษร");
       return;
     }
-    
+
     if (input.trim() || file) {
       const formData = new FormData();
       formData.append("message", input);
@@ -565,7 +565,7 @@ const ChatComponent = () => {
 
         const result = await response.json();
 
-        if  (response.ok) {
+        if (response.ok) {
           setInput("");
           setFile(null);
           setFilePreview(null);
@@ -862,7 +862,10 @@ const ChatComponent = () => {
               <span className="links_name">แช็ต</span>
 
               {userUnreadCounts.map((user) => {
-                if (String(user.userId) === String(sender._id)) {
+                if (
+                  user?.userId &&
+                  String(user.userId) === String(sender._id)
+                ) {
                   return (
                     <div key={user.userId}>
                       {user.totalUnreadCount > 0 && (
@@ -1032,7 +1035,7 @@ const ChatComponent = () => {
                   </button>
                   <p className="name-chat">
                     {/* ห้องแช็ต */}
-                    คุณ{" "}{selectedUserName} {selectedUserSurname}
+                    คุณ {selectedUserName} {selectedUserSurname}
                   </p>
                 </div>
                 <div className="chat-section" ref={chatSectionRef}>
@@ -1254,7 +1257,6 @@ const ChatComponent = () => {
                           textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
                         }
                       }}
-                      
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
@@ -1263,7 +1265,7 @@ const ChatComponent = () => {
                       }}
                       onPaste={(e) => {
                         e.preventDefault();
-                        const text = e.clipboardData.getData("text/plain"); 
+                        const text = e.clipboardData.getData("text/plain");
                         document.execCommand("insertText", false, text);
                       }}
                       placeholder={placeholder}
