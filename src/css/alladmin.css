@@ -622,7 +622,7 @@ p .label {
   background-color: #87CEFA;
   /* เปลี่ยนสีพื้นหลัง */
   color: white;
-  margin-bottom: 20px;
+
   /* เพิ่มระยะห่างระหว่างปุ่มและตาราง */
   padding: 10px 20px;
   font-size: 16px;
@@ -675,7 +675,7 @@ p .label {
 }
 
 .nameass {
-  margin-left: 110px;
+  margin-left: 70px;
 }
 
 .custom-accordion-header {

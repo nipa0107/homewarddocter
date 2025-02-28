@@ -833,7 +833,7 @@ export default function ImmobilityG3({ }) {
                                     <tr>
                                         <th scope="col" style={{ width: "5%" }}>#</th>
                                         <th scope="col">ชื่อ-สกุล</th>
-                                        <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                                        <th scope="col" style={{ width: "20%" }}>ผู้ป่วยโรค</th>
                                         <th scope="col">คะแนนรวม</th>
                                         <th scope="col"  style={{ width: "30%" }}>วันที่ประเมิน</th>
                                         <th scope="col">สถานะ</th>
@@ -848,7 +848,7 @@ export default function ImmobilityG3({ }) {
                                         >
                                             <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
                                             <td>{user.user.name} {user.user.surname}</td>
-                                            <td style={{ width: "25%" }}>{user.Diagnosis}</td>
+                                            <td style={{ width: "20%" }}>{user.Diagnosis}</td>
                                             <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
                                             <td  style={{ width: "30%" }}>{formatDate(user.createdAt)}</td>
                                             <td>

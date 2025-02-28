@@ -75,6 +75,7 @@ export default function Allpatient({ }) {
     },
     [alerts, userId]
   );
+
   useEffect(() => {
     if (!userId) return;
     const updatedCounts = {
@@ -185,7 +186,7 @@ export default function Allpatient({ }) {
     };
   }, []);
   
-  const fetchUserData = (token) => {
+   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
       crossDomain: true,
@@ -223,54 +224,6 @@ export default function Allpatient({ }) {
       });
   };
 
-  const getAllUser = () => {
-    fetch("http://localhost:5000/alluser", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data, "AllUser");
-        setDatauser(data.data);
-        console.log(datauser, "Datauser");
-      });
-  };
-
-  useEffect(() => {
-    const fetchMedicalData = async () => {
-      if (datauser.length === 0) return; 
-  
-      const userIds = datauser
-        .filter((user) => user.deletedAt === null)
-        .map((user) => user._id); 
-  
-      if (userIds.length === 0) return;
-  
-      try {
-        const response = await fetch("http://localhost:5000/medicalInformation/batch", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userIds }),
-        });
-  
-        const result = await response.json();
-        if (result.status === "ok") {
-          setMedicalData(result.data); 
-        } else {
-          console.error("Error fetching medical data:", result.message);
-        }
-      } catch (error) {
-        console.error("Error fetching medical data:", error);
-      }
-    };
-  
-    fetchMedicalData();
-  }, [datauser]);
-
   const fetchAndSetAlerts = (token, userId) => {
       fetchAlerts(token, userId)
         .then((alerts, userId) => {
@@ -287,8 +240,8 @@ export default function Allpatient({ }) {
   
     useEffect(() => {
       if (hasFetchedUserData.current) return; 
-    hasFetchedUserData.current = true;
-    const token = window.localStorage.getItem("token");
+      hasFetchedUserData.current = true;
+      const token = window.localStorage.getItem("token");
       setToken(token);
   
       if (token) {
@@ -385,6 +338,67 @@ export default function Allpatient({ }) {
           return "ไม่ทราบ";
       }
     };
+  
+    const getAllUser = () => {
+      fetch("http://localhost:5000/alluser", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data, "AllUser");
+          setDatauser(data.data);
+          console.log(datauser, "Datauser");
+        });
+    };
+  
+    useEffect(() => {
+      const fetchMedicalData = async () => {
+        const promises = datauser.map(async (user) => {
+          if (user.deletedAt === null) {
+            try {
+              const response = await fetch(
+                `http://localhost:5000/medicalInformation/${user._id}`
+              );
+              const medicalInfo = await response.json();
+              return {
+                userId: user._id,
+                hn: medicalInfo.data?.HN,
+                an: medicalInfo.data?.AN,
+                diagnosis: medicalInfo.data?.Diagnosis,
+              };
+            } catch (error) {
+              console.error(
+                `Error fetching medical information for user ${user._id}:`,
+                error
+              );
+              return {
+                userId: user._id,
+                hn: "Error",
+                an: "Error",
+                diagnosis: "Error fetching data",
+              };
+            }
+          }
+          return null;
+        });
+  
+        const results = await Promise.all(promises);
+        const medicalDataMap = results.reduce((acc, result) => {
+          if (result) {
+            acc[result.userId] = result;
+          }
+          return acc;
+        }, {});
+        setMedicalData(medicalDataMap);
+      };
+  
+      if (datauser.length > 0) {
+        fetchMedicalData();
+      }
+    }, [datauser]);
 
   const currentDate = new Date();
 

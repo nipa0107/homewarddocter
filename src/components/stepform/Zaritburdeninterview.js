@@ -48,6 +48,7 @@ export const Zarit = ({ ZaritData, setZaritData }) => {
     useEffect(() => {
         calculateTotalScore();
     }, [ZaritData]);
+    
 
     const renderQuestion = (label, name) => (
         <div className="card m-3 mt-4" style={{ width: "105%" }}>

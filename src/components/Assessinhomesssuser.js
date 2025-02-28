@@ -220,7 +220,7 @@ export default function Assessinhomesssuser({ }) {
           setTimeout(() => {
             window.location.replace("./");
           }, 0);
-          return null; 
+          return null;
         }
         setSender({
           name: data.data.name,
@@ -254,9 +254,9 @@ export default function Assessinhomesssuser({ }) {
   };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
-    
+
     const token = window.localStorage.getItem("token");
     setToken(token);
 
@@ -819,19 +819,21 @@ export default function Assessinhomesssuser({ }) {
               </span>
             </p>
           </div>
-          <div className="toolbar ">
-            {AgendaForms && AgendaForms.length > 0 && (
+          <div className="content-toolbar">
+            <div className="toolbar ">
+              {AgendaForms && AgendaForms.length > 0 && (
 
-              <button
-                className="btn btn-primary add-assessment-btn"
-                onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
-              >
-                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                เพิ่มการประเมิน
-              </button>
-            )}
+                <button
+                  className="btn btn-primary add-assessment-btn"
+                  onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
+                >
+                  <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                  เพิ่มการประเมิน
+                </button>
+              )}
+            </div>
           </div>
-          <div className="nameass mt-5">
+          <div className="nameass">
             <h4>
               ประเมิน Agenda
             </h4>
@@ -842,7 +844,7 @@ export default function Assessinhomesssuser({ }) {
                 <th style={{ width: "5%" }}>#</th>
                 <th style={{ width: "25%" }}>วันที่บันทึก</th>
                 <th style={{ width: "25%" }}>วันที่แก้ไขล่าสุด</th>
-                <th>ผลการประเมิน</th>
+                <th style={{ width: "10%" }}>ผลการประเมิน</th>
                 <th>ผู้ประเมิน</th>
               </tr>
 
@@ -878,24 +880,26 @@ export default function Assessinhomesssuser({ }) {
               )}
             </tbody>
 
-                </table>
-                    <div className="toolbar mt-4">
-                        {AssessinhomeForms && AssessinhomeForms.length > 0 && (
+          </table>
+          <div className="content-toolbar">
+            <div className="toolbar mt-4">
+              {AssessinhomeForms && AssessinhomeForms.length > 0 && (
 
-                            <button
-                                className="btn btn-primary add-assessment-btn"
-                                onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
-                            >
-                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                                เพิ่มการประเมิน
-                            </button>
-                        )}
-                    </div>
-                    <div className="nameass mt-5">
-                        <h4>
-                            ประเมิน IN-HOME-SSS
-                        </h4>
-                    </div>
+                <button
+                  className="btn btn-primary add-assessment-btn"
+                  onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
+                >
+                  <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                  เพิ่มการประเมิน
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="nameass">
+            <h4>
+              ประเมิน IN-HOME-SSS
+            </h4>
+          </div>
 
           <table className="table table-hover">
             <thead>
@@ -903,7 +907,7 @@ export default function Assessinhomesssuser({ }) {
                 <th style={{ width: "5%" }}>#</th>
                 <th style={{ width: "25%" }}>วันที่บันทึก</th>
                 <th style={{ width: "25%" }}>วันที่แก้ไขล่าสุด</th>
-                <th>ผลการประเมิน</th>
+                <th style={{ width: "10%" }}>ผลการประเมิน</th>
                 <th>ผู้ประเมิน</th>
               </tr>
 
@@ -924,7 +928,7 @@ export default function Assessinhomesssuser({ }) {
                         <span className="not-evaluated">ยังไม่มีการแก้ไขการประเมิน</span>
                       )}
                     </td>
-                    <td> <span className="normal-status">{form.status_inhome}</span></td>
+                    <td > <span className="normal-status">{form.status_inhome}</span></td>
                     <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                   </tr>
                 ))

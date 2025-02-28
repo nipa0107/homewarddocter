@@ -432,7 +432,7 @@ export default function AddEquipPatient() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
+    
         if (selectedEquipments.length === 0) {
             setValidationMessage("โปรดเลือกอุปกรณ์อย่างน้อยหนึ่งรายการ");
             return;
@@ -441,11 +441,11 @@ export default function AddEquipPatient() {
             setValidationMessage("ไม่พบข้อมูลผู้ใช้");
             return;
         }
-
+    
         if (Object.keys(equipValidationMessages).length > 0) {
             return;
         }
-
+    
         fetch("http://localhost:5000/addequipuser", {
             method: "POST",
             headers: {
@@ -456,27 +456,30 @@ export default function AddEquipPatient() {
             },
             body: JSON.stringify({ equipments: selectedEquipments, userId: id }),
         })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.status === "ok") {
-                    toast.success("เพิ่มข้อมูลสำเร็จ");
-                    setTimeout(() => {
-                        navigate("/infopatient", { state: { id } });
-                    }, 1100);
-                } else if (
-                    data.status === "error" &&
-                    data.message === "มีอุปกรณ์นี้อยู่แล้ว"
-                ) {
-                    setValidationMessage("มีอุปกรณ์นี้อยู่แล้ว");
-                } else {
-                    toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
-                }
-            })
-            .catch((error) => {
-                console.error("Error adding equipment:", error);
+        .then((res) => res.json())
+        .then((data) => {
+            if (data.status === "ok") {
+                toast.success("เพิ่มข้อมูลสำเร็จ");
+                setTimeout(() => {
+                    navigate("/infopatient", { state: { id } });
+                }, 1100);
+            } else if (data.status === "error" && data.message === "มีอุปกรณ์นี้อยู่แล้ว") {
+                // ค้นหาอุปกรณ์ที่ซ้ำ และสร้างข้อความแจ้งเตือน
+                const duplicateEquipments = selectedEquipments
+                    .map(equip => equip.equipmentname_forUser)
+                    .join(", ");
+    
+                setValidationMessage(`มีอุปกรณ์ ${duplicateEquipments} อยู่แล้ว`);
+            } else {
                 toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
-            });
+            }
+        })
+        .catch((error) => {
+            console.error("Error adding equipment:", error);
+            toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
+        });
     };
+    
 
     const logOut = () => {
         window.localStorage.clear();
@@ -910,10 +913,10 @@ export default function AddEquipPatient() {
                         </table>
 
                         {validationMessage && (
-                            <div style={{ color: "red", textAlign: "center" }}>{validationMessage}</div>
+                            <div className="mt-4" style={{ color: "red", textAlign: "center" }}>{validationMessage}</div>
                         )}
 
-                        <div className="btn-group mt-3">
+                        <div className="btn-group mt-4">
                             <div className="btn-next">
                                 <button type="submit" className="btn btn-outline py-2">
                                     บันทึก
