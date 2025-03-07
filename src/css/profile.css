@@ -9,18 +9,12 @@
 }
 
 .formcontainerpf {
-    /* box-sizing: border-box; */
-    border: 0.1px solid #ddd;
-    box-shadow: 0 4px 21px -12px rgba(0, 0, 0, .66);    
-    width: 60%;
-    height: 100%;
-    border-radius: 1rem;
-    padding: 2rem;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 30px;
-    /* display: flex;
-    flex-wrap: wrap; */
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #87CEFA;  
+  width: 60%;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 30px auto;
 }
 
 
@@ -45,11 +39,14 @@
 }
 
 .textbox{
-    text-decoration: none;
-    color: rgb(72, 72, 72);
-    border: 1px solid rgb(228, 228, 228);
-    padding: 7px;
-    border-radius: 8px;
+  display: flex;
+  justify-content: space-between; 
+  align-items: center; 
+  text-decoration: none;
+  color: rgb(72, 72, 72);
+  border: 1px solid rgb(228, 228, 228);
+  padding: 7px;
+  border-radius: 8px;
 }
 .button-group {
 
@@ -90,4 +87,85 @@
 .password-btn:hover {
   background-color: #0056b3; /* สีน้ำเงินเข้มขึ้นเมื่อ hover */
 }
-  
+
+ 
+.email-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; 
+  width: 100%;
+}
+
+.email-container .verify {
+  white-space: nowrap; 
+  margin-left: auto; 
+  text-decoration: none;
+  cursor: pointer;
+  color: #007bff;
+}
+
+.email-container .verify:hover {
+  color: #0056b3;
+}
+
+.email-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+@media screen and (max-width: 1120px) {
+  .formcontainerpf {
+      width: 75%; 
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .formcontainerpf {
+      width: 90%; 
+      padding: 1.5rem;
+  }
+
+  .email-container {
+      flex-direction: column; 
+      align-items: flex-start;
+  }
+
+  .email-container .verify {
+      margin-left: 0;
+      margin-top: 5px;
+  }
+  .custom-btn{
+    font-size: 0.9rem;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .formcontainerpf {
+      padding: 1rem;
+  }
+
+  .email-container {
+      flex-direction: column;
+      align-items: flex-start;
+  }
+
+  .email-container .verify {
+      width: 100%; 
+      text-align: center;
+      margin-top: 5px;
+  }
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+}
+
+.custom-btn {
+    width: 100%;
+    text-align: center;
+}
+}
+

@@ -620,8 +620,8 @@
   transform: translateY(-50%);
   background-color: red;
   color: #fff;
-  font-size: 0.9rem;
-  padding: 6px 8px;
+  font-size: 0.7rem;
+  padding: 4px 6px; 
   border-radius: 50%;
   min-width: 1.5rem;
   height: 1.5rem;
@@ -629,10 +629,14 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  max-width: 2rem; 
 }
 
 @media (max-width: 992px) {
-
+  .home_contentchat {
+    width: calc(100% - 82px);
+    left: 82px;
+  }
   .back-to-user-list,
   .name-chat {
     font-size: 1rem;
@@ -732,3 +736,4 @@
     padding: 0.5rem;
  }
 }
+
