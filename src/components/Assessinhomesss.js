@@ -207,7 +207,7 @@ export default function Assessinhomesss({ }) {
           setTimeout(() => {
             window.location.replace("./");
           }, 0);
-          return null; 
+          return null;
         }
         setSender({
           name: data.data.name,
@@ -241,7 +241,7 @@ export default function Assessinhomesss({ }) {
   };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -571,112 +571,112 @@ export default function Assessinhomesss({ }) {
         </ul>
       </div>
       {showNotifications && (
-          <div className="notifications-dropdown" ref={notificationsRef}>
-            <div className="notifications-head">
-              <h2 className="notifications-title">การแจ้งเตือน</h2>
-            </div>
-            <div className="notifications-filter">
-              <div
-                className={`notification-box ${filterType === "all" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("all")}
-              >
-                <div className="notification-item">
-                  <i className="bi bi-bell"></i>
-                  ทั้งหมด
-                </div>
-                <div className="notification-right">
-                  {unreadCount > 0 && (
-                    <span className="notification-count-noti">{unreadCount}</span>
-                  )}
-                  <i className="bi bi-chevron-right"></i>
-                </div>
-              </div>
-              <div
-                className={`notification-box ${filterType === "abnormal" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("abnormal")}
-              >
-                <div className="notification-item">
-                  <i className="bi bi-exclamation-triangle"></i>
-                  ผิดปกติ
-                </div>
-                <div className="notification-right">
-                  {unreadCountsByType.abnormal > 0 && (
-                    <span className="notification-count-noti">
-                      {unreadCountsByType.abnormal}
-                    </span>
-                  )}
-                  <i class="bi bi-chevron-right"></i>
-                </div>
-              </div>
-              <div
-                className={`notification-box ${filterType === "normal" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("normal")}
-              >
-                <div className="notification-item">
-                  {" "}
-                  <i className="bi bi-journal-text"></i>
-                  บันทึกอาการ
-                </div>
-                <div className="notification-right">
-                  {unreadCountsByType.normal > 0 && (
-                    <span className="notification-count-noti">
-                      {unreadCountsByType.normal}
-                    </span>
-                  )}
-                  <i class="bi bi-chevron-right"></i>
-                </div>
-              </div>
-
-              <div
-                className={`notification-box ${filterType === "assessment" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("assessment")}
-              >
-                <div className="notification-item">
-                  <i className="bi bi-clipboard-check"></i>
-                  ประเมินอาการ
-                </div>
-                <div className="notification-right">
-                  {unreadCountsByType.assessment > 0 && (
-                    <span className="notification-count-noti">
-                      {unreadCountsByType.assessment}
-                    </span>
-                  )}
-                  <i class="bi bi-chevron-right"></i>
-                </div>
-              </div>
-            </div>
-            <div className="selected-filter">
-              <p>
-                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-              </p>
-              <p
-                className="mark-all-read-btn"
-                onClick={() => markAllByTypeAsViewed(filterType)}
-              >
-                ทำเครื่องหมายว่าอ่านทั้งหมด
-              </p>
-            </div>
-            {filteredAlerts.length > 0 ? (
-              <div>
-                {renderAlerts(
-                  filteredAlerts,
-                  token,
-                  userId,
-                  navigate,
-                  setAlerts,
-                  setUnreadCount,
-                  formatDate
-                )}
-              </div>
-            ) : (
-              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-            )}
+        <div className="notifications-dropdown" ref={notificationsRef}>
+          <div className="notifications-head">
+            <h2 className="notifications-title">การแจ้งเตือน</h2>
           </div>
-        )}
+          <div className="notifications-filter">
+            <div
+              className={`notification-box ${filterType === "all" ? "active" : ""
+                }`}
+              onClick={() => handleFilterChange("all")}
+            >
+              <div className="notification-item">
+                <i className="bi bi-bell"></i>
+                ทั้งหมด
+              </div>
+              <div className="notification-right">
+                {unreadCount > 0 && (
+                  <span className="notification-count-noti">{unreadCount}</span>
+                )}
+                <i className="bi bi-chevron-right"></i>
+              </div>
+            </div>
+            <div
+              className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                }`}
+              onClick={() => handleFilterChange("abnormal")}
+            >
+              <div className="notification-item">
+                <i className="bi bi-exclamation-triangle"></i>
+                ผิดปกติ
+              </div>
+              <div className="notification-right">
+                {unreadCountsByType.abnormal > 0 && (
+                  <span className="notification-count-noti">
+                    {unreadCountsByType.abnormal}
+                  </span>
+                )}
+                <i class="bi bi-chevron-right"></i>
+              </div>
+            </div>
+            <div
+              className={`notification-box ${filterType === "normal" ? "active" : ""
+                }`}
+              onClick={() => handleFilterChange("normal")}
+            >
+              <div className="notification-item">
+                {" "}
+                <i className="bi bi-journal-text"></i>
+                บันทึกอาการ
+              </div>
+              <div className="notification-right">
+                {unreadCountsByType.normal > 0 && (
+                  <span className="notification-count-noti">
+                    {unreadCountsByType.normal}
+                  </span>
+                )}
+                <i class="bi bi-chevron-right"></i>
+              </div>
+            </div>
+
+            <div
+              className={`notification-box ${filterType === "assessment" ? "active" : ""
+                }`}
+              onClick={() => handleFilterChange("assessment")}
+            >
+              <div className="notification-item">
+                <i className="bi bi-clipboard-check"></i>
+                ประเมินอาการ
+              </div>
+              <div className="notification-right">
+                {unreadCountsByType.assessment > 0 && (
+                  <span className="notification-count-noti">
+                    {unreadCountsByType.assessment}
+                  </span>
+                )}
+                <i class="bi bi-chevron-right"></i>
+              </div>
+            </div>
+          </div>
+          <div className="selected-filter">
+            <p>
+              การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+            </p>
+            <p
+              className="mark-all-read-btn"
+              onClick={() => markAllByTypeAsViewed(filterType)}
+            >
+              ทำเครื่องหมายว่าอ่านทั้งหมด
+            </p>
+          </div>
+          {filteredAlerts.length > 0 ? (
+            <div>
+              {renderAlerts(
+                filteredAlerts,
+                token,
+                userId,
+                navigate,
+                setAlerts,
+                setUnreadCount,
+                formatDate
+              )}
+            </div>
+          ) : (
+            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+          )}
+        </div>
+      )}
       <div className="home_content">
         <div className="homeheader">
           <div className="header">แบบประเมินเยี่ยมบ้าน</div>
@@ -720,105 +720,102 @@ export default function Assessinhomesss({ }) {
             </li>
           </ul>
         </div>
-        <div className="search-bar">
-          <input
-            className="search-text"
-            type="text"
-            placeholder="ค้นหา"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-          />
-        </div>
-        <div class="container-fluid">
-
-        </div>
-        <div className="content-toolbar">
-        <div className="toolbar">
-          <p className="countadmin1">
-            จำนวนผู้ป่วยทั้งหมด :{" "}
-            {datauser.filter((user) => user.deletedAt === null).length} คน
-          </p>
-        </div>
+        <div className="content-toolbar d-flex justify-content-between align-items-center mt-5 mb-4">
+          <div className="search-bar position-relative">
+            <i className="bi bi-search search-icon"></i> 
+            <input
+              className="search-text" 
+              type="text"
+              placeholder="ค้นหา"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+            />
+          </div>
+          <div className="toolbar">
+            <p className="countadmin1 mb-0">
+              จำนวนผู้ป่วยทั้งหมด: {" "} {datauser.filter((user) => user.deletedAt === null).length} คน
+            </p>
+          </div>
         </div>
 
         <div className="content">
-        <div className="table-container">
-        <table className=" table-all table-user">
-            <thead>
-              <tr>
-                <th>HN</th>
-                <th>AN</th>
-                <th>ชื่อ-สกุล</th>
-                <th>ผู้ป่วยโรค</th>
-                <th>รายละเอียด</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datauser.filter((user) => user.deletedAt === null).length > 0 ? (
-
-                datauser
-
-                  .filter((user) => user.deletedAt === null)
-                  .map((i, index) => {
-                    const userBirthday = i.birthday ? new Date(i.birthday) : null;
-                    let userAge = "";
-                    if (userBirthday) {
-                      const ageDiff =
-                        currentDate.getFullYear() - userBirthday.getFullYear();
-                      const monthDiff =
-                        currentDate.getMonth() - userBirthday.getMonth();
-                      const isBeforeBirthday =
-                        monthDiff < 0 ||
-                        (monthDiff === 0 &&
-                          currentDate.getDate() < userBirthday.getDate());
-                      userAge = isBeforeBirthday
-                        ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน`
-                        : `${ageDiff} ปี ${monthDiff} เดือน`;
-                    }
-                    return (
-                      <tr key={index}>
-                        <td>
-                          <span style={{ color: medicalData[i._id]?.hn ? 'inherit' : '#B2B2B2' }}>
-                            {medicalData[i._id]?.hn ? medicalData[i._id]?.hn : "ไม่มีข้อมูล"}
-                          </span>
-                        </td>
-                        <td>
-                          <span style={{ color: medicalData[i._id]?.an ? 'inherit' : '#B2B2B2' }}>
-                            {medicalData[i._id]?.an ? medicalData[i._id]?.an : "ไม่มีข้อมูล"}
-                          </span>
-                        </td>
-                        <td>{i.name} {i.surname}</td>
-                        {/* <td>{userAge}</td> */}
-                        <td>
-                          <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
-                            {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
-                          </span>
-                        </td>
-                        <td>
-                          <a
-                            className="info"
-                            onClick={() =>
-                              navigate("/assessinhomesssuser", {
-                                state: { id: i._id },
-                              })
-                            }
-                          >
-                            รายละเอียด
-                          </a>
-                        </td>
-                      </tr>
-                    );
-                  })
-              ) : (
+          <div className="table-container">
+            <table className=" table-all table-user">
+              <thead>
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", color: "#B2B2B2" }}>
-                    ไม่พบข้อมูลที่คุณค้นหา
-                  </td>
+                  <th>HN</th>
+                  <th>AN</th>
+                  <th>ชื่อ-สกุล</th>
+                  <th>ผู้ป่วยโรค</th>
+                  <th>รายละเอียด</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {datauser.filter((user) => user.deletedAt === null).length > 0 ? (
+
+                  datauser
+
+                    .filter((user) => user.deletedAt === null)
+                    .map((i, index) => {
+                      const userBirthday = i.birthday ? new Date(i.birthday) : null;
+                      let userAge = "";
+                      if (userBirthday) {
+                        const ageDiff =
+                          currentDate.getFullYear() - userBirthday.getFullYear();
+                        const monthDiff =
+                          currentDate.getMonth() - userBirthday.getMonth();
+                        const isBeforeBirthday =
+                          monthDiff < 0 ||
+                          (monthDiff === 0 &&
+                            currentDate.getDate() < userBirthday.getDate());
+                        userAge = isBeforeBirthday
+                          ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน`
+                          : `${ageDiff} ปี ${monthDiff} เดือน`;
+                      }
+                      return (
+                        <tr key={index}>
+                          <td>
+                            <span style={{ color: medicalData[i._id]?.hn ? 'inherit' : '#B2B2B2' }}>
+                              {medicalData[i._id]?.hn ? medicalData[i._id]?.hn : "ไม่มีข้อมูล"}
+                            </span>
+                          </td>
+                          <td>
+                            <span style={{ color: medicalData[i._id]?.an ? 'inherit' : '#B2B2B2' }}>
+                              {medicalData[i._id]?.an ? medicalData[i._id]?.an : "ไม่มีข้อมูล"}
+                            </span>
+                          </td>
+                          <td>{i.name} {i.surname}</td>
+                          {/* <td>{userAge}</td> */}
+                          <td>
+                            <span style={{ color: medicalData[i._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
+                              {medicalData[i._id]?.diagnosis ? medicalData[i._id]?.diagnosis : "ไม่มีข้อมูล"}
+                            </span>
+                          </td>
+                          <td>
+                            <a
+                              className="info"
+                              onClick={() =>
+                                navigate("/assessinhomesssuser", {
+                                  state: { id: i._id },
+                                })
+                              }
+                            >
+                              รายละเอียด
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", color: "#B2B2B2" }}>
+                      ไม่พบข้อมูลที่คุณค้นหา
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </main>

@@ -1,4 +1,4 @@
-import React, { useCallback,useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
@@ -38,7 +38,7 @@ export default function Assessreadinessuser({ }) {
     const bellRef = useRef(null);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
-  const hasFetchedUserData = useRef(false);
+    const hasFetchedUserData = useRef(false);
     const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
         assessment: 0,
@@ -244,7 +244,7 @@ export default function Assessreadinessuser({ }) {
     };
 
     useEffect(() => {
-        if (hasFetchedUserData.current) return; 
+        if (hasFetchedUserData.current) return;
         hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
@@ -528,6 +528,42 @@ export default function Assessreadinessuser({ }) {
         };
         fetchUnreadCount();
     }, []);
+
+    const [sortConfig, setSortConfig] = useState({ key: "createdAt", direction: "desc" });
+
+    const statusOrder = {
+        "มีความพร้อม": 1,
+        "ยังไม่มีความพร้อม": 2,
+        "ยังไม่ได้ประเมิน": 3
+    };
+
+    const sortData = (key) => {
+        let direction = "asc";
+        if (sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+        setSortConfig({ key, direction });
+
+        const sortedData = [...readinessForms].sort((a, b) => {
+            if (key === "createdAt") {
+                return direction === "asc"
+                    ? new Date(a[key]) - new Date(b[key])
+                    : new Date(b[key]) - new Date(a[key]);
+            } else if (key === "readiness_status") {
+                const statusA = readinessAssessments.find(ra => ra.ReadinessForm === a._id)?.readiness_status || "ยังไม่ได้ประเมิน";
+                const statusB = readinessAssessments.find(ra => ra.ReadinessForm === b._id)?.readiness_status || "ยังไม่ได้ประเมิน";
+
+                return direction === "asc"
+                    ? statusOrder[statusA] - statusOrder[statusB]
+                    : statusOrder[statusB] - statusOrder[statusA];
+            }
+            return 0;
+        });
+
+        setReadinessForms(sortedData);
+    };
+
+
     return (
         <main className="body">
             <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -764,126 +800,128 @@ export default function Assessreadinessuser({ }) {
                     </ul>
                 </div>
                 <div className="content">
-                <div className="patient-card patient-card-style">
-            <p className="patient-name">
-              <label>ข้อมูลผู้ป่วย</label>
-            </p>
+                    <div className="patient-card patient-card-style">
+                        <p className="patient-name">
+                            <label>ข้อมูลผู้ป่วย</label>
+                        </p>
 
-            <div className="info-container">
-              <div className="info-row">
-                <div className="info-item">
-                  <label>ชื่อ-สกุล:</label>{" "}
-                  <span>
-                    {name} {surname}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <label>อายุ:</label>{" "}
-                  <span>
-                    {birthday
-                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
-                      : "0 ปี 0 เดือน"}
-                  </span>
-                </div>
-                <div className="info-item">
-                  <label>เพศ:</label> <span>{gender}</span>
-                </div>
-              </div>
+                        <div className="info-container">
+                            <div className="info-row">
+                                <div className="info-item">
+                                    <label>ชื่อ-สกุล:</label>{" "}
+                                    <span>
+                                        {name} {surname}
+                                    </span>
+                                </div>
+                                <div className="info-item">
+                                    <label>อายุ:</label>{" "}
+                                    <span>
+                                        {birthday
+                                            ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                                            : "0 ปี 0 เดือน"}
+                                    </span>
+                                </div>
+                                <div className="info-item">
+                                    <label>เพศ:</label> <span>{gender}</span>
+                                </div>
+                            </div>
 
-              <div className="info-row">
-                <div className="info-item">
-                  <label>HN:</label>{" "}
-                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
-                </div>
-                <div className="info-item">
-                  <label>AN:</label>{" "}
-                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
-                </div>
-                <div className="info-item full-width">
-                  <label>ผู้ป่วยโรค:</label>{" "}
-                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="content-toolbar">
-                    <div className="toolbar">
-                        {readinessForms && readinessForms.length > 0 && (
-
-                            <button
-                                className="btn btn-primary add-assessment-btn"
-                                onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}
-                            >
-                                <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                                เพิ่มการประเมิน
-                            </button>
-                        )}
+                            <div className="info-row">
+                                <div className="info-item">
+                                    <label>HN:</label>{" "}
+                                    <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                                </div>
+                                <div className="info-item">
+                                    <label>AN:</label>{" "}
+                                    <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                                </div>
+                                <div className="info-item full-width">
+                                    <label>ผู้ป่วยโรค:</label>{" "}
+                                    <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <div className="content-toolbar d-flex justify-content-between align-items-center mt-4">
+                        <div className="">
+                            {readinessForms && readinessForms.length > 0 && (
+                                <button
+                                    className="btn btn-primary add-assessment-btn"
+                                    onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}
+                                >
+                                    <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                                    เพิ่มการประเมิน
+                                </button>
+                            )}
+                        </div>
+                        <div className="toolbar">
+                            <p className="countadmin1 mb-0">
+                                การประเมินทั้งหมด : {readinessForms.length} ครั้ง
+                            </p>
+                        </div>
                     </div>
-                    {/* <br></br> */}
-                    <table className="table mt-5">
+
+                    <table className="table table-hover mt-4">
                         <thead>
                             <tr>
                                 <th style={{ width: "10%" }}>#</th>
-                                <th>วันที่บันทึก</th>
-                                <th>ผลการประเมินความพร้อม</th>
+                                <th onClick={() => sortData("createdAt")} style={{ cursor: "pointer" }}>
+                                    วันที่บันทึก{" "}
+                                    <i className={`bi ${sortConfig.key === "createdAt" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
+                                </th>
+                                <th onClick={() => sortData("readiness_status")} style={{ cursor: "pointer" }}>
+                                    ผลการประเมินความพร้อม{" "}
+                                    <i className={`bi ${sortConfig.key === "readiness_status" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
+                                </th>
                                 <th>ผู้บันทึก</th>
                             </tr>
                         </thead>
+
                         <tbody>
                             {readinessForms.length > 0 ? (
-                                readinessForms
-                                    // .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-                                    .map((form, index) => (
+                                readinessForms.map((form, index) => {
+                                    const assessment = readinessAssessments.find(ra => ra.ReadinessForm === form._id);
+                                    const status = assessment?.readiness_status || "";
+
+                                    return (
                                         <tr
                                             key={form._id}
                                             onClick={() => navigate("/detailassessreadiness", { state: { id: form._id } })}
-                                            style={{ cursor: "pointer"}} // Add cursor pointer to indicate it's clickable
+                                            style={{ cursor: "pointer" }}
                                         >
                                             <td style={{ width: "10%" }}>{index + 1}</td>
                                             <td>{formatDate(form.createdAt)}</td>
                                             <td>
-                                                {readinessAssessments.some(
-                                                    (readinessassessment) => readinessassessment.ReadinessForm === form._id
-                                                ) ? (
-                                                    readinessAssessments.map((readinessassessment) =>
-                                                        readinessassessment.ReadinessForm === form._id ? (
-                                                            <span
-                                                                key={readinessassessment._id}
-                                                                className={
-                                                                    readinessassessment.readiness_status === "มีความพร้อม"
-                                                                        ? "normal-status"
-                                                                        : readinessassessment.readiness_status === "ยังไม่มีความพร้อม"
-                                                                            ? "abnormal-status"
-                                                                            : // readinessassessment.status_name === "ผิดปกติ" ? "abnormal-status" :
-                                                                            "end-of-treatment-status"
-                                                                }
-                                                            >
-                                                                {readinessassessment.readiness_status}
-                                                            </span>
-                                                        ) : null
-                                                    )
-                                                ) : (
-                                                    <span className="not-evaluated">
-                                                        ยังไม่ได้ประเมินความพร้อม
-                                                    </span>
-                                                )}
+                                                <span className={status === "มีความพร้อม" ? "normal-status"
+                                                    : status === "ยังไม่มีความพร้อม" ? "abnormal-status"
+                                                        : "end-of-treatment-status"}>
+                                                    {status === "มีความพร้อม" ? <i className="bi bi-check-circle me-1"></i>
+                                                        : status === "ยังไม่มีความพร้อม" ? <i className="bi bi-exclamation-circle me-1"></i>
+                                                            : <span className="not-evaluated">
+                                                                ยังไม่ประเมินสถานะความพร้อม
+                                                            </span>}
+                                                    {status}
+                                                </span>
                                             </td>
                                             <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ยังไม่ได้รับการประเมิน"}</td>
-
                                         </tr>
-                                    ))
+                                    );
+                                })
                             ) : (
                                 <tr>
                                     <td colSpan="5" style={{ textAlign: "center" }}>
                                         <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}>
-                                            <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                                            <span className="not-evaluated">
+                                                ยังไม่ได้รับการประเมิน
+                                            </span>
                                         </a>
                                     </td>
                                 </tr>
                             )}
                         </tbody>
+
                     </table>
+
                 </div>
             </div>
         </main>

@@ -40,7 +40,9 @@ export const PatientAgenda = ({ onDataChange }) => {
                                 control={control}
                                 render={({ field: controllerField }) => (
                                     <textarea
-                                        className="form-control"
+                                    className="form-control"
+                                    rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                                    style={{ resize: "vertical" }}
                                         placeholder="กรอกคำตอบ"
                                         {...controllerField}
                                         onChange={(e) => {

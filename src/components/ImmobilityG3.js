@@ -388,41 +388,6 @@ export default function ImmobilityG3({ }) {
     }, [group3Users]);
 
 
-    const [selectedFilter, setSelectedFilter] = useState("all"); // ค่าดีฟอลต์
-
-    const handleDateFilter = (filterType) => {
-        setSelectedFilter(filterType); // อัปเดตค่าตัวเลือกที่เลือก
-        const now = new Date();
-        let filtered = [];
-
-        if (filterType === "latest") {
-            // เรียงข้อมูลจากล่าสุดไปเก่าสุด
-            filtered = [...group3Users].sort(
-                (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-            );
-        } else if (filterType === "7days") {
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // คำนวณย้อนหลัง 7 วัน
-            filtered = group3Users.filter((user) => {
-                const userDate = new Date(user.createdAt);
-                return userDate >= sevenDaysAgo && userDate <= now;
-            });
-        } else if (filterType === "30days") {
-            const thirtyDaysAgo = new Date();
-            thirtyDaysAgo.setMonth(thirtyDaysAgo.getMonth() - 1); // คำนวณย้อนหลัง 30 วัน
-            filtered = group3Users.filter((user) => {
-                const userDate = new Date(user.createdAt);
-                return userDate >= thirtyDaysAgo && userDate <= now;
-            });
-        } else {
-            filtered = group3Users; // แสดงทั้งหมด
-        }
-
-        setFilteredUsers(filtered);
-    };
-
-
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -641,6 +606,21 @@ export default function ImmobilityG3({ }) {
     // Calculate total pages
     const totalPages = Math.ceil(group3Users.length / usersPerPage);
 
+    const [ImmobilityG3Count, setImmobilityG3Count] = useState(0);
+
+    useEffect(() => {
+        if (group3Users.length > 0) {
+            // นับจำนวนเคสผิดปกติ
+            const ImmobilityG3 = group3Users.length;
+
+            
+            setImmobilityG3Count(ImmobilityG3);
+
+        } else {
+            setImmobilityG3Count(0);
+
+        }
+    }, [group3Users]);
 
     return (
         <main className="body">
@@ -763,60 +743,22 @@ export default function ImmobilityG3({ }) {
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
                         <li>
-                            <a>รายชื่อผู้ป่วยที่ช่วยเหลือตัวเองได้น้อย</a>
+                            <a>เคสที่ช่วยเหลือตัวเองได้น้อย</a>
                         </li>
                     </ul>
                 </div>
 
                 <div class="container-fluid">
-                    <div className="align-item-end mb-3">
-                        <button className="dropdown btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            {selectedFilter === "all"
-                                ? "เลือกการแสดงข้อมูล"
-                                : selectedFilter === "latest"
-                                    ? "ล่าสุด"
-                                    : selectedFilter === "7days"
-                                        ? "7 วัน"
-                                        : "30 วัน"}
-                        </button>
-                        <ul className="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a
-                                    className={`dropdown-item ${selectedFilter === "latest" ? "active" : ""}`}
-                                    href="#"
-                                    onClick={() => handleDateFilter("latest")}
-                                >
-                                    ล่าสุด
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    className={`dropdown-item ${selectedFilter === "7days" ? "active" : ""}`}
-                                    href="#"
-                                    onClick={() => handleDateFilter("7days")}
-                                >
-                                    7 วัน
-                                </a>
-                            </li>
-                            <li>
-                                <a
-                                    className={`dropdown-item ${selectedFilter === "30days" ? "active" : ""}`}
-                                    href="#"
-                                    onClick={() => handleDateFilter("30days")}
-                                >
-                                    30 วัน
-                                </a>
-                            </li>
-                        </ul>
+                    <div className="case-summary">
+                        <p className="Emergency-status">จำนวนเคสที่ช่วยเหลือตัวเองได้น้อย : <strong>{ImmobilityG3Count} เคส</strong> </p>
                     </div>
-
                     <div className="table-responsive">
                         {filteredUsers.length === 0 ? (
                             <>
                                 <table className="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th scope="col" style={{ width: "5%" }}>#</th>
+                                            <th scope="col" style={{ width: "5%" }}>ลำดับ</th>
                                             <th scope="col">ชื่อ-สกุล</th>
                                             <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
                                             <th scope="col">คะแนนรวม</th>
@@ -831,11 +773,11 @@ export default function ImmobilityG3({ }) {
                             <table className="table table-hover">
                                 <thead>
                                     <tr>
-                                        <th scope="col" style={{ width: "5%" }}>#</th>
+                                        <th scope="col" style={{ width: "5%" }}>ลำดับ</th>
                                         <th scope="col">ชื่อ-สกุล</th>
                                         <th scope="col" style={{ width: "20%" }}>ผู้ป่วยโรค</th>
                                         <th scope="col">คะแนนรวม</th>
-                                        <th scope="col"  style={{ width: "30%" }}>วันที่ประเมิน</th>
+                                        <th scope="col" style={{ width: "30%" }}>วันที่ประเมิน</th>
                                         <th scope="col">สถานะ</th>
                                     </tr>
                                 </thead>
@@ -850,7 +792,7 @@ export default function ImmobilityG3({ }) {
                                             <td>{user.user.name} {user.user.surname}</td>
                                             <td style={{ width: "20%" }}>{user.Diagnosis}</td>
                                             <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
-                                            <td  style={{ width: "30%" }}>{formatDate(user.createdAt)}</td>
+                                            <td style={{ width: "30%" }}>{formatDate(user.createdAt)}</td>
                                             <td>
                                                 <a
                                                     href=""

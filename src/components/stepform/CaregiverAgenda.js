@@ -137,6 +137,8 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         <textarea
                           className="form-control"
                           placeholder="กรอกคำตอบ"
+                          rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                                    style={{ resize: "vertical" }}
                           {...controllerField}
                           value={item[field.name]}
                           onChange={(e) => {

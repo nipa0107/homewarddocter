@@ -6,7 +6,7 @@ import Collapse from '@mui/material/Collapse';
 export const Otherpeople = ({ onDataChange }) => {
   const { control, register, getValues, setValue } = useFormContext();
   const { fields: existingFields, replace: replaceExisting } = useFieldArray({ control, name: "existingCaregivers" });
-  const { fields: newFields, append: appendNew } = useFieldArray({ control, name: "newCaregivers" });
+  const { fields: newFields, append: appendNew, remove: removeNew } = useFieldArray({ control, name: "newCaregivers" });
 
   const [openIndex, setOpenIndex] = useState({ existing: null, new: null });
   const location = useLocation();
@@ -15,7 +15,7 @@ export const Otherpeople = ({ onDataChange }) => {
   useEffect(() => {
     handleFieldChange(); // เรียกฟังก์ชันเพื่อรวมข้อมูลใหม่ทุกครั้ง
   }, [existingFields, getValues]);
-  
+
   /** ✅ เปิด/ปิด Collapse ตาม Index และประเภท (existing/new) */
   const toggleCollapse = (index, type) => {
     setOpenIndex((prev) => ({
@@ -87,6 +87,10 @@ export const Otherpeople = ({ onDataChange }) => {
     handleFieldChange();
   };
 
+  const handleRemovePerson = (index) => {
+    removeNew(index);
+    handleFieldChange();
+  };
 
   /** ✅ รวมข้อมูลผู้ดูแลทั้งหมดและอัปเดตผ่าน `onDataChange` */
   const handleFieldChange = () => {
@@ -106,7 +110,7 @@ export const Otherpeople = ({ onDataChange }) => {
       careDetails: getValues(`existingCaregivers.${index}.careDetails`) || field.careDetails || "",
       isNew: false,
     }));
-  
+
     const newCaregiversData = newFields.map((field, index) => ({
       firstName: getValues(`newCaregivers.${index}.firstName`) || "",
       lastName: getValues(`newCaregivers.${index}.lastName`) || "",
@@ -122,7 +126,7 @@ export const Otherpeople = ({ onDataChange }) => {
       careDetails: getValues(`newCaregivers.${index}.careDetails`) || "",
       isNew: true,
     }));
-  
+
     onDataChange({
       ...getValues(),
       OtherPeople: {
@@ -136,10 +140,15 @@ export const Otherpeople = ({ onDataChange }) => {
   return (
     <div>
       {/* Existing Caregivers */}
-      <div className="info3 card">
+      <div className="title-form mt-1">
         <div className="header">
           <b>Other people</b>
         </div>
+        <div style={{ marginLeft: '26px' }}>
+          <p className="mt-2" style={{ color: "#666" }}><i class="bi bi-people-fill" style={{ color: "#008000" }}></i> ข้อมูลผู้ดูแลหรือบุคคลในครอบครัว</p>
+        </div>
+      </div>
+      <div className="info3 card mt-4">
         <div className="m-4">
           {existingFields.map((field, index) => (
             <div key={field.id}>
@@ -147,12 +156,13 @@ export const Otherpeople = ({ onDataChange }) => {
                 onClick={() => toggleCollapse(index, "existing")}
                 style={{
                   cursor: "pointer",
-                  textDecoration: "underline",
-                  color: "#5cb3fd",
+                  color: "#007BFF",
                   marginBottom: "8px",
                 }}
+                onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
               >
-                {`คนที่ ${index + 1}. ${field.firstName} ${field.lastName} (${field.relationship})`}
+                <b>{`คนที่ ${index + 1}. ${field.firstName} ${field.lastName} (${field.relationship})`}</b>
               </span>
               <Collapse in={openIndex.existing === index}>
                 <div className="p-2">
@@ -174,7 +184,7 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div>
+                  <div className="mt-2">
                     <label>นามสกุล :</label>
                     <Controller
                       name={`existingCaregivers.${index}.lastName`}
@@ -192,7 +202,7 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div>
+                  <div className="mt-2">
                     <label>วันเกิด :</label>
                     <Controller
                       name={`existingCaregivers.${index}.birthDate`}
@@ -398,17 +408,38 @@ export const Otherpeople = ({ onDataChange }) => {
           ))}
           {newFields.map((field, index) => (
             <div key={field.id}>
-              <span
-                onClick={() => toggleCollapse(index, "new")}
-                style={{
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  color: "#5cb3fd",
-                  marginBottom: "8px",
-                }}
-              >
-                {`คนที่ ${existingFields.length + index + 1}. ${field.firstName} ${field.lastName}`}
-              </span>
+              <div className="row p-0" style={{marginBottom:"-25px"}}>
+                <div className="col text-start">
+                  <span
+                    onClick={() => toggleCollapse(index, "new")}
+                    style={{
+                      cursor: "pointer",
+                      color: "#007BFF",
+                      marginBottom: "8px",
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                    onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
+                  >
+                    <b>{`คนที่ ${existingFields.length + index + 1}. ${field.firstName} ${field.lastName}`}</b>
+
+                  </span>
+                </div>
+                <div className="col text-end">
+                  <span
+                    onClick={() => handleRemovePerson(index)}
+                    style={{
+                      cursor: "pointer",
+                      color: "#FF0000",
+                      marginBottom: "8px",
+                    }}
+                    onMouseEnter={(e) => e.target.style.color = "#fb8c00"} // เมื่อ hover
+                    onMouseLeave={(e) => e.target.style.color = "#FF0000"} // เมื่อออกจาก hover
+                  >
+                    <p><i className="bi bi-trash"></i> ลบ</p>
+                  </span>
+                </div>
+              </div>
+
               <Collapse in={openIndex.new === index}>
                 <div className="p-2">
                   <div>
@@ -660,7 +691,7 @@ export const Otherpeople = ({ onDataChange }) => {
             onClick={handleAddPerson}
           >
             <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-            เพิ่มคนอื่นๆ
+            เพิ่มข้อมูล
           </button>
         </div>
       </div>

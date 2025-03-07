@@ -49,7 +49,7 @@ export default function AgendaForm({ }) {
     const bellRef = useRef(null);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
-  const hasFetchedUserData = useRef(false);
+    const hasFetchedUserData = useRef(false);
     const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
         assessment: 0,
@@ -227,10 +227,10 @@ export default function AgendaForm({ }) {
                     alert("Token expired login again");
                     window.localStorage.clear();
                     setTimeout(() => {
-                      window.location.replace("./");
+                        window.location.replace("./");
                     }, 0);
-                    return null; 
-                  }
+                    return null;
+                }
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
@@ -864,27 +864,28 @@ export default function AgendaForm({ }) {
                                             )}
 
                                             <div className="btn-group">
-                                                <div className="btn-pre">
-                                                    <button
-                                                        className="btn btn-outline py-2"
-                                                        disabled={activeStep === 0}
-                                                        onClick={handleBack}
-                                                        type="button"
-                                                    >
-                                                        ก่อนหน้า
-                                                    </button>
-                                                </div>
+                                                {/* ✅ ซ่อนปุ่ม "ก่อนหน้า" เมื่ออยู่หน้าแรก */}
+                                                {activeStep > 0 && (
+                                                    <div className="btn-pre">
+                                                        <button
+                                                            className="btn btn-outline py-2"
+                                                            onClick={handleBack}
+                                                            type="button"
+                                                        >
+                                                            ก่อนหน้า
+                                                        </button>
+                                                    </div>
+                                                )}
                                                 <div className="btn-next">
                                                     <button
                                                         className="btn btn-outline-primary py-2"
                                                         type="submit"
                                                     >
-                                                        {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"
-                                                        }
-
+                                                        {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"}
                                                     </button>
                                                 </div>
                                             </div>
+
 
                                         </form>
                                     </FormProvider>

@@ -32,7 +32,7 @@ export const Nutrition = ({ onDataChange }) => {
     cooks: [],
     nutritionStatus: '',
   });
-  
+
   // ดึงข้อมูลจาก localStorage เมื่อหน้ารีเฟรช
   useEffect(() => {
     const storedData = localStorage.getItem('nutritionData');
@@ -208,43 +208,32 @@ export const Nutrition = ({ onDataChange }) => {
 
   return (
     <div>
-      <div className="info3 card ">
+      <div className="title-form mt-1">
         <div className="header">
           <b>Nutrition</b>
         </div>
-        <div className='m-4'>
-          <label className="form-label">เพศ</label>
-          <br></br>
-          <div>
-            <input
-              type="radio"
-              name="gender"
-              disabled
-              style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-            />
-            <label style={{ marginLeft: '10px' }}> {gender}</label>
-          </div>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-universal-access-circle" style={{ color: "#008000" }}></i> ประเมินภาวะโภชนาการ</p>
         </div>
       </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">อายุ (ปี)</label>
-          <br></br>
-          <div>
-            <input
-              type="radio"
-              disabled
-              style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-            />
-            <label style={{ marginLeft: '10px' }}>{userAge}ปี {userAgeInMonths} เดือน</label>
-          </div>
+
+      <div className="info3 card mt-4">
+        <div className="header">
+          <b>การคำนวณพลังงาน</b>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">น้ำหนัก (kg.)</label>
+        {/* <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-people-fill" style={{ color: "#008000" }}></i> เพื่อนบ้าน</p>
+        </div> */}
+        <div className="m-1">
+          <label className='ms-4 mb-0'> <i class="bi bi-check-circle" style={{ color: "#008000" }}></i> เพศ :</label>
+          <label style={{ marginLeft: '10px', color: "#444" }}> {gender}</label><br></br>
+          <label className="ms-4 mb-0"><i class="bi bi-check-circle" style={{ color: "#008000" }}></i> อายุ (ปี) :</label>
+          <label style={{ marginLeft: '10px', color: "#444" }}>{userAge} ปี {userAgeInMonths} เดือน</label>
+        </div>
+        <div className='m-1'>
+          <label className="form-label ms-4 mb-0">น้ำหนัก (กก.)</label>
           <span style={{ color: 'red' }}> *</span><br></br>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="weight"
               control={control}
@@ -252,7 +241,7 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="number"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกน้ำหนัก"
                   {...field}
                   onChange={(e) => {
@@ -265,12 +254,10 @@ export const Nutrition = ({ onDataChange }) => {
 
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ส่วนสูง (cm.)</label>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">ส่วนสูง (ซม.)</label>
           <span style={{ color: 'red' }}> *</span><br></br>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="height"
               control={control}
@@ -278,7 +265,7 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="number"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกส่วนสูง"
                   {...field}
                   onChange={(e) => {
@@ -290,25 +277,21 @@ export const Nutrition = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ค่า BMR (kcal)</label>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">ค่า BMR (หน่วย: กิโลกรัม น้ำหนักตัว)</label>
           <span style={{ color: 'red' }}> *</span>
           <span
             style={{ color: 'blue', cursor: 'pointer', textDecoration: 'underline', marginLeft: '15px' }}
           >
           </span>
-          <div>
-            <h5>= <CountUp end={bmr ? bmr.toFixed(0) : 0} duration={0.5} /> </h5>
+          <div className="ms-4 me-4">
+            <h4 className="m-1 mb-1"> <CountUp end={bmr ? bmr.toFixed(0) : 0} duration={0.5} style={{ color: "#28a745" }} /> </h4>
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">กิจกรรมที่ทำทุกวัน</label>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">กิจกรรมที่ทำทุกวัน</label>
           <span style={{ color: 'red' }}> *</span><br></br>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="activityLevel"
               control={control}
@@ -334,23 +317,25 @@ export const Nutrition = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ค่า TDEE </label>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">ค่า TDEE (กิโลแคลอรีต่อวัน)</label>
           <span style={{ color: 'red' }}> *</span>
           <span
             style={{ color: 'blue', cursor: 'pointer', textDecoration: 'underline', marginLeft: '15px' }}
           >
           </span>
-          <div>
-            <h5>= <CountUp end={tdee ? tdee.toFixed(0) : 0} duration={0.5} /> </h5>
+          <div className="ms-4 me-4">
+            <h4 className="m-1 mb-1"> <CountUp end={tdee ? tdee.toFixed(0) : 0} duration={0.5} style={{ color: "#fd7e14" }} /> </h4>
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
+
+      <div className='info3 card mt-3'>
         <div className='m-4'>
-          <label className="form-label">ปาก</label>
+          <label className="form-label">ช่องทางการรับอาหาร<span style={{ color: 'red' }}> *</span></label>
+          <p style={{ color: "gray", marginTop: "-10px", marginBottom: "10px" }}>
+            (เลือกได้มากกว่า 1 ข้อ)
+          </p>
           <div>
             <Controller
               name="intakeMethod"
@@ -464,7 +449,7 @@ export const Nutrition = ({ onDataChange }) => {
                 />
               )}
             />
-            <span style={{ marginLeft: '10px' }}> PEG</span>
+            <span style={{ marginLeft: '10px' }}>PEG</span>
           </div>
           <div>
             <Controller
@@ -491,9 +476,13 @@ export const Nutrition = ({ onDataChange }) => {
           </div>
         </div>
       </div>
+
       <div className="info3 card mt-3">
         <div className='m-4'>
-          <label className="form-label">Food Intake (ลักษณะอาหาร)</label>
+          <label className="form-label">Food Intake (ลักษณะอาหาร) <span style={{ color: 'red' }}> *</span></label>
+          <p style={{ color: "gray", marginTop: "-10px", marginBottom: "10px" }}>
+            (เลือกได้มากกว่า 1 ข้อ)
+          </p>
           <div>
             <Controller
               name="foodTypes"
@@ -563,9 +552,9 @@ export const Nutrition = ({ onDataChange }) => {
         </div>
       </div>
       <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">อาหารทางการแพทย์ :</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0 ">อาหารทางการแพทย์ <span style={{ color: 'red' }}> *</span></label><br></br>
+          <div className="ms-4 me-4">
             <Controller
               name="medicalFood"
               control={control}
@@ -573,7 +562,7 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -585,11 +574,9 @@ export const Nutrition = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">อาหารที่ชอบ :</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">อาหารที่ชอบ <span style={{ color: 'red' }}> *</span></label><br></br>
+          <div className="ms-4 me-4">
             <Controller
               name="favoriteFood"
               control={control}
@@ -597,7 +584,7 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -609,11 +596,9 @@ export const Nutrition = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">อาหารอื่นๆ (ถ้ามี) :</label><br></br>
-          <div>
+        <div className='m-1 mb-4'>
+          <label className="form-label mt-3 ms-4 ">อาหารอื่นๆ (ถ้ามี) </label><br></br>
+          <div className="ms-4 me-4">
             <Controller
               name="otherFood"
               control={control}
@@ -621,7 +606,7 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -636,7 +621,10 @@ export const Nutrition = ({ onDataChange }) => {
       </div>
       <div className="info3 card mt-3">
         <div className='m-4'>
-          <label className="form-label">คนปรุงอาหาร</label>
+          <label className="form-label">คนปรุงอาหาร <span style={{ color: 'red' }}> *</span></label>
+          <p style={{ color: "gray", marginTop: "-10px", marginBottom: "10px" }}>
+            (เลือกได้มากกว่า 1 ข้อ)
+          </p>
           <div>
             <Controller
               name="cooks"
@@ -679,7 +667,7 @@ export const Nutrition = ({ onDataChange }) => {
                   }}
                 />
               )}
-            /><span style={{ marginLeft: '10px' }}>คนดูแลปรุงให้ </span>
+            /><span style={{ marginLeft: '10px' }}> คนดูแลปรุงให้ </span>
           </div>
           <div>
             <Controller
@@ -709,14 +697,12 @@ export const Nutrition = ({ onDataChange }) => {
         <div className="header">
           <b>Mini Nutritional Assessment</b>
         </div>
-        <div style={{ marginLeft: '26px' }}>
-          <p>ประเมินภาวะโภชนาการอย่างย่อ</p>
+        <div className="ms-4">
+          <p className="mt-2 mb-2" style={{ color: "#666" }}>ประเมินภาวะโภชนาการอย่างย่อ</p>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ภาวะโภชนาการ</label>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 me-4 ">ภาวะโภชนาการ <span style={{ color: 'red' }}> *</span></label>
+          <div className='ms-4 me-4'>
             <Controller
               name="nutritionStatus"
               control={control}
@@ -735,7 +721,7 @@ export const Nutrition = ({ onDataChange }) => {
               )}
             /> <span style={{ marginLeft: '10px' }}>ปกติ </span>
           </div>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="nutritionStatus"
               control={control}
@@ -753,7 +739,7 @@ export const Nutrition = ({ onDataChange }) => {
               )}
             /> <span style={{ marginLeft: '10px' }}>เกินเกณฑ์ </span>
           </div>
-          <div>
+          <div className='ms-4 me-4 mb-4'>
             <Controller
               name="nutritionStatus"
               control={control}
@@ -773,6 +759,7 @@ export const Nutrition = ({ onDataChange }) => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };

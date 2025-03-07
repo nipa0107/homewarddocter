@@ -55,8 +55,8 @@ export const Physicalexamination = ({ onDataChange }) => {
   const renderCheckboxGroupWithOther = (fieldName, options, label) => (
     <div className="info3 card mt-3">
       <div className="m-4">
-        <label className="form-label">{label} :</label>
-        <p style={{ color: "gray", marginTop: "-20px", marginBottom: "10px" }}>
+        <label className="form-label">{label}</label>
+        <p style={{ color: "gray", marginTop: "-10px", marginBottom: "10px" }}>
           (เลือกได้มากกว่า 1 ข้อ)
         </p>
         {options.map((option) => (
@@ -95,7 +95,7 @@ export const Physicalexamination = ({ onDataChange }) => {
               <input
                 type="text"
                 placeholder="กรอกคำตอบอื่นๆ"
-                className="google-form-input"
+                className="form-control"
                 value={
                   (field.value.find((item) => item.startsWith("อื่นๆ:")) || "").replace(
                     "อื่นๆ: ",
@@ -115,7 +115,7 @@ export const Physicalexamination = ({ onDataChange }) => {
                   );
                 }}
                 style={{
-                  borderBottom: "1px solid #4285f4",
+                  border: "1px solid #ddd",
                   outline: "none",
                   marginLeft: "30px",
                   width: "85%",
@@ -130,44 +130,49 @@ export const Physicalexamination = ({ onDataChange }) => {
 
   return (
     <div>
-      <div className="info3 card">
+      <div className="title-form mt-1">
         <div className="header">
           <b>Physical Examination</b>
         </div>
         <div style={{ marginLeft: '26px' }}>
-          <p>การซักประวัติและการตรวจร่างกายทั่วไป</p>
+          <p className="mt-2" style={{ color: "#666" }}><i class="bi bi-person-lines-fill" style={{ color: "#008000" }}></i> การซักประวัติและการตรวจร่างกายทั่วไป</p>
         </div>
       </div>
+
       <div className="info3 card mt-3">
         <div className="header">
-          <b>Vital Signs</b>
+          <b>Vital Sign</b>
         </div>
-        <div className='m-4'>
-          <label className="form-label">Temperature ( °C) :</label><br></br>
-          <div>
-            <Controller
-              name="temperature"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input
-                  type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    handleInputChange("temperature", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-clipboard2-pulse-fill" style={{ color: "#008000" }}></i> การวัดสัญญาณชีพ</p>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div className='m-4'>
+        <label className="form-label"><i class="bi bi-thermometer-half" style={{ color: "#666" }}></i> Temperature ( °C)</label><br></br>
+        <div>
+          <Controller
+            name="temperature"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <input
+                type="text"
+                className="form-control"
+                placeholder="กรอกคำตอบ"
+                {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  handleInputChange("temperature", e.target.value);
+                }}
+              />
+            )}
+          />
+        </div>
+      </div>
+
+      <div>
         <div className='m-4'>
-          <label className="form-label">Blood pressure  (mm/Hg) :</label><br></br>
+          <label className="form-label"><i class="bi bi-heart-pulse" style={{ color: "#666" }}></i> Blood pressure  (mm/Hg)</label><br></br>
           <div>
             <Controller
               name="bloodPressure"
@@ -176,7 +181,7 @@ export const Physicalexamination = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -189,9 +194,9 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div>
         <div className='m-4'>
-          <label className="form-label">Pulse (/min) :</label><br></br>
+          <label className="form-label"><i class="bi bi-activity" style={{ color: "#666" }}></i> Pulse (/min)</label><br></br>
           <div>
             <Controller
               name="pulse"
@@ -200,7 +205,7 @@ export const Physicalexamination = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -213,9 +218,9 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div>
         <div className='m-4'>
-          <label className="form-label">Respiration (/min) :</label><br></br>
+          <label className="form-label"><i class="bi bi-lungs" style={{ color: "#666" }}></i> Respiration (/min)</label><br></br>
           <div>
             <Controller
               name="respiratoryRate"
@@ -224,7 +229,7 @@ export const Physicalexamination = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -239,43 +244,51 @@ export const Physicalexamination = ({ onDataChange }) => {
       </div>
       <div className="info3 card mt-3">
         <div className="header">
-          <b>ตรวจร่างกายทั่วไป</b>
+          <b>General physical examination </b>
         </div>
-        <div className='m-4'>
-          <label className="form-label">GA (ลักษณะโดยรวม) :</label><br></br>
-          <div>
-            <Controller
-              name="generalAppearance"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input
-                  type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    handleInputChange("generalAppearance", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-person-standing" style={{ color: "#008000" }}></i> การตรวจร่างกายทั่วไป</p>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div className='m-4'>
+        <label className="form-label">GA (ลักษณะโดยรวม)</label><br></br>
+        <div>
+          <Controller
+            name="generalAppearance"
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <textarea
+                type="text"
+                className="form-control"
+                rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                style={{ resize: "vertical" }}
+                placeholder="กรอกคำตอบ"
+                {...field}
+                onChange={(e) => {
+                  field.onChange(e);
+                  handleInputChange("generalAppearance", e.target.value);
+                }}
+              />
+            )}
+          />
+        </div>
+      </div>
+
+      <div>
         <div className='m-4'>
-          <label className="form-label">CVS (ระบบหัวใจ) :</label><br></br>
+          <label className="form-label">CVS (ระบบหัวใจ)</label><br></br>
           <div>
             <Controller
               name="cardiovascularSystem"
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
+                <textarea
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -288,18 +301,20 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div>
         <div className='m-4'>
-          <label className="form-label">RS (ระบบหายใจ) :</label><br></br>
+          <label className="form-label">RS (ระบบหายใจ)</label><br></br>
           <div>
             <Controller
               name="respiratorySystem"
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
+                <textarea
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -312,18 +327,20 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div>
         <div className='m-4'>
-          <label className="form-label">Abd (ช่องท้อง) :</label><br></br>
+          <label className="form-label">Abd (ช่องท้อง)</label><br></br>
           <div>
             <Controller
               name="abdominal"
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
+                <textarea
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -336,18 +353,20 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div>
         <div className='m-4'>
-          <label className="form-label">NS (ระบบประสาท) :</label><br></br>
+          <label className="form-label">NS (ระบบประสาท)</label><br></br>
           <div>
             <Controller
               name="nervousSystem"
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
+                <textarea
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -360,18 +379,20 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
+      <div>
         <div className='m-4'>
-          <label className="form-label">Ext (รยางค์แขน/ขา) :</label><br></br>
+          <label className="form-label">Ext (รยางค์แขน/ขา)</label><br></br>
           <div>
             <Controller
               name="extremities"
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
+                <textarea
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -384,7 +405,14 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-
+      <div className="info3 card mt-3">
+        <div className="header">
+          <b>Metal status examination</b>
+        </div>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-person-heart" style={{ color: "#008000" }}></i> การตรวจสภาพจิตใจ</p>
+        </div>
+      </div>
       {renderCheckboxGroupWithOther("moodandaffect", ["Euthymia", "Depressed", "Apathetic"], "Mood and affect")}
       {renderCheckboxGroupWithOther(
         "appearanceAndBehavior",

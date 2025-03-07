@@ -117,7 +117,7 @@ export default function DetailAgendaForm() {
   };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -297,8 +297,10 @@ export default function DetailAgendaForm() {
     setIsActive(!isActive);
   };
 
+  const [originalData, setOriginalData] = useState(null); // ✅ เก็บข้อมูลเดิม
   const [AgendaForms, setAgendaForms] = useState([]);
 
+  // โหลดข้อมูลจาก API และเซ็ต originalData
   useEffect(() => {
     const fetchAgendaForms = async () => {
       try {
@@ -309,6 +311,7 @@ export default function DetailAgendaForm() {
 
         if (response.ok) {
           setAgendaForms(data.data);
+          setOriginalData(data.data); // ✅ เซ็ตค่า originalData
         } else {
           console.error(data.message);
         }
@@ -318,7 +321,6 @@ export default function DetailAgendaForm() {
     };
     fetchAgendaForms();
   }, [id, token]);
-
   useEffect(() => {
     if (AgendaForms.user && AgendaForms._id) {
       const fetchData = async () => {
@@ -398,11 +400,10 @@ export default function DetailAgendaForm() {
     super_active: "ออกกำลังกายวันละ 2 ครั้งขึ้นไป",
   };
 
+  const [tempFormValues, setTempFormValues] = useState({}); // เก็บค่าที่แก้ไข
   const [currentEditSection, setCurrentEditSection] = useState("");
-  const [modalContent, setModalContent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const modalRef = useRef(null);
-  const inputRef = useRef(null);
+  const [modalContent, setModalContent] = useState(null);
 
   useEffect(() => {
     if (AgendaForms.user) {
@@ -412,86 +413,150 @@ export default function DetailAgendaForm() {
 
   const handleEditClick = (section) => {
     setCurrentEditSection(section);
+    setIsModalOpen(true);
+
+    let formData;
     if (section === "Patient Agenda Form") {
-      setModalContent(
-        <PatientAgendaForm
-          formData={AgendaForms.PatientAgenda}
-          onSave={(data) => handleSaveChanges({ PatientAgenda: data })}
-        />
-      );
-      setIsModalOpen(true);
-    } else if (section === "Caregiver Agenda Form") {
-      setModalContent(
-        <CaregiverAgendaForm
-          formData={AgendaForms.CaregiverAgenda}
-          onSave={(data) => handleSaveChanges({ CaregiverAgenda: data })}
-        />
-      );
-      setIsModalOpen(true);
-    } else if (section === "Caregiver Assessment Form") {
-      setModalContent(
-        <CaregiverAssessmentForm
-          formData={AgendaForms.CaregiverAssessment}
-          onSave={(data) => handleSaveChanges({ CaregiverAssessment: data })}
-        />
-      );
-      setIsModalOpen(true);
+      formData = { ...AgendaForms.PatientAgenda };
     } else if (section === "Zaritburdeninterview Form") {
-      setModalContent(
-        <ZaritburdeninterviewForm
-          formData={AgendaForms.Zaritburdeninterview}
-          onSave={(data) => handleSaveChanges({ Zaritburdeninterview: data })}
-        />
-      );
-      setIsModalOpen(true);
+      formData = { ...AgendaForms.Zaritburdeninterview };
     }
+
+    setTempFormValues(formData); // ตั้งค่าชั่วคราวก่อน
+
+    // ใช้ useEffect เพื่ออัปเดต modalContent เมื่อ tempFormValues เปลี่ยน
   };
+
+  useEffect(() => {
+    if (currentEditSection) {
+      setModalContent(
+        currentEditSection === "Patient Agenda Form" ? (
+          <PatientAgendaForm
+            formData={tempFormValues}
+            onChange={(data) => setTempFormValues(data)}
+          />
+        ) : (
+          <ZaritburdeninterviewForm
+            formData={tempFormValues}
+            onChange={(data) => setTempFormValues(data)}
+          />
+        )
+      );
+    }
+  }, [tempFormValues, currentEditSection]);
+
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setModalContent(null);
-    setCurrentEditSection("");
+    setTempFormValues({}); // รีเซ็ตค่ากลับไปเป็นค่าเดิม
   };
 
-  const handleSaveChanges = async (updatedSection) => {
+  // ✅ ฟังก์ชันบันทึกข้อมูล
+  const handleSaveChanges = async () => {
+    // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
+    const isDataChanged = JSON.stringify(originalData) !== JSON.stringify(AgendaForms);
+
+    if (!isDataChanged) {
+      const confirmSave = window.confirm("ไม่มีการเปลี่ยนแปลงข้อมูล ต้องการบันทึกหรือไม่?");
+      if (!confirmSave) return; // ถ้าผู้ใช้กด "ยกเลิก" ให้หยุดทำงานที่นี่
+    }
+
     try {
       const updatedData = {
-        ...AgendaForms, // Existing data
-        ...updatedSection, // Updated section (PhysicalExamination or Immobility)
+        ...AgendaForms,
+        [currentEditSection.replace(" Form", "").replace(" ", "")]: tempFormValues,
       };
 
       const response = await fetch(`http://localhost:5000/updateAgenda/${id}`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updatedData),
       });
 
       const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to update data");
-      }
+      if (!response.ok) throw new Error(result.message || "Failed to update data");
 
-      console.log("Updated successfully:", result.data);
-      toast.success("ข้อมูลได้รับการแก้ไขเรียบร้อย");
+      toast.success("แก้ไขข้อมูลสำเร็จ");
 
-      // ให้ modal ปิดหลังจาก toast แสดงข้อความสำเร็จ
       setTimeout(() => {
-        setModalContent(null);
+        setAgendaForms(updatedData);
+        setOriginalData(updatedData);
+        setIsModalOpen(false);
         window.location.reload();
-      }, 1100); // รอ 2 วินาที (ปรับตามความเหมาะสม)
+      }, 1100);
     } catch (error) {
       console.error("Error updating data:", error);
       toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
     }
   };
 
-  const [openIndex, setOpenIndex] = useState(null);
+
+  const [openIndex, setOpenIndex] = useState(0);
 
   const toggleAccordion = (index) => {
     setOpenIndex(openIndex === index ? null : index); // เปิด-ปิดเมื่อคลิก
   };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      // เพิ่ม class modal-open และสร้าง backdrop
+      document.body.classList.add("modal-open");
+      const backdrop = document.createElement("div");
+      backdrop.className = "modal-backdrop fade show";
+      document.body.appendChild(backdrop);
+    } else {
+      // ลบ backdrop และ class modal-open เมื่อปิด modal
+      document.body.classList.remove("modal-open");
+      const backdrop = document.querySelector(".modal-backdrop");
+      if (backdrop) {
+        backdrop.remove();
+      }
+    }
+  }, [isModalOpen]);
+
+  const [activeTab, setActiveTab] = useState("patientAgenda"); // ค่าเริ่มต้น
+
+  const [editingIndex, setEditingIndex] = useState(null); // เก็บ index ของผู้ดูแลที่กำลังแก้ไข
+
+  const handleEditCaregiver = (index) => {
+    setEditingIndex(index);
+    setCurrentEditSection("Caregiver Agenda"); // Add this line
+    setModalContent(
+      <CaregiverAgendaForm
+        formData={AgendaForms.CaregiverAgenda?.Care_Agenda[index]}
+        onChange={(data) => {
+          const updatedCaregivers = [...AgendaForms.CaregiverAgenda.Care_Agenda];
+          updatedCaregivers[index] = data;
+          setAgendaForms((prev) => ({
+            ...prev,
+            CaregiverAgenda: { Care_Agenda: updatedCaregivers },
+          }));
+        }}
+      />
+    );
+    setIsModalOpen(true);
+  };
+
+  const handleEditCaregiverAssessment = (index) => {
+    setEditingIndex(index);
+    setCurrentEditSection("Caregiver Assessment");
+    setModalContent(
+      <CaregiverAssessmentForm
+        formData={AgendaForms.CaregiverAssessment?.Care_Assessment[index]}
+        onChange={(data) => {
+          const updatedAssessments = [...AgendaForms.CaregiverAssessment.Care_Assessment];
+          updatedAssessments[index] = data;
+          setAgendaForms((prev) => ({
+            ...prev,
+            CaregiverAssessment: { Care_Assessment: updatedAssessments },
+          }));
+        }}
+      />
+    );
+    setIsModalOpen(true);
+  };
+
+
 
   return (
     <main className="body">
@@ -666,449 +731,350 @@ export default function DetailAgendaForm() {
           </ul>
         </div>
         <br></br>
-        {/* <div className="">
-          <p className="headerassesment">
-            {name} {surname}
-          </p>
-          {birthday ? (
-            <p className="textassesment">
-              <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน{" "}
-              <label>เพศ:</label>
-              {gender}
+        <div className="content">
+          <div className="patient-card patient-card-style">
+            <p className="patient-name">
+              <label>ข้อมูลผู้ป่วย</label>
             </p>
-          ) : (
-            <p className="textassesment">
-              {" "}
-              <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>
-              {gender}
-            </p>
-          )}
-          <p className="textassesment">
-            <label>HN:</label>
-            {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-            <label>AN:</label>
-            {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-            <label>ผู้ป่วยโรค:</label>
-            {medicalData && medicalData.Diagnosis
-              ? medicalData.Diagnosis
-              : "ไม่มีข้อมูล"}
-          </p>
-          <p>
-            <p className="textassesment">
-              <p>
-                <label>วันที่บันทึก:</label>
-                {formatDate(AgendaForms.createdAt)}
-              </p>
-            </p>
-          </p>
-        </div> */}
-        <div>
-          <p className="headerassesment">
-            {name} {surname}
-          </p>
-          {birthday ? (
-            <p className="textassesment">
-              <label>อายุ:</label>{" "}
-              <span>
-                {userAge} ปี {userAgeInMonths} เดือน
-              </span>{" "}
-              <label>เพศ:</label> <span>{gender}</span>
-            </p>
-          ) : (
-            <p className="textassesment">
-              <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
-              <label>เพศ:</label> <span>{gender}</span>
-            </p>
-          )}
-          <p className="textassesment">
-            <label>HN:</label>{" "}
-            <span>
-              {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-            </span>
-            <label>AN:</label>{" "}
-            <span>
-              {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-            </span>
-            <label>ผู้ป่วยโรค:</label>{" "}
-            <span>
-              {medicalData && medicalData.Diagnosis
-                ? medicalData.Diagnosis
-                : "ไม่มีข้อมูล"}
-            </span>
-          </p>
-          <p className="textassesment">
-            <label>วันที่บันทึก:</label>
-            <span>{formatDate(AgendaForms.createdAt)}</span>
-          </p>
-          <p className="textassesment">
-            <label>วันที่แก้ไขล่าสุด:</label>
-            <span
-              style={{
-                color: AgendaForms?.updatedAt === AgendaForms?.createdAt ? "#666" : "inherit",
-                fontWeight: AgendaForms?.updatedAt === AgendaForms?.createdAt ? "bold" : "bold"
-              }}
-            >
-              {AgendaForms && AgendaForms.updatedAt
-                ? AgendaForms.updatedAt !== AgendaForms.createdAt
-                  ? formatDate(AgendaForms.updatedAt)
-                  : "-"
-                : "ไม่มีข้อมูล"}
-            </span>
-          </p>
 
-        </div>
-        {/* <h4>รายละเอียดการประเมิน Agenda</h4> */}
-        <div className="info3 card mt-4">
-          {/* <div className="header">
-            <b>การประเมิน Agenda</b>
-          </div> */}
-          <div class="accordion" id="accordionExample">
-            {/* Patient Agenda */}
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingOne">
-                <button
-                  class="accordion-button"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseOne"
-                  aria-expanded="true"
-                  aria-controls="collapseOne"
-                >
-                  <b>1. Patient Agenda</b>
-                </button>
-              </h2>
-              <div
-                id="collapseOne"
-                class="accordion-collapse collapse show"
-                aria-labelledby="headingOne"
-                data-bs-parent="#accordionExample"
-              >
-                <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
-                >
-                  <div class="row ">
-                    <div class="col-sm-3">
-                      <strong>Idea :</strong>
-                    </div>
+            <div className="info-container">
+              <div className="info-row">
+                <div className="info-item">
 
-                    <div class="col-sm-6">
-                      <p>
-                        {AgendaForms.PatientAgenda?.patient_idea || "-"}
-                      </p>
-                    </div>
+                  <label>ชื่อ-สกุล:</label>{" "}
+                  <span>
+                    {name} {surname}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>อายุ:</label>{" "}
+                  <span>
+                    {birthday
+                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                      : "0 ปี 0 เดือน"}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>เพศ:</label> <span>{gender}</span>
+                </div>
+              </div>
 
-                  </div>
-                  <div class="row ">
-                    <div class="col-sm-3">
-                      <strong>Feeling :</strong>
-                    </div>
-
-                    <div class="col-sm-6">
-                      <p>
-                        {AgendaForms.PatientAgenda?.patient_feeling || "-"}
-                      </p>
-                    </div>
-
-                  </div>
-                  <div class="row ">
-                    <div class="col-sm-3">
-                      <strong>Function :</strong>
-                    </div>
-                    <div class="col-sm-6">
-                      <p>{AgendaForms.PatientAgenda?.patient_funtion || "-"}</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-3">
-                      <strong>Expectation :</strong>
-                    </div>
-                    <div className="col-sm-6">
-                      <p>
-                        {AgendaForms.PatientAgenda?.patient_expectation || "-"}
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <button
-                      className="btn m-3"
-                      style={{ backgroundColor: "#ffde59", color: "black" }}
-                      onClick={() => handleEditClick("Patient Agenda Form")}
-                    >
-                      แก้ไขข้อมูล
-                    </button>
-                  </div>
+              <div className="info-row">
+                <div className="info-item">
+                  <label>HN:</label>{" "}
+                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item">
+                  <label>AN:</label>{" "}
+                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item full-width">
+                  <label>ผู้ป่วยโรค:</label>{" "}
+                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
                 </div>
               </div>
             </div>
-            {/* Caregiver Agenda */}
-            <div className="accordion-item">
-              <h2 className="accordion-header" id="headingTwo">
+          </div>
+          <div className="mt-4 text-center">
+            <label className="text-secondary">วันที่บันทึก :</label>
+            <span> {formatDate(AgendaForms.createdAt)}</span><br></br>
+            <label className="text-secondary mt-2">วันที่แก้ไขล่าสุด :</label>
+            <span> {formatDate(AgendaForms.updatedAt)}</span>
+          </div>
+          {/* Navigation Tabs */}
+          <div className="readiness card mt-4" style={{ width: "90%" }}>
+            <ul className="nav nav-tabs">
+              <li className="nav-item">
                 <button
-                  className="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseTwo"
-                  aria-expanded="false"
-                  aria-controls="collapseTwo"
+                  className={`nav-link ${activeTab === "patientAgenda" ? "active" : ""}`}
+                  onClick={() => setActiveTab("patientAgenda")}
                 >
-                  <b>2. Caregiver Agenda</b>
+                  <i class="bi bi-person-check" ></i> Patient Agenda
                 </button>
-              </h2>
-              <div
-                id="collapseTwo"
-                className="accordion-collapse collapse"
-                aria-labelledby="headingTwo"
-                data-bs-parent="#accordionExample"
-              >
-                <div className="accordion-body" style={{ lineHeight: "20px" }}>
-                  {AgendaForms.CaregiverAgenda?.Care_Agenda?.map(
-                    (agenda, index) => (
-                      <div key={index}>
-                        <div
-                          className="row"
-                          style={{ cursor: "pointer", padding: "5px 0" }}
-                          onClick={() => toggleAccordion(index)}
-                        >
-                          <div className="col-sm-3">
-                            <strong
-                              style={{
-                                color: "#64b5f6",
-                                textDecoration: "underline",
-                              }}
-                            >
-                              คนที่ {index + 1} : {agenda.firstName}{" "}
-                              {agenda.lastName || "-"}
-                            </strong>
-                          </div>
-                          <div className="col-sm-10">
-                            <span></span>
-                            <i
-                              className={openIndex === index}
-                              style={{ marginLeft: "10px" }}
-                            ></i>
-                          </div>
-                        </div>
-                        {openIndex === index && (
-                          <div style={{ marginLeft: "20px" }}>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Idea :</strong>
-                              </div>
-                              <div className="col-sm-6">
-                                <p>{agenda.caregiver_idea || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Feeling :</strong>
-                              </div>
-                              <div className="col-sm-6">
-                                <p>{agenda.caregiver_feeling || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Function :</strong>
-                              </div>
-                              <div className="col-sm-6">
-                                <p>{agenda.caregiver_funtion || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Expectation :</strong>
-                              </div>
-                              <div className="col-sm-6">
-                                <p>{agenda.caregiver_expectation || "-"}</p>
-                              </div>
-                            </div>
-                            <hr />
-                          </div>
-                        )}
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "caregiverAgenda" ? "active" : ""}`}
+                  onClick={() => setActiveTab("caregiverAgenda")}
+                >
+                  <i class="bi bi-person-check" ></i> Caregiver Agenda
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "caregiverAssessment" ? "active" : ""}`}
+                  onClick={() => setActiveTab("caregiverAssessment")}
+                >
+                  <i class="bi bi-person-check" ></i> Caregiver Assessment
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "zaritBurden" ? "active" : ""}`}
+                  onClick={() => setActiveTab("zaritBurden")}
+                >
+                  <i class="bi bi-file-earmark-medical"></i> Zarit Burden Interview
+                </button>
+              </li>
+            </ul>
+
+            {/* Content ของแต่ละแท็บ */}
+            <div className="tab-content m-4">
+              {activeTab === "patientAgenda" && (
+                <div className="tab-pane fade show active">
+                  <p className="ms-2" style={{ color: "#10B981" }}> ประเมินผู้ป่วยเบื้องต้น</p>
+                  <div className="p-3 border rounded ms-2">
+                    <div class="row">
+                      <div class="col-sm-2">
+                        <strong>Idea :</strong>
                       </div>
-                    )
-                  ) || "ไม่มีข้อมูล"}
-                </div>
-                <div>
-                  <button
-                    className="btn m-3"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Caregiver Agenda Form")}
-                  >
-                    แก้ไขข้อมูล
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="accordion-item">
-              <h2 className="accordion-header" id="headingThree">
-                <button
-                  className="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseThree"
-                  aria-expanded="false"
-                  aria-controls="collapseThree"
-                >
-                  <b>3. Caregiver Assessments</b>
-                </button>
-              </h2>
-              <div
-                id="collapseThree"
-                className="accordion-collapse collapse"
-                aria-labelledby="headingThree"
-                data-bs-parent="#accordionExample"
-              >
-                <div
-                  className="accordion-body mt-3"
-                  style={{ lineHeight: "20px" }}
-                >
-                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map(
-                    (agenda, index) => (
-                      <div key={index}>
-                        <div
-                          className="row"
-                          style={{ cursor: "pointer", padding: "10px 0" }}
-                          onClick={() => toggleAccordion(index)}
-                        >
-                          <div className="col-sm-3">
-                            <strong
-                              style={{
-                                color: "#64b5f6",
-                                textDecoration: "underline",
-                              }}
-                            >
-                              คนที่ {index + 1} : {agenda.firstName}{" "}
-                              {agenda.lastName || "-"}
-                            </strong>
-                          </div>
-                          <div className="col-sm-9">
-                            <i
-                              className={openIndex === index}
-                              style={{ marginLeft: "10px" }}
-                            ></i>
-                          </div>
-                        </div>
-                        {openIndex === index && (
-                          <div
-                            style={{ marginLeft: "20px", padding: "10px 0" }}
-                          >
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Care :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.care || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Affection :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.affection || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Rest :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.rest || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Empathy :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.empathy || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Goal Of Care :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.goalOfCare || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Information :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.information || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Ventilation :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.ventilation || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Empowerment :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.empowerment || "-"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3">
-                                <strong>Resource :</strong>
-                              </div>
-                              <div className="col-sm-9">
-                                <p>{agenda.resource || "-"}</p>
-                              </div>
-                            </div>
-                            <hr />
-                          </div>
-                        )}
-                      </div>
-                    )
-                  ) || "ไม่มีข้อมูล"}
-                </div>
-                <div>
-                  <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Caregiver Assessment Form")}
-                  >
-                    แก้ไขข้อมูล
-                  </button>
-                </div>
-              </div>
-            </div>
 
-            <div className="accordion-item">
-              <h2 className="accordion-header" id="headingFour">
-                <button
-                  className="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseFour"
-                  aria-expanded="false"
-                  aria-controls="collapseFour"
-                >
-                  <b>4. Zarit Burden Interview</b>
-                </button>
-              </h2>
-              <div
-                id="collapseFour"
-                className="accordion-collapse collapse"
-                aria-labelledby="headingFour"
-              >
-                <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
-                >
-                  {AgendaForms.Zaritburdeninterview ? (
+                      <div class="col-sm-9">
+                        <p>
+                          {AgendaForms.PatientAgenda?.patient_idea || "-"}
+                        </p>
+                      </div>
+
+                    </div>
+                    <div class="row ">
+                      <div class="col-sm-2">
+                        <strong>Feeling :</strong>
+                      </div>
+
+                      <div class="col-sm-9">
+                        <p>
+                          {AgendaForms.PatientAgenda?.patient_feeling || "-"}
+                        </p>
+                      </div>
+
+                    </div>
+                    <div class="row ">
+                      <div class="col-sm-2">
+                        <strong>Function :</strong>
+                      </div>
+                      <div class="col-sm-9">
+                        <p>{AgendaForms.PatientAgenda?.patient_funtion || "-"}</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-2">
+                        <strong>Expectation :</strong>
+                      </div>
+                      <div className="col-sm-9">
+                        <p>
+                          {AgendaForms.PatientAgenda?.patient_expectation || "-"}
+                        </p>
+                      </div>
+                    </div>
                     <div>
+                      <button
+                        className="btn m-2"
+                        style={{ backgroundColor: "#ffde59", color: "black" }}
+                        onClick={() => handleEditClick("Patient Agenda Form")}
+                      >
+                        <i class="bi bi-pencil-fill"></i> แก้ไข
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "caregiverAgenda" && (
+                <div className="tab-pane fade show active">
+                  <p className="ms-2" style={{ color: "#10B981" }}> ประเมินผู้ดูแลเบื้องต้น</p>
+                  {AgendaForms.CaregiverAgenda?.Care_Agenda?.map((agenda, index) => (
+                    <div key={index}>
+                      <div
+                        className="row mb-2"
+                        onClick={() => toggleAccordion(index)}
+                      >
+                        <div className="col-sm-3">
+                          <strong
+                            style={{
+                              cursor: "pointer",
+                              color: "#007BFF",
+                              transition: "color 0.1s ease",
+                            }}
+                            onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                            onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
+                          >
+                            ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
+                            {agenda.lastName || "-"}
+                            {/* {agenda.relationship || "-"} */}
+                          </strong>
+                        </div>
+
+                      </div>
+
+                      {openIndex === index && (
+                        <div className="p-3 border rounded ms-2">
+                          <div className="row ">
+                            <div className="col-sm-2">
+                              <strong>Idea :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.caregiver_idea || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Feeling :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.caregiver_feeling || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Function :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.caregiver_funtion || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Expectation :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.caregiver_expectation || "-"}</p>
+                            </div>
+                          </div>
+                          {/* <hr /> */}
+                          <div className="col-sm-2">
+                            <button
+                              className="btn m-2"
+                              style={{ backgroundColor: "#ffde59", color: "black" }}
+                              onClick={() => handleEditCaregiver(index)}
+                            >
+                              <i class="bi bi-pencil-fill"></i> แก้ไข
+                            </button>
+
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                  ) || "ไม่มีข้อมูล"}
+                </div>
+              )}
+
+
+              {activeTab === "caregiverAssessment" && (
+                <div className="tab-pane fade show active">
+                  <p className="ms-2" style={{ color: "#10B981" }}> ประเมินภาระในการดูแลและปัญหาสุขภาพจิตของผู้ดูแล</p>
+                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map((agenda, index) => (
+                    <div key={index}>
+                      <div
+                        className="row mb-2"
+                        onClick={() => toggleAccordion(index)}
+                      >
+                        <div className="col-sm-3">
+                          <strong
+                            style={{
+                              cursor: "pointer",
+                              color: "#007BFF",
+                              transition: "color 0.1s ease",
+                            }}
+                            onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                            onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
+                          >
+                            ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
+                            {agenda.lastName || "-"}
+                          </strong>
+                        </div>
+
+                      </div>
+
+                      {openIndex === index && (
+                        <div className="p-3 border rounded ms-2">
+                          <div className="row ">
+                            <div className="col-sm-2">
+                              <strong>Care  :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.care || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Affection :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.affection || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Rest :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.rest || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Empathy :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.empathy || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Goal Of Care :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.goalOfCare || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Ventilation :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.ventilation || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Empowerment :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.empowerment || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="col-sm-2">
+                              <strong>Resource :</strong>
+                            </div>
+                            <div className="col-sm-9">
+                              <p>{agenda.resource || "-"}</p>
+                            </div>
+                          </div>
+                          <div className="col-sm-2">
+                            <button
+                              className="btn m-2"
+                              style={{ backgroundColor: "#ffde59", color: "black" }}
+                              onClick={() => handleEditCaregiverAssessment(index)}
+                            >
+                              <i class="bi bi-pencil-fill"></i> แก้ไข
+                            </button>
+
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                  ) || "ไม่มีข้อมูล"}
+                </div>
+              )}
+
+              {activeTab === "zaritBurden" && (
+                <div className="tab-pane fade show active">
+                  <p className="ms-2" style={{ color: "#10B981" }}> แบบประเมินภาระการดูแลผู้ป่วยในบ้าน</p>
+                  {AgendaForms.Zaritburdeninterview ? (
+                    <div className="p-3 border rounded ms-2">
                       <div className="row">
                         <div className="col-sm-2">
                           <strong>คะแนนรวม :</strong>
@@ -1149,45 +1115,59 @@ export default function DetailAgendaForm() {
                           </div>
                         </div>
                       </div>
+                      <div className="col-sm-2">
+                        <button
+                          className="btn m-2"
+                          style={{ backgroundColor: "#ffde59", color: "black" }}
+                          onClick={() => handleEditClick("Zaritburdeninterview Form")}
+                        >
+                          <i class="bi bi-pencil-fill"></i> แก้ไข
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <p>ไม่มีข้อมูล</p>
                   )}
                   <script>window.location.reload();</script>
+
+
                 </div>
-                <div>
-                  <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Zaritburdeninterview Form")}
-                  >
-                    แก้ไขข้อมูล
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
           </div>
-
-          {/* Zarit Burden Interview */}
         </div>
       </div>
       {isModalOpen && modalContent && (
-        <div className="modal show d-block">
+        <div className="modal show d-block" tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit {currentEditSection}</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={handleCloseModal}
-                ></button>
+              {/* Header */}
+              <div className="modal-header d-flex justify-content-center">
+                <h5 className="modal-title text-black text-center">
+                  แก้ไข {currentEditSection.replace(" Form", "")}
+                </h5>
               </div>
+
+              {/* Body */}
               <div className="modal-body">{modalContent}</div>
+
+              {/* Footer */}
+              <div className="modal-footer d-flex justify-content-between">
+                {/* ปุ่มยกเลิก */}
+                <button className="btn-EditMode btn-secondary" onClick={handleCloseModal}>
+                  ยกเลิก
+                </button>
+
+                {/* ปุ่มบันทึก */}
+                <button className="btn-EditMode btnsave" onClick={() => handleSaveChanges()}>
+                  บันทึก
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
     </main>
   );
 }

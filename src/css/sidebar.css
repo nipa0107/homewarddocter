@@ -130,20 +130,28 @@
 /* .sidebar ul li{ 
 } */
 .search-bar {
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;
-    /* margin-top: 20px;  */
-}
-.search-text{
+    width: 350px; /* กำหนดขนาดของช่องค้นหา */
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 12px; /* ระยะห่างจากขอบซ้าย */
+    font-size: 1.1rem;
+    color: #888; /* สีของไอคอน */
+  }
+  
+  .search-text {
+    width: 100%;
+    padding: 10px 10px 10px 35px; /* Padding-left 35px เพื่อให้ข้อความไม่ทับไอคอน */
     border-radius: 5px;
-    margin-top: 1rem;
-    padding: .3rem;
-    padding-left: .5rem;
-    width: 16rem;
-    border: 1.4px solid rgb(187, 186, 186) ;
-}
-
+    border: 1.5px solid #ddd;
+    font-size: 1rem;
+    height: 40px;
+  }
+  
 
 .sidebar ul li a {
     color: rgb(0, 0, 0);
@@ -380,36 +388,4 @@ hr{
 
 }
 
-/* ✅ ปรับ Sidebar ให้แสดงเฉพาะไอคอนบน iPad */
-@media screen and (max-width: 1024px) {
-    .sidebar {
-        width: 82px;
-        overflow: hidden; /* ป้องกัน UI เพี้ยน */
-        transition: width 0.3s ease;
-    }
-    .sidebar .links_name, .sidebar .logo_name {
-        display: none; /* ซ่อนชื่อเมนู */
-    }
-    .sidebar ul li a {
-        justify-content: center;
-    }
-    .sidebar #btn {
-        left: 50%;
-    }
-    .home_content {
-        width: calc(100% - 82px);
-        left: 82px;
-    }
-    
-    /* ✅ เมนูเปิดแล้วให้แสดงตัวหนังสือ */
-    .sidebar.active {
-        width: 320px;
-    }
-    .sidebar.active .links_name, 
-    .sidebar.active .logo_name {
-        display: inline-block !important; /* แสดงตัวหนังสือเมื่อ Sidebar เปิด */
-    }
-    .sidebar.active ul li a {
-        justify-content: flex-start;
-    }
-}
+

@@ -220,10 +220,10 @@ export default function Abnormalcaser({ }) {
                     alert("Token expired login again");
                     window.localStorage.clear();
                     setTimeout(() => {
-                      window.location.replace("./");
+                        window.location.replace("./");
                     }, 0);
-                    return null; 
-                  }
+                    return null;
+                }
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
@@ -662,8 +662,51 @@ export default function Abnormalcaser({ }) {
         fetchAbnormalCases();
     }, []);
 
-    const sortedAbnormalCases = abnormalCases.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    const [sortOrder, setSortOrder] = useState({ date: "asc", status: "asc" }); // ค่าเริ่มต้น: เก่าสุด -> ใหม่สุด, สถานะผิดปกติขึ้นก่อน
 
+    // ฟังก์ชันเรียงลำดับ
+    const handleSort = (type) => {
+        setSortOrder((prev) => ({
+            ...prev,
+            [type]: prev[type] === "asc" ? "desc" : "asc",
+        }));
+    };
+
+    // เรียงลำดับข้อมูล
+    const sortedAbnormalCases = [...abnormalCases].sort((a, b) => {
+        if (sortOrder.date === "asc") {
+            return new Date(a.updatedAt) - new Date(b.updatedAt);
+        } else {
+            return new Date(b.updatedAt) - new Date(a.updatedAt);
+        }
+    }).sort((a, b) => {
+        if (sortOrder.status === "asc") {
+            return a.status_name.localeCompare(b.status_name);
+        } else {
+            return b.status_name.localeCompare(a.status_name);
+        }
+    });
+
+    //เพิ่ม useState เพื่อเก็บจำนวนของเคสทั้งสองประเภท:
+    const [abnormalCaseCount, setAbnormalCaseCount] = useState(0);
+    const [emergencyCaseCount, setEmergencyCaseCount] = useState(0);
+
+    //ใช้ useEffect เพื่อนับจำนวนเคสผิดปกติและเคสฉุกเฉินใหม่ทุกครั้งที่ abnormalCases เปลี่ยนแปลง
+    useEffect(() => {
+        if (abnormalCases.length > 0) {
+            // นับจำนวนเคสผิดปกติ
+            const abnormalCount = abnormalCases.filter(caseData => caseData.status_name === "ผิดปกติ").length;
+
+            // นับจำนวนเคสฉุกเฉิน
+            const emergencyCount = abnormalCases.filter(caseData => caseData.status_name === "เคสฉุกเฉิน").length;
+
+            setAbnormalCaseCount(abnormalCount);
+            setEmergencyCaseCount(emergencyCount);
+        } else {
+            setAbnormalCaseCount(0);
+            setEmergencyCaseCount(0);
+        }
+    }, [abnormalCases]);
 
 
     return (
@@ -791,84 +834,72 @@ export default function Abnormalcaser({ }) {
                         </li>
                     </ul>
                 </div>
-                {/* <div className="search-bar">
-                    <input
-                        className="search-text"
-                        type="text"
-                        placeholder="ค้นหา"
-                        value={searchKeyword}
-                        onChange={(e) => setSearchKeyword(e.target.value)}
-                    />
-                </div> */}
-
                 <div class="container-fluid">
-                    {/* <h2 className="headerassesment mt-4 mb-0">รายชื่อผู้ป่วยที่มีอาการผิดปกติ</h2> */}
-                    <div className="align-item-end mb-3 ">
-                        <button className="dropdown btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            เลือกการแสดงข้อมูล
-                        </button>
-                        <ul className="dropdown-menu dropdown-menu-end">
-                            {/* <li>
-                            <a className="dropdown-item" href="#" onClick={() => handleTimeRangeChange("latest")}>
-                                ล่าสุด
-                            </a>
-                        </li> */}
-                            <li>
-                                <a className="dropdown-item" href="#" onClick={() => handleTimeRangeChange("7days")}>
-                                    7 วัน
-                                </a>
-                            </li>
-                            <li>
-                                <a className="dropdown-item" href="#" onClick={() => handleTimeRangeChange("30days")}>
-                                    30 วัน
-                                </a>
-                            </li>
-                        </ul>
+                    <div className="case-summary">
+                        <p className="abnormal-status">จำนวนเคสผิดปกติ : <strong>{abnormalCaseCount} เคส</strong> </p>
+                        <p className="Emergency-status">จำนวนเคสฉุกเฉิน : <strong>{emergencyCaseCount} เคส</strong> </p>
                     </div>
-                    <div className="table-responsive">
+
+                    <div className="table-responsive mt-4">
                         <table className="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>วันที่ประเมิน</th>
+                                    <th onClick={() => handleSort("date")} style={{ cursor: "pointer" }}>
+                                        วันที่บันทึก{" "}
+                                        {sortOrder.date === "asc" ? (
+                                            <i className="bi bi-caret-up-fill"></i>
+                                        ) : (
+                                            <i className="bi bi-caret-down-fill"></i>
+                                        )}
+                                    </th>
                                     <th>ชื่อ-สกุล</th>
-                                    <th>ผลการประเมิน</th>
+                                    <th onClick={() => handleSort("status")} style={{ cursor: "pointer" }}>
+                                        ผลการประเมิน{" "}
+                                        {sortOrder.status === "asc" ? (
+                                            <i className="bi bi-caret-up-fill"></i>
+                                        ) : (
+                                            <i className="bi bi-caret-down-fill"></i>
+                                        )}
+                                    </th>
                                     <th>ผู้ประเมิน</th>
-
+                                    <th scope="col">สถานะ</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {abnormalCases.length > 0 ? (
-                                    abnormalCases.map((caseData, index) => (
+                                {sortedAbnormalCases.length > 0 ? (
+                                    sortedAbnormalCases.map((caseData) => (
                                         <tr
                                             key={caseData._id}
                                             className="info"
                                             onClick={() =>
                                                 navigate("/assessmentuserone", {
-                                                    state: {
-                                                        id: caseData.PatientForm._id, // ส่ง ID
-                                                        fromAbnormalCases: true, // ระบุว่ามาจากหน้านี้
-                                                    },
+                                                    state: { id: caseData.PatientForm._id, fromAbnormalCases: true },
                                                 })
                                             }
                                         >
                                             <td>{formatDate(caseData.updatedAt)}</td>
-                                            <td>{caseData.PatientForm?.user?.name || "ไม่ระบุชื่อ"} {caseData.PatientForm?.user?.surname || ""}</td>
+                                            <td>{caseData.PatientForm?.user?.name || "ไม่ระบุ"} {caseData.PatientForm?.user?.surname || ""}</td>
+
                                             <td style={{ color: caseData.status_name === "ผิดปกติ" ? "#fb8c00" : "#FF6A6A" }}>
                                                 {caseData.status_name}
                                             </td>
                                             <td>
                                                 {caseData.MPersonnel
                                                     ? `${caseData.MPersonnel.nametitle} ${caseData.MPersonnel.name} ${caseData.MPersonnel.surname}`
-                                                    : "ไม่ระบุชื่อ"}
+                                                    : "ไม่ระบุ"}
+                                            </td>
+                                            <td style={{ color: "#5ab1f8", cursor: "pointer" }}>
+                                                รายละเอียด
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="4" className="text-gray text-center ">ยังไม่มีเคสผู้ป่วยที่มีอาการผิดปกติ</td>
+                                        <td colSpan="5" className="text-center text-muted">ยังไม่มีเคสผู้ป่วยที่มีอาการผิดปกติ</td>
                                     </tr>
                                 )}
                             </tbody>
+
                         </table>
                     </div>
                 </div>

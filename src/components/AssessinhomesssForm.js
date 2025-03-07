@@ -52,7 +52,7 @@ export default function AssessinhomesssForm({ }) {
     const bellRef = useRef(null);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
-  const hasFetchedUserData = useRef(false);
+    const hasFetchedUserData = useRef(false);
     const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
         assessment: 0,
@@ -230,10 +230,10 @@ export default function AssessinhomesssForm({ }) {
                     alert("Token expired login again");
                     window.localStorage.clear();
                     setTimeout(() => {
-                      window.location.replace("./");
+                        window.location.replace("./");
                     }, 0);
-                    return null; 
-                  }
+                    return null;
+                }
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
@@ -517,10 +517,20 @@ export default function AssessinhomesssForm({ }) {
     }
 
     const [activeStep, setActiveStep] = useState(0);
+
+    useEffect(() => {
+        scrollToTop(); // ทำให้ฟอร์มเลื่อนขึ้นไปด้านบนสุดทุกครั้งที่ activeStep เปลี่ยน
+    }, [activeStep]);
+
     const methods = useForm({
         defaultValues: {
         },
     });
+
+    // ฟังก์ชันสำหรับเปลี่ยน active step เมื่อคลิกที่ StepLabel
+    const handleStepClick = (index) => {
+        setActiveStep(index);
+    };
 
     useEffect(() => {
         const fetchCaregiverData = async () => {
@@ -663,10 +673,9 @@ export default function AssessinhomesssForm({ }) {
     };
 
     const handleBack = () => {
-        setTimeout(() => {
-            scrollToTop();
-        }, 0); // หน่วงเวลาเล็กน้อย
-        setActiveStep(activeStep - 1);
+        scrollToTop(); // เลื่อนไปด้านบนสุดทันที
+
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
     const storedFormData = JSON.parse(localStorage.getItem(`formData-${userid}`)) || {};
@@ -738,263 +747,284 @@ export default function AssessinhomesssForm({ }) {
         fetchUnreadCount();
     }, []);
     return (
-        <main className="bodyform">
+        <div>
             <ToastContainer />
-            <div className="homeheaderform">
-                <div className="header">ประเมิน IN-HOME-SSS</div>
-                <div className="profile_details">
-                    <ul className="nav-list">
-                        <li>
-                            <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
-                                {showNotifications ? (
-                                    <i className="bi bi-bell-fill"></i>
-                                ) : (
-                                    <i className="bi bi-bell"></i>
-                                )}
-                                {unreadCount > 0 && (
-                                    <span className="notification-count">{unreadCount}</span>
-                                )}
-                            </a>
-                        </li>
-                        <li>
-                            <a href="profile">
-                                <i className="bi bi-person"></i>
-                                <span className="links_name">
-                                    {data && data.nametitle + data.name + " " + data.surname}
-                                </span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            {showNotifications && (
-          <div className="notifications-dropdown" ref={notificationsRef}>
-            <div className="notifications-head">
-              <h2 className="notifications-title">การแจ้งเตือน</h2>
-            </div>
-            <div className="notifications-filter">
-              <div
-                className={`notification-box ${filterType === "all" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("all")}
-              >
-                <div className="notification-item">
-                  <i className="bi bi-bell"></i>
-                  ทั้งหมด
-                </div>
-                <div className="notification-right">
-                  {unreadCount > 0 && (
-                    <span className="notification-count-noti">{unreadCount}</span>
-                  )}
-                  <i className="bi bi-chevron-right"></i>
-                </div>
-              </div>
-              <div
-                className={`notification-box ${filterType === "abnormal" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("abnormal")}
-              >
-                <div className="notification-item">
-                  <i className="bi bi-exclamation-triangle"></i>
-                  ผิดปกติ
-                </div>
-                <div className="notification-right">
-                  {unreadCountsByType.abnormal > 0 && (
-                    <span className="notification-count-noti">
-                      {unreadCountsByType.abnormal}
-                    </span>
-                  )}
-                  <i class="bi bi-chevron-right"></i>
-                </div>
-              </div>
-              <div
-                className={`notification-box ${filterType === "normal" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("normal")}
-              >
-                <div className="notification-item">
-                  {" "}
-                  <i className="bi bi-journal-text"></i>
-                  บันทึกอาการ
-                </div>
-                <div className="notification-right">
-                  {unreadCountsByType.normal > 0 && (
-                    <span className="notification-count-noti">
-                      {unreadCountsByType.normal}
-                    </span>
-                  )}
-                  <i class="bi bi-chevron-right"></i>
-                </div>
-              </div>
-
-              <div
-                className={`notification-box ${filterType === "assessment" ? "active" : ""
-                  }`}
-                onClick={() => handleFilterChange("assessment")}
-              >
-                <div className="notification-item">
-                  <i className="bi bi-clipboard-check"></i>
-                  ประเมินอาการ
-                </div>
-                <div className="notification-right">
-                  {unreadCountsByType.assessment > 0 && (
-                    <span className="notification-count-noti">
-                      {unreadCountsByType.assessment}
-                    </span>
-                  )}
-                  <i class="bi bi-chevron-right"></i>
-                </div>
-              </div>
-            </div>
-            <div className="selected-filter">
-              <p>
-                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-              </p>
-              <p
-                className="mark-all-read-btn"
-                onClick={() => markAllByTypeAsViewed(filterType)}
-              >
-                ทำเครื่องหมายว่าอ่านทั้งหมด
-              </p>
-            </div>
-            {filteredAlerts.length > 0 ? (
-              <div>
-                {renderAlerts(
-                  filteredAlerts,
-                  token,
-                  userId,
-                  navigate,
-                  setAlerts,
-                  setUnreadCount,
-                  formatDate
-                )}
-              </div>
-            ) : (
-              <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-            )}
-          </div>
-        )}
-            <div className="sidebarform">
-                <div className="sideassessment">
-                    <div>
-                        <div className="nameassessment">
-                            <p className="headerassesmentinhome">
-                                {name} {surname}
-                            </p>
-                            {birthday ? (
-                                <p className="textassesmentinhome">
-                                    <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน <label>เพศ:</label>{gender}
-                                </p>
-                            ) : (
-                                <p className="textassesmentinhome"> <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>{gender}</p>
-                            )}
-                            <p className="textassesmentinhome">
-                                <label>HN: </label>
-                                {medicalData && medicalData.HN
-                                    ? medicalData.HN
-                                    : "ไม่มีข้อมูล"}
-                                <label> AN: </label>
-                                {medicalData && medicalData.AN
-                                    ? medicalData.AN
-                                    : "ไม่มีข้อมูล"}
-                                <br></br>
-                                <label>ผู้ป่วยโรค:</label>
-                                {medicalData && medicalData.Diagnosis
-                                    ? medicalData.Diagnosis
-                                    : "ไม่มีข้อมูล"}
-                            </p>
-                        </div>
-
-                        <Stepper className="stepper" activeStep={activeStep} orientation="vertical">
-                            {steps.map((label, index) => (
-                                <Step key={index}>
-                                    <StepLabel>{label}</StepLabel>
-                                </Step>
-                            ))}
-                        </Stepper>
+            <div className="container-form">
+                <div className="homeheaderform">
+                    <div className="header">ประเมิน IN-HOME-SSS</div>
+                    <div className="profile_details">
+                        <ul className="nav-list">
+                            <li>
+                                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                                    {showNotifications ? (
+                                        <i className="bi bi-bell-fill"></i>
+                                    ) : (
+                                        <i className="bi bi-bell"></i>
+                                    )}
+                                    {unreadCount > 0 && (
+                                        <span className="notification-count">{unreadCount}</span>
+                                    )}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="profile">
+                                    <i className="bi bi-person"></i>
+                                    <span className="links_name">
+                                        {data && data.nametitle + data.name + " " + data.surname}
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-            {/* Scrollable form content */}
-            <div className="form-content">
-                {/* <a href="assessinhomesssuser">บันทึกการประเมิน</a> */}
-                {activeStep === steps.length ? (
-                    <Typography variant="h3" align="center">
-                        การประเมินเสร็จสิ้น
-                    </Typography>
 
-                ) : (
-                    <FormProvider {...methods}>
-                        <form onSubmit={methods.handleSubmit(handleNext)}>
-                            {activeStep === 0 && (
-                                <Immobility Immobilitydata={Immobilitydata} setImmobilityData={setImmobilityData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
-                            )}
-                            {activeStep === 1 && (
-                                <Nutrition onDataChange={(data) => setNutritionData(data)} />
-                            )}
-                            {activeStep === 2 && (
-                                <Housing onDataChange={(data) => setHousingData(data)} />
-                            )}
-                            {activeStep === 3 && (
-                                <Otherpeople onDataChange={(data) => setOtherpeopleData(data)} />
-                            )}
-                            {activeStep === 4 && (
-                                <Medication onDataChange={(data) => setMedicationData(data)} />
-                            )}
-                            {activeStep === 5 && (
-                                <Physicalexamination onDataChange={(data) => setPhysicalexaminationData(data)} />
-                            )}
-                            {activeStep === 6 && (
-                                <SSS onDataChange={(data) => setsssData(data)} />
-                            )}
-                            <div className="btn-group">
-                                <div className="btn-pre">
-                                    <button
-                                        className="btn btn-outline py-2"
-                                        disabled={activeStep === 0}
-                                        onClick={handleBack}
-                                        type="button"
-                                    >
-                                        ก่อนหน้า
-                                    </button>
+                {showNotifications && (
+                    <div className="notifications-dropdown" ref={notificationsRef}>
+                        <div className="notifications-head">
+                            <h2 className="notifications-title">การแจ้งเตือน</h2>
+                        </div>
+                        <div className="notifications-filter">
+                            <div
+                                className={`notification-box ${filterType === "all" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("all")}
+                            >
+                                <div className="notification-item">
+                                    <i className="bi bi-bell"></i>
+                                    ทั้งหมด
                                 </div>
-                                <div className="btn-next">
-                                    <button
-                                        className="btn btn-outline-primary py-2"
-                                        type="submit"
-                                    >
-                                        {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"
-                                        }
-
-                                    </button>
+                                <div className="notification-right">
+                                    {unreadCount > 0 && (
+                                        <span className="notification-count-noti">{unreadCount}</span>
+                                    )}
+                                    <i className="bi bi-chevron-right"></i>
+                                </div>
+                            </div>
+                            <div
+                                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("abnormal")}
+                            >
+                                <div className="notification-item">
+                                    <i className="bi bi-exclamation-triangle"></i>
+                                    ผิดปกติ
+                                </div>
+                                <div className="notification-right">
+                                    {unreadCountsByType.abnormal > 0 && (
+                                        <span className="notification-count-noti">
+                                            {unreadCountsByType.abnormal}
+                                        </span>
+                                    )}
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                            </div>
+                            <div
+                                className={`notification-box ${filterType === "normal" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("normal")}
+                            >
+                                <div className="notification-item">
+                                    {" "}
+                                    <i className="bi bi-journal-text"></i>
+                                    บันทึกอาการ
+                                </div>
+                                <div className="notification-right">
+                                    {unreadCountsByType.normal > 0 && (
+                                        <span className="notification-count-noti">
+                                            {unreadCountsByType.normal}
+                                        </span>
+                                    )}
+                                    <i class="bi bi-chevron-right"></i>
                                 </div>
                             </div>
 
-                        </form>
-                    </FormProvider>
+                            <div
+                                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                                    }`}
+                                onClick={() => handleFilterChange("assessment")}
+                            >
+                                <div className="notification-item">
+                                    <i className="bi bi-clipboard-check"></i>
+                                    ประเมินอาการ
+                                </div>
+                                <div className="notification-right">
+                                    {unreadCountsByType.assessment > 0 && (
+                                        <span className="notification-count-noti">
+                                            {unreadCountsByType.assessment}
+                                        </span>
+                                    )}
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="selected-filter">
+                            <p>
+                                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+                            </p>
+                            <p
+                                className="mark-all-read-btn"
+                                onClick={() => markAllByTypeAsViewed(filterType)}
+                            >
+                                ทำเครื่องหมายว่าอ่านทั้งหมด
+                            </p>
+                        </div>
+                        {filteredAlerts.length > 0 ? (
+                            <div>
+                                {renderAlerts(
+                                    filteredAlerts,
+                                    token,
+                                    userId,
+                                    navigate,
+                                    setAlerts,
+                                    setUnreadCount,
+                                    formatDate
+                                )}
+                            </div>
+                        ) : (
+                            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+                        )}
+                    </div>
                 )}
+                <div className="stepper">
+                    <Stepper activeStep={activeStep} alternativeLabel>
+                        {steps.map((label, index) => (
+                            <Step key={index}>
+                                <StepLabel
+                                    onClick={() => handleStepClick(index)}
+                                    style={{
+                                        cursor: "pointer",
+                                        color: activeStep === index ? "#95d7ff" : "#18aed6", // สีเขียวเมื่อเลือก, สีฟ้าสำหรับไม่เลือก
+                                        fontSize: "20px", // ขนาดฟอนต์ 20px
+                                        fontWeight: activeStep === index ? "bold" : "normal", // ตัวหนาเมื่อคลิก
+                                    }}
+                                >
+                                    {label}
+                                </StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+
+                </div>
+                <div className="formcontent">
+                    <div class="row">
+                        <div className="col-4 bg-light" style={{ borderRadius: "8px" }} >
+                            <p className="name"> <i class="bi bi-person-fill"></i> {name} {surname}</p >
+                            <div className="namepatient">
+                                <label style={{ color: "#008000" }}><b>HN : {medicalData && medicalData.HN
+                                    ? medicalData.HN
+                                    : "-"}</b> </label> <br></br>
+                                <label style={{ color: "#FFA500" }}> <b>AN : {medicalData && medicalData.AN
+                                    ? medicalData.AN
+                                    : "-"}  </b></label>
+                                {birthday ? (
+                                    <p>
+                                        <label style={{ color: "#666" }}> เพศ : </label><b> {gender}</b> <br></br>
+                                        <label style={{ color: "#666" }}> อายุ :</label> <b> {userAge} ปี {userAgeInMonths} เดือน</b>   <br></br>
+                                        <label style={{ color: "#666" }}> ผู้ป่วยโรค :</label> <b> {medicalData && medicalData.Diagnosis
+                                            ? medicalData.Diagnosis
+                                            : "ไม่ได้ระบุโรค"}</b>
+                                    </p>
+                                ) : (
+                                    <p >
+                                        <label>เพศ :</label> {gender} <br></br>
+                                        <label>อายุ :</label> 0 ปี 0 เดือน </p>
+                                )}
+                            </div>
+                            <div className="step-menu d-flex flex-column mt-3">
+                                {steps.map((label, index) => (
+                                    <button
+                                        className="bg-light"
+                                        key={index}
+                                        style={{ cursor: "pointer", color: activeStep === index ? "#59bfff" : "#000", fontWeight: activeStep === index ? "bold" : "normal" }}
+                                        onClick={() => handleStepClick(index)}
+                                    >
+                                        {label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="col-8">
+                            <div className="form-content">
+                                {activeStep === steps.length ? (
+                                    <Typography variant="h3" align="center">
+                                        การประเมินเสร็จสิ้น
+                                    </Typography>
+
+                                ) : (
+                                    <FormProvider {...methods}>
+                                        <form onSubmit={methods.handleSubmit(handleNext)}>
+                                            {activeStep === 0 && (
+                                                <Immobility Immobilitydata={Immobilitydata} setImmobilityData={setImmobilityData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
+                                            )}
+                                            {activeStep === 1 && (
+                                                <Nutrition onDataChange={(data) => setNutritionData(data)} />
+                                            )}
+                                            {activeStep === 2 && (
+                                                <Housing onDataChange={(data) => setHousingData(data)} />
+                                            )}
+                                            {activeStep === 3 && (
+                                                <Otherpeople onDataChange={(data) => setOtherpeopleData(data)} />
+                                            )}
+                                            {activeStep === 4 && (
+                                                <Medication onDataChange={(data) => setMedicationData(data)} />
+                                            )}
+                                            {activeStep === 5 && (
+                                                <Physicalexamination onDataChange={(data) => setPhysicalexaminationData(data)} />
+                                            )}
+                                            {activeStep === 6 && (
+                                                <SSS onDataChange={(data) => setsssData(data)} />
+                                            )}
+                                            <div className="btn-group">
+                                                <div className="btn-pre">
+                                                    <button
+                                                        className="btn btn-outline py-2"
+                                                        disabled={activeStep === 0}
+                                                        onClick={handleBack}
+                                                        type="button"
+                                                    >
+                                                        ก่อนหน้า
+                                                    </button>
+                                                </div>
+                                                <div className="btn-next">
+                                                    <button
+                                                        className="btn btn-outline-primary py-2"
+                                                        type="submit"
+                                                    >
+                                                        {activeStep === steps.length - 1 ? "บันทึก" : "ถัดไป"
+                                                        }
+
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </form>
+                                    </FormProvider>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a
+                    onClick={scrollToTop}
+                    className="btn btn-outline-primary py-2"
+                    style={{
+                        position: "fixed",
+                        bottom: "20px",
+                        right: "20px",
+                        padding: "10px 20px",
+                        backgroundColor: "#87CEFA",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        zIndex: "1000",
+                    }}
+                >
+                    <i class="bi bi-arrow-up-circle"></i>
+
+                </a>
+
             </div>
-            <a
-                onClick={scrollToTop}
-                className="btn btn-outline-primary py-2"
-                style={{
-                    position: "fixed",
-                    bottom: "20px",
-                    right: "20px",
-                    padding: "10px 20px",
-                    backgroundColor: "#87CEFA",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                    zIndex: "1000",
-                }}
-            >
-                ขึ้นไปด้านบน
-            </a>
-
-        </main>
-
+        </div>
     );
 };

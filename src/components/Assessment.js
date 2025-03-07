@@ -616,22 +616,22 @@ export default function Assessment() {
 
         {/*ค้นหา */}
         {/* <h3>จัดการข้อมูลผู้ป่วย</h3> */}
-        <div className="search-bar">
-          <input
-            className="search-text"
-            type="text"
-            placeholder="ค้นหา"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-          />
-        </div>
-        <div className="content-toolbar">
-        <div className="toolbar">
-          <p className="countadmin1">
-            จำนวนผู้ป่วยทั้งหมด :{" "}
-            {datauser.filter((user) => user.deletedAt === null).length} คน
-          </p>
-        </div>
+        <div className="content-toolbar d-flex justify-content-between align-items-center mt-5 mb-4">
+          <div className="search-bar position-relative">
+            <i className="bi bi-search search-icon"></i> 
+            <input
+              className="search-text" 
+              type="text"
+              placeholder="ค้นหา"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+            />
+          </div>
+          <div className="toolbar">
+            <p className="countadmin1 mb-0">
+              จำนวนผู้ป่วยทั้งหมด: {" "} {datauser.filter((user) => user.deletedAt === null).length} คน
+            </p>
+          </div>
         </div>
 
         <div className="content">

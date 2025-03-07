@@ -1,5 +1,6 @@
 import React from 'react'
 import { Controller, useFormContext } from 'react-hook-form';
+import Paper from '../../img/exam.png'
 
 export const SSS = ({ onDataChange }) => {
   const { control, register, setValue, getValues, watch } = useFormContext();
@@ -15,97 +16,130 @@ export const SSS = ({ onDataChange }) => {
 
   return (
     <div>
-      <div className="info3 card">
+      <div className="title-form mt-1">
         <div className="header">
           <b>SSS Assessment</b>
         </div>
-        <div style={{ marginLeft: '26px', marginTop: '20px', lineHeight: '25px' }}>
-          <p>S = Safety</p>
-          <p>S = Spiritual Health</p>
-          <p>S = Service</p>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}>
+            <img src={Paper} className="zarit" alt="assessment" /> ประเมินระบบการดูแลผู้ป่วย
+          </p>
+        </div>
+      </div>
+      <div className="m-4">
+        <div style={{ marginLeft: '26px', marginTop: '20px', lineHeight: '20px' }}>
+          <p><i class="bi bi-shield-check" style={{ color: "#008000" }}></i> <b>S</b> = Safety (ความปลอดภัย)</p>
+          <p><i class="bi bi-clipboard-heart" style={{ color: "#008000" }}></i> <b>S</b> = Spiritual Health (สุขภาพจิตวิญญาณ)</p>
+          <p><i class="bi bi-hospital" style={{ color: "#008000" }}></i> <b>S</b> = Service (การรับบริการ)</p>
         </div>
       </div>
       <div className="info3 card mt-4">
-        <div className='m-4'>
-          <b>Safety (ความปลอดภัย)</b>
-          <table className='nutrition-table'>
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <thead>
-              <tr>
-                <th></th>
-                <th>ปลอดภัย</th>
-                <th>ไม่ปลอดภัย</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: "cleanliness", label: "1. แสงไฟ" },
-                { name: "floorSafety", label: "2. พื้นต่างระดับ" },
-                { name: "stairsSafety", label: "3. บันได" },
-                { name: "handrailSafety", label: "4. ราวจับ" },
-                { name: "sharpEdgesSafety", label: "5. เหลี่ยมคม" },
-                { name: "slipperyFloorSafety", label: "6. ความลื่นของพื้น" },
-                { name: "toiletSafety", label: "7. ลักษณะโถส้วม" },
-                { name: "stoveSafety", label: "8. เตาที่ใช้หุงต้ม" },
-                { name: "storageSafety", label: "9. การเก็บของในบ้าน" },
-                { name: "waterSafety", label: "10. น้ำที่ใช้ดื่ม" },
-              ].map((item) => (
-                <tr key={item.name}>
-                  <td>{item.label}</td>
-                  <td>
-                    <Controller
-                      name={`Safety.${item.name}`}
-                      control={control}
-                      defaultValue=""
-                      render={({ field }) => (
-                        <input
-                          type="radio"
-                          value="ปลอดภัย"
-                          checked={field.value === "ปลอดภัย"}
-                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                            handleInputChange("Safety", item.name, e.target.value);
-                          }}
-                        />
-                      )}
-                    />
-                  </td>
-                  <td>
-                    <Controller
-                      name={`Safety.${item.name}`}
-                      control={control}
-                      defaultValue=""
-                      render={({ field }) => (
-                        <input
-                          type="radio"
-                          value="ไม่ปลอดภัย"
-                          checked={field.value === "ไม่ปลอดภัย"}
-                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                            handleInputChange("Safety", item.name, e.target.value);
-                          }}
-                        />
-                      )}
-                    />
-                  </td>
-                </tr>
-              ))}
-
-
-            </tbody>
-          </table>
+        <div className='header'>
+          <b>Safety</b>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">อันตรายอื่นๆ (ถ้ามี) :</label><br></br>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-shield-check" style={{ color: "#008000" }}></i> ความปลอดภัย</p>
+        </div>
+        <table className='nutrition-table'>
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <thead>
+            <tr>
+              <th>คำถาม</th>
+              <th className='text-center'>ปลอดภัย</th>
+              <th className='text-center'>ไม่ปลอดภัย</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              { name: "cleanliness", label: "1. แสงไฟ" },
+              { name: "floorSafety", label: "2. พื้นต่างระดับ" },
+              { name: "stairsSafety", label: "3. บันได" },
+              { name: "handrailSafety", label: "4. ราวจับ" },
+              { name: "sharpEdgesSafety", label: "5. เหลี่ยมคม" },
+              { name: "slipperyFloorSafety", label: "6. ความลื่นของพื้น" },
+              { name: "toiletSafety", label: "7. ลักษณะโถส้วม" },
+              { name: "stoveSafety", label: "8. เตาที่ใช้หุงต้ม" },
+              { name: "storageSafety", label: "9. การเก็บของในบ้าน" },
+              { name: "waterSafety", label: "10. น้ำที่ใช้ดื่ม" },
+            ].map((item) => (
+              <tr key={item.name}>
+                <td>{item.label}</td>
+                <td className='text-center'>
+                  <Controller
+                    name={`Safety.${item.name}`}
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) => (
+                      <input
+
+                        type="radio"
+                        value="ปลอดภัย"
+                        checked={field.value === "ปลอดภัย"}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          handleInputChange("Safety", item.name, e.target.value);
+                        }}
+                      />
+                    )}
+                  />
+                </td>
+                <td className='text-center'>
+                  <Controller
+                    name={`Safety.${item.name}`}
+                    control={control}
+                    defaultValue=""
+                    render={({ field }) => (
+                      <input
+                        type="radio"
+                        value="ไม่ปลอดภัย"
+                        checked={field.value === "ไม่ปลอดภัย"}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          handleInputChange("Safety", item.name, e.target.value);
+                        }}
+                      />
+                    )}
+                  />
+                </td>
+              </tr>
+            ))}
+
+
+          </tbody>
+        </table>
+        <div className='mt-3 ms-4 me-4 mb-4'>
+          <label className="form-label">ภาวะฉุกเฉิน ติดต่อความช่วยเหลืออย่างไร</label><br></br>
+          <div>
+            <Controller
+              name="Safety.emergencyContact"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <textarea
+                  type="text"
+                  {...field}
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
+                  placeholder="กรอกคำตอบ"
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    handleInputChange("Safety", "emergencyContact", e.target.value);
+                  }}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className='ms-4 me-4 mb-4'>
+          <label className="form-label">อันตรายอื่นๆ (ถ้ามี)</label><br></br>
           <div>
             <Controller
               name="Safety.otherHealthHazards"
@@ -115,7 +149,7 @@ export const SSS = ({ onDataChange }) => {
                 <input
                   type="text"
                   {...field}
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   onChange={(e) => {
                     field.onChange(e.target.value);
@@ -127,257 +161,70 @@ export const SSS = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ภาวะฉุกเฉิน ติดต่อความช่วยเหลืออย่างไร :</label><br></br>
-          <div>
-            <Controller
-              name="Safety.emergencyContact"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input
-                  type="text"
-                  {...field}
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("Safety", "emergencyContact", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
+
+      <div>
+        
+      </div>
+      <div>
+        
       </div>
       <div className="info3 card mt-4">
         <div className="header">
           <b>Spiritual Health</b>
         </div>
-        <div style={{ marginLeft: '26px', marginTop: '20px', lineHeight: '25px' }}>
-          <p>จิตวิญญาณ</p>
+        <div className='ms-4 me-4 mt-1 mb-0'>
+          <p style={{ color: "#666" }}><i class="bi bi-clipboard-heart" style={{ color: "#FF6A6A" }}></i> สุขภาพจิตวิญญาณ</p>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Faith and belief :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.faithBelief"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "faithBelief", e.target.value);
-                  }}
-                />
-              )}
-            />
 
+        {/* ลด margin-bottom ของแต่ละข้อ */}
+        {[
+          { label: "Faith and belief", name: "faithBelief" },
+          { label: "Importance", name: "importance" },
+          { label: "Community", name: "community" },
+          { label: "Address in care", name: "addressInCare" },
+          { label: "Love", name: "love" },
+          { label: "Religion", name: "religion" },
+          { label: "Forgiveness", name: "forgiveness" },
+          { label: "Hope", name: "hope" },
+          { label: "Meaning of life", name: "meaningOfLife" }
+        ].map(({ label, name }) => (
+          <div className="mb-4">
+            <div className='ms-4 me-4' key={name}>
+              <label className="form-label m-0">{label}</label>
+              <Controller
+                name={`SpiritualHealth.${name}`}
+                control={control}
+                defaultValue=""
+                render={({ field }) => (
+                  <textarea
+                    type="text"
+                    className="form-control"
+                    rows="2"
+                    style={{ resize: "vertical", padding: "5px" }}
+                    placeholder="กรอกคำตอบ"
+                    {...field}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      handleInputChange("SpiritualHealth", name, e.target.value);
+                    }}
+                  />
+                )}
+              />
+            </div>
           </div>
-        </div>
+        ))}
       </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Importance :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.importance"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "importance", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Community :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.community"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "community", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Address in care :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.addressInCare"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "addressInCare", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Love :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.love"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "love", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Religion :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.religion"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "religion", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Forgiveness :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.forgiveness"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "forgiveness", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Hope :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.hope"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "hope", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">Meaning of life :</label><br></br>
-          <div>
-            <Controller
-              name="SpiritualHealth.meaningOfLife"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input type="text"
-                  className="google-form-input"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleInputChange("SpiritualHealth", "meaningOfLife", e.target.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        </div>
-      </div>
+
+
       <div className="info3 card mt-4">
         <div className="header">
           <b>Service</b>
         </div>
         <div style={{ marginLeft: '26px', marginTop: '20px', lineHeight: '25px' }}>
-          <p>การรับบริการ เช่น โรงพยาบาล สถานพยาบาล คลินิก ร้านขายยา</p>
+          <p style={{ color: "#666" }}><i class="bi bi-hospital" style={{ color: "#008000" }}></i> การรับบริการ เช่น โรงพยาบาล สถานพยาบาล คลินิก ร้านขายยา</p>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className="m-4">
-          <label className="form-label">เมื่อเจ็บป่วย ท่านรับบริการที่ใด :</label><br />
+        <div className="mt-3 ms-4 me-4 mb-4">
+          <label className="form-label">เมื่อเจ็บป่วย ท่านรับบริการที่ใด </label><br />
           <p style={{ color: 'gray' }}>(ให้ระบุชื่อสถานที่ สามารถกรอกได้มากกว่า 1 สถานที่)</p>
           <div>
             <Controller
@@ -386,7 +233,9 @@ export const SSS = ({ onDataChange }) => {
               defaultValue=""
               render={({ field }) => (
                 <textarea
-                  className="google-form-input"
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
                   placeholder="ระบุชื่อสถานที่"
                   {...field}
                   onChange={(e) => {
@@ -398,10 +247,8 @@ export const SSS = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className="m-4">
-          <label className="form-label">อื่นๆ (ถ้ามี):</label><br />
+        <div className="mt-0 ms-4 me-4 mb-4">
+          <label className="form-label">อื่นๆ (ถ้ามี)</label><br />
           <div>
             <Controller
               name="Service.otherServices"
@@ -410,7 +257,7 @@ export const SSS = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -422,6 +269,13 @@ export const SSS = ({ onDataChange }) => {
             />
           </div>
         </div>
+      </div>
+
+      <div>
+
+      </div>
+      <div>
+        
       </div>
 
     </div>

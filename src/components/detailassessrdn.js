@@ -244,7 +244,7 @@ export default function DetailAssessreadiness() {
   };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -813,240 +813,237 @@ export default function DetailAssessreadiness() {
             </li>
           </ul>
         </div>
-        <br></br>
-        <div className="">
-          <p className="headerassesment">
-            {name} {surname}
-          </p>
-          {birthday ? (
-            <p className="textassesment">
-              <label>อายุ:</label> {userAge} ปี {userAgeInMonths} เดือน{" "}
-              <label>เพศ:</label>
-              {gender}
-            </p>
-          ) : (
-            <p className="textassesment">
-              {" "}
-              <label>อายุ:</label>0 ปี 0 เดือน <label>เพศ:</label>
-              {gender}
-            </p>
-          )}
-          <p className="textassesment">
-            <label>HN:</label>
-            {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-            <label>AN:</label>
-            {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-            <label>ผู้ป่วยโรค:</label>
-            {medicalData && medicalData.Diagnosis
-              ? medicalData.Diagnosis
-              : "ไม่มีข้อมูล"}
-          </p>
-          <p>
-
-            <p className="textassesment">
-              <p>
-                <label>วันที่บันทึก:</label>
-                {formatDate(readinessForms.createdAt)}
-              </p>
+        <div className="content">
+          <div className="patient-card-ass patient-card-style">
+            <p className="patient-name">
+              <label>ข้อมูลผู้ป่วย</label>
             </p>
 
-          </p>
+            <div className="info-container">
+              <div className="info-row">
+                <div className="info-item">
 
-        </div>
+                  <label>ชื่อ-สกุล:</label>{" "}
+                  <span>
+                    {name} {surname}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>อายุ:</label>{" "}
+                  <span>
+                    {birthday
+                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                      : "0 ปี 0 เดือน"}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>เพศ:</label> <span>{gender}</span>
+                </div>
+              </div>
 
-
-        <div className="info3 card mt-4">
-          <div className="header">
-            <b>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในที่บ้าน</b>
-          </div>
-          <div className="m-4">
-            <table className="assessment-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "90%" }}>คำถาม</th>
-                  <th style={{ width: "10%" }}>คำตอบ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {readinessForms.Readiness1 && (
-                  <>
-                    <tr>
-                      <td>
-                        1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน
-                        และให้คำยินยอมก่อนรับบริการใช่หรือไม่?
-                      </td>
-                      <td >{getAnswerElement(readinessForms.Readiness1.question1_1)}</td>
-                    </tr>
-                    <tr>
-                      <td>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่?</td>
-                      <td >{getAnswerElement(readinessForms.Readiness1.question1_2)}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20
-                        กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?
-                      </td>
-                      <td>{getAnswerElement(readinessForms.Readiness1.question1_3)}</td>
-                    </tr>
-                    <tr>
-                      <td>
-                        4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?
-                      </td>
-                      <td>{getAnswerElement(readinessForms.Readiness1.question1_4)}</td>
-                    </tr>
-                  </>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="info3 card mt-4">
-          <div className="header">
-            <b>ประเมินความรู้ ความเข้าใจ (ตาม D-METHOD)</b>
-          </div>
-          <div className="m-3">
-            <table className="assessment-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "90%" }}>คำถาม</th>
-                  <th style={{ width: "9%" }}>คำตอบ</th>
-                </tr>
-              </thead>
-              <tbody>
-
-                {readinessForms.Readiness2 && (
-                  <>
-                    <tr>
-                      <td>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?</td>
-                      <td>{getAnswerElement(readinessForms.Readiness2.Disease)}</td>
-                    </tr>
-                    <tr>
-                      <td>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?</td>
-                      <td>{getAnswerElement(readinessForms.Readiness2.Medication)}</td>
-                    </tr>
-                    <tr>
-                      <td>3. Environment : มีการเตรียมสิ่งแวดล้อม ?</td>
-                      <td>{getAnswerElement(readinessForms.Readiness2.Environment)}</td>
-                    </tr>
-                    <tr>
-                      <td>4. Treatment : มีการฝึกทักษะที่จำเป็น ?</td>
-                      <td>{getAnswerElement(readinessForms.Readiness2.Treatment)}</td>
-                    </tr>
-                    <tr>
-                      <td>5. Health : รู้ข้อจำกัดด้านสุขภาพ ?</td>
-                      <td>{getAnswerElement(readinessForms.Readiness2.Health)}</td>
-                    </tr>
-                    <tr>
-                      <td>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?</td>
-                      <td>{getAnswerElement(readinessForms.Readiness2.Out_patient)}</td>
-                    </tr>
-                    <tr>
-                      <td>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?</td>
-                      <td>{getAnswerElement(readinessForms.Readiness2.Diet)}</td>
-                    </tr>
-                  </>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        {isReadinessSubmitted && !isEditing ? (
-          <div className="info3 card mt-4">
-            <h3>ประเมินความพร้อม</h3>
-            <div className="btn-group">
-              {readinessStatus === "มีความพร้อม" ? (
-                <div className={`btnass btn-normal`}>มีความพร้อม</div>
-              ) : (
-                <div className={`btnass btn-abnormal`}>ยังไม่มีความพร้อม</div>
-              )}
+              <div className="info-row">
+                <div className="info-item">
+                  <label>HN:</label>{" "}
+                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item">
+                  <label>AN:</label>{" "}
+                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item full-width">
+                  <label>ผู้ป่วยโรค:</label>{" "}
+                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                </div>
+              </div>
             </div>
-            <p className="detail-info"><b>รายละเอียดเพิ่มเติม :</b> {detail ? detail : '-'}</p>
-            <p className="detail-info"><b>ผู้ประเมินความพร้อม :</b> {mpersonnel?.nametitle} {mpersonnel?.name} {mpersonnel?.surname}</p>
-            <p className="detail-info"><b>วันที่ประเมินความพร้อม :</b> {formatDate(dateass)}</p>
-            {/* แสดงวันที่อัปเดต */}
-            {/* <button className="btn btn-warning mt-4" onClick={() => setIsEditing(true)}>
-              แก้ไขการประเมิน
-            </button> */}
           </div>
-        ) : isEditing ? (
-          <div className="info3 card mt-4">
-            <p className="texthead">แก้ไขการประเมินความพร้อม</p>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-5">
-                <div className="btn-group">
-                  <div
-                    className={`btnass ${readinessStatus === "มีความพร้อม" ? "btn-normal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("มีความพร้อม")}
-                  >
-                    มีความพร้อม
-                  </div>
-                  <div
-                    className={`btnass ${readinessStatus === "ยังไม่มีความพร้อม" ? "btn-abnormal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("ยังไม่มีความพร้อม")}
-                  >
-                    ยังไม่มีความพร้อม
-                  </div>
-                </div>
-                <div className="inline-container mt-4">
-                  <label className="title-ass">เพิ่มเติม: </label>
-                  <textarea
-                    type="text"
-                    className="form-control ml-3"
-                    id="detail"
-                    value={detail}
-                    onChange={handleDetailChange}
-                  />
-                </div>
-              </div>
-              <div className="btn-group">
-                <div className="btn-next mb-5">
-                  <button type="submit" className="btn btn-outline py-2">
-                    บันทึกการแก้ไข
-                  </button>
-                </div>
-              </div>
-            </form>
+          <div className="mt-5" style={{ marginLeft: "125px" }}>
+            <label className="text-secondary">วันที่บันทึก :</label>
+            <span> {formatDate(readinessForms.createdAt)}</span>
           </div>
-        ) : (
-          <div className="info3 card mt-4">
-            <p className="texthead">ประเมินความพร้อม</p>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-5">
-                <div className="btn-group">
-                  <div
-                    className={`btnass ${readinessStatus === "มีความพร้อม" ? "btn-normal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("มีความพร้อม")}
-                  >
-                    มีความพร้อม
-                  </div>
-                  <div
-                    className={`btnass ${readinessStatus === "ยังไม่มีความพร้อม" ? "btn-abnormal" : "btn-outline"}`}
-                    onClick={() => handleStatusChange("ยังไม่มีความพร้อม")}
-                  >
-                    ยังไม่มีความพร้อม
-                  </div>
-                </div>
-                <div className="inline-container mt-4">
-                  <label className="title-ass">เพิ่มเติม: </label>
-                  <textarea
-                    type="text"
-                    className="form-control ml-3"
-                    id="detail"
-                    value={detail}
-                    onChange={handleDetailChange}
-                  />
-                </div>
-              </div>
-              <div className="btn-group">
-                <div className="btn-next mb-5">
-                  <button type="submit" className="btn btn-outline py-2">
-                    บันทึก
-                  </button>
-                </div>
-              </div>
-            </form>
+          <div className="readiness card mt-4">
+            <div className="header">
+              <b>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในที่บ้าน</b>
+            </div>
+            <div className="m-4">
+              <table className="assessment-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "90%" }}>คำถาม</th>
+                    <th style={{ width: "10%" }}>คำตอบ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {readinessForms.Readiness1 && (
+                    <>
+                      <tr >
+                        <td>
+                          1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน
+                          และให้คำยินยอมก่อนรับบริการใช่หรือไม่?
+                        </td>
+                        <td >{getAnswerElement(readinessForms.Readiness1.question1_1)}</td>
+                      </tr>
+                      <tr>
+                        <td>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่?</td>
+                        <td >{getAnswerElement(readinessForms.Readiness1.question1_2)}</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20
+                          กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?
+                        </td>
+                        <td>{getAnswerElement(readinessForms.Readiness1.question1_3)}</td>
+                      </tr>
+                      <tr>
+                        <td>
+                          4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?
+                        </td>
+                        <td>{getAnswerElement(readinessForms.Readiness1.question1_4)}</td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )}
+          <div className="readiness card mt-4">
+            <div className="header">
+              <b>ประเมินความรู้ ความเข้าใจ (ตาม D-METHOD)</b>
+            </div>
+            <div className="m-3">
+              <table className="assessment-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "80%" }}>คำถาม</th>
+                    <th style={{ width: "10%" }}>คำตอบ</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  {readinessForms.Readiness2 && (
+                    <>
+                      <tr>
+                        <td>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?</td>
+                        <td>{getAnswerElement(readinessForms.Readiness2.Disease)}</td>
+                      </tr>
+                      <tr>
+                        <td>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?</td>
+                        <td>{getAnswerElement(readinessForms.Readiness2.Medication)}</td>
+                      </tr>
+                      <tr>
+                        <td>3. Environment : มีการเตรียมสิ่งแวดล้อม ?</td>
+                        <td>{getAnswerElement(readinessForms.Readiness2.Environment)}</td>
+                      </tr>
+                      <tr>
+                        <td>4. Treatment : มีการฝึกทักษะที่จำเป็น ?</td>
+                        <td>{getAnswerElement(readinessForms.Readiness2.Treatment)}</td>
+                      </tr>
+                      <tr>
+                        <td>5. Health : รู้ข้อจำกัดด้านสุขภาพ ?</td>
+                        <td>{getAnswerElement(readinessForms.Readiness2.Health)}</td>
+                      </tr>
+                      <tr>
+                        <td>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?</td>
+                        <td>{getAnswerElement(readinessForms.Readiness2.Out_patient)}</td>
+                      </tr>
+                      <tr>
+                        <td>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?</td>
+                        <td>{getAnswerElement(readinessForms.Readiness2.Diet)}</td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {isReadinessSubmitted ? (
+            <div className="contentin-outmost-ass mt-4">
+              <div className="divass">
+                <div className="inline-container-ass">
+                  <b className="textass" align="center">
+                    การประเมินความพร้อม
+                  </b>
+                </div>
+              </div>
+              <div className="content-in-ass">
+                <div className="assessment-section">
+                  <label className="title-ass-inside">สถานะความพร้อม :</label>
+                  {readinessStatus === "มีความพร้อม" ? (
+                    <div className={`status-indicator btn-normal`}>มีความพร้อม</div>
+                  ) : (
+                    <div className={`status-indicator btn-abnormal`}>ยังไม่มีความพร้อม</div>
+                  )}
+                </div>
+                <div className="assessment-section">
+                  <label className="title-ass-inside">
+                    รายละเอียดเพิ่มเติม :{" "}
+                  </label>
+                  <p className="text-ass-inside">{detail ? detail : '-'}</p>
+                </div>
+                <div className="assessment-section">
+                  <label className="title-ass-inside">
+                  ผู้ประเมิน :{" "}
+                  </label>
+                  <p className="text-ass-inside">{mpersonnel?.nametitle} {mpersonnel?.name} {mpersonnel?.surname}</p>
+                </div>
+                <div className="assessment-section">
+                  <label className="title-ass-inside">
+                  วันที่ประเมิน :{" "}
+                  </label>
+                  <p className="text-ass-inside">{formatDate(dateass)}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="contentin-outmost-ass mt-4">
+              <div className="divass" >
+                <b className="textass" align="center" >
+                  ประเมินความพร้อม
+                </b>
+              </div>
+              <div className="content-in-ass mb-4">
+                <form onSubmit={handleSubmit}>
+                  <div className="inline-ass">
+                    <label className="title-ass">สถานะ :</label>
+                    <div className="btn-group-status-name">
+                      <div
+                        className={`btn-ass ${readinessStatus === "มีความพร้อม" ? "btn-normal" : "btn-outline"}`}
+                        onClick={() => handleStatusChange("มีความพร้อม")}
+                        style={{ fontSize: "16px", padding: "15px 15px", width: "10px" }} // ลดขนาดปุ่ม
+                      >
+                        มีความพร้อม
+                      </div>
+                      <div
+                        className={`btn-ass ${readinessStatus === "ยังไม่มีความพร้อม" ? "btn-abnormal" : "btn-outline"}`}
+                        onClick={() => handleStatusChange("ยังไม่มีความพร้อม")}
+                      >
+                        ยังไม่มีความพร้อม
+                      </div>
+                    </div>
+                  </div>
+                  <div className="inline-ass">
+                    <label className="title-ass">รายละเอียดเพิ่มเติม : </label>
+                    <textarea
+                      type="text"
+                      className="form-control form-control-ass"
+                      id="detail"
+                      value={detail}
+                      onChange={handleDetailChange}
+                    />
+                  </div>
+
+
+                  <div className="d-grid save-ass mt-4">
+                    <button type="submit" className="btn btnsave-ass py-2">
+                      บันทึก
+                    </button>
+                  </div>
+
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

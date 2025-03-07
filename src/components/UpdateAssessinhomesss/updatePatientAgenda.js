@@ -1,48 +1,48 @@
 import React, { useState } from "react";
 
-const PatientAgendaForm = ({ formData, onSave }) => {
+const PatientAgendaForm = ({ formData, onChange }) => {
     const [formValues, setFormValues] = useState({ ...formData });
 
     const handleChange = (e) => {
         const { id, value } = e.target;
-        setFormValues((prev) => ({
-            ...prev,
-            [id]: value,
-        }));
+        const updatedValues = { ...formValues, [id]: value };
+        setFormValues(updatedValues);
+        onChange(updatedValues); // ส่งค่ากลับไปยัง parent component
     };
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave(formValues); // ส่งข้อมูลที่อัปเดตกลับไปยังฟังก์ชันที่เรียกใช้
-    };
-
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form>
             <div className="m-2">
-                <label className="form-label">1.Idea :</label>
-                <input
+                <label className="form-label">Idea :</label>
+                <textarea
                     type="text"
                     className="form-control mt-2"
+                    rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                    style={{ resize: "vertical" }}
                     id="patient_idea"
                     value={formValues.patient_idea || ""}
                     onChange={handleChange}
                 />
             </div>
             <div className="m-2">
-                <label className="form-label mt-3">2.Feeling :</label>
-                <input
+                <label className="form-label mt-3">Feeling :</label>
+                <textarea
                     type="text"
-                    className="form-control"
+                    className="form-control mt-2"
+                    rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                    style={{ resize: "vertical" }}
                     id="patient_feeling"
                     value={formValues.patient_feeling || ""}
                     onChange={handleChange}
                 />
             </div>
             <div className="m-2">
-                <label className="form-label mt-3">3.Function :</label>
-                <input
+                <label className="form-label mt-3">Function :</label>
+                <textarea
                     type="text"
-                    className="form-control "
+                    className="form-control mt-2"
+                    rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                    style={{ resize: "vertical" }}
                     id="patient_funtion"
                     value={formValues.patient_funtion || ""}
                     onChange={handleChange}
@@ -50,18 +50,15 @@ const PatientAgendaForm = ({ formData, onSave }) => {
             </div>
             <div className="m-2">
                 <label className="form-label mt-3">Expectation :</label>
-                <input
+                <textarea
                     type="text"
-                    className="form-control "
+                    className="form-control mt-2"
+                    rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                    style={{ resize: "vertical" }}
                     id="patient_expectation"
                     value={formValues.patient_expectation || ""}
                     onChange={handleChange}
                 />
-            </div>
-            <div className="modal-footer mt-3">
-                <button type="submit" className="btn">
-                    บันทึก
-                </button>
             </div>
         </form>
     );

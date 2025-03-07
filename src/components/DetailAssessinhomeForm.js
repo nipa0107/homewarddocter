@@ -186,7 +186,7 @@ export default function DetailAssessinhomeForm() {
   };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -574,7 +574,23 @@ export default function DetailAssessinhomeForm() {
     };
     fetchUnreadCount();
   }, []);
-
+  useEffect(() => {
+    if (isModalOpen) {
+      // เพิ่ม class modal-open และสร้าง backdrop
+      document.body.classList.add("modal-open");
+      const backdrop = document.createElement("div");
+      backdrop.className = "modal-backdrop fade show";
+      document.body.appendChild(backdrop);
+    } else {
+      // ลบ backdrop และ class modal-open เมื่อปิด modal
+      document.body.classList.remove("modal-open");
+      const backdrop = document.querySelector(".modal-backdrop");
+      if (backdrop) {
+        backdrop.remove();
+      }
+    }
+  }, [isModalOpen]);
+  const [activeTab, setActiveTab] = useState("Immobility"); // ค่าเริ่มต้น
   return (
     <main className="body">
       <ToastContainer />
@@ -758,39 +774,7 @@ export default function DetailAssessinhomeForm() {
         </div>
         <br></br>
         <div>
-          <p className="headerassesment">
-            {name} {surname}
-          </p>
-          {birthday ? (
-            <p className="textassesment">
-              <label>อายุ:</label>{" "}
-              <span>
-                {userAge} ปี {userAgeInMonths} เดือน
-              </span>{" "}
-              <label>เพศ:</label> <span>{gender}</span>
-            </p>
-          ) : (
-            <p className="textassesment">
-              <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
-              <label>เพศ:</label> <span>{gender}</span>
-            </p>
-          )}
-          <p className="textassesment">
-            <label>HN:</label>{" "}
-            <span>
-              {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-            </span>
-            <label>AN:</label>{" "}
-            <span>
-              {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-            </span>
-            <label>ผู้ป่วยโรค:</label>{" "}
-            <span>
-              {medicalData && medicalData.Diagnosis
-                ? medicalData.Diagnosis
-                : "ไม่มีข้อมูล"}
-            </span>
-          </p>
+          {/* <p className="headerassesment">
           <p className="textassesment">
             <label>วันที่บันทึก:</label>
             <span>{formatDate(AssessinhomeForms.createdAt)}</span>
@@ -809,40 +793,121 @@ export default function DetailAssessinhomeForm() {
                   : "-"
                 : "ไม่มีข้อมูล"}
             </span>
-          </p>
+          </p> */}
 
-        </div>
-        <div className="info3 card mt-4">
-          {/* <div className="header">
-                        <b>การประเมิน IN-HOME-SSS</b>
-                    </div> */}
-          <div class="accordion" id="accordionExample">
-            {/* Patient Agenda */}
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingOne">
+          <div className="patient-card patient-card-style">
+            <p className="patient-name">
+              <label>ข้อมูลผู้ป่วย</label>
+            </p>
+
+            <div className="info-container">
+              <div className="info-row">
+                <div className="info-item">
+
+                  <label>ชื่อ-สกุล:</label>{" "}
+                  <span>
+                    {name} {surname}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>อายุ:</label>{" "}
+                  <span>
+                    {birthday
+                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                      : "0 ปี 0 เดือน"}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>เพศ:</label> <span>{gender}</span>
+                </div>
+              </div>
+              <div className="info-row">
+                <div className="info-item">
+                  <label>HN:</label>{" "}
+                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item">
+                  <label>AN:</label>{" "}
+                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item full-width">
+                  <label>ผู้ป่วยโรค:</label>{" "}
+                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 text-center">
+            <label className="text-secondary">วันที่บันทึก :</label>
+            <span> {formatDate(AssessinhomeForms.createdAt)}</span><br></br>
+            <label className="text-secondary mt-2">วันที่แก้ไขล่าสุด :</label>
+            <span> {formatDate(AssessinhomeForms.updatedAt)}</span>
+          </div>
+          <div className="readiness card mt-4">
+            <ul className="nav nav-tabs">
+              <li className="nav-item">
                 <button
-                  class="accordion-button"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseOne"
-                  aria-expanded="true"
-                  aria-controls="collapseOne"
+                  className={`nav-link ${activeTab === "Immobility" ? "active" : ""}`}
+                  onClick={() => setActiveTab("Immobility")}
                 >
-                  <b>1. Immobility</b>
+                  <i class="bi bi-person-walking" ></i> Immobility
                 </button>
-              </h2>
-              <div
-                id="collapseOne"
-                class="accordion-collapse collapse show"
-                aria-labelledby="headingOne"
-                data-bs-parent="#accordionExample"
-              >
-                <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "Nutrition" ? "active" : ""}`}
+                  onClick={() => setActiveTab("Nutrition")}
                 >
+                  <i class="bi bi-universal-access-circle" ></i> Nutrition
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "Housing" ? "active" : ""}`}
+                  onClick={() => setActiveTab("Housing")}
+                >
+                  <i class="bi bi-house-check-fill" ></i> Housing
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "OtherPeople" ? "active" : ""}`}
+                  onClick={() => setActiveTab("OtherPeople")}
+                >
+                  <i class="bi bi-people-fill"></i> Other people
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "Medication" ? "active" : ""}`}
+                  onClick={() => setActiveTab("Medication")}
+                >
+                  <i class="bi bi-capsule"></i> Medication
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "Physical Examination" ? "active" : ""}`}
+                  onClick={() => setActiveTab("Physical Examination")}
+                >
+                  <i class="bi bi-person-lines-fill"></i> Physical Examination
+                </button>
+              </li>
+              <li className="nav-item">
+                <button
+                  className={`nav-link ${activeTab === "SSS" ? "active" : ""}`}
+                  onClick={() => setActiveTab("SSS")}
+                >
+                  <i class="bi bi-file-earmark-medical"></i> SSS
+                </button>
+              </li>
+            </ul>
+
+            <div className="tab-content m-4">
+              {activeTab === "Immobility" && (
+                <div className="tab-pane fade show active">
                   {AssessinhomeForms.Immobility ? (
-                    <div>
+                    <div className="row">
                       <div className="row">
                         <div className="col-sm-2">
                           <strong>คะแนนรวม :</strong>
@@ -886,1328 +951,1369 @@ export default function DetailAssessinhomeForm() {
                   ) : (
                     <p>ไม่มีข้อมูล</p>
                   )}
+                  <div>
+                    <button
+                      className="btn m-2"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("Immobility")}
+                    >
+                      <i class="bi bi-pencil-fill"></i> แก้ไข
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Immobility")}
-                  >
-                    แก้ไขข้อมูล
-                  </button>
-                </div>
-              </div>
+              )}
             </div>
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingTwo">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseTwo"
-                  aria-expanded="false"
-                  aria-controls="collapseTwo"
-                >
-                  <b>2. Nutrition</b>
-                </button>
-              </h2>
-              <div
-                id="collapseTwo"
-                class="accordion-collapse collapse"
-                aria-labelledby="headingTwo"
-                data-bs-parent="#accordionExample"
-              >
+          </div>
+          <div className="readiness card mt-4">
+            <div class="accordion" id="accordionExample">
+              {/* Patient Agenda */}
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                  <button
+                    class="accordion-button"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseOne"
+                    aria-expanded="true"
+                    aria-controls="collapseOne"
+                  >
+                    <b>1. Immobility</b>
+                  </button>
+                </h2>
                 <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
+                  id="collapseOne"
+                  class="accordion-collapse collapse show"
+                  aria-labelledby="headingOne"
+                  data-bs-parent="#accordionExample"
                 >
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>น้ำหนัก :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>{AssessinhomeForms.Nutrition?.weight || "-"} Kg.</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>ส่วนสูง :</strong>
-                    </div>
-
-                    <div className="col-8 col-sm-6">
-                      <p>{AssessinhomeForms.Nutrition?.height || "-"} cm.</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>ค่า BMR :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>{AssessinhomeForms.Nutrition?.bmr || "-"} kcal</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>ค่า TDEE :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>{AssessinhomeForms.Nutrition?.tdee || "-"} kcal</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>กิจกรรมที่ทำ :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>
-                        {activityLevelMapping[
-                          AssessinhomeForms.Nutrition?.activityLevel
-                        ] || "-"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>ช่องทางการรับอาหาร :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>
-                        {AssessinhomeForms.Nutrition?.intakeMethod.join(", ") ||
-                          "-"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>ลักษณะอาหาร :</strong>
-                    </div>
-
-                    <div className="col-8 col-sm-6">
-                      <p>
-                        {AssessinhomeForms.Nutrition?.foodTypes.join(", ") ||
-                          "-"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>อาหารทางการแพทย์ :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>{AssessinhomeForms.Nutrition?.medicalFood || "-"}</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>อาหารทางอื่นๆ :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>{AssessinhomeForms.Nutrition?.otherFood || "-"}</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>อาหารที่ชอบ :</strong>
-                    </div>
-
-                    <div className="col-sm-6">
-                      <p>{AssessinhomeForms.Nutrition?.favoriteFood || "-"}</p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>คนปรุงอาหาร :</strong>
-                    </div>
-                    <div className="col-sm-6">
-                      <p>
-                        {AssessinhomeForms.Nutrition?.cooks.join(", ") || "-"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-sm-4">
-                      <strong>ภาวะโภชนาการ :</strong>
-                    </div>
-                    <div className="col-sm-6">
-                      <p>
-                        {AssessinhomeForms.Nutrition?.nutritionStatus || "-"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Nutrition")}
+                  <div
+                    className="accordion-body mt-2"
+                    style={{ lineHeight: "20px" }}
                   >
-                    แก้ไขข้อมูล
-                  </button>
+
+                  </div>
+                  <div>
+                    <button
+                      className="btn m-4"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("Immobility")}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingThree">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseThree"
-                  aria-expanded="false"
-                  aria-controls="collapseThree"
-                >
-                  <b>3. Housing</b>
-                </button>
-              </h2>
-              <div
-                id="collapseThree"
-                class="accordion-collapse collapse"
-                aria-labelledby="headingThree"
-                data-bs-parent="#accordionExample"
-              >
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseTwo"
+                    aria-expanded="false"
+                    aria-controls="collapseTwo"
+                  >
+                    <b>2. Nutrition</b>
+                  </button>
+                </h2>
                 <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
+                  id="collapseTwo"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingTwo"
+                  data-bs-parent="#accordionExample"
                 >
-                  {AssessinhomeForms.Housing ? (
-                    <>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ลักษณะบ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.houseType || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>วัสดุที่ใช้ทำ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.material || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>จำนวนชั้น :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.Housing.numFloors || "-"} ชั้น
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>จำนวนห้อง :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.Housing.numRooms || "-"} ห้อง
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ผู้ป่วยอาศัยอยู่ชั้นไหน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.patientFloor || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความสะอาดในบ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.cleanliness || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความเป็นระเบียบเรียบร้อยในบ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.orderliness || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>แสงสว่างในบ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.lighting || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>การระบายอากาศ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.ventilation || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>สิ่งแวดล้อมรอบๆ บ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.Housing.homeEnvironment.join(
-                              ", "
-                            ) || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆ บ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.Housing
-                              .homeEnvironment_petType || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>อื่นๆ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.Housing.otherHomeEnvironment ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>จำนวนเพื่อนบ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.numneighbor || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความสัมพันธ์กับเพื่อนบ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.Housing.neighborRelationship ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความช่วยเหลือกันของเพื่อนบ้าน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>{AssessinhomeForms.Housing.neighborHelp || "-"}</p>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <p>ไม่มีข้อมูล</p>
-                  )}
-                </div>
-                <div>
-                  <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Housing")}
+                  <div
+                    className="accordion-body mt-2"
+                    style={{ lineHeight: "20px" }}
                   >
-                    แก้ไขข้อมูล
-                  </button>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>น้ำหนัก :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>{AssessinhomeForms.Nutrition?.weight || "-"} Kg.</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>ส่วนสูง :</strong>
+                      </div>
+
+                      <div className="col-8 col-sm-6">
+                        <p>{AssessinhomeForms.Nutrition?.height || "-"} cm.</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>ค่า BMR :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>{AssessinhomeForms.Nutrition?.bmr || "-"} kcal</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>ค่า TDEE :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>{AssessinhomeForms.Nutrition?.tdee || "-"} kcal</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>กิจกรรมที่ทำ :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>
+                          {activityLevelMapping[
+                            AssessinhomeForms.Nutrition?.activityLevel
+                          ] || "-"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>ช่องทางการรับอาหาร :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>
+                          {AssessinhomeForms.Nutrition?.intakeMethod.join(", ") ||
+                            "-"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>ลักษณะอาหาร :</strong>
+                      </div>
+
+                      <div className="col-8 col-sm-6">
+                        <p>
+                          {AssessinhomeForms.Nutrition?.foodTypes.join(", ") ||
+                            "-"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>อาหารทางการแพทย์ :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>{AssessinhomeForms.Nutrition?.medicalFood || "-"}</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>อาหารทางอื่นๆ :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>{AssessinhomeForms.Nutrition?.otherFood || "-"}</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>อาหารที่ชอบ :</strong>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <p>{AssessinhomeForms.Nutrition?.favoriteFood || "-"}</p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>คนปรุงอาหาร :</strong>
+                      </div>
+                      <div className="col-sm-6">
+                        <p>
+                          {AssessinhomeForms.Nutrition?.cooks.join(", ") || "-"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-sm-4">
+                        <strong>ภาวะโภชนาการ :</strong>
+                      </div>
+                      <div className="col-sm-6">
+                        <p>
+                          {AssessinhomeForms.Nutrition?.nutritionStatus || "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <button
+                      className="btn m-4"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("Nutrition")}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="accordion-item">
-              <h2 className="accordion-header" id="headingFour">
-                <button
-                  className="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseFour"
-                  aria-expanded="false"
-                  aria-controls="collapseFour"
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseThree"
+                    aria-expanded="false"
+                    aria-controls="collapseThree"
+                  >
+                    <b>3. Housing</b>
+                  </button>
+                </h2>
+                <div
+                  id="collapseThree"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingThree"
+                  data-bs-parent="#accordionExample"
                 >
-                  <b>4. Other People</b>
-                </button>
-              </h2>
-              <div
-                id="collapseFour"
-                className="accordion-collapse collapse"
-                aria-labelledby="headingFour"
-                data-bs-parent="#accordionExample"
-              >
-                <div className="accordion-body" style={{ lineHeight: "20px" }}>
-                  {AssessinhomeForms.OtherPeople ? (
-                    <>
-                      <h5 className="m-2">
-                        <b>1. ผู้ดูแล</b>
-                      </h5>
-                      {AssessinhomeForms.OtherPeople.existingCaregivers.length >
-                        0 ? (
-                        AssessinhomeForms.OtherPeople.existingCaregivers.map(
-                          (cg, index) => (
-                            <div key={index} style={{ lineHeight: "20px" }}>
-                              <div
-                                className="row"
-                                style={{ cursor: "pointer" }}
-                                onClick={() =>
-                                  toggleAccordion(`caregiver-${index}`)
-                                }
-                              >
-                                <div className="col-4">
-                                  <strong
-                                    style={{
-                                      color: "#64b5f6",
-                                      textDecoration: "underline",
-                                    }}
-                                  >
-                                    คนที่ {index + 1} : {cg.firstName}{" "}
-                                    {cg.lastName || "-"}
-                                  </strong>
+                  <div
+                    className="accordion-body mt-2"
+                    style={{ lineHeight: "20px" }}
+                  >
+                    {AssessinhomeForms.Housing ? (
+                      <>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ลักษณะบ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.houseType || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>วัสดุที่ใช้ทำ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.material || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>จำนวนชั้น :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.Housing.numFloors || "-"} ชั้น
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>จำนวนห้อง :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.Housing.numRooms || "-"} ห้อง
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ผู้ป่วยอาศัยอยู่ชั้นไหน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.patientFloor || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความสะอาดในบ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.cleanliness || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความเป็นระเบียบเรียบร้อยในบ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.orderliness || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>แสงสว่างในบ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.lighting || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>การระบายอากาศ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.ventilation || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>สิ่งแวดล้อมรอบๆ บ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.Housing.homeEnvironment.join(
+                                ", "
+                              ) || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆ บ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.Housing
+                                .homeEnvironment_petType || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>อื่นๆ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.Housing.otherHomeEnvironment ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>จำนวนเพื่อนบ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.numneighbor || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความสัมพันธ์กับเพื่อนบ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.Housing.neighborRelationship ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความช่วยเหลือกันของเพื่อนบ้าน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>{AssessinhomeForms.Housing.neighborHelp || "-"}</p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p>ไม่มีข้อมูล</p>
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      className="btn m-4"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("Housing")}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="accordion-item">
+                <h2 className="accordion-header" id="headingFour">
+                  <button
+                    className="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseFour"
+                    aria-expanded="false"
+                    aria-controls="collapseFour"
+                  >
+                    <b>4. Other People</b>
+                  </button>
+                </h2>
+                <div
+                  id="collapseFour"
+                  className="accordion-collapse collapse"
+                  aria-labelledby="headingFour"
+                  data-bs-parent="#accordionExample"
+                >
+                  <div className="accordion-body" style={{ lineHeight: "20px" }}>
+                    {AssessinhomeForms.OtherPeople ? (
+                      <>
+                        <h5 className="m-2">
+                          <b>1. ผู้ดูแล</b>
+                        </h5>
+                        {AssessinhomeForms.OtherPeople.existingCaregivers.length >
+                          0 ? (
+                          AssessinhomeForms.OtherPeople.existingCaregivers.map(
+                            (cg, index) => (
+                              <div key={index} style={{ lineHeight: "20px" }}>
+                                <div
+                                  className="row"
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() =>
+                                    toggleAccordion(`caregiver-${index}`)
+                                  }
+                                >
+                                  <div className="col-4">
+                                    <strong
+                                      style={{
+                                        color: "#64b5f6",
+                                        textDecoration: "underline",
+                                      }}
+                                    >
+                                      คนที่ {index + 1} : {cg.firstName}{" "}
+                                      {cg.lastName || "-"}
+                                    </strong>
+                                  </div>
+                                  <div className="col-sm-10">
+                                    <span></span>
+                                    <i
+                                      className={openIndex === index}
+                                      style={{ marginLeft: "10px" }}
+                                    ></i>
+                                  </div>
                                 </div>
-                                <div className="col-sm-10">
-                                  <span></span>
-                                  <i
-                                    className={openIndex === index}
-                                    style={{ marginLeft: "10px" }}
-                                  ></i>
-                                </div>
+                                {openIndex === `caregiver-${index}` && (
+                                  <div style={{ marginLeft: "20px" }}>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>วันเกิด :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>
+                                          {cg.birthDate
+                                            ? formatThaiDate(cg.birthDate)
+                                            : "0 ปี 0 เดือน"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>ความสัมพันธ์ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.relationship || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>อาชีพ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.occupation || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>สถานภาพ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.status || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>การศึกษา :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.education || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>รายได้ต่อเดือน :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.income || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>สิทธิ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.benefit || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>โรคประจำตัว :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.ud || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>อุปนิสัย :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.habit || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-4">
+                                        <strong>
+                                          รายละเอียดการดูแลผู้ป่วย :
+                                        </strong>
+                                      </div>
+                                      <div className="col-8">
+                                        <p>{cg.careDetails || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <hr />
+                                  </div>
+                                )}
                               </div>
-                              {openIndex === `caregiver-${index}` && (
-                                <div style={{ marginLeft: "20px" }}>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>วันเกิด :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>
-                                        {cg.birthDate
-                                          ? formatThaiDate(cg.birthDate)
-                                          : "0 ปี 0 เดือน"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>ความสัมพันธ์ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.relationship || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>อาชีพ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.occupation || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>สถานภาพ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.status || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>การศึกษา :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.education || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>รายได้ต่อเดือน :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.income || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>สิทธิ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.benefit || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>โรคประจำตัว :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.ud || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>อุปนิสัย :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.habit || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-4">
-                                      <strong>
-                                        รายละเอียดการดูแลผู้ป่วย :
-                                      </strong>
-                                    </div>
-                                    <div className="col-8">
-                                      <p>{cg.careDetails || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <hr />
-                                </div>
-                              )}
-                            </div>
+                            )
                           )
-                        )
-                      ) : (
-                        <p>ไม่มีข้อมูลผู้ดูแลปัจจุบัน</p>
-                      )}
+                        ) : (
+                          <p>ไม่มีข้อมูลผู้ดูแลปัจจุบัน</p>
+                        )}
 
-                      <h5 className="m-2">
-                        <b>2. คนในครอบครัว</b>
-                      </h5>
-                      {AssessinhomeForms.OtherPeople.newCaregivers.length >
-                        0 ? (
-                        AssessinhomeForms.OtherPeople.newCaregivers.map(
-                          (cg, index) => (
-                            <div key={index}>
-                              <div
-                                className="row"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => toggleAccordion(index)}
-                              >
-                                <div className="col-sm-3">
-                                  <strong
-                                    style={{
-                                      color: "#64b5f6",
-                                      textDecoration: "underline",
-                                    }}
-                                  >
-                                    คนที่ {index + 1} : {cg.firstName}{" "}
-                                    {cg.lastName || "-"}
-                                  </strong>
+                        <h5 className="m-2">
+                          <b>2. คนในครอบครัว</b>
+                        </h5>
+                        {AssessinhomeForms.OtherPeople.newCaregivers.length >
+                          0 ? (
+                          AssessinhomeForms.OtherPeople.newCaregivers.map(
+                            (cg, index) => (
+                              <div key={index}>
+                                <div
+                                  className="row"
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() => toggleAccordion(index)}
+                                >
+                                  <div className="col-sm-3">
+                                    <strong
+                                      style={{
+                                        color: "#64b5f6",
+                                        textDecoration: "underline",
+                                      }}
+                                    >
+                                      คนที่ {index + 1} : {cg.firstName}{" "}
+                                      {cg.lastName || "-"}
+                                    </strong>
+                                  </div>
+                                  <div className="col-sm-10">
+                                    <span></span>
+                                    <i
+                                      className={openIndex === index}
+                                      style={{ marginLeft: "10px" }}
+                                    ></i>
+                                  </div>
                                 </div>
-                                <div className="col-sm-10">
-                                  <span></span>
-                                  <i
-                                    className={openIndex === index}
-                                    style={{ marginLeft: "10px" }}
-                                  ></i>
-                                </div>
+                                {openIndex === `family-${index}` && (
+                                  <div style={{ marginLeft: "20px" }}>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>วันเกิด :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>
+                                          {cg.birthDate
+                                            ? formatThaiDate(cg.birthDate)
+                                            : "0 ปี 0 เดือน"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>ความสัมพันธ์ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.relationship || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>อาชีพ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.occupation || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>สถานภาพ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.status || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>การศึกษา :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.education || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>รายได้ต่อเดือน :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.income || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>สิทธิ :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.benefit || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>โรคประจำตัว :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.ud || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-sm-3">
+                                        <strong>อุปนิสัย :</strong>
+                                      </div>
+                                      <div className="col-sm-9">
+                                        <p>{cg.habit || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <div className="row">
+                                      <div className="col-4">
+                                        <strong>
+                                          รายละเอียดการดูแลผู้ป่วย :
+                                        </strong>
+                                      </div>
+                                      <div className="col-8">
+                                        <p>{cg.careDetails || "-"}</p>
+                                      </div>
+                                    </div>
+                                    <hr />
+                                  </div>
+                                )}
                               </div>
-                              {openIndex === `family-${index}` && (
-                                <div style={{ marginLeft: "20px" }}>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>วันเกิด :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>
-                                        {cg.birthDate
-                                          ? formatThaiDate(cg.birthDate)
-                                          : "0 ปี 0 เดือน"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>ความสัมพันธ์ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.relationship || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>อาชีพ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.occupation || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>สถานภาพ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.status || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>การศึกษา :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.education || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>รายได้ต่อเดือน :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.income || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>สิทธิ :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.benefit || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>โรคประจำตัว :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.ud || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-sm-3">
-                                      <strong>อุปนิสัย :</strong>
-                                    </div>
-                                    <div className="col-sm-9">
-                                      <p>{cg.habit || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <div className="row">
-                                    <div className="col-4">
-                                      <strong>
-                                        รายละเอียดการดูแลผู้ป่วย :
-                                      </strong>
-                                    </div>
-                                    <div className="col-8">
-                                      <p>{cg.careDetails || "-"}</p>
-                                    </div>
-                                  </div>
-                                  <hr />
-                                </div>
-                              )}
-                            </div>
+                            )
                           )
-                        )
-                      ) : (
-                        <p className="p-2">ไม่พบข้อมูลคนในครอบครัว</p>
-                      )}
-                    </>
-                  ) : (
-                    <p>ไม่มีข้อมูลผู้ดูแล</p>
-                  )}
-                </div>
-                <div>
-                  <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("OtherPeople")}
-                  >
-                    แก้ไขข้อมูล
-                  </button>
+                        ) : (
+                          <p className="p-2">ไม่พบข้อมูลคนในครอบครัว</p>
+                        )}
+                      </>
+                    ) : (
+                      <p>ไม่มีข้อมูลผู้ดูแล</p>
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      className="btn m-4"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("OtherPeople")}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingfive">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapsefive"
-                  aria-expanded="false"
-                  aria-controls="collapsefive"
-                >
-                  <b>5. Medication</b>
-                </button>
-              </h2>
-              <div
-                id="collapsefive"
-                class="accordion-collapse collapse"
-                aria-labelledby="headingfive"
-                data-bs-parent="#accordionExample"
-              >
-                <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
-                >
-                  {AssessinhomeForms.Medication ? (
-                    <>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>ยาที่แพทย์สั่ง :</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <p>
-                            {AssessinhomeForms.Medication
-                              .prescribedMedication || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>การใช้ยาจริง :</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <p>
-                            {AssessinhomeForms.Medication.actualMedication ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>อาหารเสริม :</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <p>
-                            {AssessinhomeForms.Medication.supplements || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>การบริหารยา :</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <p>
-                            {AssessinhomeForms.Medication.administration || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>การรับประทานยา :</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <p>{AssessinhomeForms.Medication.intake || "-"}</p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-sm-3">
-                          <strong>ความสม่ำเสมอ :</strong>
-                        </div>
-                        <div className="col-sm-9">
-                          <p>
-                            {AssessinhomeForms.Medication.consistency || "-"}
-                          </p>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <p>ไม่มีข้อมูล</p>
-                  )}
-                </div>
-                <div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingfive">
                   <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Medication")}
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapsefive"
+                    aria-expanded="false"
+                    aria-controls="collapsefive"
                   >
-                    แก้ไขข้อมูล
+                    <b>5. Medication</b>
                   </button>
+                </h2>
+                <div
+                  id="collapsefive"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingfive"
+                  data-bs-parent="#accordionExample"
+                >
+                  <div
+                    className="accordion-body mt-2"
+                    style={{ lineHeight: "20px" }}
+                  >
+                    {AssessinhomeForms.Medication ? (
+                      <>
+                        <div className="row">
+                          <div className="col-sm-3">
+                            <strong>ยาที่แพทย์สั่ง :</strong>
+                          </div>
+                          <div className="col-sm-9">
+                            <p>
+                              {AssessinhomeForms.Medication
+                                .prescribedMedication || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-sm-3">
+                            <strong>การใช้ยาจริง :</strong>
+                          </div>
+                          <div className="col-sm-9">
+                            <p>
+                              {AssessinhomeForms.Medication.actualMedication ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-sm-3">
+                            <strong>อาหารเสริม :</strong>
+                          </div>
+                          <div className="col-sm-9">
+                            <p>
+                              {AssessinhomeForms.Medication.supplements || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-sm-3">
+                            <strong>การบริหารยา :</strong>
+                          </div>
+                          <div className="col-sm-9">
+                            <p>
+                              {AssessinhomeForms.Medication.administration || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-sm-3">
+                            <strong>การรับประทานยา :</strong>
+                          </div>
+                          <div className="col-sm-9">
+                            <p>{AssessinhomeForms.Medication.intake || "-"}</p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-sm-3">
+                            <strong>ความสม่ำเสมอ :</strong>
+                          </div>
+                          <div className="col-sm-9">
+                            <p>
+                              {AssessinhomeForms.Medication.consistency || "-"}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p>ไม่มีข้อมูล</p>
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      className="btn m-4"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("Medication")}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingsix">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapsesix"
-                  aria-expanded="false"
-                  aria-controls="collapsesix"
-                >
-                  <b>6. Physical Examination</b>
-                </button>
-              </h2>
-              <div
-                id="collapsesix"
-                class="accordion-collapse collapse"
-                aria-labelledby="headingsix"
-                data-bs-parent="#accordionExample"
-              >
-                <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
-                >
-                  {AssessinhomeForms.PhysicalExamination ? (
-                    <>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong className="">Temperature :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .temperature || "-"}{" "}
-                            °C
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Blood Pressure :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .bloodPressure || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Pulse :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination.pulse || "-"}{" "}
-                            /min
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Respiratory Rate :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .respiratoryRate || "-"}{" "}
-                            /min
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>General Appearance :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .generalAppearance || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Cardiovascular System :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .cardiovascularSystem || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Respiratory System :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .respiratorySystem || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Abdominal :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination.abdominal ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Nervous System :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .nervousSystem || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Extremities :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .extremities || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Mood And Affect :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination.moodandaffect
-                              ?.length > 0
-                              ? AssessinhomeForms.PhysicalExamination.moodandaffect
-                                .map((item) =>
-                                  item.isOther
-                                    ? `อื่นๆ: ${item.value}`
-                                    : item.value
-                                )
-                                .join(", ")
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Appearance And Behavior :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .appearanceAndBehavior?.length > 0
-                              ? AssessinhomeForms.PhysicalExamination.appearanceAndBehavior
-                                .map((item) =>
-                                  item.isOther
-                                    ? `อื่นๆ: ${item.value}`
-                                    : item.value
-                                )
-                                .join(", ")
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Eye Contact :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination.eyeContact
-                              ?.length > 0
-                              ? AssessinhomeForms.PhysicalExamination.eyeContact
-                                .map((item) =>
-                                  item.isOther
-                                    ? `อื่นๆ: ${item.value}`
-                                    : item.value
-                                )
-                                .join(", ")
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Attention :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination.attention
-                              ?.length > 0
-                              ? AssessinhomeForms.PhysicalExamination.attention
-                                .map((item) =>
-                                  item.isOther
-                                    ? `อื่นๆ: ${item.value}`
-                                    : item.value
-                                )
-                                .join(", ")
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Orientation :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination.orientation
-                              ?.length > 0
-                              ? AssessinhomeForms.PhysicalExamination.orientation
-                                .map((item) =>
-                                  item.isOther
-                                    ? `อื่นๆ: ${item.value}`
-                                    : item.value
-                                )
-                                .join(", ")
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Thought Process :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .thoughtProcess?.length > 0
-                              ? AssessinhomeForms.PhysicalExamination.thoughtProcess
-                                .map((item) =>
-                                  item.isOther
-                                    ? `อื่นๆ: ${item.value}`
-                                    : item.value
-                                )
-                                .join(", ")
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4 ">
-                          <strong>Thought Content :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.PhysicalExamination
-                              .thoughtContent?.length > 0
-                              ? AssessinhomeForms.PhysicalExamination.thoughtContent
-                                .map((item) =>
-                                  item.isOther
-                                    ? `อื่นๆ: ${item.value}`
-                                    : item.value
-                                )
-                                .join(", ")
-                              : "-"}
-                          </p>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <p>ไม่มีข้อมูล</p>
-                  )}
-                </div>
-                <div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingsix">
                   <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("Physical Examination")}
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapsesix"
+                    aria-expanded="false"
+                    aria-controls="collapsesix"
                   >
-                    แก้ไขข้อมูล
+                    <b>6. Physical Examination</b>
                   </button>
+                </h2>
+                <div
+                  id="collapsesix"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingsix"
+                  data-bs-parent="#accordionExample"
+                >
+                  <div
+                    className="accordion-body mt-2"
+                    style={{ lineHeight: "20px" }}
+                  >
+                    {AssessinhomeForms.PhysicalExamination ? (
+                      <>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong className="">Temperature :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .temperature || "-"}{" "}
+                              °C
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Blood Pressure :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .bloodPressure || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Pulse :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination.pulse || "-"}{" "}
+                              /min
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Respiratory Rate :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .respiratoryRate || "-"}{" "}
+                              /min
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>General Appearance :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .generalAppearance || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Cardiovascular System :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .cardiovascularSystem || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Respiratory System :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .respiratorySystem || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Abdominal :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination.abdominal ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Nervous System :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .nervousSystem || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Extremities :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .extremities || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Mood And Affect :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination.moodandaffect
+                                ?.length > 0
+                                ? AssessinhomeForms.PhysicalExamination.moodandaffect
+                                  .map((item) =>
+                                    item.isOther
+                                      ? `อื่นๆ: ${item.value}`
+                                      : item.value
+                                  )
+                                  .join(", ")
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Appearance And Behavior :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .appearanceAndBehavior?.length > 0
+                                ? AssessinhomeForms.PhysicalExamination.appearanceAndBehavior
+                                  .map((item) =>
+                                    item.isOther
+                                      ? `อื่นๆ: ${item.value}`
+                                      : item.value
+                                  )
+                                  .join(", ")
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Eye Contact :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination.eyeContact
+                                ?.length > 0
+                                ? AssessinhomeForms.PhysicalExamination.eyeContact
+                                  .map((item) =>
+                                    item.isOther
+                                      ? `อื่นๆ: ${item.value}`
+                                      : item.value
+                                  )
+                                  .join(", ")
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Attention :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination.attention
+                                ?.length > 0
+                                ? AssessinhomeForms.PhysicalExamination.attention
+                                  .map((item) =>
+                                    item.isOther
+                                      ? `อื่นๆ: ${item.value}`
+                                      : item.value
+                                  )
+                                  .join(", ")
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Orientation :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination.orientation
+                                ?.length > 0
+                                ? AssessinhomeForms.PhysicalExamination.orientation
+                                  .map((item) =>
+                                    item.isOther
+                                      ? `อื่นๆ: ${item.value}`
+                                      : item.value
+                                  )
+                                  .join(", ")
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Thought Process :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .thoughtProcess?.length > 0
+                                ? AssessinhomeForms.PhysicalExamination.thoughtProcess
+                                  .map((item) =>
+                                    item.isOther
+                                      ? `อื่นๆ: ${item.value}`
+                                      : item.value
+                                  )
+                                  .join(", ")
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4 ">
+                            <strong>Thought Content :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.PhysicalExamination
+                                .thoughtContent?.length > 0
+                                ? AssessinhomeForms.PhysicalExamination.thoughtContent
+                                  .map((item) =>
+                                    item.isOther
+                                      ? `อื่นๆ: ${item.value}`
+                                      : item.value
+                                  )
+                                  .join(", ")
+                                : "-"}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p>ไม่มีข้อมูล</p>
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      className="btn m-4"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("Physical Examination")}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="headingseven">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#collapseseven"
-                  aria-expanded="false"
-                  aria-controls="collapseseven"
-                >
-                  <b>7. SSS Assessments</b>
-                </button>
-              </h2>
-              <div
-                id="collapseseven"
-                class="accordion-collapse collapse"
-                aria-labelledby="headingseven"
-                data-bs-parent="#accordionExample"
-              >
-                <div
-                  className="accordion-body mt-2"
-                  style={{ lineHeight: "20px" }}
-                >
-                  {AssessinhomeForms.SSS ? (
-                    <>
-                      <h5 className="m-2">1. ความปลอดภัย</h5>
-                      <div className="row mt-4">
-                        <div className="col-4">
-                          <strong>แสงไฟ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.cleanliness || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>พื้นต่างระดับ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.floorSafety || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>บันได :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.stairsSafety || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ราวจับ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.handrailSafety || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>เหลี่ยมคม :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.sharpEdgesSafety ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความลื่นของพื้น :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.slipperyFloorSafety ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ลักษณะโถส้วม :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.toiletSafety || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>เตาที่ใช้หุงต้ม :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.stoveSafety || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>การเก็บของในบ้าน เช่น มีด :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.storageSafety || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>น้ำที่ใช้ดื่ม :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.waterSafety || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>อันตรายอื่นๆ (ถ้ามี) :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.otherHealthHazards ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-6">
-                          <strong>
-                            ภาวะฉุกเฉิน ติดต่อความช่วยเหลืออย่างไร :
-                          </strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Safety.emergencyContact ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <hr />
-                      <h5 className="m-2">2. จิตวิญญาณ</h5>
-                      <div className="row mt-4">
-                        <div className="col-4">
-                          <strong>ความเชื่อและศรัทธา :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth
-                              .faithBelief || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row ">
-                        <div className="col-4">
-                          <strong>ความสำคัญ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth.importance ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ชุมชน :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth.community ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>การดูแลที่อยู่ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth
-                              .addressInCare || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความรัก :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth.love || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ศาสนา :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth.religion ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>การให้อภัย :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth
-                              .forgiveness || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความหวัง :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth.hope || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>ความหมายของชีวิต :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.SpiritualHealth
-                              .meaningOfLife || "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <hr />
-                      <h5 className="m-2">3. การรับบริการ</h5>
-                      <div className="row mt-4">
-                        <div className="col-4">
-                          <strong>สถานที่รับบริการ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Service.serviceLocation ||
-                              "-"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="col-4">
-                          <strong>บริการอื่นๆ :</strong>
-                        </div>
-                        <div className="col-8">
-                          <p>
-                            {AssessinhomeForms.SSS.Service.otherServices || "-"}
-                          </p>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <p>ไม่มีข้อมูล</p>
-                  )}
-                </div>
-                <div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="headingseven">
                   <button
-                    className="btn m-4"
-                    style={{ backgroundColor: "#ffde59", color: "black" }}
-                    onClick={() => handleEditClick("SSS")}
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseseven"
+                    aria-expanded="false"
+                    aria-controls="collapseseven"
                   >
-                    แก้ไขข้อมูล
+                    <b>7. SSS Assessments</b>
                   </button>
+                </h2>
+                <div
+                  id="collapseseven"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="headingseven"
+                  data-bs-parent="#accordionExample"
+                >
+                  <div
+                    className="accordion-body mt-2"
+                    style={{ lineHeight: "20px" }}
+                  >
+                    {AssessinhomeForms.SSS ? (
+                      <>
+                        <h5 className="m-2">1. ความปลอดภัย</h5>
+                        <div className="row mt-4">
+                          <div className="col-4">
+                            <strong>แสงไฟ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.cleanliness || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>พื้นต่างระดับ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.floorSafety || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>บันได :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.stairsSafety || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ราวจับ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.handrailSafety || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>เหลี่ยมคม :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.sharpEdgesSafety ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความลื่นของพื้น :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.slipperyFloorSafety ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ลักษณะโถส้วม :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.toiletSafety || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>เตาที่ใช้หุงต้ม :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.stoveSafety || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>การเก็บของในบ้าน เช่น มีด :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.storageSafety || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>น้ำที่ใช้ดื่ม :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.waterSafety || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>อันตรายอื่นๆ (ถ้ามี) :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.otherHealthHazards ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-6">
+                            <strong>
+                              ภาวะฉุกเฉิน ติดต่อความช่วยเหลืออย่างไร :
+                            </strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Safety.emergencyContact ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <hr />
+                        <h5 className="m-2">2. จิตวิญญาณ</h5>
+                        <div className="row mt-4">
+                          <div className="col-4">
+                            <strong>ความเชื่อและศรัทธา :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth
+                                .faithBelief || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row ">
+                          <div className="col-4">
+                            <strong>ความสำคัญ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth.importance ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ชุมชน :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth.community ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>การดูแลที่อยู่ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth
+                                .addressInCare || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความรัก :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth.love || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ศาสนา :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth.religion ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>การให้อภัย :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth
+                                .forgiveness || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความหวัง :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth.hope || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>ความหมายของชีวิต :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.SpiritualHealth
+                                .meaningOfLife || "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <hr />
+                        <h5 className="m-2">3. การรับบริการ</h5>
+                        <div className="row mt-4">
+                          <div className="col-4">
+                            <strong>สถานที่รับบริการ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Service.serviceLocation ||
+                                "-"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-4">
+                            <strong>บริการอื่นๆ :</strong>
+                          </div>
+                          <div className="col-8">
+                            <p>
+                              {AssessinhomeForms.SSS.Service.otherServices || "-"}
+                            </p>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p>ไม่มีข้อมูล</p>
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      className="btn m-4"
+                      style={{ backgroundColor: "#ffde59", color: "black" }}
+                      onClick={() => handleEditClick("SSS")}
+                    >
+                      แก้ไขข้อมูล
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2215,22 +2321,34 @@ export default function DetailAssessinhomeForm() {
         </div>
       </div>
       {isModalOpen && modalContent && (
-        <div className="modal show d-block">
+        <div className="modal show d-block" tabIndex="-1">
           <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit {currentEditSection}</h5>
-                <button
+              <div className="modal-header d-flex justify-content-center">
+                <h5 className="modal-title text-black text-center">แก้ไข {currentEditSection}</h5>
+                {/* <button
                   type="button"
                   className="btn-close"
                   onClick={handleCloseModal}
-                ></button>
+                ></button> */}
               </div>
               <div className="modal-body">{modalContent}</div>
+              <div className="modal-footer d-flex justify-content-between">
+                {/* ปุ่มยกเลิก */}
+                <button className="btn-EditMode btn-secondary" onClick={handleCloseModal}>
+                  ยกเลิก
+                </button>
+
+                {/* ปุ่มบันทึก */}
+                <button className="btn-EditMode btnsave" onClick={() => handleSaveChanges()}>
+                  บันทึก
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
     </main>
   );
 }

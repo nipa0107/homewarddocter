@@ -11,6 +11,7 @@ const ImmobilityForm = ({ formData, onSave }) => {
             ...prev,
             [name]: Number(value), // Ensure values are numeric
         }));
+        
     };
 
     // Function to calculate the total score
@@ -78,14 +79,13 @@ const ImmobilityForm = ({ formData, onSave }) => {
                     <div key={score} className="form-check">
                         <input
                             type="radio"
-                            className="form-check-input"
                             name={name}
                             value={score}
                             checked={formValues[name] === score}
                             onChange={handleChange}
-                            style={{ transform: 'scale(1.2)' }}
+                            style={{ transform: 'scale(1.5)' , marginBottom:"2px"}}
                         />
-                        <label className="form-check-label" style={{ marginLeft: '5px' }}>
+                        <label className="form-check-label" style={{ marginLeft: '5px' , marginBottom:"2px"}}>
                             {score} คะแนน
                         </label>
                     </div>

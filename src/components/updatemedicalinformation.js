@@ -215,33 +215,41 @@ export default function Updatemedicalinformation() {
 
     const fetchUserData = (token) => {
         return fetch("http://localhost:5000/profiledt", {
-            method: "POST",
-            crossDomain: true,
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "Access-Control-Allow-Origin": "*",
-            },
-            body: JSON.stringify({ token }),
+          method: "POST",
+          crossDomain: true,
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ token }),
         })
-            .then((res) => res.json())
-            .then((data) => {
-                setSender({
-                    name: data.data.name,
-                    surname: data.data.surname,
-                    _id: data.data._id,
-                });
-                setData(data.data);
-                if (data.data === "token expired") {
-                    window.localStorage.clear();
-                    window.location.href = "./";
-                }
-                return data.data;
-            })
-            .catch((error) => {
-                console.error("Error verifying token:", error);
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.data === "token expired") {
+              alert("Token expired login again");
+              window.localStorage.clear();
+              setTimeout(() => {
+                window.location.replace("./");
+              }, 0);
+              return null;
+            }
+            setSender({
+              name: data.data.name,
+              surname: data.data.surname,
+              _id: data.data._id,
             });
-    };
+            setData(data.data);
+            if (data.data === "token expired") {
+              window.localStorage.clear();
+              window.location.href = "./";
+            }
+            return data.data;
+          })
+          .catch((error) => {
+            console.error("Error verifying token:", error);
+          });
+      };
 
     const fetchAndSetAlerts = (token, userId) => {
         fetchAlerts(token, userId)

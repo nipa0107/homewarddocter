@@ -106,11 +106,11 @@ export const CaregiverAssessment = ({ onDataChange }) => {
           <b>Caregiver Assessment</b>
         </div>
         <div style={{ marginLeft: '26px' }}>
-          <p style={{color:"#666"}}><i class="bi bi-person-check" style={{ color: "#008000" }}></i> ประเมินภาระในการดูแลและปัญหาสุขภาพจิตของผู้ดูแล</p>
+          <p style={{ color: "#666" }}><i class="bi bi-person-check" style={{ color: "#008000" }}></i> ประเมินภาระในการดูแลและปัญหาสุขภาพจิตของผู้ดูแล</p>
         </div>
       </div>
       <div className="m-4">
-        
+
         {careAssessment.map((item, index) => (
           <div key={item.id}>
             <span
@@ -150,6 +150,8 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         <textarea
                           className="form-control"
                           placeholder="กรอกคำตอบ"
+                          rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                          style={{ resize: "vertical" }}
                           {...controllerField}
                           value={item[field.name]}
                           onChange={(e) => {

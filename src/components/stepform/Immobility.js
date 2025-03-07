@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import CountUp from 'react-countup';
 
-export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, showError, setShowError }) => {
+export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, showError, setShowError, control }) => {
   const [totalScore, setTotalScore] = useState(null);
   const [group, setGroup] = useState('');
 
@@ -15,7 +15,7 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
 
   const calculateTotalScore = () => {
     let total = 0;
-    let hasMissing = false; // ตรวจสอบว่ามีข้อไหนไม่ได้เลือกหรือไม่
+    let hasMissing = false;
 
     scoreKeys.forEach(key => {
       if (!Immobilitydata[key]) {
@@ -25,11 +25,10 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
       }
     });
 
-    setHasError(hasMissing); // แจ้งให้ Parent Component รู้ว่ามี Error
-    if (!hasMissing) setShowError(false); // ถ้าเลือกครบให้ซ่อนข้อความแจ้งเตือน
-    setTotalScore(total); 
+    setHasError(hasMissing);
+    if (!hasMissing) setShowError(false);
+    setTotalScore(total);
     setImmobilityData(prevData => ({ ...prevData, totalScore: total }));
-
 
     if (total >= 16 && total <= 20) {
       setGroup('กลุ่มที่ 1 (ช่วยเหลือตัวเองดี)');
@@ -41,194 +40,203 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
       setGroup('');
     }
   };
-  // Function to apply different styles based on group
+
   const getGroupStyle = () => {
     if (totalScore !== null) {
       if (totalScore >= 36) {
-        return 'text-danger'; // Red for group 3
+        return 'text-danger';
       } else if (totalScore >= 21) {
-        return 'text-primary'; // Orange for group 2
+        return 'text-primary';
       } else if (totalScore >= 16) {
-        return 'text-success'; // Green for group 1
+        return 'text-success';
       }
     }
-    return ''; // Default
+    return '';
   };
 
   useEffect(() => {
-    calculateTotalScore(); // เรียกฟังก์ชันทุกครั้งที่ Immobilitydata เปลี่ยน
+    calculateTotalScore();
   }, [Immobilitydata]);
 
-  const renderQuestion = (label, name, options) => (
-    <tr>
-      <td>{label}</td>
-      {options.map(option => (
-        <td key={option.value}>
-          <input
-            type="radio"
-            value={option.value}
-            checked={Immobilitydata[name] === String(option.value)}
-            onChange={(e) => {
-              setImmobilityData({ ...Immobilitydata, [name]: e.target.value });
-              calculateTotalScore(); // อัปเดตคะแนนและเช็คว่าข้อมูลครบหรือไม่
-            }}
-            style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-          />
-        </td>
-      ))}
-    </tr>
+  const renderTable = (title, description, questions) => (
+    <div className="info3 card mt-4">
+      <div className='header'>
+        <b>{title}</b>
+      </div>
+
+      <div className="m-2">
+        {description}
+      </div>
+
+      <table className='nutrition-table mt-2 mb-4' style={{ width: "95%" }}>
+        <thead>
+          <tr>
+            <th style={{ width: "55%" }}>คำถาม</th>
+            <th className='text-center'>1</th>
+            <th className='text-center'>2</th>
+            <th className='text-center'>3</th>
+          </tr>
+        </thead>
+        <tbody>
+          {questions.map((item, index) => (
+            item.name === 'description' ? (
+              <tr key={index}>
+                <td colSpan="4" className="text-center" style={{ backgroundColor: "#f8f9fa" }}>
+                  {item.label}
+                </td>
+              </tr>
+            ) : (
+              <tr key={item.name}>
+                <td style={{ width: "55%" }}>{item.label} <span style={{ color: 'red' }}>*</span></td>
+                {[1, 2, 3].map((value) => (
+                  <td className='text-center' key={value}>
+                    <Controller
+                      name={`Immobility.${item.name}`}
+                      control={control}
+                      defaultValue=""
+                      render={({ field }) => (
+                        <input
+                          type="radio"
+                          value={value}
+                          checked={Immobilitydata[item.name] === String(value)}
+                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                            setImmobilityData({ ...Immobilitydata, [item.name]: e.target.value });
+                            calculateTotalScore();
+                          }}
+                        />
+                      )}
+                    />
+                  </td>
+                ))}
+              </tr>
+            )
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 
   return (
     <div>
-      <div className="info3 card ">
+      <div className="title-form mt-1">
         <div className="header">
           <b>Immobility</b>
         </div>
-        <div className='m-4'>
-          <b>กิจวัตรประจำวันพื้นฐาน</b><span style={{ color: 'red' }}> *</span>
-          <div className='grid' align="center">
-            <div className='col'>
-              <p>1 = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
-            </div>
-            <div className='col'>
-              <p>2 = ทำได้ด้วยตัวเองได้บ้าง ต้องมีคนช่วย</p>
-            </div>
-            <div className='col'>
-              <p>3 = ทำด้วยตนเองไม่ได้เลย</p>
-            </div>
-          </div>
-          <table className="feedback-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <thead>
-              <tr>
-                <th></th>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: 'Pick_up_food', label: '1. ตัก/หยิบอาหารรับประทาน' },
-                { name: 'Clean_up', label: '2. ล้างหน้า แปรงฟัน หวีผม' },
-                { name: 'Put_on_clothes', label: '3. สวมใส่เสื้อผ้า' },
-                { name: 'Shower', label: '4. อาบน้ำ' },
-                { name: 'Using_the_toilet', label: '5. การใช้ห้องส้วมและทำความสะอาดหลังขับถ่าย' },
-                { name: 'Get_up', label: '6. ลุกจากที่นอน/เตียง' },
-                { name: 'Walk_inside', label: '7. เดินหรือเคลื่อนที่ในบ้าน' },
-                { name: 'Up_down_stairs', label: '8. ขึ้นลงบันได 1 ชั้น' },
-              ].map((item, index) => (
-                renderQuestion(item.label, item.name, [
-                  { value: 1, label: '1 = ทำได้ด้วยตัวเอง' },
-                  { value: 2, label: '2 = ทำได้ด้วยตัวเองได้บ้าง' },
-                  { value: 3, label: '3 = ทำด้วยตนเองไม่ได้เลย' },
-                ])
-              ))}
-            </tbody>
-            <thead>
-              <tr>
-                <th></th>
-                <th>1 = กลั้นได้ปกติ</th>
-                <th>2 = กลั้นไม่ได้บางครั้ง</th>
-                <th>3 = กลั้นไม่ได้เลย</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: 'Continence_urine', label: '9. กลั้นปัสสาวะ' },
-                { name: 'Continence_stool', label: '10. กลั้นอุจจาระ' }
-              ].map((item, index) => (
-                renderQuestion(item.label, item.name, [
-                  { value: 1, label: '1 = ทำได้ด้วยตัวเอง' },
-                  { value: 2, label: '2 = ทำได้ด้วยตัวเองได้บ้าง' },
-                  { value: 3, label: '3 = ทำด้วยตนเองไม่ได้เลย' },
-                ])
-              ))}
-            </tbody>
-          </table>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}>
+            <i className="bi bi-person-walking" style={{ color: "#008000" }}></i> ประเมินความสามารถในการเคลื่อนไหว
+          </p>
         </div>
       </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <b>กิจวัตรที่ซับซ้อน</b><span style={{ color: 'red' }}> *</span>
-          <div className='grid' align="center">
-            <div className='col'>
-              <p>1 = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
-            </div>
-            <div className='col'>
-              <p>2 = ทำได้ด้วยตัวเองได้บ้าง ต้องมีคนช่วย</p>
-            </div>
-            <div className='col'>
-              <p>3 = ทำด้วยตนเองไม่ได้เลย</p>
-            </div>
-          </div>
-          <table className="feedback-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th></th>
-                <th></th>
-              </tr>
-            </thead>
-            <thead>
-              <tr>
-                <th></th>
-                <th>1</th>
-                <th>2</th>
-                <th>3</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { name: 'Walk_outside', label: '1. เดินหรือเคลื่อนที่นอกบ้าน' },
-                { name: 'Cooking', label: '2. ทำหรือเตรียมอาหาร' },
-                { name: 'Household_chores', label: '3. กวาด/ถูบ้านหรือซักรีดผ้า' },
-                { name: 'Shopping', label: '4. การซื้อของ/จ่ายตลาด' },
-                { name: 'Taking_public_transportation', label: '5. ใช้บริการระบบขนส่งสาธารณะ เช่น รถโดยสาร รถเมล์ แท็กซี่ รถไฟ' },
-                { name: 'Taking_medicine', label: '6. การรับประทานยาตามแพทย์สั่ง' }
-              ].map((item, index) => (
-                renderQuestion(item.label, item.name, [
-                  { value: 1, label: '1 = ทำได้ด้วยตัวเอง' },
-                  { value: 2, label: '2 = ทำได้ด้วยตัวเองได้บ้าง' },
-                  { value: 3, label: '3 = ทำด้วยตนเองไม่ได้เลย' },
-                ])
-              ))}
-            </tbody>
-          </table>
-          {showError && (
-        <p style={{ color: 'red', textAlign: 'center', marginTop: '10px' }}>
-          <i class="bi bi-exclamation-circle"></i> กรุณาเลือกให้ครบทุกข้อ
-        </p>
-      )}
-        </div>
-      </div>
-      
-      <div className="info3 card mt-3">
-        <div className="header">
-          <b>การประเมินผล</b>
-        </div>
-        <div className='m-4'>
-          <div className='grid' align="center">
-            <div className='col'>
-              <b>คะแนนรวม = </b>
-            </div>
-            <div className='col'>
-              <b>{totalScore !== null && (
-                <div className={`text-center mt-1 ${getGroupStyle()}`}>
-                  <h4><CountUp end={totalScore} duration={2} /> คะแนน</h4>
-                  <p>{group}</p>
+
+      {/* ตาราง: กิจวัตรประจำวันพื้นฐาน + การให้คะแนนข้อ 9-10 */}
+      {renderTable('กิจวัตรประจำวันพื้นฐาน',
+        <>
+          <div className='m-1'>
+            <p className='ms-3 mb-0' style={{ color: "red" }}>
+              <span style={{ fontSize: "1.2em", fontWeight: "bold" }}>* </span>
+              = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
+            <p className='ms-3'><b >การให้คะแนน :</b></p>
+            <div style={{ marginLeft: '26px', marginTop: '10px', lineHeight: '25px' }}>
+              <div className='grid' align="center">
+                <div className='col'>
+                  <p><b>1</b> = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
                 </div>
-              )}</b>
+                <div className='col'>
+                  <p><b>2</b> = ทำได้ด้วยตัวเองได้บ้าง ต้องมีคนช่วย</p>
+                </div>
+                <div className='col'>
+                  <p><b>3</b> = ทำด้วยตนเองไม่ได้เลย</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>,
+        [
+          { name: 'Pick_up_food', label: '1. ตัก/หยิบอาหารรับประทาน' },
+          { name: 'Clean_up', label: '2. ล้างหน้า แปรงฟัน หวีผม' },
+          { name: 'Put_on_clothes', label: '3. สวมใส่เสื้อผ้า' },
+          { name: 'Shower', label: '4. อาบน้ำ' },
+          { name: 'Using_the_toilet', label: '5. ใช้ห้องส้วม/ทำความสะอาดหลังขับถ่าย' },
+          { name: 'Get_up', label: '6. ลุกจากที่นอน/เตียง' },
+          { name: 'Walk_inside', label: '7. เดินหรือเคลื่อนที่ในบ้าน' },
+          { name: 'Up_down_stairs', label: '8. ขึ้นลงบันได 1 ชั้น' },
+
+          // เพิ่มคำอธิบายให้มี colspan 4
+          {
+            name: 'description', label:
+              <div className='m-1'>
+                {/* <p className='ms-3 mb-0' style={{ color: "red" }}>
+              <span style={{ fontSize: "1.2em", fontWeight: "bold" }}> *</span>
+              = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p> */}
+                <p><b >การให้คะแนนข้อ 9-10 :</b></p>
+                <div style={{lineHeight: '10px' }}>
+                  <div className='grid' align="center">
+                    <div className='col'>
+                      <p><b>1</b> = กลั้นได้ปกติ</p>
+                    </div>
+                    <div className='col'>
+                      <p><b>2</b> = กลั้นไม่ได้บางครั้ง</p>
+                    </div>
+                    <div className='col'>
+                      <p><b>3</b> = กลั้นไม่ได้เลย</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          },
+
+          { name: 'Continence_urine', label: '9. กลั้นปัสสาวะ' },
+          { name: 'Continence_stool', label: '10. กลั้นอุจจาระ' },
+        ])}
+
+      {/* ตาราง: กิจวัตรที่ซับซ้อน */}
+      {renderTable('กิจวัตรที่ซับซ้อน',
+        <div className='m-1'>
+          <p className='ms-3 mb-0' style={{ color: "red" }}>
+            <span style={{ fontSize: "1.2em", fontWeight: "bold" }}> *</span>
+            = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
+          <p className='ms-3'><b >การให้คะแนน :</b></p>
+          <div style={{ marginLeft: '26px', marginTop: '10px', lineHeight: '25px' }}>
+            <div className='grid' align="center">
+              <div className='col'>
+                <p><b>1</b> = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
+              </div>
+              <div className='col'>
+                <p><b>2</b> = ทำได้ด้วยตัวเองได้บ้าง ต้องมีคนช่วย</p>
+              </div>
+              <div className='col'>
+                <p><b>3</b> = ทำด้วยตนเองไม่ได้เลย</p>
+              </div>
+            </div>
+          </div>
+        </div>, [
+        { name: 'Walk_outside', label: '11. เดินหรือเคลื่อนที่นอกบ้าน' },
+        { name: 'Cooking', label: '12. ทำหรือเตรียมอาหาร' },
+        { name: 'Household_chores', label: '13. กวาด/ถูบ้านหรือซักรีดผ้า' },
+        { name: 'Shopping', label: '14. การซื้อของ/จ่ายตลาด' },
+        { name: 'Taking_public_transportation', label: '15. ใช้บริการขนส่งสาธารณะ' },
+        { name: 'Taking_medicine', label: '16. การรับประทานยาตามแพทย์สั่ง' }
+      ])}
+
+      {/* แสดงคะแนนรวม */}
+      <div className='m-4'>
+        <div className="card mt-4 shadow rounded" style={{ backgroundColor: "#95d7ff", border: "none" }}>
+          <div className="card-body">
+            <h4 className='text-center'>ประเมินผลคะแนน</h4>
+            <div className="text-center m-3 p-3" style={{ backgroundColor: "white", borderRadius: "5px" }}>
+              {totalScore !== null && (
+                <div className={`text-center ${getGroupStyle()}`}>
+                  <h1><CountUp end={totalScore} duration={2} /> คะแนน</h1>
+                  <h6>{group}</h6>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 };

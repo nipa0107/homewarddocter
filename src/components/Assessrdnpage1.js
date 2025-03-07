@@ -68,7 +68,7 @@ export default function Assessreadiness1() {
         }
     };
 
-  const hasFetchedUserData = useRef(false);
+    const hasFetchedUserData = useRef(false);
 
     useEffect(() => {
         fetchLatestAssessments();
@@ -247,7 +247,7 @@ export default function Assessreadiness1() {
     };
 
     useEffect(() => {
-        if (hasFetchedUserData.current) return; 
+        if (hasFetchedUserData.current) return;
         hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
@@ -489,191 +489,251 @@ export default function Assessreadiness1() {
             } น.`;
     };
 
-    const Readiness1 = ({ register, errors, watch }) => (
-        <div>
-            <div className="mb-1">
-                <label>1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยใน ที่บ้านจากแพทย์อย่างครบถ้วน และให้คำยินยอมก่อนรับบริการใช่หรือไม่?</label>
-                <div >
-                    <label>
-                        <input type="radio" name="question1_1" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_1', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input type="radio" name="question1_1" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness1.question1_1', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
-                    </label>
-                </div>
-                {errors.question1_1 && <span>This field is required</span>}
+    const Readiness1 = ({ register, errors }) => (
+        <div className="info3 card mt-1">
+            <div className='header'>
+                <b>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในที่บ้าน</b>
             </div>
-            <div className="mb-1">
-                <label>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน มีความปลอดภัยใช่หรือไม่?</label>
-                <div>
-                    <label>
-                        <input type="radio" name="question1_2" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_2', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input type="radio" name="question1_2" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness1.question1_2', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
-                    </label>
-                </div>
-                {errors.question1_2 && <span>This field is required</span>}
+            <div className="ms-4 mt-3">
+                <p style={{ color: 'red' }}>* = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
             </div>
-            <div className="mb-1">
-                <label>3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน อยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่?</label>
-                <div>
-                    <label>
-                        <input type="radio" name="question1_3" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
-                    </label>
+
+            {/* คำถาม 1 */}
+            <div className="m-1 mt-0">
+                <label className="ms-4 me-4">
+                    1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน และให้คำยินยอมก่อนรับบริการใช่หรือไม่ ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ใช่" {...register('Readiness1.question1_1', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
                 </div>
-                <div>
-                    <label>
-                        <input type="radio" name="question1_3" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_3', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
-                    </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_1', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
                 </div>
-                {errors.question1_3 && <span>This field is required</span>}
+                {errors.Readiness1?.question1_1 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
             </div>
-            <div className="mb-1">
-                <label>4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน สามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่?</label>
-                <div>
-                    <label>
-                        <input type="radio" name="question1_4" value="ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ใช่ </span>
-                    </label>
+
+            {/* คำถาม 2 */}
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่ ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ใช่" {...register('Readiness1.question1_2', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
                 </div>
-                <div>
-                    <label>
-                        <input type="radio" name="question1_4" value="ไม่ใช่" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness1.question1_4', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ใช่ </span>
-                    </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_2', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
                 </div>
-                {errors.question1_4 && <span>This field is required</span>}
+                {errors.Readiness1?.question1_2 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
+            </div>
+
+            {/* คำถาม 3 */}
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่ ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ใช่" {...register('Readiness1.question1_3', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
+                </div>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_3', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
+                </div>
+                {errors.Readiness1?.question1_3 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
+            </div>
+
+            {/* คำถาม 4 */}
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่ ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ใช่" {...register('Readiness1.question1_4', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
+                </div>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_4', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
+                </div>
+                {errors.Readiness1?.question1_4 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
             </div>
         </div>
     );
 
-    const Readiness2 = ({ register, errors, watch }) => (
-        <div>
-            <div className="mb-1">
-                <label>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย</label>
-                <div>
-                    <label>
-                        <input type="radio" name="Disease" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Disease', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input type="radio" name="Disease" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Disease', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
-                    </label>
-                </div>
-                {/* {errors.Disease && <span>This field is required</span>} */}
+
+    const Readiness2 = ({ register, errors }) => (
+        <div className="info3 card mt-1">
+            <div className='header'>
+                <b>ประเมินความรู้ ความเข้าใจ (ตาม D-METHOD)</b>
             </div>
-            <div className="mb-1">
-                <label>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา</label>
-                <div>
-                    <label>
-                        <input type="radio" name="Medication" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Medication', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input type="radio" name="Medication" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Medication', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
-                    </label>
-                </div>
-                {/* {errors.Medication && <span>This field is required</span>} */}
+            <div className="ms-4 mt-3">
+                <p style={{ color: 'red' }}>* = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
             </div>
-            <div className="mb-1">
-                <label>3. Environment : มีการเตรียมสิ่งแวดล้อม</label>
-                <div>
-                    <label>
-                        <input type="radio" name="Environment" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Environment', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
-                    </label>
+            {/* คำถาม 1 */}
+            <div className="m-1">
+                <label className="ms-4 me-4 mb-0">
+                    1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Disease', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
                 </div>
-                <div>
-                    <label>
-                        <input type="radio" name="Environment" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Environment', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
-                    </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Disease', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
                 </div>
-                {/* {errors.Environment && <span>This field is required</span>} */}
+                {errors.Readiness2?.Disease && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
             </div>
-            <div className="mb-1">
-                <label>4.Treatment : มีการฝึกทักษะที่จำเป็น</label>
-                <div>
-                    <label>
-                        <input type="radio" name="Treatment" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Treatment', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
-                    </label>
+
+            {/* คำถาม 2 */}
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Medication', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
                 </div>
-                <div>
-                    <label>
-                        <input type="radio" name="Treatment" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Treatment', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
-                    </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Medication', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
                 </div>
-                {/* {errors.Treatment && <span>This field is required</span>} */}
+                {errors.Readiness2?.Medication && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
             </div>
-            <div className="mb-1">
-                <label>5. Health : รู้ข้อจำกัดด้านสุขภาพ</label>
-                <div>
-                    <label>
-                        <input type="radio" name="Health" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Health', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
-                    </label>
+
+            {/* คำถาม 3 */}
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    3. Environment : มีการเตรียมสิ่งแวดล้อม ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
                 </div>
-                <div>
-                    <label>
-                        <input type="radio" name="Health" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Health', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
-                    </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
                 </div>
-                {/* {errors.Health && <span>This field is required</span>} */}
+                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
             </div>
-            <div className="mb-1">
-                <label>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ</label>
-                <div>
-                    <label>
-                        <input type="radio" name="Out_patient" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Out_patient', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
-                    </label>
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    4. Treatment : มีการฝึกทักษะที่จำเป็น ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
                 </div>
-                <div>
-                    <label>
-                        <input type="radio" name="Out_patient" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }}{...register('Readiness2.Out_patient', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
-                    </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
                 </div>
-                {/* {errors.Out_patient && <span>This field is required</span>} */}
+                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
             </div>
-            <div className="mb-1">
-                <label>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค</label>
-                <div>
-                    <label>
-                        <input type="radio" name="Diet" value="ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ถูกต้อง </span>
-                    </label>
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    5. Health : รู้ข้อจำกัดด้านสุขภาพ ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
                 </div>
-                <div>
-                    <label>
-                        <input type="radio" name="Diet" value="ไม่ถูกต้อง" style={{ transform: 'scale(1.5)', marginLeft: '5px' }} {...register('Readiness2.Diet', { required: true })} />
-                        <span style={{ marginLeft: '10px' }}> ไม่ถูกต้อง </span>
-                    </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
                 </div>
-                {/* {errors.Diet && <span>This field is required</span>} */}
+                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
+            </div>
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                </div>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                </div>
+                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
+            </div>
+            <div className="m-1">
+                <label className="ms-4 me-4">
+                    7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?
+                    <span style={{ color: 'red' }}> *</span>
+                </label>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                </div>
+                <div className='ms-4 me-4'>
+                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
+                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                    />
+                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                </div>
+                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
             </div>
         </div>
     );
+
     const [step, setStep] = useState(1);
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
@@ -736,8 +796,8 @@ export default function Assessreadiness1() {
         fetchUnreadCount();
     }, []);
     return (
-        <main className="body">
-            <div className={`sidebar ${isActive ? 'active' : ''}`}>
+        <div>
+            {/* <div className={`sidebar ${isActive ? 'active' : ''}`}>
                 <div class="logo_content">
                     <div class="logo">
                         <div class="logo_name" >
@@ -806,9 +866,9 @@ export default function Assessreadiness1() {
                         </li>
                     </div>
                 </ul>
-            </div>
-            <div className="home_content">
-                <div className="homeheader">
+            </div> */}
+            <div className="container-form">
+                <div className="homeheaderform">
                     <div className="header">ประเมินความพร้อมการดูแล
                     </div>
                     <div className="profile_details">
@@ -836,7 +896,7 @@ export default function Assessreadiness1() {
                         </ul>
                     </div>
                 </div>
-                <div className="breadcrumbs mt-4">
+                {/* <div className="breadcrumbs mt-4">
                     <ul>
                         <li>
                             <a href="home">
@@ -849,8 +909,20 @@ export default function Assessreadiness1() {
                         <li>
                             <a href="assessreadiness">ประเมินความพร้อมการดูแล</a>
                         </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li>
+                            <a href="assessreadinessuser">บันทึกการประเมิน</a>
+                        </li>
+                        <li className="arrow">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li>
+                            <a>แบบฟอร์มการประเมิน</a>
+                        </li>
                     </ul>
-                </div>
+                </div> */}
                 {showNotifications && (
                     <div className="notifications-dropdown" ref={notificationsRef}>
                         <div className="notifications-head">
@@ -958,80 +1030,119 @@ export default function Assessreadiness1() {
                         )}
                     </div>
                 )}
-                <h3>ประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในบ้าน</h3>
-                <div>
-                    <p className="headerassesment">
-                        {name} {surname}
+                {/* <h3>ประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในบ้าน</h3> */}
+                {/* <div className="patient-card patient-card-style">
+                    <p className="patient-name">
+                        <label>ข้อมูลผู้ป่วย</label>
                     </p>
-                    {birthday ? (
-                        <p className="textassesment">
-                            <label>อายุ:</label>{" "}
-                            <span>
-                                {userAge} ปี {userAgeInMonths} เดือน
-                            </span>{" "}
-                            <label>เพศ:</label> <span>{gender}</span>
-                        </p>
-                    ) : (
-                        <p className="textassesment">
-                            <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
-                            <label>เพศ:</label> <span>{gender}</span>
-                        </p>
-                    )}
-                    <p className="textassesment">
-                        <label>HN:</label>{" "}
-                        <span>
-                            {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-                        </span>
-                        <label>AN:</label>{" "}
-                        <span>
-                            {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-                        </span>
-                        <label>ผู้ป่วยโรค:</label>{" "}
-                        <span>
-                            {medicalData && medicalData.Diagnosis
-                                ? medicalData.Diagnosis
-                                : "ไม่มีข้อมูล"}
-                        </span>
-                    </p>
-                </div>
-                <div className="adminall card mb-1">
-                    {showMessage ? ( // Show message if assessment is completed
-                        <div className="success-message mt-2">
-                            <h2>การประเมินเสร็จสิ้น</h2>
-                            <br></br>
-                            <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id: id } })}>ดูคำตอบ</a>
-                            <br></br>
-                            <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id } })}>กลับไปหน้าประเมินความพร้อม</a>
 
+                    <div className="info-container">
+                        <div className="info-row">
+                            <div className="info-item">
+
+                                <label>ชื่อ-สกุล:</label>{" "}
+                                <span>
+                                    {name} {surname}
+                                </span>
+                            </div>
+                            <div className="info-item">
+                                <label>อายุ:</label>{" "}
+                                <span>
+                                    {birthday
+                                        ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                                        : "0 ปี 0 เดือน"}
+                                </span>
+                            </div>
+                            <div className="info-item">
+                                <label>เพศ:</label> <span>{gender}</span>
+                            </div>
                         </div>
-                    ) : (
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            {step === 1 && <Readiness1 register={register} errors={errors} />}
-                            {step === 2 && <Readiness2 register={register} errors={errors} />}
-                            <div className="btn-group">
-                                {step > 1 && (
-                                    <div className="btn-pre">
-                                        <button type="button" onClick={handlePrevious} className="btn btn-outline py-2">ก่อนหน้า</button>
-                                    </div>
-                                )}
-                                {step < 2 && (
-                                    <div className="btn-next">
-                                        <button type="button" onClick={handleNext} className="btn btn-outline-primary py-2">ถัดไป</button>
-                                    </div>
-                                )}
-                                {step === 2 && (
-                                    <div className="btn-next">
-                                        <button type="submit" className="btn btn-outline-primary py-2">บันทึก</button>
-                                    </div>
+
+                        <div className="info-row">
+                            <div className="info-item">
+                                <label>HN:</label>{" "}
+                                <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                            </div>
+                            <div className="info-item">
+                                <label>AN:</label>{" "}
+                                <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                            </div>
+                            <div className="info-item full-width">
+                                <label>ผู้ป่วยโรค:</label>{" "}
+                                <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div> */}
+                <div className="formcontent ">
+                    <div className="row">
+                        <div className="col-4 bg-light" style={{ borderRadius: "8px" }} >
+                            <p className="name"> <i class="bi bi-person-fill"></i> {name} {surname}</p >
+                            <div className="namepatient">
+                                <label style={{ color: "#008000" }}><b>HN : {medicalData && medicalData.HN
+                                    ? medicalData.HN
+                                    : "-"}</b> </label> <br></br>
+                                <label style={{ color: "#FFA500" }}> <b>AN : {medicalData && medicalData.AN
+                                    ? medicalData.AN
+                                    : "-"}  </b></label>
+                                {birthday ? (
+                                    <p>
+                                        <label style={{ color: "#666" }}> เพศ : </label><b> {gender}</b> <br></br>
+                                        <label style={{ color: "#666" }}> อายุ :</label> <b> {userAge} ปี {userAgeInMonths} เดือน</b>   <br></br>
+                                        <label style={{ color: "#666" }}> ผู้ป่วยโรค :</label> <b> {medicalData && medicalData.Diagnosis
+                                            ? medicalData.Diagnosis
+                                            : "ไม่ได้ระบุโรค"}</b>
+                                    </p>
+                                ) : (
+                                    <p >
+                                        <label>เพศ :</label> {gender} <br></br>
+                                        <label>อายุ :</label> 0 ปี 0 เดือน </p>
                                 )}
                             </div>
-                        </form>
-                    )}
+                        </div>
+                        <div className="col-8">
+                            <div className="form-content">
+                                {showMessage ? ( // Show message if assessment is completed
+                                    <div className="success-message mt-2">
+                                        <h2>การประเมินเสร็จสิ้น</h2>
+                                        <br></br>
+                                        <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id: id } })}>ดูคำตอบ</a>
+                                        <br></br>
+                                        <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id } })}>กลับไปหน้าประเมินความพร้อม</a>
+
+                                    </div>
+                                ) : (
+                                    <form onSubmit={handleSubmit(onSubmit)}>
+                                        {step === 1 && <Readiness1 register={register} errors={errors} />}
+                                        {step === 2 && <Readiness2 register={register} errors={errors} />}
+                                        <div className="btn-group">
+                                            {step > 1 && (
+                                                <div className="btn-pre">
+                                                    <button type="button" onClick={handlePrevious} className="btn btn-outline py-2">ก่อนหน้า</button>
+                                                </div>
+                                            )}
+                                            {step < 2 && (
+                                                <div className="btn-next">
+                                                    <button type="button" onClick={handleNext} className="btn btn-outline-primary py-2">ถัดไป</button>
+                                                </div>
+                                            )}
+                                            {step === 2 && (
+                                                <div className="btn-next">
+                                                    <button type="submit" className="btn btn-outline-primary py-2">บันทึก</button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <ToastContainer />
             </div>
-        </main>
+        </div>
     );
 }
 

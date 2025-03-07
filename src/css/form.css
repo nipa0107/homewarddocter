@@ -27,7 +27,10 @@
     margin-right: auto;
     margin-left: auto;
 }
-
+.formcontent .row {
+    margin-right: auto;
+    margin-left: auto;
+}
 .formcontent .name {
     margin-top: 10px;
     color: #000;
@@ -209,8 +212,9 @@ tr.assessmentnull {
     font-weight: bold;
 
 }
-.form-check-input{
-    border:1px solid #666;
+.form-check {
+    display: block;
+    padding-left: 1.5em;
 }
 
 .btn-group {
@@ -434,7 +438,16 @@ tr.assessmentnull {
 }
 .title-form{
     border-bottom: 1px solid #ddd;
+    width: 92%;
+    margin: auto;
 }
+
+/* .title-form .header{
+    border: 1px solid #ddd;
+    border-radius: 3px 3px;
+    padding-left: 10px;
+    background-color: #e7f5fe;
+} */
 .header b {
     font-size: 25px;
 }
@@ -474,7 +487,7 @@ tr.assessmentnull {
 
 .form-label {
     font-size: 17px;
-    line-height: 50px;
+    line-height: 30px;
 }
 
 .namepatient {
@@ -770,9 +783,6 @@ textarea {
 
 .form-control::placeholder {
     color: #c6c6c6;
-    padding-top: 12px;
-    padding-left: 2px;
-    padding-bottom: 5px;
 }
 
 /* .form-input-other {
@@ -783,14 +793,12 @@ textarea {
 } */
 .feedback-table {
     border-collapse: collapse;
-    width: 100%;
+    width: 105%;
 }
 
 .feedback-table th,
 .feedback-table td {
     border: none;
-    /* Remove borders */
-    padding-left: 1px;
     line-height: 45px;
 }
 
@@ -803,6 +811,10 @@ textarea {
     background-color: #f8f8f8;
 }
 
+.nutrition-table{
+    margin: 15px;
+    margin-top: -10px;
+}
 .nutrition-table td {
     padding: 5px;
     vertical-align: middle;
@@ -813,15 +825,18 @@ textarea {
 }
 
 .nutrition-table tbody tr {
-    border-bottom: 4px solid #ffffff;
-    border-top: 4px solid #ffffff;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
 }
 
 .nutrition-table tbody tr {
-    background-color: #f8f8f8;
+    background-color: #ffffff;
 }
 
 .textassesmentinhome label {
     margin-right: 10px;
     /* ระยะห่างทางขวาจาก label */
+}
+.modal-title{
+    text-align: center;
 }

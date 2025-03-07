@@ -887,6 +887,21 @@ export default function Home() {
             </ul>
           </div>
         </div>
+        {/* <div className="breadcrumbs mt-4">
+          <ul>
+            <li>
+              <a href="home">
+                <i class="bi bi-house-fill"></i>
+              </a>
+            </li>
+            <li className="arrow">
+              <i class="bi bi-chevron-double-right"></i>
+            </li>
+            <li>
+              <a>Dashboard </a>
+            </li>
+          </ul>
+        </div> */}
         {showNotifications && (
           <div className="notifications-dropdown" ref={notificationsRef}>
             <div className="notifications-head">

@@ -45,18 +45,18 @@ const ZaritburdeninterviewForm = ({ formData, onSave }) => {
 
     const renderRadioGroup = (label, name) => (
         <div className="m-3">
-            <label className="form-label mt-3">{label} :</label>
+            <label className="form-label mt-3">{label} <span style={{ color: 'red' }}> *</span></label>
             <div>
                 {[4, 3, 2, 1, 0].map((value) => (
-                    <div key={value} className="form-check">
+                    <div key={value} >
                         <input
                             type="radio"
-                            className="form-check-input"
+                            className="mt-2 ms-0"
                             name={name}
                             value={value}
                             checked={formValues[name] === value}
                             onChange={(e) => handleChange(name, e.target.value)}
-                            style={{ transform: "scale(1.2)" }}
+                            style={{ transform: "scale(1.5)" }}
                         />
                         <label className="form-check-label" style={{ marginLeft: "5px" }}>
                             {value} คะแนน

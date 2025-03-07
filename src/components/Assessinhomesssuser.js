@@ -472,58 +472,49 @@ export default function Assessinhomesssuser({ }) {
   };
 
   const [AssessinhomeForms, setAssessinhomeForms] = useState({});
-
-  const fetchAssessinhomeForms = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/getAssessinhomeForms/${id}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setAssessinhomeForms(data.data);
-      console.log("Patient Forms1:", data.data);
-    } catch (error) {
-      console.error("Error fetching patient forms:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (id) {
-      fetchAssessinhomeForms();
-    }
-  }, [id]);
-
   const [AgendaForms, setAgendaForms] = useState({});
-
-  const fetchAgendaForms = async () => {
-    try {
-      const response = await fetch(
-        `http://localhost:5000/getAgendaForms/${id}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const data = await response.json();
-      setAgendaForms(data.data);
-      console.log("Patient Forms1:", data.data);
-    } catch (error) {
-      console.error("Error fetching patient forms:", error);
-    }
-  };
 
   useEffect(() => {
     if (id) {
       fetchAgendaForms();
+      fetchAssessinhomeForms();
     }
   }, [id]);
+
+  const fetchAgendaForms = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/getAgendaForms/${id}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+
+      // ✅ เรียงจาก ใหม่สุด -> เก่าสุด ก่อนเซ็ตค่า
+      const sortedData = [...data.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setAgendaForms(sortedData);
+    } catch (error) {
+      console.error("Error fetching patient forms:", error);
+    }
+  };
+
+  const fetchAssessinhomeForms = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/getAssessinhomeForms/${id}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+
+      // ✅ เรียงจาก ใหม่สุด -> เก่าสุด ก่อนเซ็ตค่า
+      const sortedData = [...data.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setAssessinhomeForms(sortedData);
+    } catch (error) {
+      console.error("Error fetching patient forms:", error);
+    }
+  };
+
 
   useEffect(() => {
     // ดึงข้อมูล unread count เมื่อเปิดหน้า
@@ -546,6 +537,54 @@ export default function Assessinhomesssuser({ }) {
     };
     fetchUnreadCount();
   }, []);
+
+  const [sortOrder, setSortOrder] = useState("desc"); // เริ่มต้น ใหม่สุด -> เก่าสุด
+
+  const sortByDate = () => {
+    const newOrder = sortOrder === "asc" ? "desc" : "asc"; // สลับทิศทาง
+    setSortOrder(newOrder);
+
+    const sortFunction = (a, b) =>
+      newOrder === "asc"
+        ? new Date(a.createdAt) - new Date(b.createdAt) // เก่าสุด -> ใหม่สุด
+        : new Date(b.createdAt) - new Date(a.createdAt); // ใหม่สุด -> เก่าสุด
+
+    // ✅ ใช้ [...state] เพื่อให้ React ตรวจจับการเปลี่ยนแปลง
+    setAgendaForms(prev => [...prev].sort(sortFunction));
+    setAssessinhomeForms(prev => [...prev].sort(sortFunction));
+  };
+
+  const [sortOrderAgenda, setSortOrderAgenda] = useState("desc");
+  const [sortOrderInHome, setSortOrderInHome] = useState("desc");
+  const sortByDateAgenda = () => {
+    const newOrder = sortOrderAgenda === "asc" ? "desc" : "asc";
+    setSortOrderAgenda(newOrder);
+
+    const sortedForms = [...AgendaForms].sort((a, b) =>
+      newOrder === "asc"
+        ? new Date(a.createdAt) - new Date(b.createdAt)
+        : new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    setAgendaForms(sortedForms);
+  };
+  const sortByDateInHome = () => {
+    const newOrder = sortOrderInHome === "asc" ? "desc" : "asc";
+    setSortOrderInHome(newOrder);
+
+    const sortedForms = [...AssessinhomeForms].sort((a, b) =>
+      newOrder === "asc"
+        ? new Date(a.createdAt) - new Date(b.createdAt)
+        : new Date(b.createdAt) - new Date(a.createdAt)
+    );
+
+    setAssessinhomeForms(sortedForms);
+  };
+
+  // สถานะของประเภทประเมินที่ถูกเลือก
+  const [selectedAssessment, setSelectedAssessment] = useState("Agenda");
+
+
   return (
     <main className="body">
       <div className={`sidebar ${isActive ? "active" : ""}`}>
@@ -784,171 +823,217 @@ export default function Assessinhomesssuser({ }) {
         </div>
         <div className="toolbar"></div>
         <div className="content">
-          <div>
-            <p className="headerassesment">
-              {name} {surname}
+          <div className="patient-card patient-card-style">
+            <p className="patient-name">
+              <label>ข้อมูลผู้ป่วย</label>
             </p>
-            {birthday ? (
-              <p className="textassesment">
-                <label>อายุ:</label>{" "}
-                <span>
-                  {userAge} ปี {userAgeInMonths} เดือน
-                </span>{" "}
-                <label>เพศ:</label> <span>{gender}</span>
-              </p>
-            ) : (
-              <p className="textassesment">
-                <label>อายุ:</label> <span>0 ปี 0 เดือน</span>{" "}
-                <label>เพศ:</label> <span>{gender}</span>
-              </p>
-            )}
-            <p className="textassesment">
-              <label>HN:</label>{" "}
-              <span>
-                {medicalData && medicalData.HN ? medicalData.HN : "ไม่มีข้อมูล"}
-              </span>
-              <label>AN:</label>{" "}
-              <span>
-                {medicalData && medicalData.AN ? medicalData.AN : "ไม่มีข้อมูล"}
-              </span>
-              <label>ผู้ป่วยโรค:</label>{" "}
-              <span>
-                {medicalData && medicalData.Diagnosis
-                  ? medicalData.Diagnosis
-                  : "ไม่มีข้อมูล"}
-              </span>
-            </p>
-          </div>
-          <div className="content-toolbar">
-            <div className="toolbar ">
-              {AgendaForms && AgendaForms.length > 0 && (
 
-                <button
-                  className="btn btn-primary add-assessment-btn"
-                  onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
-                >
-                  <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                  เพิ่มการประเมิน
-                </button>
-              )}
+            <div className="info-container">
+              <div className="info-row">
+                <div className="info-item">
+                  <label>ชื่อ-สกุล:</label>{" "}
+                  <span>
+                    {name} {surname}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>อายุ:</label>{" "}
+                  <span>
+                    {birthday
+                      ? `${userAge} ปี ${userAgeInMonths} เดือน`
+                      : "0 ปี 0 เดือน"}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <label>เพศ:</label> <span>{gender}</span>
+                </div>
+              </div>
+
+              <div className="info-row">
+                <div className="info-item">
+                  <label>HN:</label>{" "}
+                  <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item">
+                  <label>AN:</label>{" "}
+                  <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
+                </div>
+                <div className="info-item full-width">
+                  <label>ผู้ป่วยโรค:</label>{" "}
+                  <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="nameass">
-            <h4>
+
+          {/* Tab เมนูเลือกการประเมิน */}
+          <div className="assessment-tabs">
+            <button
+              className={`tab-btn ${selectedAssessment === "Agenda" ? "active" : ""}`}
+              onClick={() => setSelectedAssessment("Agenda")}
+            >
               ประเมิน Agenda
-            </h4>
-          </div>
-          <table className="table table-hover">
-            <thead>
-              <tr>
-                <th style={{ width: "5%" }}>#</th>
-                <th style={{ width: "25%" }}>วันที่บันทึก</th>
-                <th style={{ width: "25%" }}>วันที่แก้ไขล่าสุด</th>
-                <th style={{ width: "10%" }}>ผลการประเมิน</th>
-                <th>ผู้ประเมิน</th>
-              </tr>
-
-            </thead>
-            <tbody>
-              {AgendaForms.length > 0 ? (
-                AgendaForms.map((form, index) => (
-                  <tr key={form._id}
-                    onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td style={{ width: "5%" }}>{index + 1}</td>
-                    <td style={{ width: "25%" }}>{formatDate(form.createdAt)}</td>
-                    <td style={{ width: "25%" }}>
-                      {form.updatedAt && form.updatedAt !== form.createdAt ? (
-                        formatDate(form.updatedAt)
-                      ) : (
-                        <span className="not-evaluated">ยังไม่มีการแก้ไขการประเมิน</span>
-                      )}
-                    </td>
-                    <td><span className="normal-status">{form.status_agenda}</span></td>
-                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                    <a className="info" onClick={() => navigate("/agendaform", { state: { id: userData._id } })}>
-                      <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                    </a>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-
-          </table>
-          <div className="content-toolbar">
-            <div className="toolbar mt-4">
-              {AssessinhomeForms && AssessinhomeForms.length > 0 && (
-
-                <button
-                  className="btn btn-primary add-assessment-btn"
-                  onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
-                >
-                  <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                  เพิ่มการประเมิน
-                </button>
-              )}
-            </div>
-          </div>
-          <div className="nameass">
-            <h4>
+            </button>
+            <button
+              className={`tab-btn ${selectedAssessment === "IN-HOME-SSS" ? "active" : ""}`}
+              onClick={() => setSelectedAssessment("IN-HOME-SSS")}
+            >
               ประเมิน IN-HOME-SSS
-            </h4>
+            </button>
           </div>
 
-          <table className="table table-hover">
-            <thead>
-              <tr>
-                <th style={{ width: "5%" }}>#</th>
-                <th style={{ width: "25%" }}>วันที่บันทึก</th>
-                <th style={{ width: "25%" }}>วันที่แก้ไขล่าสุด</th>
-                <th style={{ width: "10%" }}>ผลการประเมิน</th>
-                <th>ผู้ประเมิน</th>
-              </tr>
+          {/* แสดงข้อมูลตามประเภทที่เลือก */}
+          {selectedAssessment === "Agenda" && (
+            <div>
+              <div className="content-toolbar d-flex justify-content-between align-items-center mt-4">
+                <div className="search-bar position-relative mb-2">
+                  {AgendaForms && AgendaForms.length > 0 && (
 
-            </thead>
-            <tbody>
-              {AssessinhomeForms.length > 0 ? (
-                AssessinhomeForms.map((form, index) => (
-                  <tr key={form._id}
-                    onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <td style={{ width: "5%" }}>{index + 1}</td>
-                    <td style={{ width: "25%" }}>{formatDate(form.createdAt)}</td>
-                    <td style={{ width: "25%" }}>
+                    <button
+                      className="btn btn-primary add-assessment-btn"
+                      onClick={() => navigate("/agendaform", { state: { id: userData._id } })}
+                    >
+                      <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                      เพิ่มการประเมิน
+                    </button>
+                  )}
+                </div>
+                <div className="toolbar">
+
+                  <p className="countadmin1 mb-2">
+                    การประเมินทั้งหมด : {AgendaForms.length} ครั้ง
+                  </p>
+                </div>
+              </div>
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th onClick={sortByDateAgenda} style={{ cursor: "pointer" }}>
+                      วันที่บันทึก{" "}
+                      {sortOrderAgenda === "asc" ? (
+                        <i className="bi bi-caret-up-fill"></i> // เก่าสุด -> ใหม่สุด
+                      ) : (
+                        <i className="bi bi-caret-down-fill"></i> // ใหม่สุด -> เก่าสุด
+                      )}
+                    </th>
+                    <th>ผลการประเมิน</th>
+                    <th>ผู้ประเมิน</th>
+                    <th>รายละเอียด</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {AgendaForms.length > 0 ? (
+                    AgendaForms.map((form, index) => (
+                      <tr key={form._id}
+                        onClick={() => navigate("/detailAgendaForm", { state: { id: form._id } })}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <td>{index + 1}</td>
+                        <td >{formatDate(form.createdAt)}</td>
+                        <td><span className="normal-status"><i class="bi bi-check-circle"></i> {form.status_agenda}</span></td>
+                        <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                        <td className="text-primary">รายละเอียด</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                        <a className="info" onClick={() => navigate("/agendaform", { state: { id: userData._id } })}>
+                          <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                        </a>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+
+              </table>
+            </div>
+          )}
+
+          {selectedAssessment === "IN-HOME-SSS" && (
+            <div>
+              <div className="content-toolbar d-flex justify-content-between align-items-center mt-4">
+                <div className="toolbar mb-2">
+                  {AssessinhomeForms && AssessinhomeForms.length > 0 && (
+
+                    <button
+                      className="btn btn-primary add-assessment-btn"
+                      onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
+                    >
+                      <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                      เพิ่มการประเมิน
+                    </button>
+                  )}
+                </div>
+                <div className="toolbar">
+
+                  <p className="countadmin1 mb-2">
+                    การประเมินทั้งหมด : {AssessinhomeForms.length} ครั้ง
+                  </p>
+                </div>
+              </div>
+
+
+              <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th onClick={sortByDateInHome} style={{ cursor: "pointer" }}>
+                      วันที่บันทึก{" "}
+                      {sortOrderInHome === "asc" ? (
+                        <i className="bi bi-caret-up-fill"></i> // เก่าสุด -> ใหม่สุด
+                      ) : (
+                        <i className="bi bi-caret-down-fill"></i> // ใหม่สุด -> เก่าสุด
+                      )}
+                    </th>
+                    <th>ผลการประเมิน</th>
+                    <th>ผู้ประเมิน</th>
+                    <th>รายละเอียด</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {AssessinhomeForms.length > 0 ? (
+                    AssessinhomeForms.map((form, index) => (
+                      <tr key={form._id}
+                        onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <td >{index + 1}</td>
+                        <td >{formatDate(form.createdAt)}</td>
+                        {/* <td style={{ width: "25%" }}>
                       {form.updatedAt && form.updatedAt !== form.createdAt ? (
                         formatDate(form.updatedAt)
                       ) : (
                         <span className="not-evaluated">ยังไม่มีการแก้ไขการประเมิน</span>
                       )}
-                    </td>
-                    <td > <span className="normal-status">{form.status_inhome}</span></td>
-                    <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
-                  </tr>
-                ))
-              ) : (
-                // แสดงข้อความเมื่อไม่มีข้อมูล
-                <tr>
-                  <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                    <a
-                      className="info"
-                      onClick={() =>
-                        navigate("/assessinhomesssform", { state: { id: userData._id } })
-                      }
-                    >
-                      <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
-                    </a>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    </td> */}
+                        <td > <span className="normal-status"><i class="bi bi-check-circle"></i> {form.status_inhome}</span></td>
+                        <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
+                        <td className="text-primary">รายละเอียด</td>
+                      </tr>
+                    ))
+                  ) : (
+                    // แสดงข้อความเมื่อไม่มีข้อมูล
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
+                        <a
+                          className="info"
+                          onClick={() =>
+                            navigate("/assessinhomesssform", { state: { id: userData._id } })
+                          }
+                        >
+                          <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
+                        </a>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
 
         </div>
 

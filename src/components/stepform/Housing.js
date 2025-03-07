@@ -38,20 +38,34 @@ export const Housing = ({ onDataChange }) => {
 
   return (
     <div>
-      <div className="info3 card">
+      <div className="title-form mt-1">
         <div className="header">
           <b>Housing</b>
         </div>
-        <div className='m-4'>
-          <label className="form-label">ลักษณะบ้าน :</label><br></br>
-          <div>
+        <div style={{ marginLeft: '26px' }}>
+          <p className="mt-2" style={{ color: "#666" }}><i class="bi bi-house-check-fill" style={{ color: "#008000" }}></i> ประเมินที่อยู่อาศัย</p>
+        </div>
+      </div>
+      <div className="info3 card mt-4">
+        <div className="header">
+          <b>ข้อมูลลักษณะบ้านของผู้ป่วย
+          </b>
+        </div>
+        <div className="ms-4">
+          <p className="mt-2 mb-2" style={{ color: "#666" }}>
+            <i class="bi bi-house" style={{ color: "#008000" }}></i> ประเมินสภาพแวดล้อมและความเหมาะสมสำหรับการดูแลผู้ป่วย
+          </p>
+        </div>
+        <div className="m-1">
+          <label className="form-label ms-4 mb-0">ลักษณะบ้าน </label><br></br>
+          <div className='ms-4 me-4 mt-2'>
             <Controller
               name="houseType"
               control={control}
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -63,18 +77,16 @@ export const Housing = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">วัสดุที่ใช้ทำ :</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">วัสดุที่ใช้ทำ </label><br></br>
+          <div className='ms-4 me-4 mt-2'>
             <Controller
               name="material"
               control={control}
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -86,18 +98,16 @@ export const Housing = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">จำนวนชั้น :</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">จำนวนชั้น </label><br></br>
+          <div className='ms-4 me-4 mt-2'>
             <Controller
               name="numFloors"
               control={control}
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -109,18 +119,16 @@ export const Housing = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">จำนวนห้อง :</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label mt-3 ms-4 mb-0">จำนวนห้อง </label><br></br>
+          <div className='ms-4 me-4 mt-2'>
             <Controller
               name="numRooms"
               control={control}
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -132,18 +140,16 @@ export const Housing = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ผู้ป่วยอาศัยอยู่ชั้นไหน :</label><br></br>
-          <div>
+        <div className='m-1 mb-4'>
+          <label className="form-label mt-3 ms-4 mb-0">ผู้ป่วยอาศัยอยู่ชั้นไหน </label><br></br>
+          <div className='ms-4 me-4 mt-2'>
             <Controller
               name="patientFloor"
               control={control}
               render={({ field }) => (
                 <input
                   type="text"
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -160,9 +166,12 @@ export const Housing = ({ onDataChange }) => {
         <div className="header">
           <b>Home environment</b>
         </div>
-        <div className='m-4'>
-          <label className="form-label">ความสะอาดในบ้าน :</label>
-          <div>
+        <div className="ms-4">
+          <p className="mt-2 mb-2" style={{ color: "#666" }}><i class="bi bi-tree-fill" style={{ color: "#008000" }}></i> ประเมินสิ่งแวดล้อมรอบบ้าน</p>
+        </div>
+        <div className='m-1'>
+          <label className="form-label ms-4 me-4">ความสะอาดภายในบ้าน </label>
+          <div className='ms-4 me-4'>
             <Controller
               name="cleanliness"
               control={control}
@@ -181,7 +190,7 @@ export const Housing = ({ onDataChange }) => {
               )}
             /> <span style={{ marginLeft: '10px' }}>สะอาด </span>
           </div>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="cleanliness"
               control={control}
@@ -201,11 +210,9 @@ export const Housing = ({ onDataChange }) => {
             /> <span style={{ marginLeft: '10px' }}>ไม่สะอาด </span>
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ความเป็นระเบียบเรียบร้อยในบ้าน :</label>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 me-4 mt-3">ความเป็นระเบียบเรียบร้อยในบ้าน </label>
+          <div className='ms-4 me-4'>
             <Controller
               name="orderliness"
               control={control}
@@ -222,9 +229,9 @@ export const Housing = ({ onDataChange }) => {
                   }}
                 />
               )}
-            /> <span style={{ marginLeft: '10px' }}>เป็นระเบียบเรียบร้อย </span>
+            /><span style={{ marginLeft: '10px' }}>เป็นระเบียบเรียบร้อย </span>
           </div>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="orderliness"
               control={control}
@@ -241,14 +248,12 @@ export const Housing = ({ onDataChange }) => {
                   }}
                 />
               )}
-            /> <span style={{ marginLeft: '10px' }}>ไม่เป็นระเบียบเรียบร้อย </span>
+            /><span style={{ marginLeft: '10px' }}>ไม่เป็นระเบียบเรียบร้อย </span>
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">แสงสว่างในบ้าน :</label>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 me-4 mt-3">แสงสว่างในบ้าน </label>
+          <div className='ms-4 me-4'>
             <Controller
               name="lighting"
               control={control}
@@ -265,9 +270,9 @@ export const Housing = ({ onDataChange }) => {
                   }}
                 />
               )}
-            /> <span style={{ marginLeft: '10px' }}>แสงสว่างเพียงพอ </span>
+            /><span style={{ marginLeft: '10px' }}>แสงสว่างเพียงพอ </span>
           </div>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="lighting"
               control={control}
@@ -284,14 +289,12 @@ export const Housing = ({ onDataChange }) => {
                   }}
                 />
               )}
-            /> <span style={{ marginLeft: '10px' }}>แสงสว่างไม่เพียงพอ </span>
+            /><span style={{ marginLeft: '10px' }}>แสงสว่างไม่เพียงพอ </span>
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">การระบายอากาศ :</label>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 me-4 mt-3">การระบายอากาศ </label>
+          <div className='ms-4 me-4'>
             <Controller
               name="ventilation"
               control={control}
@@ -308,9 +311,9 @@ export const Housing = ({ onDataChange }) => {
                   }}
                 />
               )}
-            /> <span style={{ marginLeft: '10px' }}>อากาศถ่ายเทสะดวก </span>
+            /><span style={{ marginLeft: '10px' }}>อากาศถ่ายเทสะดวก </span>
           </div>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="ventilation"
               control={control}
@@ -332,10 +335,12 @@ export const Housing = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-
       <div className="info3 card mt-3">
         <div className='m-4'>
-          <label className="form-label">สภาพสิ่งแวดล้อมรอบๆบ้าน :</label>
+          <label className="form-label">สภาพสิ่งแวดล้อมรอบๆบ้าน </label>
+          <p style={{ color: "gray", marginTop: "-10px", marginBottom: "10px" }}>
+            (เลือกได้มากกว่า 1 ข้อ)
+          </p>
           <div>
             <Controller
               name="homeEnvironment"
@@ -408,17 +413,17 @@ export const Housing = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆบ้าน (ถ้ามี) :</label><br></br>
-          <div>
+      <div className="info3 card mt-2">
+        <div className='m-1'>
+          <label className="form-label ms-4 me-4 mt-3">เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆบ้าน (ถ้ามี) </label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="homeEnvironment_petType"
               control={control}
               render={({ field }) => (
                 <input
                   type='text'
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกชนิดของสัตว์"
                   {...field}
                   onChange={(e) => {
@@ -430,18 +435,16 @@ export const Housing = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">อื่นๆ (ถ้ามี) :</label><br></br>
-          <div>
+        <div className='m-1 mb-4'>
+          <label className="form-label ms-4 me-4 mt-3">อื่นๆ (ถ้ามี) </label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="otherHomeEnvironment"
               control={control}
               render={({ field }) => (
                 <input
                   type='text'
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -454,21 +457,23 @@ export const Housing = ({ onDataChange }) => {
           </div>
         </div>
       </div>
-
       <div className="info3 card mt-4">
         <div className="header">
           <b>Neighbors</b>
         </div>
-        <div className='m-4'>
-          <label className="form-label">จำนวนเพื่อนบ้าน :</label><br></br>
-          <div>
+        <div className="ms-4">
+          <p className="mt-2 mb-2" style={{ color: "#666" }}><i class="bi bi-people-fill" style={{ color: "#008000" }}></i> เพื่อนบ้าน</p>
+        </div>
+        <div className="m-1">
+          <label className="form-label ms-4 me-4">จำนวนเพื่อนบ้าน </label><br></br>
+          <div className="ms-4 me-4">
             <Controller
               name="numneighbor"
               control={control}
               render={({ field }) => (
                 <input
                   type='text'
-                  className="google-form-input"
+                  className="form-control"
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -480,12 +485,9 @@ export const Housing = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-4">
-        
-        <div className='m-4'>
-          <label className="form-label">ความสัมพันธ์กับเพื่อนบ้าน :</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 me-4 mt-4">ความสัมพันธ์กับเพื่อนบ้าน </label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="neighborRelationship"
               control={control}
@@ -526,7 +528,7 @@ export const Housing = ({ onDataChange }) => {
                     <input
                       type="text"
                       placeholder="กรอกความสัมพันธ์อื่นๆ"
-                      className="google-form-input"
+                      className="form-control"
                       value={tempOtherRelationship}
                       onChange={(e) => {
                         setTempOtherRelationship(e.target.value);
@@ -549,11 +551,9 @@ export const Housing = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div className="info3 card mt-3">
-        <div className='m-4'>
-          <label className="form-label">ความช่วยเหลือกันของเพื่อนบ้าน :</label><br></br>
-          <div>
+        <div className='m-1 mb-4'>
+          <label className="form-label ms-4 me-4 mt-4">ความช่วยเหลือกันของเพื่อนบ้าน </label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="neighborHelp"
               control={control}
@@ -573,7 +573,7 @@ export const Housing = ({ onDataChange }) => {
             />
             <span style={{ marginLeft: '10px' }}> ช่วยเหลือกันดีเมื่อมีปัญหา</span>
           </div>
-          <div>
+          <div className='ms-4 me-4'>
             <Controller
               name="neighborHelp"
               control={control}

@@ -144,7 +144,6 @@ export const Zarit = ({ ZaritData, setZaritData }) => {
                 ].map((item, index) => renderQuestion(item.label, item.name))}
                 
                 <div className="card m-3 mt-4 shadow mb-5 rounded" style={{ width: "105%" , backgroundColor:"#95d7ff" , border:"none" }}>
-                   
                     <div className="card-body" >
                         <div className="row"style={{marginLeft:"1px"}}>
                         <h4 className='text-center' >ประเมินผลคะแนน</h4>
@@ -152,7 +151,7 @@ export const Zarit = ({ ZaritData, setZaritData }) => {
                                 <b>{totalScore !== null && (
                                     <div className={`text-center m-3 ${getGroupStyle()}`} >
                                         <h1><CountUp end={totalScore} duration={2} /> คะแนน</h1>
-                                        <h5>{burdenMessage}</h5>
+                                        <h4>{burdenMessage}</h4>
                                     </div>
                                 )}</b>
                             </div>
