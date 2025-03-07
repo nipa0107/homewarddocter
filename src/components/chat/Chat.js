@@ -382,28 +382,6 @@ const ChatComponent = () => {
   };
 
   useEffect(() => {
-    // ดึงข้อมูล unread count เมื่อเปิดหน้า
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
-        );
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    fetchUnreadCount();
-  }, []);
-
-  useEffect(() => {
     // ดึงรายชื่อ Users
     const fetchUsers = async () => {
       if (!sender || !sender._id) {
@@ -411,9 +389,7 @@ const ChatComponent = () => {
         return;
       }
       try {
-        const response = await fetch(
-          `http://localhost:5000/users?senderId=${sender._id}`
-        );
+        const response = await fetch(`http://localhost:5000/users`);
         const result = await response.json();
         if (response.ok) {
           setUsers(result.users);
@@ -437,6 +413,28 @@ const ChatComponent = () => {
       newSocket.disconnect();
     };
   }, [sender?._id]);
+
+  useEffect(() => {
+    // ดึงข้อมูล unread count เมื่อเปิดหน้า
+    const fetchUnreadCount = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/update-unread-count"
+        );
+
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.success) {
+          setUserUnreadCounts(data.users);
+        }
+      } catch (error) {
+        console.error("Error fetching unread count:", error);
+      }
+    };
+    fetchUnreadCount();
+  }, []);
 
   useEffect(() => {
     if (selectedUserId) {
@@ -643,6 +641,27 @@ const ChatComponent = () => {
     };
   }, [messages, socket]);
 
+
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest", // ป้องกันเลื่อนเกินขอบของ container
+        inline: "nearest",
+      });
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (chatSectionRef.current && messageEndRef.current) {
+      chatSectionRef.current.scrollTo({
+        top: messageEndRef.current.offsetTop,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
+
+  
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
     const day = dateTime.getDate();
@@ -678,8 +697,7 @@ const ChatComponent = () => {
     const day = dateTime.getDate();
     const month = dateTime.getMonth() + 1;
     const year = dateTime.getFullYear();
-    const hours = dateTime.getHours();
-    const minutes = dateTime.getMinutes();
+
 
     const thaiMonths = [
       "มกราคม",
@@ -709,24 +727,6 @@ const ChatComponent = () => {
     }`;
   };
 
-  useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest", // ป้องกันเลื่อนเกินขอบของ container
-        inline: "nearest",
-      });
-    }
-  }, [messages]);
-
-  useEffect(() => {
-    if (chatSectionRef.current && messageEndRef.current) {
-      chatSectionRef.current.scrollTo({
-        top: messageEndRef.current.offsetTop, // เลื่อนไปตำแหน่งข้อความสุดท้าย
-        behavior: "smooth",
-      });
-    }
-  }, [messages]);
 
   // const isImageFile = (url) => {
   //   return (
@@ -863,7 +863,7 @@ const ChatComponent = () => {
 
               {userUnreadCounts.map((user) => {
                 if (
-                  user?.userId &&
+                  // user?.userId &&
                   String(user.userId) === String(sender._id)
                 ) {
                   return (
@@ -929,10 +929,7 @@ const ChatComponent = () => {
           </div>
         </div>
         <div className="chat-container">
-          {/* <div
-          className="chat-mpersonnel"
-          style={{ display: "flex", flexDirection: "row", height: "100vh" }}
-        > */}
+
           {/* Sidebar เลือก User */}
           <div className={`chat-user-list ${isChatOpen ? "hidden" : ""}`}>
             <div className="search-bar-chat">
@@ -986,7 +983,7 @@ const ChatComponent = () => {
                             <strong>
                               {user.latestChat.senderId === sender._id
                                 ? "คุณ"
-                                : user.latestChat.senderName}
+                                : user.latestChat.senderName || `${user.latestChat.sender?.name || "ไม่ทราบชื่อ"}`}
                               :
                             </strong>{" "}
                             {user.latestChat.file
@@ -1114,9 +1111,9 @@ const ChatComponent = () => {
                                 msg.senderModel === "MPersonnel"
                                   ? msg.sender._id === sender._id
                                     ? "#DCF8C6"
-                                    : "#d1c4e9"
+                                    : "#E1E2E1"
                                   : msg.senderModel === "User"
-                                  ? "#B3E5FC"
+                                  ? "#B3D9F7"
                                   : "#d1c4e9",
                             }}
                           >

@@ -530,7 +530,7 @@ export default function Home() {
           </div>
           <div className="mb-2">
             <label>อีเมล</label>
-            <div className="form-control">
+            <div className="form-control email-container">
               {data.email}
               {isEmailVerified ? (
                 <a className="verify" onClick={handleChangeEmailClick}>

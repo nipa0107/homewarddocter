@@ -1304,7 +1304,7 @@ export default function Assessmentuserone() {
                     <p className="text-unit"></p>
                   </div>
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">DTX:</label>
+                    <label className="title-Vitalsigns">ระดับน้ำตาลในเลือด:</label>
                     <p className="text">{patientFormsone.DTX || "-"}</p>
                     <p className="text-unit">mg/dL</p>
                   </div>
