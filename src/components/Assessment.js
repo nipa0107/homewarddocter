@@ -6,8 +6,11 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
+import Sidebar from "./sidebar";
 import io from "socket.io-client";
 const socket = io("http://localhost:5000");
+
+
 export default function Assessment() {
   const navigate = useNavigate();
   const [data, setData] = useState("");
@@ -24,7 +27,6 @@ export default function Assessment() {
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   // const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
       assessment: 0,
@@ -146,16 +148,6 @@ export default function Assessment() {
     setUnreadCount(unreadAlerts.length);
   }, [alerts, sender._id]);
 
-  useEffect(() => {
-    socket?.on("TotalUnreadCounts", (data) => {
-      console.log("📦 TotalUnreadCounts received:", data);
-      setUserUnreadCounts(data);
-    });
-
-    return () => {
-      socket?.off("TotalUnreadCounts");
-    };
-  }, []);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -396,28 +388,6 @@ export default function Assessment() {
     }, [datauser]);
   const currentDate = new Date();
 
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./";
-  };
-  // bi-list
-  const handleToggleSidebar = () => {
-    setIsActive((prevState) => !prevState);
-  };
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth <= 992) {
-        setIsActive(false); // ซ่อน Sidebar เมื่อจอเล็ก
-      } else {
-        setIsActive(true); // แสดง Sidebar เมื่อจอใหญ่
-      }
-    };
-
-    handleResize(); // เช็กขนาดจอครั้งแรก
-    window.addEventListener("resize", handleResize);
-
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
   useEffect(() => {
     const searchUser = async () => {
       try {
@@ -480,105 +450,9 @@ export default function Assessment() {
   };
 
 
-  useEffect(() => {
-    // ดึงข้อมูล unread count เมื่อเปิดหน้า
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
-        );
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    fetchUnreadCount();
-  }, []);
-
   return (
     <main className="body">
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div class="logo_content">
-          <div class="logo">
-            <div class="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul class="nav-list">
-          <li>
-            <a href="home">
-              <i class="bi bi-house"></i>
-              <span class="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i class="bi bi-clipboard2-pulse"></i>
-              <span class="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i class="bi bi-people"></i>
-              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i className="bi bi-clipboard-check"></i>
-              <span className="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss">
-              <i className="bi bi-house-check"></i>
-              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (user?.userId && String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-          <div class="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  class="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span class="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
-
+     <Sidebar />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">ติดตาม/ประเมินอาการ</div>
@@ -615,11 +489,11 @@ export default function Assessment() {
           <ul>
             <li>
               <a href="home">
-                <i class="bi bi-house-fill"></i>
+                <i className="bi bi-house-fill"></i>
               </a>
             </li>
             <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
+              <i className="bi bi-chevron-double-right"></i>
             </li>
             <li>
               <a>ติดตาม/ประเมินอาการ</a>
@@ -855,7 +729,7 @@ export default function Assessment() {
                     {unreadCountsByType.abnormal}
                   </span>
                 )}
-                <i class="bi bi-chevron-right"></i>
+                <i className="bi bi-chevron-right"></i>
               </div>
             </div>
             <div
@@ -875,7 +749,7 @@ export default function Assessment() {
                     {unreadCountsByType.normal}
                   </span>
                 )}
-                <i class="bi bi-chevron-right"></i>
+                <i className="bi bi-chevron-right"></i>
               </div>
             </div>
 
@@ -895,7 +769,7 @@ export default function Assessment() {
                     {unreadCountsByType.assessment}
                   </span>
                 )}
-                <i class="bi bi-chevron-right"></i>
+                <i className="bi bi-chevron-right"></i>
               </div>
             </div>
           </div>

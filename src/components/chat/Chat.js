@@ -2,7 +2,7 @@ import React, { useCallback, useState, useEffect, useRef } from "react";
 import "../../css/sidebar.css";
 import "../../css/stylechat.css";
 import logow from "../../img/logow.png";
-
+import Sidebar from "../sidebar";
 import Linkify from "linkify-it";
 import { fetchAlerts } from "../Alert/alert";
 import { renderAlerts } from "../Alert/renderAlerts";
@@ -38,9 +38,7 @@ const ChatComponent = () => {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
-  const [isActive, setIsActive] = useState(false);
   const messageRefs = useRef({});
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
     abnormal: 0,
@@ -415,28 +413,6 @@ const ChatComponent = () => {
   }, [sender?._id]);
 
   useEffect(() => {
-    // ดึงข้อมูล unread count เมื่อเปิดหน้า
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
-        );
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    fetchUnreadCount();
-  }, []);
-
-  useEffect(() => {
     if (selectedUserId) {
       const fetchSelectedUserData = async () => {
         try {
@@ -496,16 +472,6 @@ const ChatComponent = () => {
     }
   }, [selectedUserId, socket]);
 
-  useEffect(() => {
-    socket?.on("TotalUnreadCounts", (data) => {
-      console.log("📦 TotalUnreadCounts received:", data);
-      setUserUnreadCounts(data);
-    });
-
-    return () => {
-      socket?.off("TotalUnreadCounts");
-    };
-  }, [socket]);
 
   useEffect(() => {
     // ฟังเหตุการณ์ 'usersUpdated' เพื่อรับข้อมูลผู้ใช้และแชทล่าสุด
@@ -787,14 +753,7 @@ const ChatComponent = () => {
     return `${bytes.toFixed(2)} ${units[unitIndex]}`;
   }
 
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./";
-  };
 
-  const handleToggleSidebar = () => {
-    setIsActive(!isActive);
-  };
 
   const ImageModal = ({ isOpen, image, onClose }) => {
     if (!isOpen) return null;
@@ -816,86 +775,7 @@ const ChatComponent = () => {
   };
   return (
     <main className="bodychat">
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div className="logo_content">
-          <div className="logo">
-            <div className="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i className="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul className="nav-list">
-          <li>
-            <a href="home">
-              <i className="bi bi-house"></i>
-              <span className="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i className="bi bi-clipboard2-pulse"></i>
-              <span className="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i className="bi bi-people"></i>
-              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i className="bi bi-clipboard-check"></i>
-              <span className="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss">
-              <i className="bi bi-house-check"></i>
-              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-
-              {userUnreadCounts.map((user) => {
-                if (
-                  // user?.userId &&
-                  String(user.userId) === String(sender._id)
-                ) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-
-          <div className="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  className="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span className="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
-
+       <Sidebar />
       <div className="home_contentchat">
         <div className="homeheader">
           <div className="header">แช็ต</div>

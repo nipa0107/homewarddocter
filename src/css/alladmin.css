@@ -49,8 +49,9 @@
 
 .btn-next button {
   padding: 10px 30px;
-  background-color: #87CEFA;
-  border-color: #87CEFA;
+  border-color: #039be5;
+  background-color: #039be5;
+  color: #fff;
 }
 
 .adminall .card-body .deleteimg {
@@ -86,8 +87,8 @@
 }
 
 .btn {
-  background-color: #87CEFA;
-  color: white;
+  background-color: #039be5;
+  color: #fff;
   text-align: center;
   /* margin-top: 20px; */
 }
@@ -245,14 +246,14 @@ tr.assessmentnull {
   border-radius: 5px;
   width: 8rem;
   padding: 9px;
-  background-color: #87CEFA;
-  color: white;
+  background-color: #039be5;
+  color: #fff;
   border: none;
 }
 
 .adddata button:hover {
-  background-color: #5cb3fd;
-  /* Darker blue on hover */
+  background-color: #0288d1;
+  color: #fff;
 }
 
 .delete-btn {
@@ -655,10 +656,8 @@ p .label {
 .add-assessment-btn {
   border: none;
   /* เอาขอบออก */
-  background-color: #87CEFA;
-  /* เปลี่ยนสีพื้นหลัง */
-  color: white;
-
+  background-color: #039be5;
+  color: #fff;
   /* เพิ่มระยะห่างระหว่างปุ่มและตาราง */
   padding: 10px 20px;
   font-size: 16px;
@@ -666,8 +665,8 @@ p .label {
 }
 
 .add-assessment-btn:hover {
-  background-color: #0056b3;
-  /* เปลี่ยนสีเมื่อ hover */
+  background-color: #0288d1;
+  color: #fff;
 }
 
 .editname {
@@ -680,8 +679,8 @@ p .label {
 }
 
 .btn:hover {
-  background-color: #87CEFA;
-  color: #000;
+  background-color: #0288d1;
+  color: #fff;
 }
 
 .verify {

@@ -4,6 +4,7 @@ import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import Sidebar from "./sidebar";
 
 import {
   XAxis,
@@ -28,7 +29,6 @@ export default function Assessmentuserone() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [token, setToken] = useState("");
-  const [isActive, setIsActive] = useState(false);
   const [patientFormsone, setPatientFormsone] = useState("");
   const location = useLocation();
   const { id } = location.state || {};
@@ -82,7 +82,6 @@ export default function Assessmentuserone() {
   });
   const [painscore, setPainscore] = useState("");
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const [showScrollTopButton, setShowScrollTopButton] = useState(false);
   const textareaDetailRef = useRef(null);
   const textareaSuggestionRef = useRef(null);
@@ -92,6 +91,10 @@ export default function Assessmentuserone() {
     abnormal: 0,
     normal: 0,
   });
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const getUnreadCount = useCallback(
     (type) => {
@@ -180,17 +183,6 @@ export default function Assessmentuserone() {
 
     setUnreadCount(unreadAlerts.length);
   }, [alerts, sender._id]);
-
-  useEffect(() => {
-    socket?.on("TotalUnreadCounts", (data) => {
-      console.log("📦 TotalUnreadCounts received:", data);
-      setUserUnreadCounts(data);
-    });
-
-    return () => {
-      socket?.off("TotalUnreadCounts");
-    };
-  }, []);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -410,66 +402,97 @@ export default function Assessmentuserone() {
         return "ไม่ทราบ";
     }
   };
+  // useEffect(() => {
+  //   const fetchpatientForms = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `http://localhost:5000/getpatientformsone/${id}`,
+  //         {
+  //           method: "GET",
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         }
+  //       );
+  //       const data = await response.json();
+  //       setPatientFormsone(data.data);
+  //     } catch (error) {
+  //       console.error("Error fetching patient forms:", error);
+  //     }
+  //   };
+
+  //   fetchpatientForms();
+  // }, [id, token]);
+
+  // useEffect(() => {
+  //   if (patientFormsone.user && patientFormsone._id) {
+  //     const fetchData = async () => {
+  //       try {
+  //         const response = await fetch(
+  //           `http://localhost:5000/getuser/${patientFormsone.user}`
+  //         );
+  //         const data = await response.json();
+  //         setName(data.name);
+  //         setSurname(data.surname);
+  //         setGender(data.gender);
+  //         setBirthday(data.birthday);
+  //       } catch (error) {
+  //         console.error("Error fetching user data:", error);
+  //       }
+  //     };
+
+  //     fetchData();
+  //   }
+  // }, [patientFormsone.user, patientFormsone._id]);
+
+  // useEffect(() => {
+  //   if (patientFormsone && patientFormsone.user) {
+  //     const fetchMedicalInfo = async () => {
+  //       try {
+  //         const response = await fetch(
+  //           `http://localhost:5000/medicalInformation/${patientFormsone.user}`
+  //         );
+  //         const data = await response.json();
+  //         console.log("Medical Information:", data);
+  //         setMedicalData(data.data);
+  //       } catch (error) {
+  //         console.error("Error fetching medical information:", error);
+  //       }
+  //     };
+
+  //     fetchMedicalInfo();
+  //   }
+  // }, [patientFormsone.user, patientFormsone]);
   useEffect(() => {
-    const fetchpatientForms = async () => {
+    const fetchAllData = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:5000/getpatientformsone/${id}`,
-          {
-            method: "GET",
+        const [patientFormRes, userRes, medicalRes] = await Promise.all([
+          fetch(`http://localhost:5000/getpatientformsone/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const data = await response.json();
-        setPatientFormsone(data.data);
+          }),
+          fetch(`http://localhost:5000/getuser/${patientFormsone.user}`),
+          fetch(`http://localhost:5000/medicalInformation/${patientFormsone.user}`),
+        ]);
+  
+        const patientFormData = await patientFormRes.json();
+        const userData = await userRes.json();
+        const medicalData = await medicalRes.json();
+  
+        setPatientFormsone(patientFormData.data);
+        setName(userData.name);
+        setSurname(userData.surname);
+        setGender(userData.gender);
+        setBirthday(userData.birthday);
+        setMedicalData(medicalData.data);
       } catch (error) {
-        console.error("Error fetching patient forms:", error);
+        console.error("Error fetching data:", error);
       }
     };
-
-    fetchpatientForms();
-  }, [id, token]);
-
-  useEffect(() => {
-    if (patientFormsone.user && patientFormsone._id) {
-      const fetchData = async () => {
-        try {
-          const response = await fetch(
-            `http://localhost:5000/getuser/${patientFormsone.user}`
-          );
-          const data = await response.json();
-          setName(data.name);
-          setSurname(data.surname);
-          setGender(data.gender);
-          setBirthday(data.birthday);
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-        }
-      };
-
-      fetchData();
+  
+    if (id && token) {
+      fetchAllData();
     }
-  }, [patientFormsone.user, patientFormsone._id]);
+  }, [id, token, patientFormsone.user]);
 
-  useEffect(() => {
-    if (patientFormsone && patientFormsone.user) {
-      const fetchMedicalInfo = async () => {
-        try {
-          const response = await fetch(
-            `http://localhost:5000/medicalInformation/${patientFormsone.user}`
-          );
-          const data = await response.json();
-          console.log("Medical Information:", data);
-          setMedicalData(data.data);
-        } catch (error) {
-          console.error("Error fetching medical information:", error);
-        }
-      };
-
-      fetchMedicalInfo();
-    }
-  }, [patientFormsone.user, patientFormsone]);
-
+  
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!statusName && !PPS) {
@@ -783,14 +806,6 @@ export default function Assessmentuserone() {
     }
   }, [currentDate, birthday]);
 
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./";
-  };
-  // bi-list
-  const handleToggleSidebar = () => {
-    setIsActive(!isActive);
-  };
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
     const day = dateTime.getDate();
@@ -859,20 +874,6 @@ export default function Assessmentuserone() {
     }
     return null;
   };
-
-  // const CustomTooltipBloodPressure = ({ active, payload }) => {
-  //   if (active && payload && payload.length) {
-  //     const data = payload[0].payload;
-  //     return (
-  //       <div className="custom-tooltip">
-  //         <p className="label">{`${formatDate(data.createdAt)}`}</p>
-  //         <span className="desc">{`SBP: ${data.SBP}`}</span>
-  //         <span className="desc">{` DBP: ${data.DBP}`}</span>
-  //       </div>
-  //     );
-  //   }
-  //   return null;
-  // };
 
   const CustomTooltipSBP = ({ active, payload }) => {
     if (active && payload && payload.length) {
@@ -972,26 +973,6 @@ export default function Assessmentuserone() {
     fetchSymptomsCount();
   }, [patientFormsone.user, patientFormsone._id]);
 
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
-        );
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    fetchUnreadCount();
-  }, []);
 
   const handleScroll = () => {
     if (window.scrollY > 300) {
@@ -1057,80 +1038,7 @@ export default function Assessmentuserone() {
   return (
     <main className="body">
       <ToastContainer />
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div class="logo_content">
-          <div class="logo">
-            <div class="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul class="nav-list">
-          <li>
-            <a href="home">
-              <i class="bi bi-house"></i>
-              <span class="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i class="bi bi-clipboard2-pulse"></i>
-              <span class="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i class="bi bi-people"></i>
-              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss">
-              <i class="bi bi-house-check"></i>
-              <span class="links_name">แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (user?.userId && String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-          <div class="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  class="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span class="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
+      <Sidebar />
 
       <div className="home_content">
         <div className="homeheader">
@@ -1197,7 +1105,7 @@ export default function Assessmentuserone() {
                   </a>
                 </li>
                 <li className="arrow">
-                  <i class="bi bi-chevron-double-right"></i>
+                  <i className="bi bi-chevron-double-right"></i>
                 </li>
                 <li>
                   <a onClick={handleBreadcrumbClick} className="info">
@@ -1205,7 +1113,7 @@ export default function Assessmentuserone() {
                   </a>
                 </li>
                 <li className="arrow">
-                  <i class="bi bi-chevron-double-right"></i>
+                  <i className="bi bi-chevron-double-right"></i>
                 </li>
                 <li>
                   <a>รายละเอียดอาการผู้ป่วย</a>
@@ -2238,7 +2146,7 @@ export default function Assessmentuserone() {
                       className="ellipsis-btn"
                       onClick={() => setShowMenu(!showMenu)}
                     >
-                      <i class="bi bi-three-dots-vertical"></i>
+                      <i className="bi bi-three-dots-vertical"></i>
                     </div>
                   )}
                 </div>
@@ -2724,7 +2632,7 @@ export default function Assessmentuserone() {
                       {unreadCountsByType.abnormal}
                     </span>
                   )}
-                  <i class="bi bi-chevron-right"></i>
+                  <i className="bi bi-chevron-right"></i>
                 </div>
               </div>
               <div
@@ -2744,7 +2652,7 @@ export default function Assessmentuserone() {
                       {unreadCountsByType.normal}
                     </span>
                   )}
-                  <i class="bi bi-chevron-right"></i>
+                  <i className="bi bi-chevron-right"></i>
                 </div>
               </div>
 
@@ -2764,7 +2672,7 @@ export default function Assessmentuserone() {
                       {unreadCountsByType.assessment}
                     </span>
                   )}
-                  <i class="bi bi-chevron-right"></i>
+                  <i className="bi bi-chevron-right"></i>
                 </div>
               </div>
             </div>
@@ -2813,7 +2721,7 @@ export default function Assessmentuserone() {
               fontSize: "1rem",
             }}
           >
-            <i class="bi bi-caret-up-fill"></i>
+            <i className="bi bi-caret-up-fill"></i>
           </button>
         )}
       </div>

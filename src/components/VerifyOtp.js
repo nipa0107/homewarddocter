@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback,useEffect, useState, useRef } from "react";
 import "../css/alladmin.css";
 import "../css/sidebar.css";
 import logow from "../img/logow.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
-
+import Sidebar from "./sidebar";
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
 export default function VerifyOtp() {
@@ -15,14 +15,12 @@ export default function VerifyOtp() {
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState("");
   const [alerts, setAlerts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const [userId, setUserId] = useState("");
-  const [allUsers, setAllUsers] = useState([]);
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
   const hasFetchedUserData = useRef(false);
@@ -32,9 +30,41 @@ export default function VerifyOtp() {
   const [timer, setTimer] = useState(300); // นับถอยหลัง 5 นาที (300 วินาที)
   const [isOtpExpired, setIsOtpExpired] = useState(false);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]); 
   const dataemail = location.state?.dataemail;
+  const [unreadCountsByType, setUnreadCountsByType] = useState({
+    assessment: 0,
+    abnormal: 0,
+    normal: 0,
+  });
 
+  const getUnreadCount = useCallback(
+    (type) => {
+      const filteredByType = alerts.filter(
+        (alert) =>
+          (type === "assessment" &&
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน") ||
+          (type === "abnormal" &&
+            (alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน")) ||
+          (type === "normal" && alert.alertType === "normal")
+      );
+      return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+        .length;
+    },
+    [alerts, userId]
+  );
+  useEffect(() => {
+    if (!userId) return;
+    const updatedCounts = {
+      assessment: getUnreadCount("assessment"),
+      abnormal: getUnreadCount("abnormal"),
+      normal: getUnreadCount("normal"),
+    };
+    setUnreadCountsByType(updatedCounts);
+  }, [alerts, userId]);
+
+  
   const handleKeyDown = (event, index) => {
     if (event.key === "Backspace" && otp[index] === "") {
       if (event.target.previousSibling) {
@@ -109,16 +139,6 @@ export default function VerifyOtp() {
     setUnreadCount(unreadAlerts.length); // ตั้งค่า unreadCount ตามรายการที่ยังไม่ได้อ่าน
   }, [alerts]);
 
-    useEffect(() => {
-      socket?.on("TotalUnreadCounts", (data) => {
-        console.log("📦 TotalUnreadCounts received:", data);
-        setUserUnreadCounts(data);
-      });
-  
-      return () => {
-        socket?.off("TotalUnreadCounts");
-      };
-    }, [socket]);
   useEffect(() => {
     // ตั้งค่าการนับถอยหลัง
     let countdown;
@@ -202,12 +222,7 @@ export default function VerifyOtp() {
     const seconds = time % 60;
     return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
   };
-  // useEffect(() => {
-  //     if (dataemail) {
-  //       setEmail(dataemail.email);
-  //       setUsername(dataemail.username);
-  //     }
-  //   }, [dataemail]);
+
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -256,7 +271,7 @@ export default function VerifyOtp() {
           _id: data.data._id,
         });
         setData(data.data);
-        if (data.data == "token expired") {
+        if (data.data === "token expired") {
           window.localStorage.clear();
           window.location.href = "./";
         }
@@ -300,29 +315,6 @@ export default function VerifyOtp() {
     }
   }, []);
 
-  const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ userId: userId }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const updatedAlerts = alerts.map((alert) => ({
-          ...alert,
-          viewedBy: [...alert.viewedBy, userId],
-        }));
-        setAlerts(updatedAlerts);
-        setUnreadCount(0);
-      })
-      .catch((error) => {
-        console.error("Error marking all alerts as viewed:", error);
-      });
-  };
-
   const handleFilterChange = (type) => {
     setFilterType(type);
   };
@@ -330,8 +322,79 @@ export default function VerifyOtp() {
   const filteredAlerts =
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
+      : filterType === "assessment"
+      ? alerts.filter(
+          (alert) =>
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน"
+        )
+      : filterType === "abnormal"
+      ? alerts.filter(
+          (alert) =>
+            alert.alertType === "abnormal" ||
+            alert.alertMessage === "เคสฉุกเฉิน"
+        )
+      : filterType === "normal"
+      ? alerts.filter((alert) => alert.alertType === "normal")
       : alerts;
 
+  const getFilterLabel = (type) => {
+    switch (type) {
+      case "all":
+        return "ทั้งหมด";
+      case "unread":
+        return "ยังไม่อ่าน";
+      case "normal":
+        return "บันทึกอาการ";
+      case "abnormal":
+        return "ผิดปกติ";
+      case "assessment":
+        return "ประเมินอาการ";
+      default:
+        return "ไม่ทราบ";
+    }
+  };
+  const markAllByTypeAsViewed = (type) => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ userId: userId, type: type }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.message === "All selected alerts marked as viewed") {
+          const updatedAlerts = alerts.map((alert) => {
+            if (
+              type === "all" ||
+              ((alert.alertType === type ||
+                (type === "abnormal" &&
+                  (alert.alertType === "abnormal" ||
+                    alert.alertMessage === "เคสฉุกเฉิน")) ||
+                (type === "assessment" &&
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                !alert.viewedBy.includes(userId))
+            ) {
+              return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+            }
+            return alert;
+          });
+
+          setAlerts(updatedAlerts);
+          // setUnreadCount(0);
+          const unreadAlerts = updatedAlerts.filter(
+            (alert) => !alert.viewedBy.includes(userId)
+          );
+          setUnreadCount(unreadAlerts.length);
+        }
+      })
+      .catch((error) => {
+        console.error("Error marking alerts as viewed:", error);
+      });
+  };
   const formatDate = (dateTimeString) => {
     const dateTime = new Date(dateTimeString);
     const day = dateTime.getDate();
@@ -362,122 +425,13 @@ export default function VerifyOtp() {
     } น.`;
   };
 
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./";
-  };
-
-  // bi-list
-  const handleToggleSidebar = () => {
-    setIsActive(!isActive);
-  };
-
-  // const toggleNotifications = () => {
-  //   setShowNotifications(!showNotifications);
-  // };
-
   const handleBreadcrumbClick = () => {
     navigate("/emailverification", { state: { dataemail} });
   };
 
-    useEffect(() => {
-      // ดึงข้อมูล unread count เมื่อเปิดหน้า
-      const fetchUnreadCount = async () => {
-        try {
-          const response = await fetch(
-            "http://localhost:5000/update-unread-count"
-          );
-  
-          if (!response.ok) {
-            throw new Error(`Network response was not ok: ${response.status}`);
-          }
-          const data = await response.json();
-          if (data.success) {
-            setUserUnreadCounts(data.users);
-          }
-        } catch (error) {
-          console.error("Error fetching unread count:", error);
-        }
-      };
-      fetchUnreadCount();
-    }, []);
-
   return (
     <main className="body">
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div class="logo_content">
-          <div class="logo">
-            <div class="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul class="nav-list">
-          <li>
-            <a href="home">
-              <i class="bi bi-house"></i>
-              <span class="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i class="bi bi-clipboard2-pulse"></i>
-              <span class="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i className="bi bi-people"></i>
-              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss">
-              <i class="bi bi-house-check"></i>
-              <span class="links_name">แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (user?.userId && String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-          <div class="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  class="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span class="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
+      <Sidebar />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">โปรไฟล์</div>
@@ -533,8 +487,9 @@ export default function VerifyOtp() {
             </li>
           </ul>
         </div>
-        <h3>กรอกรหัสยืนยัน</h3>
+        {/* <h3>กรอกรหัสยืนยัน</h3> */}
         <div className="formcontainerpf card mb-2">
+        <p className="title-header">กรอกรหัสยืนยัน</p>
         <div className="mb-2">
         <div className="label-container">
             <p className="label-inline">คุณจะได้รับรหัสยืนยันตัวตนที่อีเมล</p>
@@ -594,48 +549,117 @@ export default function VerifyOtp() {
         </div>
       </div>
 
-      {showNotifications && (
-        <div className="notifications-dropdown" ref={notificationsRef}>
-          <div className="notifications-head">
-            <h2 className="notifications-title">การแจ้งเตือน</h2>
-            <p
-              className="notifications-allread"
-              onClick={markAllAlertsAsViewed}
-            >
-              ทำเครื่องหมายว่าอ่านทั้งหมด
-            </p>
-            <div className="notifications-filter">
-              <button
-                className={filterType === "all" ? "active" : ""}
-                onClick={() => handleFilterChange("all")}
-              >
-                ดูทั้งหมด
-              </button>
-              <button
-                className={filterType === "unread" ? "active" : ""}
-                onClick={() => handleFilterChange("unread")}
-              >
-                ยังไม่อ่าน
-              </button>
-            </div>
-          </div>
-          {filteredAlerts.length > 0 ? (
-            <>
-              {renderAlerts(
-                filteredAlerts,
-                token,
-                userId,
-                navigate,
-                setAlerts,
-                setUnreadCount,
-                formatDate
-              )}
-            </>
-          ) : (
-            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-          )}
-        </div>
-      )}
+       {showNotifications && (
+              <div className="notifications-dropdown" ref={notificationsRef}>
+                <div className="notifications-head">
+                  <h2 className="notifications-title">การแจ้งเตือน</h2>
+                </div>
+                <div className="notifications-filter">
+                  <div
+                    className={`notification-box ${
+                      filterType === "all" ? "active" : ""
+                    }`}
+                    onClick={() => handleFilterChange("all")}
+                  >
+                    <div className="notification-item">
+                      <i className="bi bi-bell"></i>
+                      ทั้งหมด
+                    </div>
+                    <div className="notification-right">
+                      {unreadCount > 0 && (
+                        <span className="notification-count-noti">{unreadCount}</span>
+                      )}
+                      <i className="bi bi-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div
+                    className={`notification-box ${
+                      filterType === "abnormal" ? "active" : ""
+                    }`}
+                    onClick={() => handleFilterChange("abnormal")}
+                  >
+                    <div className="notification-item">
+                      <i className="bi bi-exclamation-triangle"></i>
+                      ผิดปกติ
+                    </div>
+                    <div className="notification-right">
+                      {unreadCountsByType.abnormal > 0 && (
+                        <span className="notification-count-noti">
+                          {unreadCountsByType.abnormal}
+                        </span>
+                      )}
+                      <i class="bi bi-chevron-right"></i>
+                    </div>
+                  </div>
+                  <div
+                    className={`notification-box ${
+                      filterType === "normal" ? "active" : ""
+                    }`}
+                    onClick={() => handleFilterChange("normal")}
+                  >
+                    <div className="notification-item">
+                      {" "}
+                      <i className="bi bi-journal-text"></i>
+                      บันทึกอาการ
+                    </div>
+                    <div className="notification-right">
+                      {unreadCountsByType.normal > 0 && (
+                        <span className="notification-count-noti">
+                          {unreadCountsByType.normal}
+                        </span>
+                      )}
+                      <i class="bi bi-chevron-right"></i>
+                    </div>
+                  </div>
+      
+                  <div
+                    className={`notification-box ${
+                      filterType === "assessment" ? "active" : ""
+                    }`}
+                    onClick={() => handleFilterChange("assessment")}
+                  >
+                    <div className="notification-item">
+                      <i className="bi bi-clipboard-check"></i>
+                      ประเมินอาการ
+                    </div>
+                    <div className="notification-right">
+                      {unreadCountsByType.assessment > 0 && (
+                        <span className="notification-count-noti">
+                          {unreadCountsByType.assessment}
+                        </span>
+                      )}
+                      <i class="bi bi-chevron-right"></i>
+                    </div>
+                  </div>
+                </div>
+                <div className="selected-filter">
+                  <p>
+                    การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+                  </p>
+                  <p
+                    className="mark-all-read-btn"
+                    onClick={() => markAllByTypeAsViewed(filterType)}
+                  >
+                    ทำเครื่องหมายว่าอ่านทั้งหมด
+                  </p>
+                </div>
+                {filteredAlerts.length > 0 ? (
+                  <div>
+                    {renderAlerts(
+                      filteredAlerts,
+                      token,
+                      userId,
+                      navigate,
+                      setAlerts,
+                      setUnreadCount,
+                      formatDate
+                    )}
+                  </div>
+                ) : (
+                  <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+                )}
+              </div>
+            )}
     </main>
   );
 }

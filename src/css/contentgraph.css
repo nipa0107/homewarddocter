@@ -608,8 +608,8 @@
 }
 
 .btnsave-ass {
-  background-color: #87CEFA;
-  color: #000;
+  background-color: #039be5;
+  color: #fff;
 }
 
 .btnsave-ass:link {
@@ -617,9 +617,9 @@
 }
 
 .btnsave-ass:hover {
-  background-color: #87CEFA;
-  color: #ffffff;
-  border-color: #87CEFA;
+  background-color: #0288d1;
+  color: #fff;
+  border-color: #0288d1;
 }
 
 /* ประเมิน */
@@ -804,12 +804,13 @@
 }
 
 .btnsave {
-  background-color: #87CEFA;
-  color: #000;
+  background-color: #039be5;
+  color: #fff;
 }
 
 .btnsave:hover {
-  background-color: #49adeb;
+  background-color: #0288d1;
+  color: #fff;
 }
 
 .detail,

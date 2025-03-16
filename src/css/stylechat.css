@@ -5,8 +5,8 @@
 }
 
 .sidebar.active~.home_contentchat {
-  width: calc(100% - 78px);
-  left: 78px;
+  width: calc(100% - 330px);
+  left: 320px;
 }
 
 .home_contentchat {
@@ -16,8 +16,8 @@
   overflow: hidden;
   position: relative;
   height: 100%;
-  width: calc(100% - 330px);
-  left: 320px;
+  width: calc(100% - 78px);
+  left: 78px;
   transition: all 0.5s ease;
 }
 
@@ -631,12 +631,18 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   max-width: 2rem; 
 }
-
-@media (max-width: 992px) {
+@media screen and (max-width: 1024px) {
   .home_contentchat {
     width: calc(100% - 82px);
     left: 82px;
   }
+
+}
+@media (max-width: 992px) {
+  .sidebar.active ~ .home_contentchat{
+    width: 100%;
+    left: 0;
+ }
   .back-to-user-list,
   .name-chat {
     font-size: 1rem;

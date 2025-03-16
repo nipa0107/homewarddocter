@@ -29,13 +29,13 @@
     margin-right: auto;
 }
 .btnsave:link{
-    background-color: #87CEFA;
+  background-color: #039be5;
 }
 
 .btnsave:hover{
-    background-color: #87CEFA;
-    color: #ffffff;
-    border-color: #87CEFA;
+  background-color: #0288d1;
+  color: #fff;
+    border-color: #0288d1;
 }
 
 .textbox{

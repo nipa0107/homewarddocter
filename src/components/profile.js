@@ -8,12 +8,13 @@ import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import io from "socket.io-client";
+import Sidebar from "./sidebar";
+
 const socket = io("http://localhost:5000");
 
 export default function Home() {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
-  const [isActive, setIsActive] = useState(false);
   const [token, setToken] = useState("");
   const [alerts, setAlerts] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -25,7 +26,6 @@ export default function Home() {
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
-  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const hasFetchedUserData = useRef(false);
 
   const [unreadCountsByType, setUnreadCountsByType] = useState({
@@ -121,17 +121,6 @@ export default function Home() {
     );
     setUnreadCount(unreadAlerts.length);
   }, [alerts,sender._id]);
-
-  useEffect(() => {
-    socket?.on("TotalUnreadCounts", (data) => {
-      console.log("📦 TotalUnreadCounts received:", data);
-      setUserUnreadCounts(data);
-    });
-
-    return () => {
-      socket?.off("TotalUnreadCounts");
-    };
-  }, []);
 
   const toggleNotifications = (e) => {
     e.stopPropagation();
@@ -342,14 +331,6 @@ export default function Home() {
     } น.`;
   };
 
-  const logOut = () => {
-    window.localStorage.clear();
-    window.location.href = "./";
-  };
-
-  const handleToggleSidebar = () => {
-    setIsActive(!isActive);
-  };
 
   const handleEditClick = () => {
     navigate("/emailverification", { state: { dataemail } });
@@ -359,103 +340,9 @@ export default function Home() {
     navigate("/updateemail", { state: { dataemail } });
   };
 
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/update-unread-count"
-        );
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.status}`);
-        }
-        const data = await response.json();
-        if (data.success) {
-          setUserUnreadCounts(data.users);
-        }
-      } catch (error) {
-        console.error("Error fetching unread count:", error);
-      }
-    };
-    fetchUnreadCount();
-  }, []);
-
   return (
     <main className="body">
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div class="logo_content">
-          <div class="logo">
-            <div class="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul class="nav-list">
-          <li>
-            <a href="home">
-              <i class="bi bi-house"></i>
-              <span class="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i class="bi bi-clipboard2-pulse"></i>
-              <span class="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i className="bi bi-people"></i>
-              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss">
-              <i class="bi bi-house-check"></i>
-              <span class="links_name">แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (user?.userId && String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-          <div class="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  class="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span class="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
+      <Sidebar />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">โปรไฟล์</div>
