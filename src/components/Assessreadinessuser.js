@@ -454,7 +454,10 @@ export default function Assessreadinessuser({ }) {
                 }
             );
             const data = await response.json();
-            setReadinessForms(data.data);
+            // ✅ เรียงจาก ใหม่สุด -> เก่าสุด ก่อนเซ็ตค่า
+            const sortedData = [...data.data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            setReadinessForms(sortedData);
             console.log("Patient Forms1:", data.data);
         } catch (error) {
             console.error("Error fetching patient forms:", error);
@@ -861,10 +864,10 @@ export default function Assessreadinessuser({ }) {
                         </div>
                     </div>
 
-                    <table className="table table-hover mt-4">
+                    <table className="table table-hover mt-3">
                         <thead>
                             <tr>
-                                <th style={{ width: "10%" }}>#</th>
+                                <th >#</th>
                                 <th onClick={() => sortData("createdAt")} style={{ cursor: "pointer" }}>
                                     วันที่บันทึก{" "}
                                     <i className={`bi ${sortConfig.key === "createdAt" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
@@ -874,6 +877,7 @@ export default function Assessreadinessuser({ }) {
                                     <i className={`bi ${sortConfig.key === "readiness_status" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
                                 </th>
                                 <th>ผู้บันทึก</th>
+                                <th>รายละเอียด</th>
                             </tr>
                         </thead>
 
@@ -904,6 +908,7 @@ export default function Assessreadinessuser({ }) {
                                                 </span>
                                             </td>
                                             <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ยังไม่ได้รับการประเมิน"}</td>
+                                            <td className="text-primary">รายละเอียด</td>
                                         </tr>
                                     );
                                 })

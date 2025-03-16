@@ -1,94 +1,124 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Controller, useFormContext } from "react-hook-form";
+import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import Collapse from '@mui/material/Collapse';
 
 export const CaregiverAgenda = ({ onDataChange }) => {
-  const { control, setValue } = useFormContext();
-  const [caregivers, setCaregivers] = useState([]);
-  const [newCaregivers, setNewCaregivers] = useState([]);
-  const [careAgenda, setCareAgenda] = useState([]);
-  const [openIndex, setOpenIndex] = useState(0); // ควบคุมฟอร์มที่เปิดอยู่
+  const { control, getValues, setValue } = useFormContext();
+  const { fields: existingCaregivers, replace: replaceExisting } = useFieldArray({ control, name: "existingCaregivers" });
+  const { fields: newCaregivers, replace: replaceNew } = useFieldArray({ control, name: "newCaregivers" });
+
+  const [openIndex, setOpenIndex] = useState({ existing: 0, new: null });
   const location = useLocation();
   const { id } = location.state || {};
 
+  useEffect(() => {
+    handleFieldChange(); // อัปเดตข้อมูลเมื่อ existingCaregivers เปลี่ยนแปลง
+  }, [existingCaregivers, newCaregivers, getValues]);
+
+  /** ✅ เปิด/ปิด Collapse */
+  const toggleCollapse = (index, type) => {
+    setOpenIndex((prev) => ({
+      ...prev,
+      [type]: prev[type] === index ? null : index,
+    }));
+  };
+
+  /** ✅ ดึงข้อมูลผู้ดูแลเดิมจาก API */
   useEffect(() => {
     const fetchCaregivers = async () => {
       try {
         const response = await fetch(`http://localhost:5000/getCaregiverstoAgenda/${id}`);
         const data = await response.json();
-        if (data.status === "ok") {
-          setCaregivers(data.data);
+
+        if (data.status === "ok" && Array.isArray(data.data)) {
+          if (getValues("existingCaregivers").length === 0) {
+            replaceExisting(
+              data.data.map((cg) => ({
+                CaregiverId: cg.id || "",
+                firstName: cg.firstName || "",
+                lastName: cg.lastName || "",
+                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์", 
+                caregiver_idea: cg.caregiver_idea || "",
+                caregiver_feeling: cg.caregiver_feeling || "",
+                caregiver_funtion: cg.caregiver_function || "",
+                caregiver_expectation: cg.caregiver_expectation || "",
+                isNew: false,
+              }))
+            );
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch caregivers:", error);
+        console.error("Error fetching caregivers:", error);
       }
     };
 
-    if (id) fetchCaregivers();
-  }, [id]);
+    if (id) {
+      fetchCaregivers();
+    }
+  }, [id, replaceExisting, getValues]);
 
+  /** ✅ ดึงข้อมูลผู้ดูแลใหม่จาก API */
   useEffect(() => {
     const fetchNewCaregivers = async () => {
       try {
         const response = await fetch(`http://localhost:5000/getcaregivesotherpeople/${id}`);
         const data = await response.json();
-        console.log("Fetched new caregivers:", data); // ตรวจสอบข้อมูลใน console
-        if (data.status === "ok") {
-          setNewCaregivers(data.data); // อัปเดต state newCaregivers
-        } else {
-          console.error("Failed to fetch new caregivers:", data.message);
+
+        if (data.status === "ok" && Array.isArray(data.data)) {
+          if (getValues("newCaregivers").length === 0) {
+            replaceNew(
+              data.data.map((cg) => ({
+                firstName: cg.firstName || "",
+                lastName: cg.lastName || "",
+                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์", 
+                caregiver_idea: cg.caregiver_idea || "",
+                caregiver_feeling: cg.caregiver_feeling || "",
+                caregiver_funtion: cg.caregiver_function || "",
+                caregiver_expectation: cg.caregiver_expectation || "",
+                isNew: false,
+              }))
+            );
+          }
         }
       } catch (error) {
         console.error("Error fetching new caregivers:", error);
       }
     };
 
-    if (id) fetchNewCaregivers();
-  }, [id]);
+    if (id) {
+      fetchNewCaregivers();
+    }
+  }, [id, replaceNew, getValues]);
 
+  /** ✅ อัปเดตข้อมูลทุกครั้งที่มีการเปลี่ยนแปลง */
+  const handleFieldChange = () => {
+    const existingData = existingCaregivers.map((cg, index) => ({
+      CaregiverId: cg.CaregiverId || "",
+      firstName: getValues(`existingCaregivers.${index}.firstName`) || cg.firstName || "",
+      lastName: getValues(`existingCaregivers.${index}.lastName`) || cg.lastName || "",
+      relationship: getValues(`existingCaregivers.${index}.relationship`) || cg.relationship || "",
+      caregiver_idea: getValues(`existingCaregivers.${index}.caregiver_idea`) || "",
+      caregiver_feeling: getValues(`existingCaregivers.${index}.caregiver_feeling`) || "",
+      caregiver_funtion: getValues(`existingCaregivers.${index}.caregiver_function`) || "",
+      caregiver_expectation: getValues(`existingCaregivers.${index}.caregiver_expectation`) || "",
+      isNew: false,
+    }));
 
-  // อัปเดต careAgenda เมื่อข้อมูล caregivers หรือ newCaregivers ถูกโหลด
-  useEffect(() => {
-    const combinedCaregivers = [
-      ...caregivers.map((c) => ({
-        id: c.id,
-        firstName: c.firstName,
-        lastName: c.lastName,
-        relationship: c.relationship,
-        caregiver_idea: "",
-        caregiver_feeling: "",
-        caregiver_function: "",
-        caregiver_expectation: "",
-      })),
-      ...newCaregivers.map((c) => ({
-        id: c.id,
-        firstName: c.firstName,
-        lastName: c.lastName,
-        relationship: c.relationship,
-        caregiver_idea: "",
-        caregiver_feeling: "",
-        caregiver_function: "",
-        caregiver_expectation: "",
-      })),
-    ];
-    setCareAgenda(combinedCaregivers);
-  }, [caregivers, newCaregivers]);
+    const newData = newCaregivers.map((cg, index) => ({
+      firstName: getValues(`newCaregivers.${index}.firstName`) || cg.firstName || "",
+      lastName: getValues(`newCaregivers.${index}.lastName`) || cg.lastName || "",
+      relationship: getValues(`newCaregivers.${index}.relationship`) || "",
+      caregiver_idea: getValues(`newCaregivers.${index}.caregiver_idea`) || "",
+      caregiver_feeling: getValues(`newCaregivers.${index}.caregiver_feeling`) || "",
+      caregiver_funtion: getValues(`newCaregivers.${index}.caregiver_function`) || "",
+      caregiver_expectation: getValues(`newCaregivers.${index}.caregiver_expectation`) || "",
+      isNew: true,
+    }));
 
-  // ส่งข้อมูลที่อัปเดตกลับไปยัง Parent ผ่าน onDataChange
-  useEffect(() => {
-    onDataChange(careAgenda);
-  }, [careAgenda]);
-
-  const toggleFormVisibility = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
-
-  const handleInputChange = (index, field, value) => {
-    setCareAgenda((prev) => {
-      const updated = [...prev];
-      updated[index][field] = value;
-      return updated;
+    onDataChange({
+      existingCaregivers: existingData,
+      newCaregivers: newData,
     });
   };
 
@@ -98,62 +128,171 @@ export const CaregiverAgenda = ({ onDataChange }) => {
         <div className="header">
           <b>Caregiver Agenda</b>
         </div>
-        <div style={{ marginLeft: '26px' }}>
-          <p style={{ color: "#666" }}><i class="bi bi-person-check" style={{ color: "#008000" }}></i> ประเมินผู้ดูแลเบื้องต้น</p>
-        </div>
-
       </div>
-      <div className="m-4">
-        {careAgenda.map((item, index) => (
-          <div key={item.id}>
-            <span
-              onClick={() => toggleFormVisibility(index)}
-              style={{
-                cursor: "pointer",
-                color: "#007BFF",
-                display: "block", // ทำให้แต่ละบรรทัดเป็น block
-                marginTop: "20px",
-                transition: "color 0.3s ease", // ทำให้การเปลี่ยนสีมีการเคลื่อนไหว
-              }}
-              onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
-              onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
-            >
-              <b>{`ผู้ดูแลคนที่ ${index + 1}. ${item.firstName} ${item.lastName} (${item.relationship})`}</b>
-            </span>
-
-            <Collapse in={openIndex === index}>
-              <div>
-                {[{ name: "caregiver_idea", label: "Idea" },
-                { name: "caregiver_feeling", label: "Feeling" },
-                { name: "caregiver_function", label: "Function" },
-                { name: "caregiver_expectation", label: "Expectation" },
-                ].map((field) => (
-                  <div key={field.name}>
-                    <label className="form-label mt-2">{field.label} :</label>
-                    <Controller
-                      name={`careAgenda_${index}_${field.name}`}
-                      control={control}
-                      render={({ field: controllerField }) => (
-                        <textarea
-                          className="form-control"
-                          placeholder="กรอกคำตอบ"
-                          rows="2" // กำหนดจำนวนแถวเริ่มต้น
-                                    style={{ resize: "vertical" }}
-                          {...controllerField}
-                          value={item[field.name]}
-                          onChange={(e) => {
-                            controllerField.onChange(e);
-                            handleInputChange(index, field.name, e.target.value);
-                          }}
-                        />
-                      )}
-                    />
-                  </div>
-                ))}
-              </div>
-            </Collapse>
+      <div className="info3 card mt-4">
+        <div className="m-4">
+          <b>ข้อมูลผู้ดูแล</b>
+          {existingCaregivers.map((caregiver, index) => (
+            <div key={caregiver.id}>
+              <span
+                onClick={() => toggleCollapse(index, "existing")}
+                style={{ cursor: "pointer", color: "#007BFF", display: "block" }}
+              >
+                <b>{`ผู้ดูแลคนที่ ${index + 1} : ${caregiver.firstName} ${caregiver.lastName} (${caregiver.relationship})`}</b>
+              </span>
+              <Collapse in={openIndex.existing === index}>
+                <div>
+                  <label className="form-label mt-2">Idea </label>
+                  <Controller
+                    name={`existingCaregivers.${index}.caregiver_idea`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+                  <label className="form-label mt-4">Feeling </label>
+                  <Controller
+                    name={`existingCaregivers.${index}.caregiver_feeling`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+                  <label className="form-label mt-4">Funtion </label>
+                  <Controller
+                    name={`existingCaregivers.${index}.caregiver_function`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+                  <label className="form-label mt-4">Expectation </label>
+                  <Controller
+                    name={`existingCaregivers.${index}.caregiver_expectation`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+                </div>
+              </Collapse>
+            </div>
+          ))}
+          <div className="mt-2">
+            <b >ข้อมูลคนในครอบครัว</b>
           </div>
-        ))}
+          {newCaregivers.map((caregiver, index) => (
+            <div key={caregiver.id}>
+              <span
+                onClick={() => toggleCollapse(index, "new")}
+                style={{ cursor: "pointer", color: "#007BFF", display: "block", marginTop:"8px" }}
+              >
+                <b>{`คนที่ ${index + 1} : ${caregiver.firstName} ${caregiver.lastName} (${caregiver.relationship})`}</b>
+              </span>
+              <Collapse in={openIndex.new === index}>
+                <div>
+                  <label className="form-label mt-2">Idea</label>
+                  <Controller
+                    name={`newCaregivers.${index}.caregiver_idea`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+                  <label className="form-label mt-4">Feeling </label>
+                  <Controller
+                    name={`newCaregivers.${index}.caregiver_feeling`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+                  <label className="form-label mt-4">Function</label>
+                  <Controller
+                    name={`newCaregivers.${index}.caregiver_function`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+                  <label className="form-label mt-4">Expectation </label>
+                  <Controller
+                    name={`newCaregivers.${index}.caregiver_expectation`}
+                    control={control}
+                    render={({ field }) => (
+                      <textarea
+                        className="form-control"
+                        placeholder="กรอกคำตอบ"
+                        rows="2"
+                        style={{ resize: "vertical" }}
+                        {...field} onChange={(e) => {
+                          field.onChange(e);
+                          handleFieldChange();
+                        }} />
+                    )}
+                  />
+
+                </div>
+              </Collapse>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

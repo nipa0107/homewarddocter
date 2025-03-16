@@ -1,149 +1,100 @@
 import React, { useState, useEffect } from "react";
 
-const CaregiverAssessmentForm = ({ formData, onChange }) => {
-    const [formValues, setFormValues] = useState({ ...formData });
+const CaregiverAssessmentForm = ({ formData, onSave, onClose }) => {
+    const [formValues, setFormValues] = useState(formData || {});
+    const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการแก้ไขข้อมูลหรือไม่
 
     useEffect(() => {
-        setFormValues({ ...formData });
-    }, [formData]);
+        // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
+        setIsEdited(JSON.stringify(formValues) !== JSON.stringify(formData));
+    }, [formValues, formData]);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
-        const updatedValues = { ...formValues, [id]: value };
-        setFormValues(updatedValues);
-        onChange(updatedValues); // ✅ ส่งค่าที่อัปเดตกลับไปยัง Parent Component
+        setFormValues((prev) => ({
+            ...prev,
+            [id]: value,
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
+        if (!isEdited) {
+            const confirmSave = window.confirm("ไม่มีการเปลี่ยนแปลงข้อมูล ต้องการบันทึกหรือไม่?");
+            if (!confirmSave) return;
+        }
+
+        onSave(formValues);
+    };
+
+    const handleCancel = () => {
+        // 🔹 ถ้ามีการแก้ไขแล้วกดยกเลิก ให้แสดงแจ้งเตือน
+        if (isEdited) {
+            const confirmExit = window.confirm("ต้องการออกจากหน้านี้หรือไม่?\nหากออกจากหน้านี้ การแก้ไขที่ไม่ได้บันทึกจะถูกละทิ้ง");
+            if (!confirmExit) return;
+        }
+        onClose(); // ปิด Modal
     };
 
     return (
-        <form>
-            {/* ชื่อ - นามสกุล */}
-            <div className="m-2">
-                <label className="form-label">ชื่อ - นามสกุล :</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    disabled
-                    value={`${formValues.firstName || ""} ${formValues.lastName || ""}`}
-                />
-            </div>
+        <div className="modal show d-block" tabIndex="-1">
+            <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div className="modal-content">
 
-            {/* Care */}
-            <div className="m-2">
-                <label className="form-label mt-3">Care :</label>
-                <textarea
-                    id="care"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.care || ""}
-                    onChange={handleChange}
-                />
-            </div>
+                    <div className="modal-header d-flex justify-content-center">
+                        <h5 className="modal-title text-black text-center">แก้ไข Caregiver Assessment</h5>
+                    </div>
 
-            {/* Affection */}
-            <div className="m-2">
-                <label className="form-label mt-3">Affection :</label>
-                <textarea
-                    id="affection"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.affection || ""}
-                    onChange={handleChange}
-                />
-            </div>
 
-            {/* Rest */}
-            <div className="m-2">
-                <label className="form-label mt-3">Rest :</label>
-                <textarea
-                    id="rest"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.rest || ""}
-                    onChange={handleChange}
-                />
+                    <div className="modal-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="m-2">
+                                <label className="form-label">ชื่อ - นามสกุล</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    disabled
+                                    value={`${formValues.firstName || ""} ${formValues.lastName || ""}`}
+                                />
+                            </div>
+                            {[
+                                { id: "care", label: "Care" },
+                                { id: "affection", label: "Affection" },
+                                { id: "rest", label: "Rest" },
+                                { id: "empathy", label: "Empathy" },
+                                { id: "goalOfCare", label: "Goal Of Care" },
+                                { id: "information", label: "Information" },
+                                { id: "ventilation", label: "Ventilation" },
+                                { id: "empowerment", label: "Empowerment" },
+                                { id: "resource", label: "Resource" },
+                            ].map((item) => (
+                                <div className="m-2" key={item.id}>
+                                    <label className="form-label mt-3">{item.label}</label>
+                                    <textarea
+                                        id={item.id}
+                                        className="form-control mt-1"
+                                        rows="2"
+                                        style={{ resize: "vertical" }}
+                                        value={formValues[item.id] || ""}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            ))}
+                        </form>
+                    </div>
+                    <div className="modal-footer d-flex justify-content-between">
+                        <button className="btn-EditMode btn-secondary" onClick={handleCancel}>
+                            ยกเลิก
+                        </button>
+                        <button className="btn-EditMode btnsave" onClick={handleSubmit}>
+                            บันทึก
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            {/* Empathy */}
-            <div className="m-2">
-                <label className="form-label mt-3">Empathy :</label>
-                <textarea
-                    id="empathy"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.empathy || ""}
-                    onChange={handleChange}
-                />
-            </div>
-
-            {/* Goal Of Care */}
-            <div className="m-2">
-                <label className="form-label mt-3">Goal Of Care :</label>
-                <textarea
-                    id="goalOfCare"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.goalOfCare || ""}
-                    onChange={handleChange}
-                />
-            </div>
-
-            {/* Information */}
-            <div className="m-2">
-                <label className="form-label mt-3">Information :</label>
-                <textarea
-                    id="information"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.information || ""}
-                    onChange={handleChange}
-                />
-            </div>
-
-            {/* Ventilation */}
-            <div className="m-2">
-                <label className="form-label mt-3">Ventilation :</label>
-                <textarea
-                    id="ventilation"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.ventilation || ""}
-                    onChange={handleChange}
-                />
-            </div>
-
-            {/* Empowerment */}
-            <div className="m-2">
-                <label className="form-label mt-3">Empowerment :</label>
-                <textarea
-                    id="empowerment"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.empowerment || ""}
-                    onChange={handleChange}
-                />
-            </div>
-
-            {/* Resource */}
-            <div className="m-2">
-                <label className="form-label mt-3">Resource :</label>
-                <textarea
-                    id="resource"
-                    className="form-control mt-1"
-                    rows="2"
-                    style={{ resize: "vertical" }}
-                    value={formValues.resource || ""}
-                    onChange={handleChange}
-                />
-            </div>
-        </form>
+        </div>
     );
 };
 

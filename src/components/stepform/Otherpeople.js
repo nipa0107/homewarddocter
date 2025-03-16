@@ -39,7 +39,7 @@ export const Otherpeople = ({ onDataChange }) => {
                 CaregiverId: caregiver.id || "",
                 firstName: caregiver.name || "",
                 lastName: caregiver.surname || "",
-                relationship: caregiver.relationship || "ไม่ระบุ",  // ใช้ relationship จาก API
+                relationship: caregiver.relationship || "ไม่ระบุความสัมพันธ์",  // ใช้ relationship จาก API
                 birthDate: caregiver.birthDate || "",
                 role: caregiver.role || "",
                 occupation: caregiver.occupation || "",
@@ -152,6 +152,7 @@ export const Otherpeople = ({ onDataChange }) => {
         <div className="m-4">
           {existingFields.map((field, index) => (
             <div key={field.id}>
+              <b>ข้อมูลผู้ดูแล</b><br></br>
               <span
                 onClick={() => toggleCollapse(index, "existing")}
                 style={{
@@ -162,12 +163,12 @@ export const Otherpeople = ({ onDataChange }) => {
                 onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
                 onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
               >
-                <b>{`คนที่ ${index + 1}. ${field.firstName} ${field.lastName} (${field.relationship})`}</b>
+                <b>{`ผู้ดูแลคนที่ ${index + 1}. ${field.firstName} ${field.lastName} (${field.relationship})`}</b>
               </span>
               <Collapse in={openIndex.existing === index}>
                 <div className="p-2">
                   <div>
-                    <label>ชื่อ :</label>
+                    <label>ชื่อ </label>
                     <Controller
                       name={`existingCaregivers.${index}.firstName`}
                       control={control}
@@ -184,8 +185,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>นามสกุล :</label>
+                  <div className="mt-3">
+                    <label>นามสกุล </label>
                     <Controller
                       name={`existingCaregivers.${index}.lastName`}
                       control={control}
@@ -202,8 +203,24 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>วันเกิด :</label>
+                  <div className="mt-3">
+                    <label>ความสัมพันธ์ </label>
+                    <Controller
+                      name={`existingCaregivers.${index}.relationship`}
+                      control={control}
+                      defaultValue={field.relationship || ""}
+                      render={({ field }) => (
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={field.value}
+                          disabled // Prevent editing for existing caregivers
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="mt-3">
+                    <label>วันเกิด </label>
                     <Controller
                       name={`existingCaregivers.${index}.birthDate`}
                       control={control}
@@ -219,24 +236,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>ความสัมพันธ์ :</label>
-                    <Controller
-                      name={`existingCaregivers.${index}.relationship`}
-                      control={control}
-                      defaultValue={field.relationship || ""}
-                      render={({ field }) => (
-                        <input
-                          type="text"
-                          className="form-control"
-                          value={field.value}
-                          disabled // Prevent editing for existing caregivers
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="mt-2">
-                    <label>อาชีพ:</label>
+                  <div className="mt-3">
+                    <label>อาชีพ</label>
                     <Controller
                       name={`existingCaregivers.${index}.occupation`}
                       control={control}
@@ -263,8 +264,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>สถานภาพ :</label>
+                  <div className="mt-3">
+                    <label>สถานภาพ </label>
                     <Controller
                       name={`existingCaregivers.${index}.status`}
                       control={control}
@@ -283,8 +284,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label >การศึกษา :</label>
+                  <div className="mt-3">
+                    <label >การศึกษา </label>
                     <Controller
                       name={`existingCaregivers.${index}.education`}
                       control={control}
@@ -307,8 +308,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label >รายได้ต่อเดือน :</label>
+                  <div className="mt-3">
+                    <label >รายได้ต่อเดือน </label>
                     <Controller
                       name={`existingCaregivers.${index}.income`}
                       control={control}
@@ -327,8 +328,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>สิทธิ :</label>
+                  <div className="mt-3">
+                    <label>สิทธิ </label>
                     <Controller
                       name={`existingCaregivers.${index}.benefit`}
                       control={control}
@@ -348,15 +349,16 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>โรคประจำตัว :</label>
+                  <div className="mt-4">
+                    <label>โรคประจำตัว <span style={{ color: "#666", fontSize: "15px" }}>(เช่น โรคเบาหวาน ความดัน)</span></label>
                     <Controller
                       name={`existingCaregivers.${index}.ud`}
                       control={control}
                       render={({ field }) => (
-                        <input
-                          type="text"
+                        <textarea
                           className="form-control"
+                          rows="2"
+                          style={{ resize: "vertical" }}
                           placeholder="กรอกโรคประจำตัว"
                           {...field}
                           onChange={(e) => {
@@ -366,15 +368,16 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>อุปนิสัย :</label>
+                  <div className="mt-4">
+                    <label>อุปนิสัย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น ใจดี มีความรับผิดชอบ)</span></label>
                     <Controller
                       name={`existingCaregivers.${index}.habit`}
                       control={control}
                       render={({ field }) => (
-                        <input
-                          type="text"
+                        <textarea
                           className="form-control"
+                          rows="2"
+                          style={{ resize: "vertical" }}
                           placeholder="กรอกอุปนิสัย"
                           {...field}
                           onChange={(e) => {
@@ -383,16 +386,18 @@ export const Otherpeople = ({ onDataChange }) => {
                         />
                       )}
                     />
+                    
                   </div>
-                  <div className="mt-2">
-                    <label>รายละเอียดการดูแลผู้ป่วย:</label>
+                  <div className="mt-4">
+                    <label>รายละเอียดการดูแลผู้ป่วย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น บันทึกอาการ การให้ยาผู้ป่วย)</span></label>
                     <Controller
                       name={`existingCaregivers.${index}.careDetails`}
                       control={control}
                       render={({ field }) => (
-                        <input
-                          type="text"
+                        <textarea
                           className="form-control"
+                          rows="2"
+                          style={{ resize: "vertical" }}
                           placeholder="กรอกรายละเอียดการดูแลผู้ป่วย"
                           {...field}
                           onChange={(e) => {
@@ -401,15 +406,18 @@ export const Otherpeople = ({ onDataChange }) => {
                         />
                       )}
                     />
+                    
                   </div>
                 </div>
               </Collapse>
             </div>
           ))}
           {newFields.map((field, index) => (
-            <div key={field.id}>
-              <div className="row p-0" style={{marginBottom:"-25px"}}>
-                <div className="col text-start">
+            <div key={field.id} className="mt-3">
+              <b>ข้อมูลคนในครอบครัว</b><br></br>
+              <div className="row" style={{ marginBottom: "-25px" }}>
+                <div className="col text-start" style={{ marginLeft: "-25px" }}>
+              
                   <span
                     onClick={() => toggleCollapse(index, "new")}
                     style={{
@@ -420,7 +428,7 @@ export const Otherpeople = ({ onDataChange }) => {
                     onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
                     onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
                   >
-                    <b>{`คนที่ ${existingFields.length + index + 1}. ${field.firstName} ${field.lastName}`}</b>
+                    <b>{`คนที่ ${index + 1}. ${field.firstName} ${field.lastName}`}</b>
 
                   </span>
                 </div>
@@ -442,8 +450,8 @@ export const Otherpeople = ({ onDataChange }) => {
 
               <Collapse in={openIndex.new === index}>
                 <div className="p-2">
-                  <div>
-                    <label>ชื่อ :</label>
+                <div className="mt-3">
+                    <label>ชื่อ</label>
                     <Controller
                       name={`newCaregivers.${index}.firstName`}
                       control={control}
@@ -456,8 +464,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div>
-                    <label>สกุล :</label>
+                  <div className="mt-3">
+                    <label>สกุล</label>
                     <Controller
                       name={`newCaregivers.${index}.lastName`}
                       control={control}
@@ -470,25 +478,9 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div>
-                    <label>วันเกิด :</label>
-                    <Controller
-                      name={`newCaregivers.${index}.birthDate`}
-                      control={control}
-                      render={({ field }) => (
-                        <input
-                          type="date"
-                          className="form-control"
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                          }}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="mt-2">
-                    <label>ความสัมพันธ์ :</label>
+                  
+                  <div className="mt-3">
+                    <label>ความสัมพันธ์</label>
                     <Controller
                       name={`newCaregivers.${index}.relationship`}
                       control={control}
@@ -513,8 +505,25 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>อาชีพ :</label>
+                  <div className="mt-3">
+                    <label>วันเกิด</label>
+                    <Controller
+                      name={`newCaregivers.${index}.birthDate`}
+                      control={control}
+                      render={({ field }) => (
+                        <input
+                          type="date"
+                          className="form-control"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="mt-3">
+                    <label>อาชีพ</label>
                     <Controller
                       name={`newCaregivers.${index}.occupation`}
                       control={control}
@@ -541,8 +550,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>สถานภาพ :</label>
+                  <div className="mt-3">
+                    <label>สถานภาพ</label>
                     <Controller
                       name={`newCaregivers.${index}.status`}
                       control={control}
@@ -561,8 +570,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label >การศึกษา :</label>
+                  <div className="mt-3">
+                    <label >การศึกษา</label>
                     <Controller
                       name={`newCaregivers.${index}.education`}
                       control={control}
@@ -585,8 +594,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label >รายได้ต่อเดือน :</label>
+                  <div className="mt-3">
+                    <label >รายได้ต่อเดือน</label>
                     <Controller
                       name={`newCaregivers.${index}.income`}
                       control={control}
@@ -605,8 +614,8 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>สิทธิ :</label>
+                  <div className="mt-3">
+                    <label>สิทธิ</label>
                     <Controller
                       name={`newCaregivers.${index}.benefit`}
                       control={control}
@@ -626,15 +635,16 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>โรคประจำตัว :</label>
+                  <div className="mt-4">
+                    <label>โรคประจำตัว <span style={{ color: "#666", fontSize: "15px" }}>(เช่น โรคเบาหวาน ความดัน)</span></label>
                     <Controller
                       name={`newCaregivers.${index}.ud`}
                       control={control}
                       render={({ field }) => (
-                        <input
-                          type="text"
+                        <textarea
                           className="form-control"
+                          rows="2"
+                          style={{ resize: "vertical" }}
                           placeholder="กรอกโรคประจำตัว"
                           {...field}
                           onChange={(e) => {
@@ -644,15 +654,16 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>อุปนิสัย :</label>
+                  <div className="mt-4">
+                    <label>อุปนิสัย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น ใจดี มีความรับผิดชอบ)</span></label>
                     <Controller
                       name={`newCaregivers.${index}.habit`}
                       control={control}
                       render={({ field }) => (
-                        <input
-                          type="text"
+                        <textarea
                           className="form-control"
+                          rows="2"
+                          style={{ resize: "vertical" }}
                           placeholder="กรอกอุปนิสัย"
                           {...field}
                           onChange={(e) => {
@@ -662,15 +673,16 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  <div className="mt-2">
-                    <label>รายละเอียดการดูแลผู้ป่วย :</label>
+                  <div className="mt-4">
+                    <label>รายละเอียดการดูแลผู้ป่วย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น บันทึกอาการ การให้ยาผู้ป่วย)</span></label>
                     <Controller
                       name={`newCaregivers.${index}.careDetails`}
                       control={control}
                       render={({ field }) => (
-                        <input
-                          type="text"
+                        <textarea
                           className="form-control"
+                          rows="2"
+                          style={{ resize: "vertical" }}
                           placeholder="กรอกรายละเอียดการดูแลผู้ป่วย"
                           {...field}
                           onChange={(e) => {

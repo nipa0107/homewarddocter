@@ -27,10 +27,12 @@
     margin-right: auto;
     margin-left: auto;
 }
+
 .formcontent .row {
     margin-right: auto;
     margin-left: auto;
 }
+
 .formcontent .name {
     margin-top: 10px;
     color: #000;
@@ -151,7 +153,7 @@
 
 .btn {
     background-color: #039be5;
-  color: #fff;
+    color: #fff;
     text-align: center;
     /* margin-top: 20px; */
 }
@@ -213,6 +215,7 @@ tr.assessmentnull {
     font-weight: bold;
 
 }
+
 .form-check {
     display: block;
     padding-left: 1.5em;
@@ -437,7 +440,8 @@ tr.assessmentnull {
     margin: 0;
     border-radius: 3px 3px 0 0;
 }
-.title-form{
+
+.title-form {
     border-bottom: 1px solid #ddd;
     width: 92%;
     margin: auto;
@@ -516,7 +520,8 @@ tr.assessmentnull {
     line-height: 50px;
 
 }
-.zarit{
+
+.zarit {
     width: 3%;
 }
 
@@ -812,10 +817,11 @@ textarea {
     background-color: #f8f8f8;
 }
 
-.nutrition-table{
+.nutrition-table {
     margin: 15px;
     margin-top: -10px;
 }
+
 .nutrition-table td {
     padding: 5px;
     vertical-align: middle;
@@ -838,6 +844,127 @@ textarea {
     margin-right: 10px;
     /* ระยะห่างทางขวาจาก label */
 }
-.modal-title{
+
+.modal-title {
     text-align: center;
+}
+
+.clear-selection {
+    cursor: pointer;
+    color: #007BFF;
+    /* สีเริ่มต้น */
+    transition: color 0.2s ease-in-out;
+}
+
+.clear-selection:hover {
+    color: #1E90FF !important;
+    /* Hover → สีฟ้าเข้มขึ้น */
+}
+
+@media screen and (max-width: 767px) {
+
+    /* ประเมิน */
+    .homeheaderform .links_name {
+        display: none;
+    }
+
+    .homeheaderform {
+        padding: 0.7rem;
+    }
+
+    .container-form {
+        width: 120%;
+        padding-left: 1.1rem;
+        padding-right: 3.6rem;
+
+    }
+
+    .formcontent {
+        width: 110%;
+        /* ปรับให้เต็มจอมือถือ */
+        padding: 0.8rem;
+        /* ลด padding */
+        border-radius: 5px;
+        /* ลดขอบโค้ง */
+
+    }
+
+    .formcontent .row {
+        display: flex;
+        flex-direction: column;
+        /* เปลี่ยนจาก row เป็น column */
+        gap: 10px;
+        /* เพิ่มระยะห่างระหว่าง sections */
+    }
+
+    .col-4 {
+        width: 100% !important;
+        /* ให้แต่ละ section กว้างเต็มจอ */
+    }
+
+    .col-8 {
+        width: 120% !important;
+        /* ให้แต่ละ section กว้างเต็มจอ */
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .info3.card {
+        width: 107%;
+        margin-left: -14px;
+    }
+
+    .info3.card .header {
+        padding: 10px;
+    }
+
+
+    .btn-next button {
+        width: 100%;
+        /* ปรับให้ปุ่มกว้างเต็มจอ */
+    }
+
+    .stepper .MuiStepper-root {
+        width: 100%;
+        /* ให้ Stepper กว้างเต็มจอ */
+        margin-top: -10px;
+        margin-left: -25px;
+    }
+
+    .stepper .MuiStep-root {
+        min-width: 60px;
+        /* กำหนดความกว้างของแต่ละ Step */
+        flex: 1;
+    }
+
+    .stepper .MuiStepLabel-label {
+        font-size: 14px !important;
+        /* ลดขนาดตัวอักษร */
+        text-align: center;
+        display: none
+    }
+
+    .stepper .MuiStepIcon-root {
+        width: 24px !important;
+        /* ลดขนาดไอคอน */
+        height: 24px !important;
+    }
+
+    .description {
+        line-height: 50px;
+        /* ปรับระยะห่างระหว่างบรรทัด */
+        font-size: 14px;
+        /* ลดขนาดตัวอักษร */
+        padding: 5px;
+        /* ลด padding ด้านใน */
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .container-form {
+        width: 140%;
+        padding-left: 1.1rem;
+        padding-right: 3.6rem;
+
+    }
 }

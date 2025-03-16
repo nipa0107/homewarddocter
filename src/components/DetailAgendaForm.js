@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "../css/form.css";
@@ -38,18 +38,140 @@ export default function DetailAgendaForm() {
   const [filterType, setFilterType] = useState("all");
   const notificationsRef = useRef(null);
   const bellRef = useRef(null);
+  const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
+  const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+  const [latestAssessments, setLatestAssessments] = useState({});
+  const [unreadCountsByType, setUnreadCountsByType] = useState({
+    assessment: 0,
+    abnormal: 0,
+    normal: 0,
+  });
+
+  const fetchLatestAssessments = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/latest-assessments");
+      const data = await response.json();
+      console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
+
+      if (data.status === "ok") {
+        const assessmentsMap = data.data.reduce((acc, item) => {
+          acc[item._id] = item.latestStatusName;
+          return acc;
+        }, {});
+        console.log("Processed latestAssessments:", assessmentsMap); // เช็กค่าหลังประมวลผล
+
+        setLatestAssessments(assessmentsMap);
+      }
+    } catch (error) {
+      console.error("Error fetching latest assessments:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLatestAssessments();
+  }, []);
+
+  const getUnreadCount = useCallback(
+    (type) => {
+      const filteredByType = alerts.filter(
+        (alert) =>
+          (type === "assessment" &&
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน") ||
+          (type === "abnormal" &&
+            (alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน")) ||
+          (type === "normal" && alert.alertType === "normal")
+      );
+      return filteredByType.filter((alert) => !alert.viewedBy.includes(userId))
+        .length;
+    },
+    [alerts, userId]
+  );
+
+  useEffect(() => {
+    if (!userId) return;
+    const updatedCounts = {
+      assessment: getUnreadCount("assessment"),
+      abnormal: getUnreadCount("abnormal"),
+      normal: getUnreadCount("normal"),
+    };
+    setUnreadCountsByType(updatedCounts);
+  }, [alerts, userId]);
   const hasFetchedUserData = useRef(false);
 
   useEffect(() => {
-    socket.on("newAlert", (alert) => {
-      setAlerts((prevAlerts) => [...prevAlerts, alert]);
-      setUnreadCount((prevCount) => prevCount + 1);
+    socket?.on("newAlert", (alert) => {
+      console.log("Received newAlert:", alert);
+
+      if (alert.MPersonnel?.id === userId) {
+        console.log("Ignoring alert from self");
+        return;
+      }
+
+      setAlerts((prevAlerts) => {
+        const isExisting = prevAlerts.some(
+          (existingAlert) => existingAlert.patientFormId === alert.patientFormId
+        );
+
+        let updatedAlerts;
+
+        if (isExisting) {
+          updatedAlerts = prevAlerts.map((existingAlert) =>
+            existingAlert.patientFormId === alert.patientFormId
+              ? alert
+              : existingAlert
+          );
+        } else {
+          updatedAlerts = [...prevAlerts, alert];
+        }
+
+        return [...updatedAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      });
+    });
+
+    socket?.on("deletedAlert", (data) => {
+      setAlerts((prevAlerts) => {
+        const filteredAlerts = prevAlerts.filter(
+          (alert) => alert.patientFormId !== data.patientFormId
+        );
+
+        return [...filteredAlerts].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+      });
     });
 
     return () => {
-      socket.off("newAlert"); // Clean up the listener on component unmount
+      socket?.off("newAlert");
+      socket?.off("deletedAlert");
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    const currentUserId = sender._id;
+
+    const unreadAlerts = alerts.filter(
+      (alert) =>
+        Array.isArray(alert.viewedBy) && !alert.viewedBy.includes(currentUserId)
+    );
+
+    setUnreadCount(unreadAlerts.length);
+  }, [alerts, sender._id]);
+
+  useEffect(() => {
+    socket?.on("TotalUnreadCounts", (data) => {
+      console.log("📦 TotalUnreadCounts received:", data);
+      setUserUnreadCounts(data);
+    });
+
+    return () => {
+      socket?.off("TotalUnreadCounts");
     };
   }, []);
+
   const toggleNotifications = (e) => {
     e.stopPropagation();
     if (showNotifications) {
@@ -77,6 +199,7 @@ export default function DetailAgendaForm() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
   const fetchUserData = (token) => {
     return fetch("http://localhost:5000/profiledt", {
       method: "POST",
@@ -90,8 +213,21 @@ export default function DetailAgendaForm() {
     })
       .then((res) => res.json())
       .then((data) => {
+        if (data.data === "token expired") {
+          alert("Token expired login again");
+          window.localStorage.clear();
+          setTimeout(() => {
+            window.location.replace("./");
+          }, 0);
+          return null;
+        }
+        setSender({
+          name: data.data.name,
+          surname: data.data.surname,
+          _id: data.data._id,
+        });
         setData(data.data);
-        if (data.data == "token expired") {
+        if (data.data === "token expired") {
           window.localStorage.clear();
           window.location.href = "./";
         }
@@ -103,8 +239,8 @@ export default function DetailAgendaForm() {
   };
 
   const fetchAndSetAlerts = (token, userId) => {
-    fetchAlerts(token)
-      .then((alerts) => {
+    fetchAlerts(token, userId)
+      .then((alerts, userId) => {
         setAlerts(alerts);
         const unreadAlerts = alerts.filter(
           (alert) => !alert.viewedBy.includes(userId)
@@ -119,6 +255,7 @@ export default function DetailAgendaForm() {
   useEffect(() => {
     if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
+
     const token = window.localStorage.getItem("token");
     setToken(token);
 
@@ -132,28 +269,47 @@ export default function DetailAgendaForm() {
           console.error("Error verifying token:", error);
         });
     }
-  }, []);
+  }, [token]);
 
-  const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+  const markAllByTypeAsViewed = (type) => {
+    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ userId: userId }),
+      body: JSON.stringify({ userId: userId, type: type }),
     })
       .then((res) => res.json())
       .then((data) => {
-        const updatedAlerts = alerts.map((alert) => ({
-          ...alert,
-          viewedBy: [...alert.viewedBy, userId],
-        }));
-        setAlerts(updatedAlerts);
-        setUnreadCount(0);
+        if (data.message === "All selected alerts marked as viewed") {
+          const updatedAlerts = alerts.map((alert) => {
+            if (
+              type === "all" ||
+              ((alert.alertType === type ||
+                (type === "abnormal" &&
+                  (alert.alertType === "abnormal" ||
+                    alert.alertMessage === "เคสฉุกเฉิน")) ||
+                (type === "assessment" &&
+                  alert.alertType === "assessment" &&
+                  alert.alertMessage !== "เคสฉุกเฉิน")) &&
+                !alert.viewedBy.includes(userId))
+            ) {
+              return { ...alert, viewedBy: [...alert.viewedBy, userId] };
+            }
+            return alert;
+          });
+
+          setAlerts(updatedAlerts);
+          // setUnreadCount(0);
+          const unreadAlerts = updatedAlerts.filter(
+            (alert) => !alert.viewedBy.includes(userId)
+          );
+          setUnreadCount(unreadAlerts.length);
+        }
       })
       .catch((error) => {
-        console.error("Error marking all alerts as viewed:", error);
+        console.error("Error marking alerts as viewed:", error);
       });
   };
 
@@ -164,7 +320,38 @@ export default function DetailAgendaForm() {
   const filteredAlerts =
     filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
-      : alerts;
+      : filterType === "assessment"
+        ? alerts.filter(
+          (alert) =>
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน"
+        )
+        : filterType === "abnormal"
+          ? alerts.filter(
+            (alert) =>
+              alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน"
+          )
+          : filterType === "normal"
+            ? alerts.filter((alert) => alert.alertType === "normal")
+            : alerts;
+
+  const getFilterLabel = (type) => {
+    switch (type) {
+      case "all":
+        return "ทั้งหมด";
+      case "unread":
+        return "ยังไม่อ่าน";
+      case "normal":
+        return "บันทึกอาการ";
+      case "abnormal":
+        return "ผิดปกติ";
+      case "assessment":
+        return "ประเมินอาการ";
+      default:
+        return "ไม่ทราบ";
+    }
+  };
 
   const currentDate = new Date();
 
@@ -321,6 +508,7 @@ export default function DetailAgendaForm() {
     };
     fetchAgendaForms();
   }, [id, token]);
+
   useEffect(() => {
     if (AgendaForms.user && AgendaForms._id) {
       const fetchData = async () => {
@@ -392,18 +580,9 @@ export default function DetailAgendaForm() {
     return "ไม่มีข้อมูล"; // กรณีไม่มีคะแนน
   };
 
-  const activityLevelMapping = {
-    sedentary: "ออกกำลังกายน้อยมาก หรือไม่ออกเลย",
-    lightly_active: "ออกกำลังกาย 1-3 ครั้งต่อสัปดาห์",
-    moderately_active: "ออกกำลังกาย 4-5 ครั้งต่อสัปดาห์",
-    very_active: "ออกกำลังกาย 6-7 ครั้งต่อสัปดาห์",
-    super_active: "ออกกำลังกายวันละ 2 ครั้งขึ้นไป",
-  };
-
   const [tempFormValues, setTempFormValues] = useState({}); // เก็บค่าที่แก้ไข
   const [currentEditSection, setCurrentEditSection] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState(null);
 
   useEffect(() => {
     if (AgendaForms.user) {
@@ -413,76 +592,129 @@ export default function DetailAgendaForm() {
 
   const handleEditClick = (section) => {
     setCurrentEditSection(section);
-    setIsModalOpen(true);
-
-    let formData;
     if (section === "Patient Agenda Form") {
-      formData = { ...AgendaForms.PatientAgenda };
-    } else if (section === "Zaritburdeninterview Form") {
-      formData = { ...AgendaForms.Zaritburdeninterview };
+      setTempFormValues({ ...AgendaForms.PatientAgenda });
+    } else if (section === "Caregiver Agenda Form") {
+      setTempFormValues({ ...AgendaForms.CaregiverAgenda });
+    } else if (section === "Caregiver Assessment Form") {
+      setTempFormValues({ Care_Assessment: [...AgendaForms.CaregiverAssessment.Care_Assessment] });
+    } else if (section === "Zarit Burden Interview Form") {
+      setTempFormValues({ ...AgendaForms.Zaritburdeninterview });
     }
-
-    setTempFormValues(formData); // ตั้งค่าชั่วคราวก่อน
-
-    // ใช้ useEffect เพื่ออัปเดต modalContent เมื่อ tempFormValues เปลี่ยน
+    setIsModalOpen(true);
   };
-
-  useEffect(() => {
-    if (currentEditSection) {
-      setModalContent(
-        currentEditSection === "Patient Agenda Form" ? (
-          <PatientAgendaForm
-            formData={tempFormValues}
-            onChange={(data) => setTempFormValues(data)}
-          />
-        ) : (
-          <ZaritburdeninterviewForm
-            formData={tempFormValues}
-            onChange={(data) => setTempFormValues(data)}
-          />
-        )
-      );
-    }
-  }, [tempFormValues, currentEditSection]);
 
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setTempFormValues({}); // รีเซ็ตค่ากลับไปเป็นค่าเดิม
+    setTempFormValues({});
   };
 
-  // ✅ ฟังก์ชันบันทึกข้อมูล
-  const handleSaveChanges = async () => {
-    // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
-    const isDataChanged = JSON.stringify(originalData) !== JSON.stringify(AgendaForms);
+  const [editingOldCaregiverIndex, setEditingOldCaregiverIndex] = useState(null);
+  const [editingNewCaregiverIndex, setEditingNewCaregiverIndex] = useState(null);
 
-    if (!isDataChanged) {
-      const confirmSave = window.confirm("ไม่มีการเปลี่ยนแปลงข้อมูล ต้องการบันทึกหรือไม่?");
-      if (!confirmSave) return; // ถ้าผู้ใช้กด "ยกเลิก" ให้หยุดทำงานที่นี่
-    }
+  const handleEditOldCaregiverAgenda = (index) => {
+    setCurrentEditSection("Caregiver Agenda Form");
+    setIsModalOpen(true);
+    setEditingOldCaregiverIndex(index);  // ✅ ระบุว่ากำลังแก้ไขผู้ดูแลเก่า
+    setEditingNewCaregiverIndex(null);  // ❌ ไม่ให้แก้ไขผู้ดูแลใหม่ในเวลาเดียวกัน
+    setTempFormValues({ ...AgendaForms.CaregiverAgenda.Old_Caregiver_Agenda[index] });
+  };
 
+  const handleEditNewCaregiversAgenda = (index) => {
+    setCurrentEditSection("Caregiver Agenda Form");
+    setIsModalOpen(true);
+    setEditingNewCaregiverIndex(index);  // ✅ ระบุว่ากำลังแก้ไขผู้ดูแลใหม่
+    setEditingOldCaregiverIndex(null);  // ❌ ไม่ให้แก้ไขผู้ดูแลเก่าในเวลาเดียวกัน
+    setTempFormValues({ ...AgendaForms.CaregiverAgenda.New_Caregiver_Agenda[index] });
+  };
+
+  const [editingOldCaregiverAssessmentIndex, setEditingOldCaregiverAssessmentIndex] = useState(null);
+  const [editingNewCaregiverAssessmentIndex, setEditingNewCaregiverAssessmentIndex] = useState(null);
+
+  const handleEditOldCaregiverAssessment = (index) => {
+    setCurrentEditSection("Caregiver Assessment Form");
+    setIsModalOpen(true);
+    setEditingOldCaregiverAssessmentIndex(index);
+    setEditingNewCaregiverAssessmentIndex(null);
+    setTempFormValues({ ...AgendaForms.CaregiverAssessment.Old_Caregiver_Assessment[index] });
+  };
+
+  const handleEditNewCaregiverAssessment = (index) => {
+    setCurrentEditSection("Caregiver Assessment Form");
+    setIsModalOpen(true);
+    setEditingNewCaregiverAssessmentIndex(index);
+    setEditingOldCaregiverAssessmentIndex(null);
+    setTempFormValues({ ...AgendaForms.CaregiverAssessment.New_Caregiver_Assessment[index] });
+  };
+
+  const handleSaveChanges = async (updatedData) => {
     try {
-      const updatedData = {
-        ...AgendaForms,
-        [currentEditSection.replace(" Form", "").replace(" ", "")]: tempFormValues,
-      };
+      let newAgendaForms = { ...AgendaForms };
 
+      if (currentEditSection === "Patient Agenda Form") {
+        newAgendaForms.PatientAgenda = updatedData;
+
+      } else if (currentEditSection === "Caregiver Assessment Form") {
+        if (editingOldCaregiverAssessmentIndex !== null) {
+          // ✅ อัปเดตเฉพาะผู้ดูแลเก่า
+          let updatedOldAssessments = [...newAgendaForms.CaregiverAssessment.Old_Caregiver_Assessment];
+          updatedOldAssessments[editingOldCaregiverAssessmentIndex] = { ...updatedData };
+          newAgendaForms.CaregiverAssessment.Old_Caregiver_Assessment = updatedOldAssessments;
+        } else if (editingNewCaregiverAssessmentIndex !== null) {
+
+          // ✅ อัปเดตเฉพาะผู้ดูแลใหม่
+          let updatedNewAssessments = [...newAgendaForms.CaregiverAssessment.New_Caregiver_Assessment];
+          updatedNewAssessments[editingNewCaregiverAssessmentIndex] = { ...updatedData };
+          newAgendaForms.CaregiverAssessment.New_Caregiver_Assessment = updatedNewAssessments;
+        }
+      } else if (currentEditSection === "Zarit Burden Interview Form") {
+        newAgendaForms.Zaritburdeninterview = updatedData;
+
+      }
+      else if (currentEditSection === "Caregiver Agenda Form") {
+        if (editingOldCaregiverIndex !== null) {
+          // ✅ อัปเดตเฉพาะผู้ดูแลเก่า
+          let updatedOldCaregiverAgenda = [...newAgendaForms.CaregiverAgenda.Old_Caregiver_Agenda];
+          updatedOldCaregiverAgenda[editingOldCaregiverIndex] = { ...updatedData };
+          newAgendaForms.CaregiverAgenda.Old_Caregiver_Agenda = updatedOldCaregiverAgenda;
+        } else if (editingNewCaregiverIndex !== null) {
+          // ✅ อัปเดตเฉพาะผู้ดูแลใหม่
+          let updatedNewCaregiverAgenda = [...newAgendaForms.CaregiverAgenda.New_Caregiver_Agenda];
+          updatedNewCaregiverAgenda[editingNewCaregiverIndex] = { ...updatedData };
+          newAgendaForms.CaregiverAgenda.New_Caregiver_Agenda = updatedNewCaregiverAgenda;
+        }
+      }
       const response = await fetch(`http://localhost:5000/updateAgenda/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(newAgendaForms),
       });
 
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Failed to update data");
 
-      toast.success("แก้ไขข้อมูลสำเร็จ");
+      // ✅ อัปเดตค่าที่ได้จากเซิร์ฟเวอร์กลับมา
+      const updatedForm = await fetch(`http://localhost:5000/getAgendaForm/${id}`);
+      const updatedDataFromServer = await updatedForm.json();
+
+      toast.success("แก้ไขข้อมูลสำเร็จ", {
+        position: "top-right",
+        autoClose: 1000,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+      });
 
       setTimeout(() => {
-        setAgendaForms(updatedData);
-        setOriginalData(updatedData);
+        // ✅ อัปเดตค่าที่ได้จากเซิร์ฟเวอร์ลง State เพื่อให้ `updatedAt` เปลี่ยนแปลงใน UI
+        setAgendaForms(updatedDataFromServer.data);
+        setOriginalData(updatedDataFromServer.data);
         setIsModalOpen(false);
-        window.location.reload();
+        setEditingOldCaregiverIndex(null);
+        setEditingNewCaregiverIndex(null);
+        setEditingOldCaregiverAssessmentIndex(null);
+        setEditingNewCaregiverAssessmentIndex(null);
       }, 1100);
     } catch (error) {
       console.error("Error updating data:", error);
@@ -490,12 +722,16 @@ export default function DetailAgendaForm() {
     }
   };
 
-
-  const [openIndex, setOpenIndex] = useState(0);
+  const [openIndex, setOpenIndex] = useState(null);
 
   const toggleAccordion = (index) => {
     setOpenIndex(openIndex === index ? null : index); // เปิด-ปิดเมื่อคลิก
   };
+  useEffect(() => {
+    if (AgendaForms.CaregiverAgenda) {
+      setOpenIndex("caregiver-0"); // เปิดคนแรกโดยอัตโนมัติ
+    }
+  }, [AgendaForms.CaregiverAgenda]);
 
   useEffect(() => {
     if (isModalOpen) {
@@ -515,46 +751,6 @@ export default function DetailAgendaForm() {
   }, [isModalOpen]);
 
   const [activeTab, setActiveTab] = useState("patientAgenda"); // ค่าเริ่มต้น
-
-  const [editingIndex, setEditingIndex] = useState(null); // เก็บ index ของผู้ดูแลที่กำลังแก้ไข
-
-  const handleEditCaregiver = (index) => {
-    setEditingIndex(index);
-    setCurrentEditSection("Caregiver Agenda"); // Add this line
-    setModalContent(
-      <CaregiverAgendaForm
-        formData={AgendaForms.CaregiverAgenda?.Care_Agenda[index]}
-        onChange={(data) => {
-          const updatedCaregivers = [...AgendaForms.CaregiverAgenda.Care_Agenda];
-          updatedCaregivers[index] = data;
-          setAgendaForms((prev) => ({
-            ...prev,
-            CaregiverAgenda: { Care_Agenda: updatedCaregivers },
-          }));
-        }}
-      />
-    );
-    setIsModalOpen(true);
-  };
-
-  const handleEditCaregiverAssessment = (index) => {
-    setEditingIndex(index);
-    setCurrentEditSection("Caregiver Assessment");
-    setModalContent(
-      <CaregiverAssessmentForm
-        formData={AgendaForms.CaregiverAssessment?.Care_Assessment[index]}
-        onChange={(data) => {
-          const updatedAssessments = [...AgendaForms.CaregiverAssessment.Care_Assessment];
-          updatedAssessments[index] = data;
-          setAgendaForms((prev) => ({
-            ...prev,
-            CaregiverAssessment: { Care_Assessment: updatedAssessments },
-          }));
-        }}
-      />
-    );
-    setIsModalOpen(true);
-  };
 
 
 
@@ -663,29 +859,94 @@ export default function DetailAgendaForm() {
           <div className="notifications-dropdown" ref={notificationsRef}>
             <div className="notifications-head">
               <h2 className="notifications-title">การแจ้งเตือน</h2>
+            </div>
+            <div className="notifications-filter">
+              <div
+                className={`notification-box ${filterType === "all" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("all")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-bell"></i>
+                  ทั้งหมด
+                </div>
+                <div className="notification-right">
+                  {unreadCount > 0 && (
+                    <span className="notification-count-noti">{unreadCount}</span>
+                  )}
+                  <i className="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("abnormal")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-exclamation-triangle"></i>
+                  ผิดปกติ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.abnormal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.abnormal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+              <div
+                className={`notification-box ${filterType === "normal" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("normal")}
+              >
+                <div className="notification-item">
+                  {" "}
+                  <i className="bi bi-journal-text"></i>
+                  บันทึกอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.normal > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.normal}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+
+              <div
+                className={`notification-box ${filterType === "assessment" ? "active" : ""
+                  }`}
+                onClick={() => handleFilterChange("assessment")}
+              >
+                <div className="notification-item">
+                  <i className="bi bi-clipboard-check"></i>
+                  ประเมินอาการ
+                </div>
+                <div className="notification-right">
+                  {unreadCountsByType.assessment > 0 && (
+                    <span className="notification-count-noti">
+                      {unreadCountsByType.assessment}
+                    </span>
+                  )}
+                  <i class="bi bi-chevron-right"></i>
+                </div>
+              </div>
+            </div>
+            <div className="selected-filter">
+              <p>
+                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+              </p>
               <p
-                className="notifications-allread"
-                onClick={markAllAlertsAsViewed}
+                className="mark-all-read-btn"
+                onClick={() => markAllByTypeAsViewed(filterType)}
               >
                 ทำเครื่องหมายว่าอ่านทั้งหมด
               </p>
-              <div className="notifications-filter">
-                <button
-                  className={filterType === "all" ? "active" : ""}
-                  onClick={() => handleFilterChange("all")}
-                >
-                  ดูทั้งหมด
-                </button>
-                <button
-                  className={filterType === "unread" ? "active" : ""}
-                  onClick={() => handleFilterChange("unread")}
-                >
-                  ยังไม่อ่าน
-                </button>
-              </div>
             </div>
             {filteredAlerts.length > 0 ? (
-              <>
+              <div>
                 {renderAlerts(
                   filteredAlerts,
                   token,
@@ -695,7 +956,7 @@ export default function DetailAgendaForm() {
                   setUnreadCount,
                   formatDate
                 )}
-              </>
+              </div>
             ) : (
               <p className="no-notification">ไม่มีการแจ้งเตือน</p>
             )}
@@ -730,7 +991,6 @@ export default function DetailAgendaForm() {
             </li>
           </ul>
         </div>
-        <br></br>
         <div className="content">
           <div className="patient-card patient-card-style">
             <p className="patient-name">
@@ -779,7 +1039,9 @@ export default function DetailAgendaForm() {
             <label className="text-secondary">วันที่บันทึก :</label>
             <span> {formatDate(AgendaForms.createdAt)}</span><br></br>
             <label className="text-secondary mt-2">วันที่แก้ไขล่าสุด :</label>
-            <span> {formatDate(AgendaForms.updatedAt)}</span>
+            <span> {AgendaForms.updatedAt === AgendaForms.createdAt
+              ? " -"
+              : formatDate(AgendaForms.updatedAt)}</span>
           </div>
           {/* Navigation Tabs */}
           <div className="readiness card mt-4" style={{ width: "90%" }}>
@@ -882,191 +1144,377 @@ export default function DetailAgendaForm() {
               {activeTab === "caregiverAgenda" && (
                 <div className="tab-pane fade show active">
                   <p className="ms-2" style={{ color: "#10B981" }}> ประเมินผู้ดูแลเบื้องต้น</p>
-                  {AgendaForms.CaregiverAgenda?.Care_Agenda?.map((agenda, index) => (
-                    <div key={index}>
-                      <div
-                        className="row mb-2"
-                        onClick={() => toggleAccordion(index)}
-                      >
-                        <div className="col-sm-3">
-                          <strong
-                            style={{
-                              cursor: "pointer",
-                              color: "#007BFF",
-                              transition: "color 0.1s ease",
-                            }}
-                            onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
-                            onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
-                          >
-                            ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
-                            {agenda.lastName || "-"}
-                            {/* {agenda.relationship || "-"} */}
-                          </strong>
-                        </div>
-
-                      </div>
-
-                      {openIndex === index && (
-                        <div className="p-3 border rounded ms-2">
-                          <div className="row ">
-                            <div className="col-sm-2">
-                              <strong>Idea :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.caregiver_idea || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Feeling :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.caregiver_feeling || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Function :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.caregiver_funtion || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Expectation :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.caregiver_expectation || "-"}</p>
-                            </div>
-                          </div>
-                          {/* <hr /> */}
-                          <div className="col-sm-2">
-                            <button
-                              className="btn m-2"
-                              style={{ backgroundColor: "#ffde59", color: "black" }}
-                              onClick={() => handleEditCaregiver(index)}
+                  <h5 className="ms-2" style={{ color: "#444" }}> <b>1. ผู้ดูแล</b></h5>
+                  {AgendaForms.CaregiverAgenda?.Old_Caregiver_Agenda?.length > 0 ? (
+                    AgendaForms.CaregiverAgenda?.Old_Caregiver_Agenda?.map((agenda, index) => (
+                      <div key={index}>
+                        <div
+                          className="row mb-2 mt-3"
+                          onClick={() => toggleAccordion(`caregiver-${index}`)}
+                        >
+                          <div className="col-sm-3">
+                            <strong
+                              style={{
+                                cursor: "pointer",
+                                color: "#007BFF",
+                                transition: "color 0.1s ease",
+                              }}
+                              onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                              onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
                             >
-                              <i class="bi bi-pencil-fill"></i> แก้ไข
-                            </button>
-
+                              ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
+                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                            </strong>
                           </div>
+
                         </div>
-                      )}
-                    </div>
-                  )
-                  ) || "ไม่มีข้อมูล"}
+                        {openIndex === `caregiver-${index}` && (
+                          <div className=" p-3 border rounded ms-2 ">
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Idea :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_idea || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Feeling :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_feeling || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Function :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_function || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Expectation :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_expectation || "-"}</p>
+                              </div>
+                            </div>
+                            {/* <hr /> */}
+                            <div className="col-sm-2">
+                              <button
+                                className="btn m-2"
+                                style={{ backgroundColor: "#ffde59", color: "black" }}
+                                onClick={() => handleEditOldCaregiverAgenda(index)}
+                              >
+                                <i class="bi bi-pencil-fill"></i> แก้ไข
+                              </button>
+
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="p-2">ไม่มีข้อมูลผู้ดูแล</p>
+                  )}
+                  <h5 className="ms-2 mt-4" style={{ color: "#444" }}> <b>2. คนในครอบครัว</b></h5>
+                  {AgendaForms.CaregiverAgenda?.New_Caregiver_Agenda?.length > 0 ? (
+                    AgendaForms.CaregiverAgenda?.New_Caregiver_Agenda?.map((agenda, index) => (
+                      <div key={index}>
+                        <div
+                          className="row mb-2 mt-3"
+                          onClick={() => toggleAccordion(`family-${index}`)}
+                        >
+                          <div className="col-sm-6">
+                            <strong
+                              style={{
+                                cursor: "pointer",
+                                color: "#007BFF",
+                                transition: "color 0.1s ease",
+                              }}
+                              onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                              onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
+                            >
+                              คนที่ {index + 1} : {agenda.firstName}{" "}
+                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                            </strong>
+                          </div>
+
+                        </div>
+
+                        {openIndex === `family-${index}` && (
+                          <div className=" p-3 border rounded ms-2 ">
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Idea :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_idea || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Feeling :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_feeling || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Function :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_function || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Expectation :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.caregiver_expectation || "-"}</p>
+                              </div>
+                            </div>
+                            {/* <hr /> */}
+                            <div className="col-sm-2">
+                              <button
+                                className="btn m-2"
+                                style={{ backgroundColor: "#ffde59", color: "black" }}
+                                onClick={() => handleEditNewCaregiversAgenda(index)}
+                              >
+                                <i class="bi bi-pencil-fill"></i> แก้ไข
+                              </button>
+
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="p-2">ไม่มีข้อมูลคนในครอบครัว</p>
+                  )}
                 </div>
               )}
-
 
               {activeTab === "caregiverAssessment" && (
                 <div className="tab-pane fade show active">
                   <p className="ms-2" style={{ color: "#10B981" }}> ประเมินภาระในการดูแลและปัญหาสุขภาพจิตของผู้ดูแล</p>
-                  {AgendaForms.CaregiverAssessment?.Care_Assessment?.map((agenda, index) => (
-                    <div key={index}>
-                      <div
-                        className="row mb-2"
-                        onClick={() => toggleAccordion(index)}
-                      >
-                        <div className="col-sm-3">
-                          <strong
-                            style={{
-                              cursor: "pointer",
-                              color: "#007BFF",
-                              transition: "color 0.1s ease",
-                            }}
-                            onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
-                            onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
-                          >
-                            ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
-                            {agenda.lastName || "-"}
-                          </strong>
-                        </div>
-
-                      </div>
-
-                      {openIndex === index && (
-                        <div className="p-3 border rounded ms-2">
-                          <div className="row ">
-                            <div className="col-sm-2">
-                              <strong>Care  :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.care || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Affection :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.affection || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Rest :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.rest || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Empathy :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.empathy || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Goal Of Care :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.goalOfCare || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Ventilation :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.ventilation || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Empowerment :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.empowerment || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="col-sm-2">
-                              <strong>Resource :</strong>
-                            </div>
-                            <div className="col-sm-9">
-                              <p>{agenda.resource || "-"}</p>
-                            </div>
-                          </div>
-                          <div className="col-sm-2">
-                            <button
-                              className="btn m-2"
-                              style={{ backgroundColor: "#ffde59", color: "black" }}
-                              onClick={() => handleEditCaregiverAssessment(index)}
+                  <h5 className="ms-2" style={{ color: "#444" }}> <b>1. ผู้ดูแล</b></h5>
+                  {AgendaForms.CaregiverAssessment?.Old_Caregiver_Assessment?.length > 0 ? (
+                    AgendaForms.CaregiverAssessment.Old_Caregiver_Assessment.map((agenda, index) => (
+                      <div key={index}>
+                        <div
+                          className="row mb-2 mt-3"
+                          onClick={() => toggleAccordion(`caregiver-${index}`)}
+                        >
+                          <div className="col-sm-3">
+                            <strong
+                              style={{
+                                cursor: "pointer",
+                                color: "#007BFF",
+                                transition: "color 0.1s ease",
+                              }}
+                              onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                              onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
                             >
-                              <i class="bi bi-pencil-fill"></i> แก้ไข
-                            </button>
-
+                              ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
+                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                            </strong>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  )
-                  ) || "ไม่มีข้อมูล"}
+                        {openIndex === `caregiver-${index}` && (
+                          <div className="p-3 border rounded ms-2">
+                            <div className="row ">
+                              <div className="col-sm-2">
+                                <strong>Care  :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.care || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Affection :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.affection || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Rest :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.rest || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Empathy :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.empathy || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Goal Of Care :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.goalOfCare || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Ventilation :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.ventilation || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Empowerment :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.empowerment || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Resource :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.resource || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="col-sm-2">
+                              <button
+                                className="btn m-2"
+                                style={{ backgroundColor: "#ffde59", color: "black" }}
+                                onClick={() => handleEditOldCaregiverAssessment(index)}
+                              >
+                                <i class="bi bi-pencil-fill"></i> แก้ไข
+                              </button>
+
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="p-2">ไม่มีข้อมูลผู้ดูแล</p>
+                  )}
+                  <h5 className="ms-2 mt-4" style={{ color: "#444" }}> <b>2. คนในครอบครัว</b></h5>
+                  {AgendaForms.CaregiverAssessment?.New_Caregiver_Assessment?.length > 0 ? (
+                    AgendaForms.CaregiverAssessment?.New_Caregiver_Assessment?.map((agenda, index) => (
+                      <div key={index}>
+                        <div
+                          className="row mb-2 mt-3"
+                          onClick={() => toggleAccordion(`family-${index}`)}
+                        >
+                          <div className="col-sm-6">
+                            <strong
+                              style={{
+                                cursor: "pointer",
+                                color: "#007BFF",
+                                transition: "color 0.1s ease",
+                              }}
+                              onMouseEnter={(e) => e.target.style.color = "#95d7ff"} // เมื่อ hover
+                              onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
+                            >
+                              คนที่ {index + 1} : {agenda.firstName}{" "}
+                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                            </strong>
+                          </div>
+                        </div>
+                        {openIndex === `family-${index}` && (
+                          <div className="p-3 border rounded ms-2">
+                            <div className="row ">
+                              <div className="col-sm-2">
+                                <strong>Care  :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.care || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Affection :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.affection || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Rest :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.rest || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Empathy :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.empathy || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Goal Of Care :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.goalOfCare || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Ventilation :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.ventilation || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Empowerment :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.empowerment || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-sm-2">
+                                <strong>Resource :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>{agenda.resource || "-"}</p>
+                              </div>
+                            </div>
+                            <div className="col-sm-2">
+                              <button
+                                className="btn m-2"
+                                style={{ backgroundColor: "#ffde59", color: "black" }}
+                                onClick={() => handleEditNewCaregiverAssessment(index)}
+                              >
+                                <i class="bi bi-pencil-fill"></i> แก้ไข
+                              </button>
+
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="p-2">ไม่มีข้อมูลคนในครอบครัว</p>
+                  )}
                 </div>
               )}
 
@@ -1119,7 +1567,7 @@ export default function DetailAgendaForm() {
                         <button
                           className="btn m-2"
                           style={{ backgroundColor: "#ffde59", color: "black" }}
-                          onClick={() => handleEditClick("Zaritburdeninterview Form")}
+                          onClick={() => handleEditClick("Zarit Burden Interview Form")}
                         >
                           <i class="bi bi-pencil-fill"></i> แก้ไข
                         </button>
@@ -1137,35 +1585,53 @@ export default function DetailAgendaForm() {
           </div>
         </div>
       </div>
-      {isModalOpen && modalContent && (
-        <div className="modal show d-block" tabIndex="-1">
-          <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div className="modal-content">
-              {/* Header */}
-              <div className="modal-header d-flex justify-content-center">
-                <h5 className="modal-title text-black text-center">
-                  แก้ไข {currentEditSection.replace(" Form", "")}
-                </h5>
-              </div>
+      {isModalOpen && currentEditSection === "Patient Agenda Form" && (
+        <PatientAgendaForm
+          formData={tempFormValues}
+          onSave={handleSaveChanges}
+          onClose={handleCloseModal}
+        />
 
-              {/* Body */}
-              <div className="modal-body">{modalContent}</div>
+      )}
+      {isModalOpen && currentEditSection === "Caregiver Agenda Form" && editingOldCaregiverIndex !== null && (
+        <CaregiverAgendaForm
+          formData={tempFormValues}
+          onSave={handleSaveChanges}
+          onClose={handleCloseModal}
+        />
+      )}
 
-              {/* Footer */}
-              <div className="modal-footer d-flex justify-content-between">
-                {/* ปุ่มยกเลิก */}
-                <button className="btn-EditMode btn-secondary" onClick={handleCloseModal}>
-                  ยกเลิก
-                </button>
+      {isModalOpen && currentEditSection === "Caregiver Agenda Form" && editingNewCaregiverIndex !== null && (
+        <CaregiverAgendaForm
+          formData={tempFormValues}
+          onSave={handleSaveChanges}
+          onClose={handleCloseModal}
+        />
+      )}
 
-                {/* ปุ่มบันทึก */}
-                <button className="btn-EditMode btnsave" onClick={() => handleSaveChanges()}>
-                  บันทึก
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {isModalOpen && currentEditSection === "Caregiver Assessment Form" && editingOldCaregiverAssessmentIndex !== null && (
+        <CaregiverAssessmentForm
+          formData={tempFormValues}
+          onSave={handleSaveChanges}
+          onClose={handleCloseModal}
+        />
+      )}
+
+      {isModalOpen && currentEditSection === "Caregiver Assessment Form" && editingNewCaregiverAssessmentIndex !== null && (
+        <CaregiverAssessmentForm
+          formData={tempFormValues}
+          onSave={handleSaveChanges}
+          onClose={handleCloseModal}
+        />
+      )}
+
+
+      {isModalOpen && currentEditSection === "Zarit Burden Interview Form" && (
+        <ZaritburdeninterviewForm
+          formData={tempFormValues}
+          onSave={handleSaveChanges}
+          onClose={handleCloseModal}
+        />
       )}
 
     </main>

@@ -1,16 +1,32 @@
 import React, { useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const PatientAgenda = ({ onDataChange }) => {
+export const PatientAgenda = ({ onDataChange}) => {
     const { control, setValue, getValues } = useFormContext();
 
-    useEffect(() => {
-        onDataChange(getValues()); // ส่งค่าเริ่มต้นให้ Parent Component
-    }, []);
+    const storageKey = `patientAgendaData`; // ✅ ใช้ userId เพื่อแยกข้อมูลแต่ละคน
 
+    // ✅ โหลดข้อมูลจาก LocalStorage เมื่อลง Component
+    useEffect(() => {
+        const savedData = localStorage.getItem(storageKey);
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            Object.keys(parsedData).forEach((key) => setValue(key, parsedData[key]));
+            onDataChange(parsedData);
+        } else {
+            // ✅ ถ้าไม่มีข้อมูล ให้เคลียร์ค่า
+            onDataChange({});
+        }
+    }, ); // ✅ รันใหม่เมื่อ userid เปลี่ยน
+
+    // ✅ บันทึกข้อมูลทุกครั้งที่มีการเปลี่ยนแปลง
     const handleInputChange = (name, value) => {
         setValue(name, value);
-        onDataChange({ ...getValues() });
+        const updatedData = { ...getValues(), [name]: value };
+        onDataChange(updatedData);
+
+        // ✅ บันทึกข้อมูลลง localStorage
+        localStorage.setItem(storageKey, JSON.stringify(updatedData));
     };
 
     return (

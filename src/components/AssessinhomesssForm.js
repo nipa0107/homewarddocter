@@ -440,43 +440,15 @@ export default function AssessinhomesssForm({ }) {
         }
     };
 
-    const logOut = () => {
-        window.localStorage.clear();
-        window.location.href = "./";
-    };
+    // const logOut = () => {
+    //     window.localStorage.clear();
+    //     window.location.href = "./";
+    // };
 
-    const handleToggleSidebar = () => {
-        setIsActive(!isActive);
-    };
+    // const handleToggleSidebar = () => {
+    //     setIsActive(!isActive);
+    // };
 
-
-
-    const handleScroll = () => {
-        const formContent = document.querySelector('.form-content');
-        if (formContent.scrollTop > 200) {
-            setShowToTopButton(true);
-        } else {
-            setShowToTopButton(false);
-        }
-    };
-    const scrollToTop = () => {
-        console.log("🔼 Scrolling to top...");  // ตรวจสอบว่าโค้ดเข้าถึงตรงนี้จริงไหม
-        const formContent = document.querySelector('.form-content');
-        if (formContent) {
-            formContent.scrollTo({ top: 0 });
-        } else {
-            console.log("⚠️ form-content not found!");
-        }
-    };
-
-
-    useEffect(() => {
-        const formContent = document.querySelector('.form-content');
-        formContent.addEventListener("scroll", handleScroll);
-        return () => {
-            formContent.removeEventListener("scroll", handleScroll);
-        };
-    }, []);
 
 
     const formatDate = (dateTimeString) => {
@@ -518,10 +490,6 @@ export default function AssessinhomesssForm({ }) {
 
     const [activeStep, setActiveStep] = useState(0);
 
-    useEffect(() => {
-        scrollToTop(); // ทำให้ฟอร์มเลื่อนขึ้นไปด้านบนสุดทุกครั้งที่ activeStep เปลี่ยน
-    }, [activeStep]);
-
     const methods = useForm({
         defaultValues: {
         },
@@ -529,8 +497,39 @@ export default function AssessinhomesssForm({ }) {
 
     // ฟังก์ชันสำหรับเปลี่ยน active step เมื่อคลิกที่ StepLabel
     const handleStepClick = (index) => {
+        // อนุญาตให้กลับไปยังหน้า Immobility ได้เสมอ
+        if (index < activeStep) {
+            setActiveStep(index);
+            setShowError(false); // ซ่อนข้อความแจ้งเตือน
+            window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนหน้าไปด้านบนสุด
+            return;
+        }
+
+        // ตรวจสอบว่ากำลังไป Step 1 (Nutrition) และ Immobility ต้องกรอกครบก่อน
+        if (activeStep === 0 && !isImmobilityDataValid(Immobilitydata)) {
+            setShowError(true);
+            toast.error("กรุณากรอกข้อมูลให้ครบถ้วนก่อนดำเนินการต่อ");
+            return;
+        }
+
+        // ตรวจสอบ Nutrition ก่อนข้ามไปหน้าอื่น
+        if (activeStep === 1 && !validateForm()) {
+            setShowError(true);
+            toast.error("กรุณากรอกข้อมูลให้ครบถ้วนก่อนดำเนินการต่อ");
+            return;
+        }
+
         setActiveStep(index);
+        setShowError(false); // ซ่อนข้อความแจ้งเตือนถ้าผ่าน
+        window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนหน้าไปด้านบนสุด
     };
+
+    // ฟังก์ชันตรวจสอบข้อมูล Immobility
+    const isImmobilityDataValid = (data) => {
+        return Object.values(data).every(value => value !== 0 && value !== "");
+    };
+
+
 
     useEffect(() => {
         const fetchCaregiverData = async () => {
@@ -547,35 +546,63 @@ export default function AssessinhomesssForm({ }) {
         fetchCaregiverData();
     }, [id]);
 
-    useEffect(() => {
-        // โหลดข้อมูลจาก localStorage ถ้ามี
-        const savedFormData = localStorage.getItem(`formData-${userid}`);
-        if (savedFormData) {
-            const parsedData = JSON.parse(savedFormData);
-            setImmobilityData(parsedData.Immobility || {});
-            setNutritionData(parsedData.Nutrition || {});
-            setHousingData(parsedData.Housing || {});
-            setOtherpeopleData(parsedData.OtherPeople || []);
-            setMedicationData(parsedData.Medication || {});
-            setPhysicalexaminationData(parsedData.PhysicalExamination || {});
-            setsssData(parsedData.SSS || {});
-        }
-    }, [userid]);
 
     const [hasError, setHasError] = useState(false); // ตรวจสอบข้อผิดพลาด
     const [showError, setShowError] = useState(false); // ควบคุมการแสดงข้อความแจ้งเตือน
 
+    const [validateForm, setValidateForm] = useState(() => () => true);
+
+    // โหลดข้อมูลจาก LocalStorage เมื่อเปิดหน้า
+    const [Immobilitydata, setImmobilityData] = useState(() => {
+        return JSON.parse(localStorage.getItem('immobilityData')) || {
+            Pick_up_food: 0, Clean_up: 0, Put_on_clothes: 0, Shower: 0, Using_the_toilet: 0,
+            Get_up: 0, Walk_inside: 0, Up_down_stairs: 0, Continence_urine: 0, Continence_stool: 0,
+            Walk_outside: 0, Cooking: 0, Household_chores: 0, Shopping: 0, Taking_public_transportation: 0,
+            Taking_medicine: 0, totalScore: 0
+        };
+    });
+
+    const [nutritionData, setNutritionData] = useState(() => {
+        return JSON.parse(localStorage.getItem('nutritionData')) || {
+          weight: "", height: "", bmr: 0, tdee: 0, activityLevel: "",
+          intakeMethod: [], foodTypes: [], medicalFood: "", favoriteFood: "",
+          cooks: [], nutritionStatus: ""
+        };
+      });
+    const [HousingData, setHousingData] = useState(() => JSON.parse(localStorage.getItem('housingData')) || {});
+    const [medicationData, setMedicationData] = useState(() => JSON.parse(localStorage.getItem('medicationData')) || {});
+    const [PhysicalexaminationData, setPhysicalexaminationData] = useState(() => JSON.parse(localStorage.getItem('physicalExaminationData')) || {});
+    const [sssData, setsssData] = useState(() => JSON.parse(localStorage.getItem('sssData')) || {});
+    const [OtherpeopleData, setOtherpeopleData] = useState(() => JSON.parse(localStorage.getItem('otherPeopleData')) || []);
+
+    // บันทึกข้อมูลลง LocalStorage ทุกครั้งที่เปลี่ยนแปลง
+    useEffect(() => {
+        localStorage.setItem('immobilityData', JSON.stringify(Immobilitydata));
+        localStorage.setItem('nutritionData', JSON.stringify(nutritionData));
+        localStorage.setItem('housingData', JSON.stringify(HousingData));
+        localStorage.setItem('medicationData', JSON.stringify(medicationData));
+        localStorage.setItem('physicalExaminationData', JSON.stringify(PhysicalexaminationData));
+        localStorage.setItem('sssData', JSON.stringify(sssData));
+        localStorage.setItem('otherPeopleData', JSON.stringify(OtherpeopleData));
+    }, [Immobilitydata, nutritionData, HousingData, medicationData, PhysicalexaminationData, sssData, OtherpeopleData]);
+
     const handleNext = async (data) => {
         console.log("Form data at step", activeStep, data);
 
+        // ตรวจสอบเฉพาะ step 0 และ step 1
         if (activeStep === 0) {
             if (hasError) {
                 setShowError(true); // แสดงข้อความแจ้งเตือน
                 return; // หยุดการทำงานถ้ายังมี error
             }
             setImmobilityData(Immobilitydata);
-        } else if (activeStep === 1) {
+        } else if (activeStep === 1) { // ตรวจสอบเฉพาะหน้าโภชนาการ
+            if (!validateForm()) {
+                setShowError(true);
+                return;
+            }
             setNutritionData(nutritionData);
+
         } else if (activeStep === 2) {
             setHousingData(HousingData);
         } else if (activeStep === 3) {
@@ -585,7 +612,7 @@ export default function AssessinhomesssForm({ }) {
         } else if (activeStep === 5) { // Physical Examination Step
             const updatedPhysicalExamination = { ...PhysicalexaminationData };
 
-            // รวมค่าของ "Other" ในแต่ละฟิลด์
+            // ฟิลด์ที่อาจมี "Other"
             const fieldsWithOther = [
                 "moodandaffect",
                 "appearanceAndBehavior",
@@ -597,9 +624,12 @@ export default function AssessinhomesssForm({ }) {
             ];
 
             fieldsWithOther.forEach((field) => {
-                const values = updatedPhysicalExamination[field] || [];
+                const values = Array.isArray(updatedPhysicalExamination[field])
+                    ? updatedPhysicalExamination[field]
+                    : [];
+
                 updatedPhysicalExamination[field] = values.map((item) => {
-                    if (item.startsWith("อื่นๆ:")) {
+                    if (typeof item === "string" && item.startsWith("อื่นๆ:")) {
                         return {
                             value: item.replace("อื่นๆ: ", ""),
                             isOther: true,
@@ -613,8 +643,10 @@ export default function AssessinhomesssForm({ }) {
         } else if (activeStep === 6) {
             setsssData(data);
         }
+
         setShowError(false); // ซ่อนข้อความแจ้งเตือนเมื่อเปลี่ยนหน้า
-        // เมื่อถึงหน้าสุดท้าย ให้ส่งข้อมูลไปยัง backend
+
+
         if (activeStep === steps.length - 1) {
             try {
                 const response = await fetch(`http://localhost:5000/submitassessinhome/${userid}`, {
@@ -624,19 +656,23 @@ export default function AssessinhomesssForm({ }) {
                     },
                     body: JSON.stringify({
                         userId: userid,
-                        MPersonnel: mpersonnel,
-                        Caregiver: caregiver,
+                        MPersonnel: mpersonnel || {},
+                        Caregiver: caregiver || {},
                         Immobility: Immobilitydata,
                         Nutrition: {
                             ...nutritionData,
-                            gender: nutritionData.gender || gender, // ตรวจสอบ gender ก่อนส่ง
+                            gender: nutritionData.gender || gender,
                             userAge: nutritionData.userAge || userAge,
                             userAgeInMonths: nutritionData.userAgeInMonths || userAgeInMonths,
                         },
                         Housing: HousingData,
                         OtherPeople: {
-                            existingCaregivers: OtherpeopleData.existingCaregivers || [],
-                            newCaregivers: OtherpeopleData.newCaregivers || [],
+                            existingCaregivers: Array.isArray(OtherpeopleData.existingCaregivers)
+                                ? OtherpeopleData.existingCaregivers
+                                : [],
+                            newCaregivers: Array.isArray(OtherpeopleData.newCaregivers)
+                                ? OtherpeopleData.newCaregivers
+                                : [],
                         },
                         Medication: medicationData,
                         PhysicalExamination: PhysicalexaminationData,
@@ -648,7 +684,16 @@ export default function AssessinhomesssForm({ }) {
                 const result = await response.json();
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
-                    localStorage.removeItem(`formData-${userid}`); // ล้างข้อมูลหลังจากส่งสำเร็จ
+
+                    // ล้างค่า LocalStorage
+                    localStorage.removeItem('immobilityData');
+                    localStorage.removeItem('nutritionData');
+                    localStorage.removeItem('housingData');
+                    localStorage.removeItem('medicationData');
+                    localStorage.removeItem('physicalExaminationData');
+                    localStorage.removeItem('sssData');
+                    localStorage.removeItem('otherPeopleData');
+
                     setTimeout(() => {
                         navigate("/assessinhomesssuser", { state: { id } });
                     }, 1000);
@@ -663,67 +708,47 @@ export default function AssessinhomesssForm({ }) {
                 console.error('Error saving data:', error);
             }
         } else {
-            // เรียก `scrollToTop()` พร้อม setTimeout เพื่อให้แน่ใจว่าหน้าถูกอัปเดตก่อน
-            setTimeout(() => {
-                scrollToTop();
-            }, 0); // หน่วงเวลาเล็กน้อย
-
+            // หากไม่ใช่หน้าสุดท้าย ให้เลื่อนไปยังหน้าถัดไป
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
+            window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนหน้าไปด้านบนสุด
         }
+
     };
 
-    const handleBack = () => {
-        scrollToTop(); // เลื่อนไปด้านบนสุดทันที
 
+    const handleBack = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนหน้าไปด้านบนสุด
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const storedFormData = JSON.parse(localStorage.getItem(`formData-${userid}`)) || {};
 
-    const [Immobilitydata, setImmobilityData] = useState(storedFormData.Immobility || {
-        Pick_up_food: 0,
-        Clean_up: 0,
-        Put_on_clothes: 0,
-        Shower: 0,
-        Using_the_toilet: 0,
-        Get_up: 0,
-        Walk_inside: 0,
-        Up_down_stairs: 0,
-        Continence_urine: 0,
-        Continence_stool: 0,
-        Walk_outside: 0,
-        Cooking: 0,
-        Household_chores: 0,
-        Shopping: 0,
-        Taking_public_transportation: 0,
-        Taking_medicine: 0,
-        totalScore: 0
-    });
+    // const [Immobilitydata, setImmobilityData] = useState({
+    //     Pick_up_food: 0,
+    //     Clean_up: 0,
+    //     Put_on_clothes: 0,
+    //     Shower: 0,
+    //     Using_the_toilet: 0,
+    //     Get_up: 0,
+    //     Walk_inside: 0,
+    //     Up_down_stairs: 0,
+    //     Continence_urine: 0,
+    //     Continence_stool: 0,
+    //     Walk_outside: 0,
+    //     Cooking: 0,
+    //     Household_chores: 0,
+    //     Shopping: 0,
+    //     Taking_public_transportation: 0,
+    //     Taking_medicine: 0,
+    //     totalScore: 0
+    // });
+    // const [nutritionData, setNutritionData] = useState({});
+    // const [HousingData, setHousingData] = useState({});
 
-    const [nutritionData, setNutritionData] = useState(storedFormData.Nutrition || {});
-    const [HousingData, setHousingData] = useState(storedFormData.Housing || {});
-    const [medicationData, setMedicationData] = useState(storedFormData.Medication || {});
-    const [PhysicalexaminationData, setPhysicalexaminationData] = useState(storedFormData.PhysicalExamination || {});
-    const [sssData, setsssData] = useState(storedFormData.SSS || {});
-    const [OtherpeopleData, setOtherpeopleData] = useState(storedFormData.OtherPeople || []);
+    // const [medicationData, setMedicationData] = useState({});
+    // const [PhysicalexaminationData, setPhysicalexaminationData] = useState({});
+    // const [sssData, setsssData] = useState({});
+    // const [OtherpeopleData, setOtherpeopleData] = useState([]);
 
-    useEffect(() => {
-        const formData = {
-            Immobility: Immobilitydata,
-            Nutrition: {
-                ...nutritionData,
-                gender: nutritionData.gender || gender, // ตรวจสอบ gender ก่อนส่ง
-                userAge: nutritionData.userAge || userAge,
-                userAgeInMonths: nutritionData.userAgeInMonths || userAgeInMonths,
-            },
-            Housing: HousingData,
-            OtherPeople: OtherpeopleData,
-            Medication: medicationData,
-            PhysicalExamination: PhysicalexaminationData,
-            SSS: sssData,
-        };
-        localStorage.setItem(`formData-${userid}`, JSON.stringify(formData));
-    }, [Immobilitydata, nutritionData, HousingData, OtherpeopleData, medicationData, PhysicalexaminationData, sssData]);
 
     useEffect(() => {
         // ดึงข้อมูล unread count เมื่อเปิดหน้า
@@ -749,161 +774,163 @@ export default function AssessinhomesssForm({ }) {
     return (
         <div>
             <ToastContainer />
-            <div className="container-form">
-                <div className="homeheaderform">
-                    <div className="header">ประเมิน IN-HOME-SSS</div>
-                    <div className="profile_details">
-                        <ul className="nav-list">
-                            <li>
-                                <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
-                                    {showNotifications ? (
-                                        <i className="bi bi-bell-fill"></i>
-                                    ) : (
-                                        <i className="bi bi-bell"></i>
-                                    )}
-                                    {unreadCount > 0 && (
-                                        <span className="notification-count">{unreadCount}</span>
-                                    )}
-                                </a>
-                            </li>
-                            <li>
-                                <a href="profile">
-                                    <i className="bi bi-person"></i>
-                                    <span className="links_name">
-                                        {data && data.nametitle + data.name + " " + data.surname}
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
 
-                {showNotifications && (
-                    <div className="notifications-dropdown" ref={notificationsRef}>
-                        <div className="notifications-head">
-                            <h2 className="notifications-title">การแจ้งเตือน</h2>
-                        </div>
-                        <div className="notifications-filter">
-                            <div
-                                className={`notification-box ${filterType === "all" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("all")}
-                            >
-                                <div className="notification-item">
+            <div className="homeheaderform">
+                <div className="header">ประเมิน IN-HOME-SSS</div>
+                <div className="profile_details">
+                    <ul className="nav-list">
+                        <li>
+                            <a ref={bellRef} className="bell-icon" onClick={toggleNotifications}>
+                                {showNotifications ? (
+                                    <i className="bi bi-bell-fill"></i>
+                                ) : (
                                     <i className="bi bi-bell"></i>
-                                    ทั้งหมด
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCount > 0 && (
-                                        <span className="notification-count-noti">{unreadCount}</span>
-                                    )}
-                                    <i className="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-                            <div
-                                className={`notification-box ${filterType === "abnormal" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("abnormal")}
-                            >
-                                <div className="notification-item">
-                                    <i className="bi bi-exclamation-triangle"></i>
-                                    ผิดปกติ
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCountsByType.abnormal > 0 && (
-                                        <span className="notification-count-noti">
-                                            {unreadCountsByType.abnormal}
-                                        </span>
-                                    )}
-                                    <i class="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-                            <div
-                                className={`notification-box ${filterType === "normal" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("normal")}
-                            >
-                                <div className="notification-item">
-                                    {" "}
-                                    <i className="bi bi-journal-text"></i>
-                                    บันทึกอาการ
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCountsByType.normal > 0 && (
-                                        <span className="notification-count-noti">
-                                            {unreadCountsByType.normal}
-                                        </span>
-                                    )}
-                                    <i class="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-
-                            <div
-                                className={`notification-box ${filterType === "assessment" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("assessment")}
-                            >
-                                <div className="notification-item">
-                                    <i className="bi bi-clipboard-check"></i>
-                                    ประเมินอาการ
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCountsByType.assessment > 0 && (
-                                        <span className="notification-count-noti">
-                                            {unreadCountsByType.assessment}
-                                        </span>
-                                    )}
-                                    <i class="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="selected-filter">
-                            <p>
-                                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-                            </p>
-                            <p
-                                className="mark-all-read-btn"
-                                onClick={() => markAllByTypeAsViewed(filterType)}
-                            >
-                                ทำเครื่องหมายว่าอ่านทั้งหมด
-                            </p>
-                        </div>
-                        {filteredAlerts.length > 0 ? (
-                            <div>
-                                {renderAlerts(
-                                    filteredAlerts,
-                                    token,
-                                    userId,
-                                    navigate,
-                                    setAlerts,
-                                    setUnreadCount,
-                                    formatDate
                                 )}
-                            </div>
-                        ) : (
-                            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                        )}
+                                {unreadCount > 0 && (
+                                    <span className="notification-count">{unreadCount}</span>
+                                )}
+                            </a>
+                        </li>
+                        <li>
+                            <a href="profile">
+                                <i className="bi bi-person"></i>
+                                <span className="links_name">
+                                    {data && data.nametitle + data.name + " " + data.surname}
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {showNotifications && (
+                <div className="notifications-dropdown" ref={notificationsRef}>
+                    <div className="notifications-head">
+                        <h2 className="notifications-title">การแจ้งเตือน</h2>
                     </div>
-                )}
+                    <div className="notifications-filter">
+                        <div
+                            className={`notification-box ${filterType === "all" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("all")}
+                        >
+                            <div className="notification-item">
+                                <i className="bi bi-bell"></i>
+                                ทั้งหมด
+                            </div>
+                            <div className="notification-right">
+                                {unreadCount > 0 && (
+                                    <span className="notification-count-noti">{unreadCount}</span>
+                                )}
+                                <i className="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div
+                            className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("abnormal")}
+                        >
+                            <div className="notification-item">
+                                <i className="bi bi-exclamation-triangle"></i>
+                                ผิดปกติ
+                            </div>
+                            <div className="notification-right">
+                                {unreadCountsByType.abnormal > 0 && (
+                                    <span className="notification-count-noti">
+                                        {unreadCountsByType.abnormal}
+                                    </span>
+                                )}
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div
+                            className={`notification-box ${filterType === "normal" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("normal")}
+                        >
+                            <div className="notification-item">
+                                {" "}
+                                <i className="bi bi-journal-text"></i>
+                                บันทึกอาการ
+                            </div>
+                            <div className="notification-right">
+                                {unreadCountsByType.normal > 0 && (
+                                    <span className="notification-count-noti">
+                                        {unreadCountsByType.normal}
+                                    </span>
+                                )}
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+
+                        <div
+                            className={`notification-box ${filterType === "assessment" ? "active" : ""
+                                }`}
+                            onClick={() => handleFilterChange("assessment")}
+                        >
+                            <div className="notification-item">
+                                <i className="bi bi-clipboard-check"></i>
+                                ประเมินอาการ
+                            </div>
+                            <div className="notification-right">
+                                {unreadCountsByType.assessment > 0 && (
+                                    <span className="notification-count-noti">
+                                        {unreadCountsByType.assessment}
+                                    </span>
+                                )}
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="selected-filter">
+                        <p>
+                            การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+                        </p>
+                        <p
+                            className="mark-all-read-btn"
+                            onClick={() => markAllByTypeAsViewed(filterType)}
+                        >
+                            ทำเครื่องหมายว่าอ่านทั้งหมด
+                        </p>
+                    </div>
+                    {filteredAlerts.length > 0 ? (
+                        <div>
+                            {renderAlerts(
+                                filteredAlerts,
+                                token,
+                                userId,
+                                navigate,
+                                setAlerts,
+                                setUnreadCount,
+                                formatDate
+                            )}
+                        </div>
+                    ) : (
+                        <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+                    )}
+                </div>
+            )}
+            <div className="container-form">
+                {/* <Stepper className="stepper" activeStep={activeStep} orientation="vertical">
+                    {steps.map((label, index) => (
+                        <Step key={index}>
+                            <StepLabel>{label}</StepLabel>
+                        </Step>
+                    ))}
+                </Stepper> */}
                 <div className="stepper">
                     <Stepper activeStep={activeStep} alternativeLabel>
                         {steps.map((label, index) => (
                             <Step key={index}>
                                 <StepLabel
                                     onClick={() => handleStepClick(index)}
-                                    style={{
-                                        cursor: "pointer",
-                                        color: activeStep === index ? "#95d7ff" : "#18aed6", // สีเขียวเมื่อเลือก, สีฟ้าสำหรับไม่เลือก
-                                        fontSize: "20px", // ขนาดฟอนต์ 20px
-                                        fontWeight: activeStep === index ? "bold" : "normal", // ตัวหนาเมื่อคลิก
-                                    }}
+
                                 >
                                     {label}
                                 </StepLabel>
                             </Step>
                         ))}
                     </Stepper>
-
                 </div>
                 <div className="formcontent">
                     <div class="row">
@@ -922,7 +949,7 @@ export default function AssessinhomesssForm({ }) {
                                         <label style={{ color: "#666" }}> อายุ :</label> <b> {userAge} ปี {userAgeInMonths} เดือน</b>   <br></br>
                                         <label style={{ color: "#666" }}> ผู้ป่วยโรค :</label> <b> {medicalData && medicalData.Diagnosis
                                             ? medicalData.Diagnosis
-                                            : "ไม่ได้ระบุโรค"}</b>
+                                            : "ไม่ระบุโรค"}</b>
                                     </p>
                                 ) : (
                                     <p >
@@ -957,7 +984,7 @@ export default function AssessinhomesssForm({ }) {
                                                 <Immobility Immobilitydata={Immobilitydata} setImmobilityData={setImmobilityData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
                                             )}
                                             {activeStep === 1 && (
-                                                <Nutrition onDataChange={(data) => setNutritionData(data)} />
+                                                <Nutrition onDataChange={(data) => setNutritionData(data)} setValidateForm={setValidateForm} />
                                             )}
                                             {activeStep === 2 && (
                                                 <Housing onDataChange={(data) => setHousingData(data)} />
@@ -1005,7 +1032,7 @@ export default function AssessinhomesssForm({ }) {
                     </div>
                 </div>
                 <a
-                    onClick={scrollToTop}
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} // เพิ่มฟังก์ชันเลื่อนไปด้านบน
                     className="btn btn-outline-primary py-2"
                     style={{
                         position: "fixed",

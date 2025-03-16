@@ -57,16 +57,17 @@ export const Housing = ({ onDataChange }) => {
           </p>
         </div>
         <div className="m-1">
-          <label className="form-label ms-4 mb-0">ลักษณะบ้าน </label><br></br>
+          <label className="form-label ms-4 mb-0">ลักษณะบ้าน  <span style={{ color: "#666", fontSize: "15px" }}>(เช่น บ้านเดี่ยว อพาร์ตเมนต์ ทาวน์เฮาส์)</span></label><br></br>
           <div className='ms-4 me-4 mt-2'>
             <Controller
               name="houseType"
               control={control}
               render={({ field }) => (
-                <input
-                  type="text"
+                <textarea
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  rows="2"
+                  style={{ resize: "vertical" }}
+                  placeholder="กรอกลักษณะบ้าน"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -78,16 +79,17 @@ export const Housing = ({ onDataChange }) => {
           </div>
         </div>
         <div className='m-1'>
-          <label className="form-label mt-3 ms-4 mb-0">วัสดุที่ใช้ทำ </label><br></br>
+          <label className="form-label mt-4 ms-4 mb-0">วัสดุที่ใช้ทำ <span style={{ color: "#666", fontSize: "15px" }}>(เช่น ปูนซีเมนต์ ไม้ อิฐ)</span></label><br></br>
           <div className='ms-4 me-4 mt-2'>
             <Controller
               name="material"
               control={control}
               render={({ field }) => (
-                <input
-                  type="text"
+                <textarea
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  rows="2"
+                  style={{ resize: "vertical" }}
+                  placeholder="กรอกวัสดุที่ใช้ทำ"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -96,19 +98,21 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
+            
           </div>
         </div>
         <div className='m-1'>
-          <label className="form-label mt-3 ms-4 mb-0">จำนวนชั้น </label><br></br>
+          <label className="form-label mt-4 ms-4 mb-0">จำนวนชั้น <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label><br></br>
           <div className='ms-4 me-4 mt-2'>
             <Controller
               name="numFloors"
               control={control}
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  style={{ width: "30%" }}
+                  placeholder="กรอกจำนวนชั้น"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -117,19 +121,21 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
+            
           </div>
         </div>
         <div className='m-1'>
-          <label className="form-label mt-3 ms-4 mb-0">จำนวนห้อง </label><br></br>
+          <label className="form-label mt-4 ms-4 mb-0">จำนวนห้อง <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label><br></br>
           <div className='ms-4 me-4 mt-2'>
             <Controller
               name="numRooms"
               control={control}
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  style={{ width: "30%" }}
+                  placeholder="กรอกจำนวนห้อง"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -138,19 +144,21 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
+            
           </div>
         </div>
         <div className='m-1 mb-4'>
-          <label className="form-label mt-3 ms-4 mb-0">ผู้ป่วยอาศัยอยู่ชั้นไหน </label><br></br>
+          <label className="form-label mt-4 ms-4 mb-0">ผู้ป่วยอาศัยอยู่ชั้นไหน <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label><br></br>
           <div className='ms-4 me-4 mt-2'>
             <Controller
               name="patientFloor"
               control={control}
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  style={{ width: "30%" }}
+                  placeholder="กรอกตัวเลขชั้น"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -159,6 +167,7 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
+            
           </div>
         </div>
       </div>
@@ -292,7 +301,7 @@ export const Housing = ({ onDataChange }) => {
             /><span style={{ marginLeft: '10px' }}>แสงสว่างไม่เพียงพอ </span>
           </div>
         </div>
-        <div className='m-1'>
+        <div className='m-1 mb-4'>
           <label className="form-label ms-4 me-4 mt-3">การระบายอากาศ </label>
           <div className='ms-4 me-4'>
             <Controller
@@ -415,15 +424,16 @@ export const Housing = ({ onDataChange }) => {
       </div>
       <div className="info3 card mt-2">
         <div className='m-1'>
-          <label className="form-label ms-4 me-4 mt-3">เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆบ้าน (ถ้ามี) </label><br></br>
+          <label className="form-label ms-4 me-4 mt-3">เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆบ้าน (ถ้ามี) <span style={{ color: "#666", fontSize: "15px" }}>(ชนิดของสัตว์ เช่น ไก่ สุนัข แมว วัว ควาย)</span> </label><br></br>
           <div className='ms-4 me-4'>
             <Controller
               name="homeEnvironment_petType"
               control={control}
               render={({ field }) => (
-                <input
-                  type='text'
+                <textarea
                   className="form-control"
+                  rows="2"
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกชนิดของสัตว์"
                   {...field}
                   onChange={(e) => {
@@ -433,18 +443,20 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
+            
           </div>
         </div>
         <div className='m-1 mb-4'>
-          <label className="form-label ms-4 me-4 mt-3">อื่นๆ (ถ้ามี) </label><br></br>
+          <label className="form-label ms-4 me-4 mt-1">อื่นๆ (ถ้ามี) </label><br></br>
           <div className='ms-4 me-4'>
             <Controller
               name="otherHomeEnvironment"
               control={control}
               render={({ field }) => (
-                <input
-                  type='text'
+                <textarea
                   className="form-control"
+                  rows="2"
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {
@@ -465,16 +477,17 @@ export const Housing = ({ onDataChange }) => {
           <p className="mt-2 mb-2" style={{ color: "#666" }}><i class="bi bi-people-fill" style={{ color: "#008000" }}></i> เพื่อนบ้าน</p>
         </div>
         <div className="m-1">
-          <label className="form-label ms-4 me-4">จำนวนเพื่อนบ้าน </label><br></br>
+          <label className="form-label ms-4 me-4">จำนวนเพื่อนบ้าน <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label><br></br>
           <div className="ms-4 me-4">
             <Controller
               name="numneighbor"
               control={control}
               render={({ field }) => (
                 <input
-                  type='text'
+                  type='number'
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  style={{ width: "39%" }}
+                  placeholder="กรอกจำนวนเพื่อนบ้าน"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -483,10 +496,11 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
+            
           </div>
         </div>
         <div className='m-1'>
-          <label className="form-label ms-4 me-4 mt-4">ความสัมพันธ์กับเพื่อนบ้าน </label><br></br>
+          <label className="form-label ms-4 me-4 mt-1">ความสัมพันธ์กับเพื่อนบ้าน </label><br></br>
           <div className='ms-4 me-4'>
             <Controller
               name="neighborRelationship"
@@ -539,7 +553,6 @@ export const Housing = ({ onDataChange }) => {
                         }
                       }}
                       style={{
-                        borderBottom: '1px solid #4285f4',
                         outline: 'none',
                         marginLeft: '30px',
                         width: '85%'

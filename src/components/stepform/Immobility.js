@@ -14,11 +14,13 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
   ];
 
   const calculateTotalScore = () => {
+    if (!Immobilitydata || typeof Immobilitydata !== "object") return; // ✅ กัน Error 
+
     let total = 0;
     let hasMissing = false;
 
     scoreKeys.forEach(key => {
-      if (!Immobilitydata[key]) {
+      if (!Immobilitydata?.[key]) { // ✅ ใช้ ?. ป้องกัน undefined
         hasMissing = true;
       } else {
         total += parseInt(Immobilitydata[key], 10) || 0;
@@ -41,6 +43,7 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
     }
   };
 
+
   const getGroupStyle = () => {
     if (totalScore !== null) {
       if (totalScore >= 36) {
@@ -54,69 +57,104 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
     return '';
   };
 
+  // ✅ ฟังก์ชันเคลียร์ข้อมูลทั้งหมด
+  const clearAllAnswers = () => {
+    setImmobilityData({}); // ล้างข้อมูลทั้งหมด
+    setTotalScore(null); // รีเซ็ตคะแนน
+    setGroup(''); // รีเซ็ตกลุ่ม
+    setHasError(false); // ซ่อน error
+    setShowError(false); // ซ่อน error
+  };
+
   useEffect(() => {
-    calculateTotalScore();
+    calculateTotalScore(); // เรียกฟังก์ชันทุกครั้งที่ Immobilitydata เปลี่ยน
   }, [Immobilitydata]);
 
-  const renderTable = (title, description, questions) => (
-    <div className="info3 card mt-4">
-      <div className='header'>
-        <b>{title}</b>
-      </div>
+  const renderTable = (title, description, questions, category) => {
+    if (!Immobilitydata || typeof Immobilitydata !== "object") return null; // ✅ กัน Error 
 
-      <div className="m-2">
-        {description}
-      </div>
+    const hasErrors = showError && questions.some((item) => item.name !== 'description' && !Immobilitydata?.[item.name]);
 
-      <table className='nutrition-table mt-2 mb-4' style={{ width: "95%" }}>
-        <thead>
-          <tr>
-            <th style={{ width: "55%" }}>คำถาม</th>
-            <th className='text-center'>1</th>
-            <th className='text-center'>2</th>
-            <th className='text-center'>3</th>
-          </tr>
-        </thead>
-        <tbody>
-          {questions.map((item, index) => (
-            item.name === 'description' ? (
-              <tr key={index}>
-                <td colSpan="4" className="text-center" style={{ backgroundColor: "#f8f9fa" }}>
-                  {item.label}
-                </td>
-              </tr>
-            ) : (
-              <tr key={item.name}>
-                <td style={{ width: "55%" }}>{item.label} <span style={{ color: 'red' }}>*</span></td>
-                {[1, 2, 3].map((value) => (
-                  <td className='text-center' key={value}>
-                    <Controller
-                      name={`Immobility.${item.name}`}
-                      control={control}
-                      defaultValue=""
-                      render={({ field }) => (
-                        <input
-                          type="radio"
-                          value={value}
-                          checked={Immobilitydata[item.name] === String(value)}
-                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                            setImmobilityData({ ...Immobilitydata, [item.name]: e.target.value });
-                            calculateTotalScore();
-                          }}
-                        />
-                      )}
-                    />
+    return (
+      <div
+        id={category}
+        className="info3 card mt-4"
+        style={{ border: hasErrors ? '1px solid red' : '1px solid #dee2e6' }} // ✅ ใช้ style กำหนดขอบ
+        data-error={hasErrors ? "true" : "false"} // ✅ ใช้ attribute เพื่อให้ JavaScript ตรวจจับได้
+      >
+
+        <div className='header'>
+          <b>{title}</b>
+        </div>
+
+        <div className="description m-2">
+          {description}
+        </div>
+
+        <table className='nutrition-table mt-2 mb-4' style={{ width: "95%" }}>
+          <thead>
+            <tr>
+              <th style={{ width: "55%" }}>คำถาม</th>
+              <th className='text-center'>1</th>
+              <th className='text-center'>2</th>
+              <th className='text-center'>3</th>
+            </tr>
+          </thead>
+          <tbody>
+            {questions.map((item, index) => (
+              item.name === 'description' ? (
+                <tr key={index}>
+                  <td colSpan="4" className="text-center" style={{ backgroundColor: "#f8f9fa" }}>
+                    {item.label}
                   </td>
-                ))}
-              </tr>
-            )
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+                </tr>
+              ) : (
+                <tr key={item.name}>
+                  <td style={{ width: "55%" }}>{item.label} <span style={{ color: 'red' }}>*</span></td>
+                  {[1, 2, 3].map((value) => (
+                    <td className='text-center' key={value}>
+                      <Controller
+                        name={`Immobility.${item.name}`}
+                        control={control}
+                        defaultValue=""
+                        render={({ field }) => (
+                          <input
+                            type="radio"
+                            value={value}
+                            checked={Immobilitydata?.[item.name] === String(value)}
+                            style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                            onChange={(e) => {
+                              field.onChange(e.target.value);
+                              setImmobilityData(prev => ({
+                                ...prev,
+                                [item.name]: e.target.value
+                              }));
+                              calculateTotalScore();
+                            }}
+                          />
+                        )}
+                      />
+                    </td>
+                  ))}
+                </tr>
+              )
+            ))}
+          </tbody>
+
+        </table>
+
+        {/* ✅ แสดงข้อความเตือนใต้กรอบถ้ายังไม่ได้เลือกครบ */}
+        {hasErrors && (
+          <div className=" text-center mb-3" style={{ color: "red" }}>
+            กรุณาเลือกคำตอบให้ครบทุกข้อ
+          </div>
+        )}
+      </div>
+
+    );
+  };
+
+
 
   return (
     <div>
@@ -168,11 +206,8 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
           {
             name: 'description', label:
               <div className='m-1'>
-                {/* <p className='ms-3 mb-0' style={{ color: "red" }}>
-              <span style={{ fontSize: "1.2em", fontWeight: "bold" }}> *</span>
-              = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p> */}
                 <p><b >การให้คะแนนข้อ 9-10 :</b></p>
-                <div style={{lineHeight: '10px' }}>
+                <div style={{ lineHeight: '25px' }}>
                   <div className='grid' align="center">
                     <div className='col'>
                       <p><b>1</b> = กลั้นได้ปกติ</p>
@@ -220,7 +255,14 @@ export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, sho
         { name: 'Taking_public_transportation', label: '15. ใช้บริการขนส่งสาธารณะ' },
         { name: 'Taking_medicine', label: '16. การรับประทานยาตามแพทย์สั่ง' }
       ])}
-
+      {/* ✅ ปุ่มเคลียร์คำตอบทั้งหมด */}
+      <div className="d-flex justify-content-end me-4 mb-2">
+        <span className="clear-selection text-secondary"
+          onClick={clearAllAnswers}
+        >
+          เคลียร์คำตอบ
+        </span>
+      </div>
       {/* แสดงคะแนนรวม */}
       <div className='m-4'>
         <div className="card mt-4 shadow rounded" style={{ backgroundColor: "#95d7ff", border: "none" }}>

@@ -19,7 +19,7 @@ export const Medication = ({ onDataChange }) => {
           <b>Medication</b>
         </div>
         <div style={{ marginLeft: '26px' }}>
-          <p className="mt-2" style={{ color: "#666" }}><i class="bi bi-capsule" style={{ color: "#008000" }}></i> ข้อมูลการใช้ยา</p>
+          <p className="mt-2" style={{ color: "#666" }}><i class="bi bi-capsule" style={{ color: "#008000" }}></i> ข้อมูลเกี่ยวกับการใช้ยา</p>
         </div>
       </div>
       <div className="info3 card mt-3">
@@ -27,7 +27,7 @@ export const Medication = ({ onDataChange }) => {
           <b>การใช้ยาของผู้ป่วย</b>
         </div>
         <div className='m-1'>
-          <label className="form-label ms-4 me-4 mt-4">ยาที่แพทย์สั่ง</label>
+          <label className="form-label ms-4 me-4 mt-4">ยาที่แพทย์สั่ง <span style={{ color: "#666", fontSize: "15px" }}>(ระบุชื่อยา ปริมาณ และวิธีใช้ตามที่แพทย์สั่ง)</span></label>
           <div className='ms-4 me-4'>
             <Controller
               name="prescribedMedication"
@@ -50,7 +50,7 @@ export const Medication = ({ onDataChange }) => {
           </div>
         </div>
         <div className='m-1'>
-          <label className="form-label ms-4 me-4 mt-4">การใช้ยาจริง</label>
+          <label className="form-label ms-4 me-4 mt-4">การใช้ยาจริง <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่าผู้ป่วยรับประทานยาตามแพทย์สั่งได้ หรือลืมกินหรือไม่)</span></label>
           <div className='ms-4 me-4'>
             <Controller
               name="actualMedication"
@@ -73,7 +73,7 @@ export const Medication = ({ onDataChange }) => {
           </div>
         </div>
         <div className='m-1 mb-4'>
-          <label className="form-label ms-4 me-4 mt-4">อาหารเสริม</label>
+          <label className="form-label ms-4 me-4 mt-4">อาหารเสริม <span style={{ color: "#666", fontSize: "15px" }}>(เช่น น้ำมันปลา โปรตีนเสริม)</span></label>
           <div className='ms-4 me-4'>
             <Controller
               name="supplements"
@@ -82,7 +82,7 @@ export const Medication = ({ onDataChange }) => {
               render={({ field }) => (
                 <textarea
                   className="form-control"
-                  placeholder="กรอกอาหารเสริม"
+                  placeholder="กรอกอาหารเสริมที่รับประทานเป็นประจำ"
                   rows="2" // กำหนดจำนวนแถวเริ่มต้น
                   style={{ resize: "vertical" }}
                   {...field}
@@ -100,8 +100,9 @@ export const Medication = ({ onDataChange }) => {
       {/* Radio: Administration */}
       <div className="info3 card mt-3">
       <div className="header">
-          <b>Mini Nutritional Assessment</b>
+          <b>พฤติกรรมเกี่ยวกับการใช้ยา</b>
         </div>
+        
         <div className="m-1">
           <label className="form-label ms-4 me-4">การบริหารยา</label>
           {['จัดยาด้วยตนเอง', 'มีคนจัดยาให้'].map((option) => (
@@ -127,12 +128,8 @@ export const Medication = ({ onDataChange }) => {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Radio: Intake */}
-      <div className="info3 card mt-3">
         <div className="m-1">
-          <label className="form-label ms-4 me-4">การรับประทานยา</label>
+          <label className="form-label ms-4 me-4 mt-3">การรับประทานยา</label>
           {['รับประทานยาด้วยตัวเอง', 'มีคนเตรียมยาแต่ละมื้อให้'].map((option) => (
             <div className='ms-4 me-4' key={option}>
               <Controller
@@ -156,12 +153,8 @@ export const Medication = ({ onDataChange }) => {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Radio: Consistency */}
-      <div className="info3 card mt-3">
-        <div className="m-1">
-          <label className="form-label ms-4 me-4">ความสม่ำเสมอ</label>
+        <div className="m-1 mb-4">
+          <label className="form-label ms-4 me-4 mt-3 ">ความสม่ำเสมอ</label>
           {['สม่ำเสมอทุกวัน', 'หลงลืมบางครั้ง', 'ไม่สม่ำเสมอ'].map((option) => (
             <div className='ms-4 me-4' key={option}>
               <Controller

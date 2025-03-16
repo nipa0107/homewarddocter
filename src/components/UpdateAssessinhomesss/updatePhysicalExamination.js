@@ -1,22 +1,36 @@
 import React, { useState, useEffect } from "react";
 
-const PhysicalExaminationForm = ({ formData, onSave }) => {
+const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
-    const [tempOtherValues, setTempOtherValues] = useState({}); // จัดการค่าชั่วคราวของ "Other"
+    const [tempOtherValues, setTempOtherValues] = useState({}); // ค่าชั่วคราวของ "อื่นๆ"
+
+    // กำหนดตัวเลือกที่เป็นค่า default ของแต่ละฟิลด์
+    const optionLists = {
+        moodandaffect: ["Euthymia", "Depressed", "Apathetic"],
+        appearanceAndBehavior: ["Cooperative", "Guarded", "Candid", "Defensive"],
+        eyeContact: ["Good", "Sporadic", "Fleeting", "None"],
+        attention: ["Adequate", "Inadequate"],
+        orientation: ["Place", "Time", "Person", "Situation"],
+        thoughtProcess: ["Coherence", "Tangential", "Disorganized"],
+        thoughtContent: ["Reality", "Obsession", "Delusion"]
+    };
 
     useEffect(() => {
+        // กำหนดค่าช่อง "อื่นๆ" ถ้ามีค่าที่ไม่ใช่ตัวเลือกที่กำหนดไว้
         const initializeOtherValues = () => {
             const tempValues = {};
-            Object.keys(formData).forEach((key) => {
-                if (key.endsWith("Other")) {
-                    const fieldName = key.replace("Other", "");
-                    const otherValue = formData[key]?.trim();
-                    if (otherValue) {
-                        tempValues[fieldName] = otherValue;
+            Object.keys(optionLists).forEach((field) => {
+                if (formData[field]) {
+                    const nonStandardValues = formData[field]
+                        .filter((item) => !optionLists[field].includes(item.value))
+                        .map((item) => item.value)
+                        .join(", ");
+                    if (nonStandardValues) {
+                        tempValues[field] = nonStandardValues;
                     }
                 }
             });
-            setTempOtherValues(tempValues); // ตั้งค่าชั่วคราว
+            setTempOtherValues(tempValues);
         };
 
         initializeOtherValues();
@@ -46,13 +60,17 @@ const PhysicalExaminationForm = ({ formData, onSave }) => {
             }
         });
     };
-    
 
     const handleOtherInputChange = (fieldName, value) => {
+        setTempOtherValues((prev) => ({
+            ...prev,
+            [fieldName]: value,
+        }));
+
         setFormValues((prev) => {
             const currentValues = prev[fieldName] || [];
             const updatedValues = currentValues.filter((item) => !item.isOther);
-    
+
             if (value.trim()) {
                 return {
                     ...prev,
@@ -66,31 +84,18 @@ const PhysicalExaminationForm = ({ formData, onSave }) => {
             }
         });
     };
-    
-    
-   
+
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        const updatedFormValues = { ...formValues };
-        Object.keys(tempOtherValues).forEach((key) => {
-            if (tempOtherValues[key] && !updatedFormValues[key]?.includes(tempOtherValues[key])) {
-                updatedFormValues[key] = [
-                    ...(updatedFormValues[key] || []),
-                    tempOtherValues[key],
-                ];
-            }
-        });
-
-        onSave(updatedFormValues); // ส่งข้อมูลกลับ
+        onSave(formValues);
     };
 
-    const renderCheckboxGroupWithOther = (fieldName, options, label) => (
+    const renderCheckboxGroupWithOther = (fieldName, label) => (
         <div className="mt-2">
             <div className="m-2">
                 <label className="form-label mt-4">{label} :</label>
                 <p style={{ color: "gray" }}>(เลือกได้มากกว่า 1 ข้อ)</p>
-                {options.map((option) => (
+                {optionLists[fieldName].map((option) => (
                     <div key={option} style={{ lineHeight: "40px" }}>
                         <input
                             type="checkbox"
@@ -108,13 +113,10 @@ const PhysicalExaminationForm = ({ formData, onSave }) => {
                     <input
                         type="text"
                         placeholder="กรอกคำตอบอื่นๆ"
-                        className="google-form-input"
-                        value={
-                            formValues[fieldName]?.find((item) => item.isOther)?.value || ""
-                        }
+                        className="form-control"
+                        value={tempOtherValues[fieldName] || ""}
                         onChange={(e) => handleOtherInputChange(fieldName, e.target.value)}
                         style={{
-                            borderBottom: "1px solid #4285f4",
                             outline: "none",
                             marginLeft: "30px",
                             width: "85%",
@@ -124,163 +126,164 @@ const PhysicalExaminationForm = ({ formData, onSave }) => {
             </div>
         </div>
     );
-    
+
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="m-2">
-                <label className="form-label">1.Temperature (°C) :</label>
-                <input
-                    type="text"
-                    className="form-control mt-2"
-                    id="temperature"
-                    value={formValues.temperature || ""}
-                    onChange={handleChange}
-                />
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">2.Blood pressure (mm/Hg) :</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="bloodPressure"
-                    value={formValues.bloodPressure || ""}
-                    onChange={handleChange}
-                />
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">3.Pulse (/min) :</label>
-                <input
-                    type="text"
-                    className="form-control "
-                    id="pulse"
-                    value={formValues.pulse || ""}
-                    onChange={handleChange}
-                />
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">4.Respiration (/min) :</label>
-                <input
-                    type="text"
-                    className="form-control "
-                    id="respiratoryRate"
-                    value={formValues.respiratoryRate || ""}
-                    onChange={handleChange}
-                />
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">5.General Appearance :</label>
-                <input
-                    type="text"
-                    className="form-control "
-                    id="generalAppearance"
-                    value={formValues.generalAppearance || ""}
-                    onChange={handleChange}
-                />
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">6.Cardiovascular System :</label>
-                <br></br>
-                <div>
-                    <input
-                        type="text"
-                        className="form-control "
-                        id="cardiovascularSystem"
-                        value={formValues.cardiovascularSystem || ""}
-                        onChange={handleChange}
-                    />
+        <div className="modal show d-block" tabIndex="-1">
+            <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div className="modal-content">
+                    {/* Header */}
+                    <div className="modal-header d-flex justify-content-center">
+                        <h5 className="modal-title text-black text-center">แก้ไข Physical Examination</h5>
+                    </div>
+
+                    {/* Body */}
+                    <div className="modal-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="m-2">
+                                <label className="form-label">Temperature (°C) :</label>
+                                <input
+                                    type="text"
+                                    className="form-control mt-2"
+                                    id="temperature"
+                                    value={formValues.temperature || ""}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Blood pressure (mmHg) :</label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    id="bloodPressure"
+                                    value={formValues.bloodPressure || ""}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Pulse (min) :</label>
+                                <input
+                                    type="text"
+                                    className="form-control "
+                                    id="pulse"
+                                    value={formValues.pulse || ""}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Respiration (min) :</label>
+                                <input
+                                    type="text"
+                                    className="form-control "
+                                    id="respiratoryRate"
+                                    value={formValues.respiratoryRate || ""}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">General Appearance :</label>
+                                <textarea
+                                    className="form-control mt-1"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                    id="generalAppearance"
+                                    value={formValues.generalAppearance || ""}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Cardiovascular System :</label>
+                                
+                                <div>
+                                    <textarea
+                                    className="form-control mt-1"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                        id="cardiovascularSystem"
+                                        value={formValues.cardiovascularSystem || ""}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Respiratory System :</label>
+                                
+                                <div>
+                                <textarea
+                                    className="form-control mt-1"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                        id="respiratorySystem"
+                                        value={formValues.respiratorySystem || ""}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Abdominal :</label>
+                                
+                                <div>
+                                <textarea
+                                    className="form-control mt-1"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                        id="abdominal"
+                                        value={formValues.abdominal || ""}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Nervous System :</label>
+                                
+                                <div>
+                                <textarea
+                                    className="form-control mt-1"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                        id="nervousSystem"
+                                        value={formValues.nervousSystem || ""}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            <div className="m-2">
+                                <label className="form-label mt-3">Extremities :</label>
+                                
+                                <div>
+                                <textarea
+                                    className="form-control mt-1"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                        id="extremities"
+                                        value={formValues.extremities || ""}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                            {/* Checkbox groups */}
+                            {renderCheckboxGroupWithOther("moodandaffect", "Mood and Affect")}
+                            {renderCheckboxGroupWithOther("appearanceAndBehavior", "Appearance and Behavior")}
+                            {renderCheckboxGroupWithOther("eyeContact", "Eye contact")}
+                            {renderCheckboxGroupWithOther("attention", "Attention")}
+                            {renderCheckboxGroupWithOther("orientation", "Orientation")}
+                            {renderCheckboxGroupWithOther("thoughtProcess", "Thought process")}
+                            {renderCheckboxGroupWithOther("thoughtContent", "Thought content")}
+                           
+                        </form>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="modal-footer d-flex justify-content-between">
+                        <button className="btn-EditMode btn-secondary" onClick={onClose}>
+                            ยกเลิก
+                        </button>
+                        <button className="btn-EditMode btnsave" onClick={handleSubmit}>
+                            บันทึก
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div className="m-2">
-                <label className="form-label mt-3">7.Respiratory System :</label>
-                <br></br>
-                <div>
-                    <input
-                        type="text"
-                        className="form-control "
-                        id="respiratorySystem"
-                        value={formValues.respiratorySystem || ""}
-                        onChange={handleChange}
-                    />
-                </div>
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">8.Abdominal :</label>
-                <br></br>
-                <div>
-                    <input
-                        type="text"
-                        className="form-control "
-                        id="abdominal"
-                        value={formValues.abdominal || ""}
-                        onChange={handleChange}
-                    />
-                </div>
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">9.Nervous System :</label>
-                <br></br>
-                <div>
-                    <input
-                        type="text"
-                        className="form-control "
-                        id="nervousSystem"
-                        value={formValues.nervousSystem || ""}
-                        onChange={handleChange}
-                    />
-                </div>
-            </div>
-            <div className="m-2">
-                <label className="form-label mt-3">10.Extremities :</label>
-                <br></br>
-                <div>
-                    <input
-                        type="text"
-                        className="form-control "
-                        id="extremities"
-                        value={formValues.extremities || ""}
-                        onChange={handleChange}
-                    />
-                </div>
-            </div>
-            {/* Checkbox groups */}
-            {renderCheckboxGroupWithOther("moodandaffect", ["Euthymia", "Depressed", "Apathetic"], "11.Mood and Affect")}
-            {renderCheckboxGroupWithOther(
-                "appearanceAndBehavior",
-                ["Cooperative", "Guarded", "Candid", "Defensive"],
-                "12.Appearance and Behavior"
-            )}
-            {renderCheckboxGroupWithOther(
-                "eyeContact",
-                ["Good", "Sporadic", "Fleeting", "None"],
-                "13.Eye contact"
-            )}
-            {renderCheckboxGroupWithOther(
-                "attention",
-                ["Adequate", "Inadequate"],
-                "14.Attention"
-            )}
-            {renderCheckboxGroupWithOther(
-                "orientation",
-                ["Place", "Time", "Person", "Situation"],
-                "15.Orientation"
-            )}
-            {renderCheckboxGroupWithOther(
-                "thoughtProcess",
-                ["Coherence", "Tangential", "Disorganized"],
-                "16.Thought process"
-            )}
-            {renderCheckboxGroupWithOther(
-                "thoughtContent",
-                ["Reality", "Obsession", "Delusion"],
-                "17.Thought content"
-            )}
-            <div className="modal-footer mt-3">
-                {/* <button type="button" class="btn" data-bs-dismiss="modal">ยกเลิก</button> */}
-                <button type="submit" className="btn">
-                    บันทึก
-                </button>
-            </div>
-        </form>
+        </div>
     );
 };
 

@@ -3,17 +3,24 @@ import { Controller, useFormContext } from 'react-hook-form';
 import Paper from '../../img/exam.png'
 
 export const SSS = ({ onDataChange }) => {
-  const { control, register, setValue, getValues, watch } = useFormContext();
-  // Function to update array-based values
+  const { control, setValue, getValues } = useFormContext();
+
+  // ✅ แก้ไข: ทำให้แน่ใจว่าข้อมูลอัปเดตและส่งไปยัง Parent
   const handleInputChange = (group, name, value) => {
-    const currentValues = getValues(group) || {}; // ใช้ Object เป็นค่าเริ่มต้น
-    const updatedValues = { ...currentValues, [name]: value }; // อัปเดตค่าของคีย์ใน Object
-    setValue(group, updatedValues); // ตั้งค่าใหม่ในฟอร์ม
+    const currentValues = getValues(group) || {}; 
+    const updatedValues = { ...currentValues, [name]: value }; 
+
+    // ✅ อัปเดตค่าในฟอร์มก่อนส่งออก
+    setValue(group, updatedValues); 
+
+    // ✅ ส่งข้อมูลของทั้ง SSS กลับไปยัง Parent
     if (onDataChange) {
-      onDataChange({ [group]: updatedValues }); // ส่งข้อมูลกลับไปยัง Parent Component
+      onDataChange({
+        ...getValues(), // ✅ ส่งค่าทั้งหมด
+        [group]: updatedValues
+      });
     }
   };
-
   return (
     <div>
       <div className="title-form mt-1">
@@ -146,10 +153,11 @@ export const SSS = ({ onDataChange }) => {
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
-                  type="text"
-                  {...field}
+                <textarea
                   className="form-control"
+                  rows="2"
+                  style={{ resize: "vertical" }}
+                  {...field}
                   placeholder="กรอกคำตอบ"
                   onChange={(e) => {
                     field.onChange(e.target.value);
@@ -255,9 +263,10 @@ export const SSS = ({ onDataChange }) => {
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
-                  type="text"
+                <textarea
                   className="form-control"
+                  rows="2"
+                  style={{ resize: "vertical" }}
                   placeholder="กรอกคำตอบ"
                   {...field}
                   onChange={(e) => {

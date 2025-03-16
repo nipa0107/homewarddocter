@@ -92,10 +92,13 @@ export const Physicalexamination = ({ onDataChange }) => {
             control={control}
             defaultValue={[]}
             render={({ field }) => (
-              <input
-                type="text"
-                placeholder="กรอกคำตอบอื่นๆ"
+              <textarea
                 className="form-control"
+                rows="2"
+                style={{ resize: "vertical" ,border: "1px solid #ddd",
+                  outline: "none",
+                  marginLeft: "30px", }}
+                placeholder="กรอกคำตอบอื่นๆ"
                 value={
                   (field.value.find((item) => item.startsWith("อื่นๆ:")) || "").replace(
                     "อื่นๆ: ",
@@ -113,12 +116,6 @@ export const Physicalexamination = ({ onDataChange }) => {
                       ]
                       : field.value.filter((item) => !item.startsWith("อื่นๆ:"))
                   );
-                }}
-                style={{
-                  border: "1px solid #ddd",
-                  outline: "none",
-                  marginLeft: "30px",
-                  width: "85%",
                 }}
               />
             )}
@@ -143,46 +140,45 @@ export const Physicalexamination = ({ onDataChange }) => {
         <div className="header">
           <b>Vital Sign</b>
         </div>
-        <div style={{ marginLeft: '26px' }}>
+        <div className='ms-4 mb-0 mt-2'>
           <p style={{ color: "#666" }}><i class="bi bi-clipboard2-pulse-fill" style={{ color: "#008000" }}></i> การวัดสัญญาณชีพ</p>
         </div>
-      </div>
-      <div className='m-4'>
-        <label className="form-label"><i class="bi bi-thermometer-half" style={{ color: "#666" }}></i> Temperature ( °C)</label><br></br>
-        <div>
-          <Controller
-            name="temperature"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <input
-                type="text"
-                className="form-control"
-                placeholder="กรอกคำตอบ"
-                {...field}
-                onChange={(e) => {
-                  field.onChange(e);
-                  handleInputChange("temperature", e.target.value);
-                }}
-              />
-            )}
-          />
+        <div className='m-1'>
+          <label className="form-label ms-4"><i class="bi bi-thermometer-half" style={{ color: "#666" }}></i> อุณหภูมิร่างกาย ( °C) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็มหรือทศนิยม เช่น 35,36.8)</span></label><br></br>
+          <div className='ms-4 me-4'>
+            <Controller
+              name="temperature"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <input
+                  type="number"
+                  style={{ width: "35%" }}
+                  className="form-control"
+                  placeholder="กรอกตัวเลข"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("temperature", e.target.value);
+                  }}
+                />
+              )}
+            />
+          </div>
         </div>
-      </div>
-
-      <div>
-        <div className='m-4'>
-          <label className="form-label"><i class="bi bi-heart-pulse" style={{ color: "#666" }}></i> Blood pressure  (mm/Hg)</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 mt-4"><i class="bi bi-heart-pulse" style={{ color: "#666" }}></i> ความดันโลหิต (mmHg) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็ม เช่น 120/80)</span></label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="bloodPressure"
               control={control}
               defaultValue=""
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
+                  style={{ width: "35%" }}
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  placeholder="กรอกตัวเลข"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -193,20 +189,19 @@ export const Physicalexamination = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div>
-        <div className='m-4'>
-          <label className="form-label"><i class="bi bi-activity" style={{ color: "#666" }}></i> Pulse (/min)</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 mt-4"><i class="bi bi-activity" style={{ color: "#666" }}></i> อัตราการเต้นของหัวใจ (bpm) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็ม เช่น 72)</span></label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="pulse"
               control={control}
               defaultValue=""
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
+                  style={{ width: "35%" }}
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  placeholder="กรอกตัวเลข"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -217,20 +212,19 @@ export const Physicalexamination = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div>
-        <div className='m-4'>
-          <label className="form-label"><i class="bi bi-lungs" style={{ color: "#666" }}></i> Respiration (/min)</label><br></br>
-          <div>
+        <div className='m-1 mb-4'>
+          <label className="form-label ms-4 mt-4 "><i class="bi bi-lungs" style={{ color: "#666" }}></i> อัตราการหายใจ (min) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็ม เช่น 16)</span></label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="respiratoryRate"
               control={control}
               defaultValue=""
               render={({ field }) => (
                 <input
-                  type="text"
+                  type="number"
+                  style={{ width: "35%" }}
                   className="form-control"
-                  placeholder="กรอกคำตอบ"
+                  placeholder="กรอกตัวเลข"
                   {...field}
                   onChange={(e) => {
                     field.onChange(e);
@@ -242,43 +236,41 @@ export const Physicalexamination = ({ onDataChange }) => {
           </div>
         </div>
       </div>
+
       <div className="info3 card mt-3">
         <div className="header">
           <b>General physical examination </b>
         </div>
-        <div style={{ marginLeft: '26px' }}>
+        <div className='ms-4 mb-0 mt-2'>
           <p style={{ color: "#666" }}><i class="bi bi-person-standing" style={{ color: "#008000" }}></i> การตรวจร่างกายทั่วไป</p>
         </div>
-      </div>
-      <div className='m-4'>
-        <label className="form-label">GA (ลักษณะโดยรวม)</label><br></br>
-        <div>
-          <Controller
-            name="generalAppearance"
-            control={control}
-            defaultValue=""
-            render={({ field }) => (
-              <textarea
-                type="text"
-                className="form-control"
-                rows="2" // กำหนดจำนวนแถวเริ่มต้น
-                style={{ resize: "vertical" }}
-                placeholder="กรอกคำตอบ"
-                {...field}
-                onChange={(e) => {
-                  field.onChange(e);
-                  handleInputChange("generalAppearance", e.target.value);
-                }}
-              />
-            )}
-          />
+        <div className='m-1 mt-0'>
+          <label className="form-label ms-4 ">GA (ลักษณะโดยรวม)</label><br></br>
+          <div className='ms-4 me-4'>
+            <Controller
+              name="generalAppearance"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <textarea
+                  type="text"
+                  className="form-control"
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
+                  placeholder="กรอกคำตอบ"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleInputChange("generalAppearance", e.target.value);
+                  }}
+                />
+              )}
+            />
+          </div>
         </div>
-      </div>
-
-      <div>
-        <div className='m-4'>
-          <label className="form-label">CVS (ระบบหัวใจ)</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 mt-4">CVS (ระบบหัวใจ)</label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="cardiovascularSystem"
               control={control}
@@ -300,11 +292,9 @@ export const Physicalexamination = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div>
-        <div className='m-4'>
-          <label className="form-label">RS (ระบบหายใจ)</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 mt-4">RS (ระบบหายใจ)</label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="respiratorySystem"
               control={control}
@@ -326,11 +316,9 @@ export const Physicalexamination = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div>
-        <div className='m-4'>
-          <label className="form-label">Abd (ช่องท้อง)</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 mt-4">Abd (ช่องท้อง)</label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="abdominal"
               control={control}
@@ -352,11 +340,9 @@ export const Physicalexamination = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div>
-        <div className='m-4'>
-          <label className="form-label">NS (ระบบประสาท)</label><br></br>
-          <div>
+        <div className='m-1'>
+          <label className="form-label ms-4 mt-4">NS (ระบบประสาท)</label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="nervousSystem"
               control={control}
@@ -378,11 +364,9 @@ export const Physicalexamination = ({ onDataChange }) => {
             />
           </div>
         </div>
-      </div>
-      <div>
-        <div className='m-4'>
-          <label className="form-label">Ext (รยางค์แขน/ขา)</label><br></br>
-          <div>
+        <div className='m-1 mb-4'>
+          <label className="form-label ms-4 mt-4">Ext (รยางค์แขน/ขา)</label><br></br>
+          <div className='ms-4 me-4'>
             <Controller
               name="extremities"
               control={control}

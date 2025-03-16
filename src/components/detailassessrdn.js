@@ -512,7 +512,7 @@ export default function DetailAssessreadiness() {
       }
 
       const data = await response.json();
-      toast.success("ประเมินความพร้อมสำเร็จ");
+      toast.success("ประเมินสถานะความพร้อมสำเร็จ");
       setTimeout(() => window.location.reload(), 1000); // Reload หลังจากบันทึกสำเร็จ
     } catch (error) {
       toast.error(`Error updating data: ${error.message}`);
@@ -549,8 +549,6 @@ export default function DetailAssessreadiness() {
   const handleBreadcrumbClick = () => {
     navigate("/assessreadinessuser", { state: { id: readinessForms.user } });
   };
-
-  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     // ดึงข้อมูล unread count เมื่อเปิดหน้า

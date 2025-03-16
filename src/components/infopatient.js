@@ -290,23 +290,26 @@ export default function Infopatient({ }) {
     useEffect(() => {
         const fetchCaregiverData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getcaregiver/${id}`);
-                const caregiverData = await response.json();
-
-                if (caregiverData.status === "ok" && caregiverData.data.length > 0) {
-                    setCaregiverInfo(caregiverData.data);
-                    setCaregiverName(caregiverData.data[0].name);
-                    setCaregiverSurname(caregiverData.data[0].surname);
-                    setCaregiverTel(caregiverData.data[0].tel);
-                    setRelationship(caregiverData.data[0].relationship); // ✅ ใช้ relationship ที่ถูกต้อง
-                } else {
-                    setCaregiverInfo([]);
-                }
+              const response = await fetch(
+                `http://localhost:5000/getcaregiver/${id}`
+              );
+              const caregiverData = await response.json();
+              if (caregiverData.status === "ok") {
+                setCaregiverInfo(caregiverData.data);
+                setCaregiverName(caregiverData.data.name);
+                setCaregiverSurname(caregiverData.data.surname);
+                setCaregiverTel(caregiverData.data.tel);
+                setRelationship(caregiverData.data.Relationship);
+              }
+              console.log("caregiverData", caregiverInfo);
             } catch (error) {
+              if (error.response && error.response.status === 404) {
+                setCaregiverInfo(null);
+              } else {
                 console.error("Error fetching caregiver info:", error);
-                setCaregiverInfo([]);
+              }
             }
-        };
+          };
         fetchCaregiverData();
     }, [id]);
 
@@ -1035,11 +1038,11 @@ export default function Infopatient({ }) {
                                                         {[
                                                             {
                                                                 label: "เลขประจําตัวประชาชน", value: `${formatIDCardNumber(
-                                                                    caregiver.ID_card_number || "-"
+                                                                    caregiver.ID_card_number || "-" 
                                                                 )}`
                                                             },
                                                             { label: "ชื่อ-สกุล", value: `${caregiver.name || "-"} ${caregiver.surname || "-"}` },
-                                                            { label: "ความสัมพันธ์", value: caregiver.relationship || "ไม่ระบุ" }
+                                                            { label: "ความสัมพันธ์", value: caregiver.userRelationships?.[0]?.relationship || "ไม่ระบุ" }
                                                         ].map((item, index) => (
                                                             <React.Fragment key={index}>
                                                                 <div className="col-sm-4" style={{ color: "#444" }}><p><span>{item.label} :</span></p></div>

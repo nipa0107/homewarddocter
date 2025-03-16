@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from "react";
-import CountUp from 'react-countup';
+import CountUp from "react-countup";
 
-const ImmobilityForm = ({ formData, onSave }) => {
+const ImmobilityForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
     const [totalScore, setTotalScore] = useState(0);
+    const [groupMessage, setGroupMessage] = useState("");
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+    useEffect(() => {
+        calculateTotalScore();
+    }, [formValues]);
+
+    const handleChange = (name, value) => {
         setFormValues((prev) => ({
             ...prev,
-            [name]: Number(value), // Ensure values are numeric
+            [name]: Number(value),
         }));
-        
     };
 
-    // Function to calculate the total score
     const calculateTotalScore = () => {
         const keys = [
             "Pick_up_food",
@@ -34,126 +36,200 @@ const ImmobilityForm = ({ formData, onSave }) => {
             "Taking_public_transportation",
             "Taking_medicine",
         ];
+
         let total = 0;
         keys.forEach((key) => {
-            total += formValues[key] || 0; // Default to 0 if undefined
+            total += formValues[key] || 0;
         });
+
         setTotalScore(total);
+
+        if (total >= 16 && total <= 20) {
+            setGroupMessage("กลุ่มที่ 1 (ช่วยเหลือตัวเองดี ไม่ต้องการความช่วยเหลือ)");
+        } else if (total >= 21 && total <= 35) {
+            setGroupMessage("กลุ่มที่ 2 (ช่วยเหลือตัวเองได้ปานกลาง ต้องการความช่วยเหลือบางส่วน)");
+        } else if (total >= 36) {
+            setGroupMessage("กลุ่มที่ 3 (ช่วยเหลือตัวเองได้น้อย หรือไม่ได้เลย ต้องการความช่วยเหลือจากผู้อื่นทั้งหมด)");
+        } else {
+            setGroupMessage("-");
+        }
     };
 
+    // ฟังก์ชันเคลียร์ค่าทั้งหมด
+    const handleClearSelections = () => {
+        setFormValues({
+            Pick_up_food: null,
+            Clean_up: null,
+            Put_on_clothes: null,
+            Shower: null,
+            Using_the_toilet: null,
+            Get_up: null,
+            Walk_inside: null,
+            Up_down_stairs: null,
+            Continence_urine: null,
+            Continence_stool: null,
+            Walk_outside: null,
+            Cooking: null,
+            Household_chores: null,
+            Shopping: null,
+            Taking_public_transportation: null,
+            Taking_medicine: null,
+        });
+        setTotalScore(0);
+        setGroupMessage("-");
+    };
+    const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
     useEffect(() => {
-        calculateTotalScore(); // Recalculate total score whenever formValues changes
-    }, [formValues]);
-
-    const getGroup = (totalScore) => {
-        if (totalScore >= 16 && totalScore <= 20) {
-            return 'กลุ่มที่ 1 (ช่วยเหลือตัวเองดี ไม่ต้องการความช่วยเหลือจากผู้อื่น)';
-        } else if (totalScore >= 21 && totalScore <= 35) {
-            return 'กลุ่มที่ 2 (ช่วยเหลือตัวเองได้ปานกลาง ต้องการความช่วยเหลือจากผู้อื่นบางส่วน)';
-        } else if (totalScore >= 36 && totalScore <= 48) {
-            return 'กลุ่มที่ 3 (ช่วยเหลือตัวเองได้น้อย หรือไม่ได้เลย ต้องการความช่วยเหลือจากผู้อื่นมากหรือทั้งหมด)';
-        }
-        return '-';
-    };
-    const getGroupStyle = (totalScore) => {
-        if (totalScore >= 36) {
-            return 'text-danger'; // สีแดงสำหรับกลุ่มที่ 3
-        } else if (totalScore >= 21) {
-            return 'text-primary'; // สีส้มสำหรับกลุ่มที่ 2
-        } else if (totalScore >= 16) {
-            return 'text-success'; // สีเขียวสำหรับกลุ่มที่ 1
-        }
-        return ''; // ค่าเริ่มต้น
-    };
+        // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
+        setIsEdited(JSON.stringify(formValues) !== JSON.stringify(formData));
+    }, [formValues, formData]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ ...formValues, totalScore }); // Include totalScore in the saved data
+        // ตรวจสอบว่ามีข้อไหนยังไม่ได้เลือกหรือไม่
+        const keys = [
+            "Pick_up_food", "Clean_up", "Put_on_clothes", "Shower",
+            "Using_the_toilet", "Get_up", "Walk_inside", "Up_down_stairs",
+            "Continence_urine", "Continence_stool", "Walk_outside",
+            "Cooking", "Household_chores", "Shopping",
+            "Taking_public_transportation", "Taking_medicine"
+        ];
+
+        const isComplete = keys.every(key => formValues[key] !== null && formValues[key] !== undefined);
+
+        if (!isComplete) {
+            window.alert("กรุณาเลือกคำตอบให้ครบทุกข้อ");
+            return;
+        }
+
+        // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
+        if (!isEdited) {
+            const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
+            if (!confirmSave) return;
+        }
+
+        onSave({ ...formValues, totalScore });
+    };
+
+    const handleCancel = () => {
+        // 🔹 ถ้ามีการแก้ไขแล้วกดยกเลิก ให้แสดงแจ้งเตือน
+        if (isEdited) {
+            const confirmExit = window.confirm("ต้องการยกเลิกการแก้ไขหรือไม่?\nหากยกเลิก การแก้ไขที่ไม่ได้บันทึกจะถูกละทิ้ง");
+            if (!confirmExit) return;
+        }
+        onClose(); // ปิด Modal
     };
 
     const renderRadioGroup = (label, name) => (
-        <div className="m-3">
-            <label className="form-label mt-3">{label} :</label>
-            <div>
-                {[1, 2, 3].map((score) => (
-                    <div key={score} className="form-check">
-                        <input
-                            type="radio"
-                            name={name}
-                            value={score}
-                            checked={formValues[name] === score}
-                            onChange={handleChange}
-                            style={{ transform: 'scale(1.5)' , marginBottom:"2px"}}
-                        />
-                        <label className="form-check-label" style={{ marginLeft: '5px' , marginBottom:"2px"}}>
-                            {score} คะแนน
-                        </label>
-                    </div>
-                ))}
-            </div>
+        <div className="m-1">
+            <label className="form-label ms-2 mb-0 mt-3">{label} <span style={{ color: 'red' }}> *</span></label>
+
+            {[1, 2, 3].map((value) => (
+                <div key={value} className='ms-4 mt-2 d-flex align-items-center'>
+                    <input
+                        type="radio"
+                        name={name}
+                        value={value}
+                        checked={formValues[name] === value}
+                        onChange={(e) => handleChange(name, e.target.value)}
+                        style={{
+                            transform: 'scale(1.5)',
+                            marginRight: '8px',
+                            verticalAlign: 'middle'
+                        }}
+                    />
+                    <label className="form-check-label" style={{ marginBottom: "0px", verticalAlign: "middle", marginLeft: "8px" }}>
+                        {value} คะแนน
+                    </label>
+                </div>
+            ))}
         </div>
     );
 
+    const getGroupStyle = () => {
+        if (totalScore >= 36) return "text-danger"; // สีแดงสำหรับกลุ่มที่ 3
+        if (totalScore >= 21) return "text-primary"; // สีฟ้าสำหรับกลุ่มที่ 2
+        if (totalScore >= 16) return "text-success"; // สีเขียวสำหรับกลุ่มที่ 1
+        return "text-dark"; // สีดำเป็นค่าเริ่มต้น
+    };
+
+
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="m-3">
-                <b>กิจวัตรประจำวันพื้นฐาน</b>
-                <span style={{ color: "red" }}> *</span>
-                <p className="mt-3">1 คะแนน = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
-                <p>2 คะแนน = ทำได้ด้วยตัวเองได้บ้าง ต้องมีคนช่วย</p>
-                <p>3 คะแนน = ทำด้วยตนเองไม่ได้เลย</p>
-            </div>
+        <div className="modal show d-block" tabIndex="-1">
+            <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div className="modal-content">
+                    {/* Header */}
+                    <div className="modal-header d-flex justify-content-center">
+                        <h5 className="modal-title text-black text-center">แก้ไข Immobility</h5>
+                    </div>
 
-            {renderRadioGroup("1. ตัก/หยิบอาหารรับประทาน", "Pick_up_food")}
-            {renderRadioGroup("2. ล้างหน้า แปรงฟัน หวีผม", "Clean_up")}
-            {renderRadioGroup("3. สวมใส่เสื้อผ้า", "Put_on_clothes")}
-            {renderRadioGroup("4. อาบน้ำ", "Shower")}
-            {renderRadioGroup("5. การใช้ห้องส้วมและทำความสะอาดหลังขับถ่าย", "Using_the_toilet")}
-            {renderRadioGroup("6. ลุกจากที่นอน/เตียง", "Get_up")}
-            {renderRadioGroup("7. เดินหรือเคลื่อนที่ในบ้าน", "Walk_inside")}
-            {renderRadioGroup("8. ขึ้นลงบันได 1 ชั้น", "Up_down_stairs")}
-            {/* <hr></hr> */}
-            <div className="m-3">
-                <p className="mt-4"><b>สำหรับข้อ 9-10</b> <span style={{ color: "red" }}> *</span></p>
-                <p className="mt-1">1 คะแนน = กลั้นได้ปกติ</p>
-                <p>2 คะแนน = กลั้นไม่ได้บางครั้ง</p>
-                <p>3 คะแนน = กลั้นไม่ได้เลย</p>
-            </div>
-            {renderRadioGroup("9. กลั้นปัสสาวะ", "Continence_urine")}
-            {renderRadioGroup("10. กลั้นอุจจาระ", "Continence_stool")}
-            <hr></hr>
-            <div className="m-3">
-                <b>กิจวัตรที่ซับซ้อน</b> <span style={{ color: "red" }}> *</span>
-                <p className="mt-3">1 คะแนน = ทำได้ด้วยตัวเอง (รวมใช้อุปกรณ์ช่วย)</p>
-                <p>2 คะแนน = ทำได้ด้วยตัวเองได้บ้าง ต้องมีคนช่วย</p>
-                <p>3 คะแนน = ทำด้วยตนเองไม่ได้เลย</p>
-            </div>
-            {renderRadioGroup("11. เดินหรือเคลื่อนที่นอกบ้าน", "Walk_outside")}
-            {renderRadioGroup("12. ทำหรือเตรียมอาหาร", "Cooking")}
-            {renderRadioGroup("13. กวาด/ถูบ้านหรือซักรีดผ้า", "Household_chores")}
-            {renderRadioGroup("14. การซื้อของ/จ่ายตลาด", "Shopping")}
-            {renderRadioGroup("15. ใช้บริการระบบขนส่งสาธารณะ", "Taking_public_transportation")}
-            {renderRadioGroup("16. การรับประทานยาตามแพทย์สั่ง", "Taking_medicine")}
+                    {/* Body */}
+                    <div className="modal-body">
+                        <form onSubmit={handleSubmit}>
+                            <div className="m-2">
+                                <b>การให้คะแนน</b>
+                                <span style={{ color: "red" }}> *</span>
+                                <p className="mt-3">1 = ทำได้ด้วยตัวเอง</p>
+                                <p>2 = ทำได้บ้าง ต้องมีคนช่วย</p>
+                                <p>3 = ทำไม่ได้เลย</p>
+                            </div>
 
+                            {/* คำถามทั้งหมด */}
+                            {[
+                                { name: "Pick_up_food", label: "1. ตัก/หยิบอาหารรับประทาน" },
+                                { name: "Clean_up", label: "2. ล้างหน้า แปรงฟัน หวีผม" },
+                                { name: "Put_on_clothes", label: "3. สวมใส่เสื้อผ้า" },
+                                { name: "Shower", label: "4. อาบน้ำ" },
+                                { name: "Using_the_toilet", label: "5. การใช้ห้องส้วม" },
+                                { name: "Get_up", label: "6. ลุกจากที่นอน/เตียง" },
+                                { name: "Walk_inside", label: "7. เดินหรือเคลื่อนที่ในบ้าน" },
+                                { name: "Up_down_stairs", label: "8. ขึ้นลงบันได 1 ชั้น" },
+                                { name: "Continence_urine", label: "9. กลั้นปัสสาวะ" },
+                                { name: "Continence_stool", label: "10. กลั้นอุจจาระ" },
+                                { name: "Walk_outside", label: "11. เดินหรือเคลื่อนที่นอกบ้าน" },
+                                { name: "Cooking", label: "12. ทำหรือเตรียมอาหาร" },
+                                { name: "Household_chores", label: "13. กวาด/ถูบ้าน ซักรีดผ้า" },
+                                { name: "Shopping", label: "14. การซื้อของ/จ่ายตลาด" },
+                                { name: "Taking_public_transportation", label: "15. ใช้บริการระบบขนส่งสาธารณะ" },
+                                { name: "Taking_medicine", label: "16. การรับประทานยาตามแพทย์สั่ง" },
+                            ].map((item) => renderRadioGroup(item.label, item.name))}
 
-            <div className="m-3">
-                <b>
-                    {totalScore !== null && (
-                        <div className={`mt-4 ${getGroupStyle(totalScore)}`}>
-                            <h4>คะแนนรวม = <CountUp end={totalScore} duration={2} /></h4>
-                            <p>{getGroup(totalScore)}</p>
-                        </div>
-                    )}
-                </b>
-            </div>
+                            <div className="d-flex justify-content-end mt-2">
+                                <span className="clear-selection text-secondary"
+                                    onClick={handleClearSelections}>
+                                    เคลียร์คำตอบ
+                                </span>
+                            </div>
 
 
-            <div className="modal-footer mt-3">
-                <button type="submit" className="btn">
-                    บันทึก
-                </button>
+
+                            <div className="m-3">
+                                <b>
+                                    {totalScore !== null && (
+                                        <div className={`mt-4 ${getGroupStyle()}`}>
+                                            <h4>คะแนนรวม = <CountUp end={totalScore} duration={2} /></h4>
+                                            <p>{groupMessage}</p>
+                                        </div>
+                                    )}
+                                </b>
+                            </div>
+                        </form>
+
+                    </div>
+
+                    {/* Footer */}
+                    <div className="modal-footer d-flex justify-content-between">
+
+                        <button className="btn-EditMode btn-secondary" onClick={handleCancel}>
+                            ยกเลิก
+                        </button>
+                        <button className="btn-EditMode btnsave" onClick={handleSubmit}>
+                            บันทึก
+                        </button>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     );
 };
 

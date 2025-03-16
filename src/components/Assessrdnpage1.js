@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState, useRef } from "react";
 import "../css/sidebar.css";
 import "../css/alladmin.css"
 import "bootstrap-icons/font/bootstrap-icons.css";
-import logow from "../img/logow.png";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { fetchAlerts } from './Alert/alert';
@@ -38,9 +37,11 @@ export default function Assessreadiness1() {
     const [filterType, setFilterType] = useState("all");
     const notificationsRef = useRef(null);
     const [showMessage, setShowMessage] = useState(false);
+    const [showToTopButton, setShowToTopButton] = useState(false);
     const bellRef = useRef(null);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
+    const hasFetchedUserData = useRef(false);
     const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
         assessment: 0,
@@ -67,8 +68,6 @@ export default function Assessreadiness1() {
             console.error("Error fetching latest assessments:", error);
         }
     };
-
-    const hasFetchedUserData = useRef(false);
 
     useEffect(() => {
         fetchLatestAssessments();
@@ -215,6 +214,14 @@ export default function Assessreadiness1() {
         })
             .then((res) => res.json())
             .then((data) => {
+                if (data.data === "token expired") {
+                    alert("Token expired login again");
+                    window.localStorage.clear();
+                    setTimeout(() => {
+                        window.location.replace("./");
+                    }, 0);
+                    return null;
+                }
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
@@ -233,8 +240,8 @@ export default function Assessreadiness1() {
     };
 
     const fetchAndSetAlerts = (token, userId) => {
-        fetchAlerts(token, userId)
-            .then((alerts, userId) => {
+        fetchAlerts(token)
+            .then((alerts) => {
                 setAlerts(alerts);
                 const unreadAlerts = alerts.filter(
                     (alert) => !alert.viewedBy.includes(userId)
@@ -247,22 +254,23 @@ export default function Assessreadiness1() {
     };
 
     useEffect(() => {
-        if (hasFetchedUserData.current) return;
-        hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
 
         if (token) {
             fetchUserData(token)
-                .then((user) => {
+                .then(user => {
                     setUserId(user._id);
+                    setMPersonnel(user._id);
                     fetchAndSetAlerts(token, user._id);
+
                 })
                 .catch((error) => {
                     console.error("Error verifying token:", error);
                 });
         }
-    }, [token]);
+    }, []);
+
 
     const markAllByTypeAsViewed = (type) => {
         fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
@@ -488,385 +496,181 @@ export default function Assessreadiness1() {
             } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
             } น.`;
     };
+    const [showScrollButton, setShowScrollButton] = useState(false);
+    const formRef = useRef(null); // อ้างอิงไปยังฟอร์ม
 
-    const Readiness1 = ({ register, errors }) => (
-        <div className="info3 card mt-1">
-            <div className='header'>
-                <b>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในที่บ้าน</b>
-            </div>
-            <div className="ms-4 mt-3">
-                <p style={{ color: 'red' }}>* = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
-            </div>
+    useEffect(() => {
+        const handleScroll = () => {
+            if (formRef.current) {
+                const formTop = formRef.current.getBoundingClientRect().top;
+                const scrollY = window.scrollY;
 
-            {/* คำถาม 1 */}
-            <div className="m-1 mt-0">
-                <label className="ms-4 me-4">
-                    1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาด้วยการดูแลแบบผู้ป่วยในที่บ้านจากแพทย์อย่างครบถ้วน และให้คำยินยอมก่อนรับบริการใช่หรือไม่ ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ใช่" {...register('Readiness1.question1_1', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_1', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
-                </div>
-                {errors.Readiness1?.question1_1 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
+                // ถ้าเลื่อนลงมากกว่า 200px ให้แสดงปุ่ม
+                setShowScrollButton(scrollY > 200);
+            }
+        };
 
-            {/* คำถาม 2 */}
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านมีความปลอดภัยใช่หรือไม่ ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ใช่" {...register('Readiness1.question1_2', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_2', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
-                </div>
-                {errors.Readiness1?.question1_2 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
 
-            {/* คำถาม 3 */}
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านอยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่ ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ใช่" {...register('Readiness1.question1_3', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_3', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
-                </div>
-                {errors.Readiness1?.question1_3 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
+    // ฟังก์ชันให้เลื่อนขึ้นด้านบนของฟอร์ม
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
 
-            {/* คำถาม 4 */}
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้านสามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่ ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ใช่" {...register('Readiness1.question1_4', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ใช่ </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ใช่" {...register('Readiness1.question1_4', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
-                </div>
-                {errors.Readiness1?.question1_4 && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
-        </div>
-    );
+    const LOCAL_STORAGE_KEY = `readinessForm-${id}`;
+    const { control, handleSubmit, setValue, getValues, formState: { errors }, watch, clearErrors, setError } = useForm();
+    const [isSubmitted, setIsSubmitted] = useState(false); // ตรวจสอบว่ากดบันทึกแล้วหรือยัง
+    const fieldRefs = useRef({}); // สร้าง object เพื่อเก็บ reference ของแต่ละ field
+
+    // ✅ ใช้ watch() เพื่อติดตามการเปลี่ยนแปลงของฟอร์ม
+    const formData = watch();
+
+    // ✅ โหลดค่าจาก LocalStorage เมื่อเปิดหน้า
+    useEffect(() => {
+        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            Object.keys(parsedData).forEach(key => setValue(key, parsedData[key]));
+        }
+    }, [setValue, id]);
+
+    // ✅ บันทึกค่าลง LocalStorage ทุกครั้งที่ Form Data เปลี่ยน
+    useEffect(() => {
+        if (Object.keys(formData).length > 0) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formData));
+        }
+    }, [formData]);
+
+    // รายการคำถามที่ต้องตรวจสอบ
+    const requiredFields = [
+        "question1_1", "question1_2", "question1_3", "question1_4",
+        "Disease", "Medication", "Environment", "Treatment",
+        "Health", "Out_patient", "Diet"
+    ];
+
+    // ฟังชันตรวจสอบฟอร์มว่าตอบครบหรือไม่
+    const validateForm = (formData) => {
+        let hasError = false;
+        let firstErrorField = null; // เก็บข้อแรกที่ยังไม่ตอบ
+
+        requiredFields.forEach(field => {
+            if (!formData[field]) {
+                setError(field, { type: "manual", message: "กรุณาเลือกคำตอบ" });
+
+                if (!firstErrorField) {
+                    firstErrorField = field; // บันทึกฟิลด์แรกที่ผิด
+                }
+                hasError = true;
+            } else {
+                clearErrors(field);
+            }
+        });
+
+        // ถ้าพบข้อผิดพลาด ให้เลื่อนไปที่ฟิลด์แรกที่ยังไม่ได้เลือกคำตอบ
+        if (firstErrorField && fieldRefs.current[firstErrorField]) {
+            fieldRefs.current[firstErrorField].scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+
+        return !hasError;
+    };
 
 
-    const Readiness2 = ({ register, errors }) => (
-        <div className="info3 card mt-1">
-            <div className='header'>
-                <b>ประเมินความรู้ ความเข้าใจ (ตาม D-METHOD)</b>
-            </div>
-            <div className="ms-4 mt-3">
-                <p style={{ color: 'red' }}>* = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
-            </div>
-            {/* คำถาม 1 */}
-            <div className="m-1">
-                <label className="ms-4 me-4 mb-0">
-                    1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Disease', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Disease', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
-                </div>
-                {errors.Readiness2?.Disease && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
+    // ฟังชันเมื่อเปลี่ยนค่า input
+    const handleInputChange = (name, value) => {
+        setValue(name, value);
 
-            {/* คำถาม 2 */}
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Medication', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Medication', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
-                </div>
-                {errors.Readiness2?.Medication && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
+        // ล้าง error ของข้อนั้นทันทีเมื่อมีการเลือกคำตอบ
+        if (value) {
+            clearErrors(name);
+        }
+    };
 
-            {/* คำถาม 3 */}
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    3. Environment : มีการเตรียมสิ่งแวดล้อม ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
-                </div>
-                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    4. Treatment : มีการฝึกทักษะที่จำเป็น ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
-                </div>
-                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    5. Health : รู้ข้อจำกัดด้านสุขภาพ ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
-                </div>
-                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
-                </div>
-                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
-            <div className="m-1">
-                <label className="ms-4 me-4">
-                    7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ?
-                    <span style={{ color: 'red' }}> *</span>
-                </label>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
-                </div>
-                <div className='ms-4 me-4'>
-                    <input type="radio" value="ไม่ถูกต้อง" {...register('Readiness2.Environment', { required: true })}
-                        style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
-                    />
-                    <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
-                </div>
-                {errors.Readiness2?.Environment && <span className="error-text">* กรุณาเลือกคำตอบ</span>}
-            </div>
-        </div>
-    );
-
-    const [step, setStep] = useState(1);
-    const { register, handleSubmit, watch, formState: { errors } } = useForm();
-
+    // ฟังชันเมื่อกดส่งฟอร์ม
     const onSubmit = async (formData) => {
+        setIsSubmitted(true); // บันทึกว่ากดบันทึกแล้ว
+
+        if (!validateForm(formData)) {
+            toast.error("กรุณาเลือกคำตอบให้ครบทุกข้อ");
+            return;
+        }
+
+        // ถ้าข้อมูลครบ ให้ดำเนินการส่งฟอร์ม
+        const requestData = {
+            userId: id,
+            MPersonnel: mpersonnel,
+            Readiness1: {
+                question1_1: formData.question1_1,
+                question1_2: formData.question1_2,
+                question1_3: formData.question1_3,
+                question1_4: formData.question1_4,
+            },
+            Readiness2: {
+                Disease: formData.Disease,
+                Medication: formData.Medication,
+                Environment: formData.Environment,
+                Treatment: formData.Treatment,
+                Health: formData.Health,
+                Out_patient: formData.Out_patient,
+                Diet: formData.Diet,
+            },
+            status_name: 'ประเมินแล้ว'
+        };
+
+        console.log("📤 Data to submit:", requestData);
+
         try {
             const response = await fetch(`http://localhost:5000/submitReadinessForm/${id}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    userId: id,
-                    Readiness1: formData.Readiness1,
-                    Readiness2: formData.Readiness2,
-                    status_name: 'ประเมินแล้ว',
-                    MPersonnel: mpersonnel
-                }),
+                body: JSON.stringify(requestData),
             });
 
             const data = await response.json();
+            console.log("Response:", data);
+
             if (response.ok) {
-                toast.success("ประเมินข้อมูลสำเร็จ");
+                toast.success("บันทึกข้อมูลสำเร็จ");
+                // ✅ ลบข้อมูลจาก localStorage
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+                // ✅ รีเซ็ตค่าฟอร์มทั้งหมด
+                [
+                    "question1_1", "question1_2", "question1_3", "question1_4",
+                    "Disease", "Medication", "Environment", "Treatment",
+                    "Health", "Out_patient", "Diet"
+                ].forEach(field => setValue(field, "")); // เคลียร์ค่าฟอร์ม
                 setTimeout(() => {
                     navigate("/assessreadinessuser", { state: { id } });
                 }, 1000);
-                // Show the success message and links
             } else {
-                console.error("Error during ReadinessForm submission:", data);
-                toast.error("เกิดข้อผิดพลาดในการประเมิน");
+                toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             }
         } catch (error) {
-            console.error("Error updating ReadinessForm:", error);
-            toast.error("เกิดข้อผิดพลาดในการประเมิน");
+            console.error("Error submitting form:", error);
+            toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
         }
     };
 
 
-    const handleNext = () => setStep(prevStep => prevStep + 1);
-    const handlePrevious = () => setStep(prevStep => prevStep - 1);
+    const clearForm = () => {
+        clearErrors(); // เคลียร์ errors ทั้งหมด
 
-    useEffect(() => {
-        // ดึงข้อมูล unread count เมื่อเปิดหน้า
-        const fetchUnreadCount = async () => {
-            try {
-                const response = await fetch(
-                    "http://localhost:5000/update-unread-count"
-                );
+        // รีเซ็ตค่าฟอร์มทุกข้อให้เป็นค่าว่าง
+        [
+            "question1_1", "question1_2", "question1_3", "question1_4",
+            "Disease", "Medication", "Environment", "Treatment",
+            "Health", "Out_patient", "Diet"
+        ].forEach(field => setValue(field, ""));
 
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.status}`);
-                }
-                const data = await response.json();
-                if (data.success) {
-                    setUserUnreadCounts(data.users);
-                }
-            } catch (error) {
-                console.error("Error fetching unread count:", error);
-            }
-        };
-        fetchUnreadCount();
-    }, []);
+    };
+
     return (
         <div>
-            {/* <div className={`sidebar ${isActive ? 'active' : ''}`}>
-                <div class="logo_content">
-                    <div class="logo">
-                        <div class="logo_name" >
-                            <img src={logow} className="logow" alt="logo" ></img>
-                        </div>
-                    </div>
-                    <i class='bi bi-list' id="btn" onClick={handleToggleSidebar}></i>
-                </div>
-                <ul class="nav-list">
-                    <li>
-                        <a href="home">
-                            <i class="bi bi-house"></i>
-                            <span class="links_name" >หน้าหลัก</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessment" >
-                            <i class="bi bi-clipboard2-pulse"></i>
-                            <span class="links_name" >ติดตาม/ประเมินอาการ</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="allpatient" >
-                            <i class="bi bi-people"></i>
-                            <span class="links_name" >จัดการข้อมูลการดูแลผู้ป่วย</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessreadiness" >
-                            <i class="bi bi-clipboard-check"></i>
-                            <span class="links_name" >ประเมินความพร้อมการดูแล</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="assessinhomesss" >
-                            <i class="bi bi-house-check"></i>
-                            <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="chat" style={{ position: "relative" }}>
-                            <i className="bi bi-chat-dots"></i>
-                            <span className="links_name">แช็ต</span>
-                            {userUnreadCounts.map((user) => {
-                                if (user?.userId && String(user.userId) === String(sender._id)) {
-                                    return (
-                                        <div key={user.userId}>
-                                            {user.totalUnreadCount > 0 && (
-                                                <div className="notification-countchat">
-                                                    {user.totalUnreadCount}
-                                                </div>
-                                            )}
-                                        </div>
-                                    );
-                                }
-                                return null;
-                            })}
-                        </a>
-                    </li>
-                    <div class="nav-logout">
-                        <li>
-                            <a href="./" onClick={logOut}>
-                                <i class='bi bi-box-arrow-right' id="log_out" onClick={logOut}></i>
-                                <span class="links_name" >ออกจากระบบ</span>
-                            </a>
-                        </li>
-                    </div>
-                </ul>
-            </div> */}
             <div className="container-form">
                 <div className="homeheaderform">
                     <div className="header">ประเมินความพร้อมการดูแล
@@ -896,33 +700,6 @@ export default function Assessreadiness1() {
                         </ul>
                     </div>
                 </div>
-                {/* <div className="breadcrumbs mt-4">
-                    <ul>
-                        <li>
-                            <a href="home">
-                                <i class="bi bi-house-fill"></i>
-                            </a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="assessreadiness">ประเมินความพร้อมการดูแล</a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="assessreadinessuser">บันทึกการประเมิน</a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a>แบบฟอร์มการประเมิน</a>
-                        </li>
-                    </ul>
-                </div> */}
                 {showNotifications && (
                     <div className="notifications-dropdown" ref={notificationsRef}>
                         <div className="notifications-head">
@@ -1030,51 +807,7 @@ export default function Assessreadiness1() {
                         )}
                     </div>
                 )}
-                {/* <h3>ประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในบ้าน</h3> */}
-                {/* <div className="patient-card patient-card-style">
-                    <p className="patient-name">
-                        <label>ข้อมูลผู้ป่วย</label>
-                    </p>
-
-                    <div className="info-container">
-                        <div className="info-row">
-                            <div className="info-item">
-
-                                <label>ชื่อ-สกุล:</label>{" "}
-                                <span>
-                                    {name} {surname}
-                                </span>
-                            </div>
-                            <div className="info-item">
-                                <label>อายุ:</label>{" "}
-                                <span>
-                                    {birthday
-                                        ? `${userAge} ปี ${userAgeInMonths} เดือน`
-                                        : "0 ปี 0 เดือน"}
-                                </span>
-                            </div>
-                            <div className="info-item">
-                                <label>เพศ:</label> <span>{gender}</span>
-                            </div>
-                        </div>
-
-                        <div className="info-row">
-                            <div className="info-item">
-                                <label>HN:</label>{" "}
-                                <span>{medicalData?.HN || "ไม่มีข้อมูล"}</span>
-                            </div>
-                            <div className="info-item">
-                                <label>AN:</label>{" "}
-                                <span>{medicalData?.AN || "ไม่มีข้อมูล"}</span>
-                            </div>
-                            <div className="info-item full-width">
-                                <label>ผู้ป่วยโรค:</label>{" "}
-                                <span>{medicalData?.Diagnosis || "ไม่มีข้อมูล"}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
-                <div className="formcontent ">
+                <div className="formcontent" ref={formRef}>
                     <div className="row">
                         <div className="col-4 bg-light" style={{ borderRadius: "8px" }} >
                             <p className="name"> <i class="bi bi-person-fill"></i> {name} {surname}</p >
@@ -1102,44 +835,335 @@ export default function Assessreadiness1() {
                         </div>
                         <div className="col-8">
                             <div className="form-content">
-                                {showMessage ? ( // Show message if assessment is completed
-                                    <div className="success-message mt-2">
-                                        <h2>การประเมินเสร็จสิ้น</h2>
-                                        <br></br>
-                                        <a className="info" onClick={() => navigate("/detailassessreadiness", { state: { id: id } })}>ดูคำตอบ</a>
-                                        <br></br>
-                                        <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id } })}>กลับไปหน้าประเมินความพร้อม</a>
-
-                                    </div>
-                                ) : (
-                                    <form onSubmit={handleSubmit(onSubmit)}>
-                                        {step === 1 && <Readiness1 register={register} errors={errors} />}
-                                        {step === 2 && <Readiness2 register={register} errors={errors} />}
-                                        <div className="btn-group">
-                                            {step > 1 && (
-                                                <div className="btn-pre">
-                                                    <button type="button" onClick={handlePrevious} className="btn btn-outline py-2">ก่อนหน้า</button>
-                                                </div>
-                                            )}
-                                            {step < 2 && (
-                                                <div className="btn-next">
-                                                    <button type="button" onClick={handleNext} className="btn btn-outline-primary py-2">ถัดไป</button>
-                                                </div>
-                                            )}
-                                            {step === 2 && (
-                                                <div className="btn-next">
-                                                    <button type="submit" className="btn btn-outline-primary py-2">บันทึก</button>
-                                                </div>
-                                            )}
+                                {/* {showMessage ? (
+                                    <div className="success-message mt-2 text-center mt-5">
+                                        <h2>บันทึกการประเมินเสร็จสิ้น</h2>
+                                        <div className="d-flex flex-column align-items-center mt-3">
+                                            <a className="info mb-2" onClick={() => navigate("/detailassessreadiness", { state: { id:id } })}>ดูรายละเอียดคำตอบ</a>
+                                            <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id } })}>กลับไปหน้าบันทึกประเมิน</a>
                                         </div>
-                                    </form>
-                                )}
+                                    </div>
+                                ) : ( */}
+
+                                <form onSubmit={handleSubmit(onSubmit)}>
+                                    <div className="info3 card mt-1"
+                                    // style={{ border: Object.keys(errors).length > 0 ? '1px solid red' : '1px solid #dee2e6' }}
+                                    >
+                                        <div className="header">
+                                            <b>การประเมินที่พักอาศัยระหว่างการดูแลแบบผู้ป่วยในที่บ้าน</b>
+                                        </div>
+                                        <div className="ms-4 mt-3">
+                                            <p style={{ color: "red" }}>* = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
+                                        </div>
+
+                                        {/* คำถามที่ 1 */}
+                                        <div className="ms-4 me-4">
+                                            <label>1. ผู้ป่วยและผู้ดูแลได้รับข้อมูลแนวทางการรักษาและให้คำยินยอมก่อนรับบริการใช่หรือไม่? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller
+                                                    name="question1_1"
+                                                    control={control}
+                                                    rules={{ required: "กรุณาเลือกคำตอบ" }}
+                                                    render={({ field }) => (
+                                                        <>
+                                                            <div>
+                                                                <input type="radio" value="ใช่" checked={field.value === "ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ใช่ </span>
+                                                            </div>
+                                                            <div>
+                                                                <input type="radio" value="ไม่ใช่" checked={field.value === "ไม่ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                />
+                                            </div>
+                                            {errors.question1_1 && <p className="ms-4" style={{ color: "red" }}>{errors.question1_1.message}</p>}
+                                        </div>
+
+                                        <div className="ms-4 me-4">
+                                            <label>2. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน มีความปลอดภัยใช่หรือไม่? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller
+                                                    name="question1_2"
+                                                    control={control}
+                                                    rules={{ required: "กรุณาเลือกคำตอบ" }}
+                                                    render={({ field }) => (
+                                                        <>
+                                                            <div>
+                                                                <input type="radio" value="ใช่" checked={field.value === "ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ใช่ </span>
+                                                            </div>
+                                                            <div>
+                                                                <input type="radio" value="ไม่ใช่" checked={field.value === "ไม่ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                />
+                                            </div>
+                                            {errors.question1_2 && <p className="ms-4" style={{ color: "red" }}>{errors.question1_2.message}</p>}
+                                        </div>
+
+                                        <div className="ms-4 me-4">
+                                            <label>3. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน อยู่ห่างจากโรงพยาบาลไม่เกิน 20 กิโลเมตรและเดินทางมาโรงพยาบาลได้สะดวกใช่หรือไม่? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller
+                                                    name="question1_3"
+                                                    control={control}
+                                                    rules={{ required: "กรุณาเลือกคำตอบ" }}
+                                                    render={({ field }) => (
+                                                        <>
+                                                            <div>
+                                                                <input type="radio" value="ใช่" checked={field.value === "ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ใช่ </span>
+                                                            </div>
+                                                            <div>
+                                                                <input type="radio" value="ไม่ใช่" checked={field.value === "ไม่ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                />
+                                            </div>
+                                            {errors.question1_3 && <p className="ms-4" style={{ color: "red" }}>{errors.question1_3.message}</p>}
+                                        </div>
+
+                                        <div className="ms-4 me-4 mb-4">
+                                            <label>4. ที่พักอาศัยระหว่างการดูแลผู้ป่วยในบ้าน สามารถเข้าถึงช่องทางสื่อสารทางโทรศัพท์หรืออินเทอร์เน็ตใช่หรือไม่? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller
+                                                    name="question1_4"
+                                                    control={control}
+                                                    rules={{ required: "กรุณาเลือกคำตอบ" }}
+                                                    render={({ field }) => (
+                                                        <>
+                                                            <div>
+                                                                <input type="radio" value="ใช่" checked={field.value === "ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ใช่ </span>
+                                                            </div>
+                                                            <div>
+                                                                <input type="radio" value="ไม่ใช่" checked={field.value === "ไม่ใช่"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                    style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                                <span style={{ marginLeft: '5px' }}> ไม่ใช่ </span>
+                                                            </div>
+                                                        </>
+                                                    )}
+                                                />
+                                            </div>
+                                            {errors.question1_4 && <p className="ms-4" style={{ color: "red" }}>{errors.question1_4.message}</p>}
+                                        </div>
+                                        {/* {Object.keys(errors).length > 1 && (
+                                            <div className="text-center text-danger" >
+                                                กรุณาเลือกคำตอบให้ครบทุกข้อ
+                                            </div>
+                                        )} */}
+                                    </div>
+                                    <div className="info3 card mt-1"
+                                    // style={{ border: Object.keys(errors).length > 0 ? '1px solid red' : '1px solid #dee2e6' }}
+                                    >
+                                        <div className="header">
+                                            <b>ประเมินความรู้ ความเข้าใจ (ตาม D-METHOD)</b>
+                                        </div>
+                                        <div className="ms-4 mt-3">
+                                            <p style={{ color: "red" }}>* = ระบุว่าเป็นคําถามที่จําเป็นต้องตอบ</p>
+                                        </div>
+
+                                        <div className="ms-4 me-4">
+                                            <label>1. Disease : เข้าใจโรค/ภาวะเจ็บป่วย ? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller name="Disease" control={control} rules={{ required: "กรุณาเลือกคำตอบ" }} render={({ field }) => (
+                                                    <>
+                                                        <div>
+                                                            <input type="radio" value="ถูกต้อง" checked={field.value === "ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                                                        </div>
+                                                        <div>
+                                                            <input type="radio" value="ไม่ถูกต้อง" checked={field.value === "ไม่ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                                                        </div>
+                                                    </>
+                                                )} />
+                                            </div>
+                                            {errors.Disease && <p className="ms-4" style={{ color: "red" }}>{errors.Disease.message}</p>}
+                                        </div>
+                                        <div className="ms-4 me-4">
+                                            <label>2. Medication : รู้ข้อมูล/ข้อพึงระวัง/การจัดยา ? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller name="Medication" control={control} rules={{ required: "กรุณาเลือกคำตอบ" }} render={({ field }) => (
+                                                    <>
+                                                        <div>
+                                                            <input type="radio" value="ถูกต้อง" checked={field.value === "ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                                                        </div>
+                                                        <div>
+                                                            <input type="radio" value="ไม่ถูกต้อง" checked={field.value === "ไม่ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                                                        </div>
+                                                    </>
+                                                )} />
+                                            </div>
+                                            {errors.Medication && <p className="ms-4" style={{ color: "red" }}>{errors.Medication.message}</p>}
+                                        </div>
+                                        <div className="ms-4 me-4">
+                                            <label>3. Environment : มีการเตรียมสิ่งแวดล้อม ? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller name="Environment" control={control} rules={{ required: "กรุณาเลือกคำตอบ" }} render={({ field }) => (
+                                                    <>
+                                                        <div>
+                                                            <input type="radio" value="ถูกต้อง" checked={field.value === "ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                                                        </div>
+                                                        <div>
+                                                            <input type="radio" value="ไม่ถูกต้อง" checked={field.value === "ไม่ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                                                        </div>
+                                                    </>
+                                                )} />
+                                            </div>
+                                            {errors.Environment && <p className="ms-4" style={{ color: "red" }}>{errors.Environment.message}</p>}
+                                        </div>
+                                        <div className="ms-4 me-4">
+                                            <label>4.Treatment : มีการฝึกทักษะที่จำเป็น ? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller name="Treatment" control={control} rules={{ required: "กรุณาเลือกคำตอบ" }} render={({ field }) => (
+                                                    <>
+                                                        <div>
+                                                            <input type="radio" value="ถูกต้อง" checked={field.value === "ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                                                        </div>
+                                                        <div>
+                                                            <input type="radio" value="ไม่ถูกต้อง" checked={field.value === "ไม่ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                                                        </div>
+                                                    </>
+                                                )} />
+                                            </div>
+                                            {errors.Treatment && <p className="ms-4" style={{ color: "red" }}>{errors.Treatment.message}</p>}
+                                        </div>
+                                        <div className="ms-4 me-4">
+                                            <label>5. Health : รู้ข้อจำกัดด้านสุขภาพ  ? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller name="Health" control={control} rules={{ required: "กรุณาเลือกคำตอบ" }} render={({ field }) => (
+                                                    <>
+                                                        <div>
+                                                            <input type="radio" value="ถูกต้อง" checked={field.value === "ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                                                        </div>
+                                                        <div>
+                                                            <input type="radio" value="ไม่ถูกต้อง" checked={field.value === "ไม่ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                                                        </div>
+                                                    </>
+                                                )} />
+                                            </div>
+                                            {errors.Health && <p className="ms-4" style={{ color: "red" }}>{errors.Health.message}</p>}
+                                        </div>
+                                        <div className="ms-4 me-4">
+                                            <label>6. Out patient : รู้เรื่องการมาตามนัด/การส่งต่อ ? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller name="Out_patient" control={control} rules={{ required: "กรุณาเลือกคำตอบ" }} render={({ field }) => (
+                                                    <>
+                                                        <div>
+                                                            <input type="radio" value="ถูกต้อง" checked={field.value === "ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                                                        </div>
+                                                        <div>
+                                                            <input type="radio" value="ไม่ถูกต้อง" checked={field.value === "ไม่ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                                                        </div>
+                                                    </>
+                                                )} />
+                                            </div>
+                                            {errors.Out_patient && <p className="ms-4" style={{ color: "red" }}>{errors.Out_patient.message}</p>}
+                                        </div>
+                                        <div className="ms-4 me-4 mb-4">
+                                            <label>7. Diet : รู้เรื่องการจัดการอาหารที่เหมาะสมกับโรค ? <span style={{ color: 'red' }}> *</span></label>
+                                            <div className="ms-4">
+                                                <Controller name="Diet" control={control} rules={{ required: "กรุณาเลือกคำตอบ" }} render={({ field }) => (
+                                                    <>
+                                                        <div>
+                                                            <input type="radio" value="ถูกต้อง" checked={field.value === "ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ถูกต้อง </span>
+                                                        </div>
+                                                        <div>
+                                                            <input type="radio" value="ไม่ถูกต้อง" checked={field.value === "ไม่ถูกต้อง"} onChange={(e) => handleInputChange(field.name, e.target.value)}
+                                                                style={{ transform: 'scale(1.5)', marginLeft: '5px' }} />
+                                                            <span style={{ marginLeft: '5px' }}> ไม่ถูกต้อง </span>
+                                                        </div>
+                                                    </>
+                                                )} />
+                                            </div>
+                                            {errors.Diet && <p className="ms-4" style={{ color: "red" }}>{errors.Diet.message}</p>}
+                                        </div>
+                                        <div className="d-flex justify-content-end me-4 mb-2">
+                                            <span className="clear-selection text-secondary"
+                                                onClick={clearForm}
+                                            >
+                                                เคลียร์คำตอบ
+                                            </span>
+                                        </div>
+
+                                        {/* {Object.keys(errors).length > 1 && (
+                                            <div className="text-center text-danger" >
+                                                กรุณาเลือกคำตอบให้ครบทุกข้อ
+                                            </div>
+                                        )} */}
+                                    </div>
+
+
+                                    <div className="btn-group">
+                                        <div className="btn-next">
+                                            <button type="submit" className="btn btn-outline-primary py-2">บันทึก</button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
 
                 </div>
-
+                {/* ปุ่ม Scroll ไปด้านบน */}
+                {showScrollButton && (
+                    <a
+                        className="btn btn-outline-primary py-2"
+                        onClick={scrollToTop}
+                        style={{
+                            position: "fixed",
+                            bottom: "20px",
+                            right: "20px",
+                            padding: "10px 20px",
+                            backgroundColor: "#87CEFA",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                            zIndex: "1000",
+                        }}
+                    >
+                        <i class="bi bi-arrow-up-circle"></i>
+                    </a>
+                )}
                 <ToastContainer />
             </div>
         </div>

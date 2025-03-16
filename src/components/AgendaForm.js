@@ -533,24 +533,30 @@ export default function AgendaForm({ }) {
         if (id) fetchNewCaregivers();
     }, [id]);
 
+    const [hasError, setHasError] = useState(false); // ตรวจสอบข้อผิดพลาด
+    const [showError, setShowError] = useState(false); // ควบคุมการแสดงข้อความแจ้งเตือน
 
     const handleNext = async (data) => {
         console.log("Form data at step", activeStep, data);
+        const storageKey = `patientAgendaData`;
 
-        if (activeStep === 3) {
-            const isIncomplete = Object.values(ZaritData).some(val => val === undefined || val === '');
-            if (isIncomplete) {
-                toast.error("⚠️ กรุณากรอกข้อมูลให้ครบทุกข้อในแบบประเมิน Zarit ก่อนบันทึก");
-                return; // หยุดไม่ให้บันทึกถ้ายังไม่เลือกครบ
-            }
-        }
         if (activeStep === 0) {
             setPatientAgendaData(PatientAgendaData);
         } else if (activeStep === 1) {
-            setCaregiverAgendaData(CaregiverAgendaData);
+            setCaregiverAgendaData(careAgenda); // Ensure latest data is stored!
         } else if (activeStep === 2) {
-            setCaregiverAssessmentData(CaregiverAssessmentData);
+            setCaregiverAssessmentData(careAssessment);
         } else if (activeStep === 3) {
+            if (hasError) {
+                setShowError(true); // ✅ แสดงข้อผิดพลาด
+                setTimeout(() => {
+                    const firstError = document.querySelector(".text-danger");
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }, 200);
+                return; // ❌ หยุดการทำงานถ้ายังมี error
+            }
             setZaritData(ZaritData);
         }
 
@@ -565,8 +571,15 @@ export default function AgendaForm({ }) {
                         Caregiver: caregiver,
                         newCaregivers: newCaregivers.map(cg => cg.id),
                         PatientAgenda: PatientAgendaData,
-                        CaregiverAgenda: { Care_Agenda: CaregiverAgendaData },
-                        CaregiverAssessment: { Care_Assessment: CaregiverAssessmentData },
+                        CaregiverAgenda: {
+                            Old_Caregiver_Agenda: careAgenda.existingCaregivers,
+                            New_Caregiver_Agenda: careAgenda.newCaregivers
+                          },
+                        // 🔹 แบ่ง `CaregiverAssessment` เป็น `Old_Caregiver_Assessment` และ `New_Caregiver_Assessment`
+                        CaregiverAssessment: {
+                            Old_Caregiver_Assessment: careAssessment.existingCaregivers,
+                            New_Caregiver_Assessment: careAssessment.newCaregivers
+                        },
                         Zaritburdeninterview: ZaritData,
                         status_agenda: 'ประเมินแล้ว',
                     }),
@@ -575,6 +588,11 @@ export default function AgendaForm({ }) {
                 const result = await response.json();
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
+                    // ✅ ล้างข้อมูลใน LocalStorage หลังจากบันทึกสำเร็จ
+                    localStorage.removeItem(storageKey);
+
+                    // ✅ รีเซ็ตค่าให้เริ่มใหม่
+                    setPatientAgendaData({});
                     setTimeout(() => {
                         navigate("/assessinhomesssuser", { state: { id } });
                     }, 1000);
@@ -599,23 +617,22 @@ export default function AgendaForm({ }) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-
     const [PatientAgendaData, setPatientAgendaData] = useState({});
-    const [CaregiverAgendaData, setCaregiverAgendaData] = useState({});
-    const [CaregiverAssessmentData, setCaregiverAssessmentData] = useState({});
+    const [careAgenda, setCaregiverAgendaData] = useState({});
+    const [careAssessment, setCaregiverAssessmentData] = useState({});
     const [ZaritData, setZaritData] = useState({
-        question_1: "0",
-        question_2: "0",
-        question_3: "0",
-        question_4: "0",
-        question_5: "0",
-        question_6: "0",
-        question_7: "0",
-        question_8: "0",
-        question_9: "0",
-        question_10: "0",
-        question_11: "0",
-        question_12: "0",
+        question_1: 0,
+        question_2: 0,
+        question_3: 0,
+        question_4: 0,
+        question_5: 0,
+        question_6: 0,
+        question_7: 0,
+        question_8: 0,
+        question_9: 0,
+        question_10: 0,
+        question_11: 0,
+        question_12: 0,
         totalScore: 0,
     });
 
@@ -818,7 +835,7 @@ export default function AgendaForm({ }) {
                                         <label style={{ color: "#666" }}> อายุ :</label> <b> {userAge} ปี {userAgeInMonths} เดือน</b>   <br></br>
                                         <label style={{ color: "#666" }}> ผู้ป่วยโรค :</label> <b> {medicalData && medicalData.Diagnosis
                                             ? medicalData.Diagnosis
-                                            : "ไม่ได้ระบุโรค"}</b>
+                                            : "ไม่ระบุโรค"}</b>
                                     </p>
                                 ) : (
                                     <p >
@@ -860,7 +877,7 @@ export default function AgendaForm({ }) {
                                                 <CaregiverAssessment onDataChange={(data) => setCaregiverAssessmentData(data)} />
                                             )}
                                             {activeStep === 3 && (
-                                                <Zarit ZaritData={ZaritData} setZaritData={setZaritData} />
+                                                <Zarit ZaritData={ZaritData} setZaritData={setZaritData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
                                             )}
 
                                             <div className="btn-group">

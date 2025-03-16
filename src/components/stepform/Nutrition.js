@@ -3,208 +3,242 @@ import { useLocation } from "react-router-dom";
 import { Controller, useFormContext } from 'react-hook-form';
 import CountUp from 'react-countup';
 
-export const Nutrition = ({ onDataChange }) => {
+export const Nutrition = ({ onDataChange, setValidateForm }) => {
   const { control, getValues, setValue } = useFormContext();
-  const [gender, setGender] = useState("");
-  const [birthday, setBirthday] = useState("");
   const location = useLocation();
   const { id } = location.state;
+  const [showError, setShowError] = useState(false); // สำหรับแสดงข้อความแจ้งเตือน
+  const [gender, setGender] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [userAge, setUserAge] = useState(0);
   const [userAgeInMonths, setUserAgeInMonths] = useState(0);
-  const [activityLevel, setActivityLevel] = useState("");
   const [bmr, setBmr] = useState(0);
   const [tdee, setTdee] = useState(0);
 
-  const [nutritionData, setNutritionData] = useState({
-    gender: '',
-    userAge: 0,
-    userAgeInMonths: 0,
-    weight: 0,
-    height: 0,
-    bmr: 0,
-    tdee: 0,
-    activityLevel: '',
-    intakeMethod: [],
-    foodTypes: [],
-    medicalFood: '',
-    otherFood: '',
-    favoriteFood: '',
-    cooks: [],
-    nutritionStatus: '',
+  const [nutritionData, setNutritionData] = useState(() => {
+    return JSON.parse(localStorage.getItem('nutritionData')) || {
+      weight: "", height: "", bmr: 0, tdee: 0, activityLevel: "",
+      intakeMethod: [], foodTypes: [], medicalFood: "", favoriteFood: "",
+      cooks: [], nutritionStatus: ""
+    };
   });
-
-  // ดึงข้อมูลจาก localStorage เมื่อหน้ารีเฟรช
+  // ✅ โหลดค่าจาก LocalStorage ไปยัง React Hook Form ทันทีที่โหลดหน้า
   useEffect(() => {
-    const storedData = localStorage.getItem('nutritionData');
-    if (storedData) {
-      const storedNutritionData = JSON.parse(storedData);
-      setNutritionData(storedNutritionData);
-
-      // ใช้ setValue จาก react-hook-form เพื่ออัปเดตค่าในฟอร์ม
-      Object.keys(storedNutritionData).forEach((key) => {
-        setValue(key, storedNutritionData[key]);
-      });
-
-      // กำหนดค่า tdee และ activityLevel จาก localStorage
-      setTdee(storedNutritionData.tdee || 0);
-      setActivityLevel(storedNutritionData.activityLevel || "");
-    }
-  }, [setValue]);
+    Object.keys(nutritionData).forEach(key => {
+      setValue(key, nutritionData[key]);
+    });
+  }, [setValue, nutritionData]);
 
   useEffect(() => {
-    if (gender) {
-      setNutritionData((prev) => ({
-        ...prev,
-        gender: gender,
-      }));
-    }
-  }, [gender]);
+    localStorage.setItem('nutritionData', JSON.stringify(nutritionData));
+  }, [nutritionData]);
+  
+  const activityFactors = {
+    sedentary: 1.2,
+    lightly_active: 1.375,
+    moderately_active: 1.55,
+    very_active: 1.725,
+    super_active: 1.9,
+  };
 
+  // ดึงข้อมูลผู้ใช้จากฐานข้อมูล
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch(`http://localhost:5000/getuser/${id}`);
         const data = await response.json();
 
-        // ตั้งค่า gender และ birthday
-        setGender(data.gender || "");
-        setBirthday(data.birthday || "");
+        setGender(data.gender);
+        setBirthday(data.birthday);
 
-        // คำนวณ userAge และ userAgeInMonths
-        if (data.birthday) {
-          const userBirthday = new Date(data.birthday);
-          const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
-          const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
+        setValue("gender", data.gender);
+        setValue("birthday", data.birthday);
 
-          const calculatedMonths = monthDiff >= 0 ? monthDiff : 12 + monthDiff;
-          const calculatedYears =
-            monthDiff < 0 ||
-              (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
-              ? ageDiff - 1
-              : ageDiff;
-
-          setUserAge(calculatedYears);
-          setUserAgeInMonths(calculatedMonths);
-
-          // อัปเดต nutritionData
-          setNutritionData((prev) => ({
-            ...prev,
-            gender: data.gender || "",
-            userAge: calculatedYears,
-            userAgeInMonths: calculatedMonths,
-          }));
-        }
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id, setValue]);
 
-
-  const currentDate = new Date();
-
+  // คำนวณอายุจากวันเกิด
   useEffect(() => {
     if (birthday) {
-      const userBirthday = new Date(birthday);
-      const ageDiff = currentDate.getFullYear() - userBirthday.getFullYear();
-      const monthDiff = currentDate.getMonth() - userBirthday.getMonth();
+      const birthDate = new Date(birthday);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
 
-      const calculatedMonths = monthDiff >= 0 ? monthDiff : 12 + monthDiff;
-      const calculatedYears =
-        monthDiff < 0 ||
-          (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())
-          ? ageDiff - 1
-          : ageDiff;
-
-      setUserAge(calculatedYears);
-      setUserAgeInMonths(calculatedMonths);
-      setNutritionData((prev) => ({
-        ...prev,
-        userAge: calculatedYears,
-        userAgeInMonths: calculatedMonths,
-      }));
+      setUserAge(monthDiff >= 0 ? age : age - 1);
+      setUserAgeInMonths(monthDiff >= 0 ? monthDiff : 12 + monthDiff);
     }
   }, [birthday]);
 
+  // คำนวณ BMR เมื่อ เพศ, อายุ, น้ำหนัก, หรือ ส่วนสูง เปลี่ยนแปลง
   useEffect(() => {
     const calculateBmr = () => {
       const weight = parseFloat(getValues('weight'));
       const height = parseFloat(getValues('height'));
 
-      if (isNaN(weight) || isNaN(height) || !userAge || !gender) {
-        return; // ถ้ามีข้อมูลไม่ครบ ให้ข้ามการคำนวณ
-      }
+      if (!weight || !height || !userAge || !gender) return;
 
-      let calculatedBmr = 0;
+      let calculatedBmr = gender === "ชาย"
+        ? 88.362 + 13.397 * weight + 4.799 * height - 5.677 * userAge
+        : 447.593 + 9.247 * weight + 3.098 * height - 4.330 * userAge;
 
-      if (gender === "ชาย") {
-        calculatedBmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * userAge);
-      } else if (gender === "หญิง") {
-        calculatedBmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * userAge);
-      }
+      calculatedBmr = Math.round(calculatedBmr);
+      setBmr(calculatedBmr);
+      setValue('bmr', calculatedBmr);
 
-      setBmr(Math.round(calculatedBmr));
-      setValue('bmr', Math.round(calculatedBmr));
-      setNutritionData((prev) => ({
-        ...prev,
-        bmr: Math.round(calculatedBmr),
-      }));
+      // อัปเดต nutritionData และ onDataChange
+      setNutritionData(prev => {
+        const updatedData = { ...prev, bmr: calculatedBmr };
+
+        // คำนวณ TDEE ใหม่เมื่อ BMR เปลี่ยน
+        if (getValues("activityLevel")) {
+          const activityFactor = activityFactors[getValues("activityLevel")] || 1.2;
+          updatedData.tdee = Math.round(calculatedBmr * activityFactor);
+          setTdee(updatedData.tdee);
+          setValue("tdee", updatedData.tdee);
+        }
+
+        onDataChange(updatedData);
+        return updatedData;
+      });
     };
 
-    calculateBmr();
-  }, [getValues('weight'), getValues('height'), userAge, gender]); // คำนวณใหม่เมื่อ weight, height, userAge หรือ gender เปลี่ยน
+    if (getValues('weight') && getValues('height')) {
+      calculateBmr();
+    }
+  }, [getValues('weight'), getValues('height'), userAge, gender, setValue, onDataChange]);
 
 
   useEffect(() => {
-    const calculateTdee = () => {
-      const activityFactors = {
-        sedentary: 1.2,
-        lightly_active: 1.375,
-        moderately_active: 1.55,
-        very_active: 1.725,
-        super_active: 1.9
-      };
+    const activityLevel = getValues("activityLevel");
 
-      if (!bmr || !activityLevel || !activityFactors[activityLevel]) {
-        return; // ถ้า BMR หรือ activityLevel ไม่ครบ ให้ข้ามการคำนวณ
+    if (bmr && activityLevel) { // ตรวจสอบว่ามี activityLevel ก่อนคำนวณ
+      const activityFactor = activityFactors[activityLevel] || 1.2;
+      const calculatedTdee = Math.round(bmr * activityFactor);
+
+      setTdee(calculatedTdee);
+      setValue("tdee", calculatedTdee);
+
+      // อัปเดต nutritionData และแจ้ง onDataChange
+      setNutritionData(prev => {
+        const updatedData = { ...prev, tdee: calculatedTdee };
+        onDataChange(updatedData);
+        return updatedData;
+      });
+    }
+  }, [bmr, getValues("activityLevel"), setValue, onDataChange]);
+
+
+  const errorMessages = {
+    weight: "กรุณากรอกน้ำหนัก",
+    height: "กรุณากรอกส่วนสูง",
+    activityLevel: "กรุณาเลือกกิจกรรมที่ทำทุกวัน",
+    intakeMethod: "กรุณาเลือกช่องทางการรับอาหาร",
+    foodTypes: "กรุณาเลือกลักษณะอาหาร",
+    medicalFood: "กรุณากรอกอาหารทางการแพทย์",
+    favoriteFood: "กรุณากรอกอาหารที่ชอบ",
+    cooks: "กรุณาเลือกคนปรุงอาหาร",
+    nutritionStatus: "กรุณาเลือกภาวะโภชนาการ"
+  };
+  const handleInputChange = (name, value) => {
+    setValue(name, value);
+
+    setNutritionData(prev => {
+      const updatedData = { ...prev, ...getValues(), [name]: value };
+
+      // ✅ เช็คเฉพาะ input ที่เป็น string
+      if (typeof value === "string") {
+        if (value.trim() !== "" && errors[name]) {
+          setErrors(prevErrors => ({ ...prevErrors, [name]: undefined })); // ✅ ซ่อน Error ถ้ามีการกรอกข้อมูล
+        }
+        if (value.trim() === "") {
+          setErrors(prevErrors => ({ ...prevErrors, [name]: errorMessages[name] || "กรุณากรอกข้อมูล" })); // ❌ แสดง Error ถ้าลบออกหมด
+        }
       }
 
-      const calculatedTdee = bmr * activityFactors[activityLevel];
-      setTdee(Math.round(calculatedTdee));
-      setValue('tdee', Math.round(calculatedTdee));
-      setNutritionData((prev) => ({
-        ...prev,
-        tdee: Math.round(calculatedTdee),
-      }));
-      localStorage.setItem('nutritionData', JSON.stringify({
-        ...nutritionData,
-        tdee: Math.round(calculatedTdee),
-      }));
-    };
-
-    calculateTdee();
-  }, [bmr, activityLevel]); // คำนวณใหม่เมื่อ BMR หรือ activityLevel เปลี่ยน
+      // ✅ เช็ค input ที่เป็น Array (เช่น checkbox)
+      if (Array.isArray(value)) {
+        if (value.length > 0 && errors[name]) {
+          setErrors(prevErrors => ({ ...prevErrors, [name]: undefined })); // ✅ ซ่อน Error ถ้ามีการเลือก
+        }
+        if (value.length === 0) {
+          setErrors(prevErrors => ({ ...prevErrors, [name]: "กรุณาเลือกอย่างน้อย 1 ข้อ" })); // ❌ แสดง Error ถ้าลบออกหมด
+        }
+      }
 
 
-  const handleInputChange = (name, value) => {
-    const updatedValue = value || (typeof nutritionData[name] === 'number' ? 0 : nutritionData[name]);
-    const updatedData = {
-      ...nutritionData,
-      [name]: updatedValue,
-      gender: gender || nutritionData.gender, // ใช้ gender จาก state ถ้ายังไม่มีการแก้ไข
-      userAge: userAge || nutritionData.userAge, // ใช้ userAge ที่คำนวณแล้ว
-      userAgeInMonths: userAgeInMonths || nutritionData.userAgeInMonths, // ใช้ userAgeInMonths ที่คำนวณแล้ว
-      bmr: Math.round(bmr),
-      tdee: Math.round(tdee),
-    };
-    // เก็บข้อมูลลงใน localStorage
-    localStorage.setItem('nutritionData', JSON.stringify(updatedData));
-    setNutritionData(updatedData);
-    onDataChange(updatedData);
+
+      // คำนวณ BMR ใหม่เมื่อ weight, height, gender หรือ userAge เปลี่ยน
+      if (["weight", "height", "gender", "userAge"].includes(name)) {
+        const weight = parseFloat(getValues('weight'));
+        const height = parseFloat(getValues('height'));
+        const age = userAge;
+        const sex = gender;
+
+        if (weight && height && age && sex) {
+          let newBmr = sex === "ชาย"
+            ? 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age
+            : 447.593 + 9.247 * weight + 3.098 * height - 4.330 * age;
+
+          newBmr = Math.round(newBmr);
+          setBmr(newBmr);
+          setValue("bmr", newBmr);
+          updatedData.bmr = newBmr;
+        }
+      }
+
+      // คำนวณ TDEE ใหม่ **เฉพาะเมื่อเลือก activityLevel แล้ว**
+      if (name === "activityLevel" && updatedData.bmr) {
+        const activityFactor = activityFactors[value] || 1.2;
+        updatedData.tdee = Math.round(updatedData.bmr * activityFactor);
+        setTdee(updatedData.tdee);
+        setValue("tdee", updatedData.tdee);
+      }
+
+      onDataChange(updatedData);
+      return updatedData;
+    });
   };
 
+
+  useEffect(() => {
+    if (tdee > 0) {
+      setValue("tdee", tdee);
+      setNutritionData(prev => ({ ...prev, tdee }));
+    }
+  }, [tdee, setValue]);
+
+  const [errors, setErrors] = useState({});
+  // ✅ ฟังก์ชันตรวจสอบข้อมูล
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!getValues("weight")) newErrors.weight = "กรุณากรอกน้ำหนัก";
+    if (!getValues("height")) newErrors.height = "กรุณากรอกส่วนสูง";
+    if (!getValues("activityLevel")) newErrors.activityLevel = "กรุณาเลือกกิจกรรมที่ทำทุกวัน";
+    if (!getValues("intakeMethod") || getValues("intakeMethod").length === 0)
+      newErrors.intakeMethod = "กรุณาเลือกช่องทางการรับอาหาร";
+    if (!getValues("foodTypes") || getValues("foodTypes").length === 0)
+      newErrors.foodTypes = "กรุณาเลือกลักษณะอาหาร";
+    if (!getValues("medicalFood")) newErrors.medicalFood = "กรุณากรอกอาหารทางการแพทย์";
+    if (!getValues("favoriteFood")) newErrors.favoriteFood = "กรุณากรอกอาหารที่ชอบ";
+    if (!getValues("cooks") || getValues("cooks").length === 0)
+      newErrors.cooks = "กรุณาเลือกคนปรุงอาหาร";
+    if (!getValues("nutritionStatus")) newErrors.nutritionStatus = "กรุณาเลือกภาวะโภชนาการ";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // ถ้าไม่มีข้อผิดพลาดจะคืนค่า true
+  };
+
+  // ✅ ส่งฟังก์ชัน `validateForm` กลับไปให้ Component หลัก
+  useEffect(() => {
+    setValidateForm(() => validateForm);
+  }, [setValidateForm]);
 
   return (
     <div>
@@ -221,9 +255,6 @@ export const Nutrition = ({ onDataChange }) => {
         <div className="header">
           <b>การคำนวณพลังงาน</b>
         </div>
-        {/* <div style={{ marginLeft: '26px' }}>
-          <p style={{ color: "#666" }}><i class="bi bi-people-fill" style={{ color: "#008000" }}></i> เพื่อนบ้าน</p>
-        </div> */}
         <div className="m-1">
           <label className='ms-4 mb-0'> <i class="bi bi-check-circle" style={{ color: "#008000" }}></i> เพศ :</label>
           <label style={{ marginLeft: '10px', color: "#444" }}> {gender}</label><br></br>
@@ -237,55 +268,62 @@ export const Nutrition = ({ onDataChange }) => {
             <Controller
               name="weight"
               control={control}
-              defaultValue={nutritionData.weight}
               render={({ field }) => (
                 <input
                   type="number"
-                  className="form-control"
+                  style={{ width: "35%" }}
+                  className={`form-control ${errors.weight ? "is-invalid" : ""}`}
                   placeholder="กรอกน้ำหนัก"
                   {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    handleInputChange('weight', e.target.value);
+                  onChange={(e) => handleInputChange("weight", e.target.value)}
+                  onBlur={(e) => {
+                    if (e.target.value.trim() === "") {
+                      setErrors(prevErrors => ({ ...prevErrors, weight: "กรุณากรอกน้ำหนัก" }));
+                    }
                   }}
                 />
               )}
             />
-
+            <span style={{ color: "#666", fontSize: "15px" }}>กรอกน้ำหนักเป็นตัวเลขหรือทศนิยม เช่น 40, 50.5</span>
           </div>
+          {errors.weight && <div className="ms-4" style={{ color: "red" }}>{errors.weight}</div>}
         </div>
         <div className='m-1'>
-          <label className="form-label mt-3 ms-4 mb-0">ส่วนสูง (ซม.)</label>
+          <label className="form-label mt-2 ms-4 mb-0">ส่วนสูง (ซม.)</label>
           <span style={{ color: 'red' }}> *</span><br></br>
           <div className='ms-4 me-4'>
             <Controller
               name="height"
               control={control}
-              defaultValue={nutritionData.height}
               render={({ field }) => (
                 <input
                   type="number"
-                  className="form-control"
+                  style={{ width: "35%" }}
+                  className={`form-control ${errors.height ? "is-invalid" : ""}`}
                   placeholder="กรอกส่วนสูง"
                   {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    handleInputChange('height', e.target.value);
+                  onChange={(e) => handleInputChange("height", e.target.value)}
+                  onBlur={(e) => {
+                    if (e.target.value.trim() === "") {
+                      setErrors(prevErrors => ({ ...prevErrors, height: "กรุณากรอกส่วนสูง" }));
+                    }
                   }}
                 />
               )}
             />
+            <span style={{ color: "#666", fontSize: "15px" }}>กรอกส่วนสูงเป็นตัวเลขหรือทศนิยม เช่น 145, 165.5</span>
           </div>
+          {errors.height && <div className="ms-4" style={{ color: "red" }}>{errors.height}</div>}
         </div>
         <div className='m-1'>
-          <label className="form-label mt-3 ms-4 mb-0">ค่า BMR (หน่วย: กิโลกรัม น้ำหนักตัว)</label>
+          <label className="form-label mt-2 ms-4 mb-0">ค่า BMR (กิโลแคลอรีต่อวัน)</label>
           <span style={{ color: 'red' }}> *</span>
           <span
             style={{ color: 'blue', cursor: 'pointer', textDecoration: 'underline', marginLeft: '15px' }}
           >
           </span>
           <div className="ms-4 me-4">
-            <h4 className="m-1 mb-1"> <CountUp end={bmr ? bmr.toFixed(0) : 0} duration={0.5} style={{ color: "#28a745" }} /> </h4>
+            <h4 className="m-1 mb-1"> <CountUp end={bmr || 0} duration={0.5} style={{ color: "#28a745" }} /> </h4>
           </div>
         </div>
         <div className='m-1'>
@@ -298,12 +336,13 @@ export const Nutrition = ({ onDataChange }) => {
               defaultValue=""
               render={({ field }) => (
                 <select
-                  className="form-select"
+                  className={`form-select ${errors.activityLevel ? "is-invalid" : ""}`}
                   {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    setActivityLevel(e.target.value); // อัปเดต activityLevel
-                    handleInputChange('activityLevel', e.target.value); // อัปเดตใน useForm
+                  onChange={(e) => handleInputChange("activityLevel", e.target.value)}
+                  onBlur={(e) => {
+                    if (e.target.value.trim() === "") {
+                      setErrors(prevErrors => ({ ...prevErrors, activityLevel: "กรุณาเลือกกิจกรรมที่ทำทุกวัน" }));
+                    }
                   }}
                 >
                   <option value="">เลือกกิจกรรม</option>
@@ -316,6 +355,7 @@ export const Nutrition = ({ onDataChange }) => {
               )}
             />
           </div>
+          {errors.activityLevel && <div className="ms-4" style={{ color: "red" }}>{errors.activityLevel}</div>}
         </div>
         <div className='m-1'>
           <label className="form-label mt-3 ms-4 mb-0">ค่า TDEE (กิโลแคลอรีต่อวัน)</label>
@@ -325,7 +365,7 @@ export const Nutrition = ({ onDataChange }) => {
           >
           </span>
           <div className="ms-4 me-4">
-            <h4 className="m-1 mb-1"> <CountUp end={tdee ? tdee.toFixed(0) : 0} duration={0.5} style={{ color: "#fd7e14" }} /> </h4>
+            <h4 className="m-1 mb-1"> <CountUp end={tdee || 0} duration={0.5} style={{ color: "#fd7e14" }} /> </h4>
           </div>
         </div>
       </div>
@@ -351,8 +391,15 @@ export const Nutrition = ({ onDataChange }) => {
                     const newValue = e.target.checked
                       ? [...field.value, "กินเอง"]
                       : field.value.filter((item) => item !== "กินเอง");
+
                     field.onChange(newValue);
                     handleInputChange("intakeMethod", newValue);
+                  }}
+                  onBlur={() => {
+                    const intakeMethod = getValues("intakeMethod");
+                    if (Array.isArray(intakeMethod) && intakeMethod.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, intakeMethod: "กรุณาเลือกช่องทางการรับอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -374,8 +421,15 @@ export const Nutrition = ({ onDataChange }) => {
                     const newValue = e.target.checked
                       ? [...field.value, "ผู้ดูแลป้อน"]
                       : field.value.filter((item) => item !== "ผู้ดูแลป้อน");
+
                     field.onChange(newValue);
                     handleInputChange("intakeMethod", newValue);
+                  }}
+                  onBlur={() => {
+                    const intakeMethod = getValues("intakeMethod");
+                    if (Array.isArray(intakeMethod) && intakeMethod.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, intakeMethod: "กรุณาเลือกช่องทางการรับอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -397,8 +451,15 @@ export const Nutrition = ({ onDataChange }) => {
                     const newValue = e.target.checked
                       ? [...field.value, "NG tube"]
                       : field.value.filter((item) => item !== "NG tube");
+
                     field.onChange(newValue);
                     handleInputChange("intakeMethod", newValue);
+                  }}
+                  onBlur={() => {
+                    const intakeMethod = getValues("intakeMethod");
+                    if (Array.isArray(intakeMethod) && intakeMethod.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, intakeMethod: "กรุณาเลือกช่องทางการรับอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -420,8 +481,15 @@ export const Nutrition = ({ onDataChange }) => {
                     const newValue = e.target.checked
                       ? [...field.value, "OG tube"]
                       : field.value.filter((item) => item !== "OG tube");
+
                     field.onChange(newValue);
                     handleInputChange("intakeMethod", newValue);
+                  }}
+                  onBlur={() => {
+                    const intakeMethod = getValues("intakeMethod");
+                    if (Array.isArray(intakeMethod) && intakeMethod.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, intakeMethod: "กรุณาเลือกช่องทางการรับอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -443,8 +511,15 @@ export const Nutrition = ({ onDataChange }) => {
                     const newValue = e.target.checked
                       ? [...field.value, "PEG"]
                       : field.value.filter((item) => item !== "PEG");
+
                     field.onChange(newValue);
                     handleInputChange("intakeMethod", newValue);
+                  }}
+                  onBlur={() => {
+                    const intakeMethod = getValues("intakeMethod");
+                    if (Array.isArray(intakeMethod) && intakeMethod.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, intakeMethod: "กรุณาเลือกช่องทางการรับอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -459,22 +534,31 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="checkbox"
-                  value="IV"
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+                  value="IV"
                   checked={field.value.includes("IV")}
                   onChange={(e) => {
                     const newValue = e.target.checked
                       ? [...field.value, "IV"]
                       : field.value.filter((item) => item !== "IV");
+
                     field.onChange(newValue);
                     handleInputChange("intakeMethod", newValue);
+                  }}
+                  onBlur={() => {
+                    const intakeMethod = getValues("intakeMethod");
+                    if (Array.isArray(intakeMethod) && intakeMethod.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, intakeMethod: "กรุณาเลือกช่องทางการรับอาหาร" }));
+                    }
                   }}
                 />
               )}
             />
             <span style={{ marginLeft: '10px' }}>IV</span>
           </div>
+          {errors.intakeMethod && <div className="ms-1" style={{ color: "red" }}>{errors.intakeMethod}</div>}
         </div>
+
       </div>
 
       <div className="info3 card mt-3">
@@ -491,15 +575,22 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="checkbox"
-                  value="อาหารธรรมดา"
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+                  value="อาหารธรรมดา"
                   checked={field.value.includes("อาหารธรรมดา")}
                   onChange={(e) => {
                     const newValue = e.target.checked
                       ? [...field.value, "อาหารธรรมดา"]
                       : field.value.filter((item) => item !== "อาหารธรรมดา");
+
                     field.onChange(newValue);
                     handleInputChange("foodTypes", newValue);
+                  }}
+                  onBlur={() => {
+                    const foodTypes = getValues("foodTypes");
+                    if (Array.isArray(foodTypes) && foodTypes.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, foodTypes: "กรุณาเลือกลักษณะอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -513,15 +604,22 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="checkbox"
-                  value="อาหารอ่อน"
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+                  value="อาหารอ่อน"
                   checked={field.value.includes("อาหารอ่อน")}
                   onChange={(e) => {
                     const newValue = e.target.checked
                       ? [...field.value, "อาหารอ่อน"]
                       : field.value.filter((item) => item !== "อาหารอ่อน");
+
                     field.onChange(newValue);
                     handleInputChange("foodTypes", newValue);
+                  }}
+                  onBlur={() => {
+                    const foodTypes = getValues("foodTypes");
+                    if (Array.isArray(foodTypes) && foodTypes.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, foodTypes: "กรุณาเลือกลักษณะอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -535,20 +633,28 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="checkbox"
-                  value="อาหารเหลว"
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+                  value="อาหารเหลว"
                   checked={field.value.includes("อาหารเหลว")}
                   onChange={(e) => {
                     const newValue = e.target.checked
                       ? [...field.value, "อาหารเหลว"]
                       : field.value.filter((item) => item !== "อาหารเหลว");
+
                     field.onChange(newValue);
                     handleInputChange("foodTypes", newValue);
+                  }}
+                  onBlur={() => {
+                    const foodTypes = getValues("foodTypes");
+                    if (Array.isArray(foodTypes) && foodTypes.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, foodTypes: "กรุณาเลือกลักษณะอาหาร" }));
+                    }
                   }}
                 />
               )}
             /> <span style={{ marginLeft: '10px' }}>อาหารเหลว </span>
           </div>
+          {errors.foodTypes && <div className="ms-1" style={{ color: "red" }}>{errors.foodTypes}</div>}
         </div>
       </div>
       <div className="info3 card mt-3">
@@ -560,21 +666,28 @@ export const Nutrition = ({ onDataChange }) => {
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="กรอกคำตอบ"
+                <textarea
+                  className={`form-control ${errors.medicalFood ? "is-invalid" : ""}`}
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
+                  placeholder="กรอกอาหารทางการแพทย์"
                   {...field}
                   onChange={(e) => {
-                    field.onChange(e);
+                    field.onChange(e.target.value);
                     handleInputChange("medicalFood", e.target.value);
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value.trim() === "") {
+                      setErrors(prevErrors => ({ ...prevErrors, medicalFood: "กรุณากรอกอาหารทางการแพทย์" }));
+                    }
                   }}
                 />
               )}
             />
           </div>
+          {errors.medicalFood && <div className="ms-4" style={{ color: "red" }}>{errors.medicalFood}</div>}
         </div>
-        <div className='m-1'>
+        <div className='m-1 mb-4'>
           <label className="form-label mt-3 ms-4 mb-0">อาหารที่ชอบ <span style={{ color: 'red' }}> *</span></label><br></br>
           <div className="ms-4 me-4">
             <Controller
@@ -582,41 +695,26 @@ export const Nutrition = ({ onDataChange }) => {
               control={control}
               defaultValue=""
               render={({ field }) => (
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="กรอกคำตอบ"
+                <textarea
+                  className={`form-control ${errors.favoriteFood ? "is-invalid" : ""}`}
+                  rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                  style={{ resize: "vertical" }}
+                  placeholder="กรอกอาหารที่ชอบ"
                   {...field}
                   onChange={(e) => {
-                    field.onChange(e);
+                    field.onChange(e.target.value);
                     handleInputChange("favoriteFood", e.target.value);
                   }}
-                />
-              )}
-            />
-          </div>
-        </div>
-        <div className='m-1 mb-4'>
-          <label className="form-label mt-3 ms-4 ">อาหารอื่นๆ (ถ้ามี) </label><br></br>
-          <div className="ms-4 me-4">
-            <Controller
-              name="otherFood"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="กรอกคำตอบ"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(e);
-                    handleInputChange("otherFood", e.target.value);
+                  onBlur={(e) => {
+                    if (e.target.value.trim() === "") {
+                      setErrors(prevErrors => ({ ...prevErrors, favoriteFood: "กรุณากรอกอาหารที่ชอบ" }));
+                    }
                   }}
                 />
               )}
             />
           </div>
+          {errors.favoriteFood && <div className="ms-4" style={{ color: "red" }}>{errors.favoriteFood}</div>}
         </div>
       </div>
       <div className="info3 card mt-3">
@@ -633,15 +731,22 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="checkbox"
-                  value="ปรุงเอง"
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+                  value="ปรุงเอง"
                   checked={field.value.includes("ปรุงเอง")}
                   onChange={(e) => {
                     const newValue = e.target.checked
                       ? [...field.value, "ปรุงเอง"]
                       : field.value.filter((item) => item !== "ปรุงเอง");
+
                     field.onChange(newValue);
                     handleInputChange("cooks", newValue);
+                  }}
+                  onBlur={() => {
+                    const cooks = getValues("cooks");
+                    if (Array.isArray(cooks) && cooks.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, cooks: "กรุณาเลือกคนปรุงอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -655,15 +760,22 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="checkbox"
-                  value="คนดูแลปรุงให้"
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+                  value="คนดูแลปรุงให้"
                   checked={field.value.includes("คนดูแลปรุงให้")}
                   onChange={(e) => {
                     const newValue = e.target.checked
                       ? [...field.value, "คนดูแลปรุงให้"]
                       : field.value.filter((item) => item !== "คนดูแลปรุงให้");
+
                     field.onChange(newValue);
                     handleInputChange("cooks", newValue);
+                  }}
+                  onBlur={() => {
+                    const cooks = getValues("cooks");
+                    if (Array.isArray(cooks) && cooks.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, cooks: "กรุณาเลือกคนปรุงอาหาร" }));
+                    }
                   }}
                 />
               )}
@@ -677,20 +789,28 @@ export const Nutrition = ({ onDataChange }) => {
               render={({ field }) => (
                 <input
                   type="checkbox"
-                  value="ซื้อจากร้านอาหาร"
                   style={{ transform: 'scale(1.3)', marginLeft: '5px' }}
+                  value="ซื้อจากร้านอาหาร"
                   checked={field.value.includes("ซื้อจากร้านอาหาร")}
                   onChange={(e) => {
                     const newValue = e.target.checked
                       ? [...field.value, "ซื้อจากร้านอาหาร"]
                       : field.value.filter((item) => item !== "ซื้อจากร้านอาหาร");
+
                     field.onChange(newValue);
                     handleInputChange("cooks", newValue);
+                  }}
+                  onBlur={() => {
+                    const cooks = getValues("cooks");
+                    if (Array.isArray(cooks) && cooks.length === 0) {
+                      setErrors(prevErrors => ({ ...prevErrors, cooks: "กรุณาเลือกคนปรุงอาหาร" }));
+                    }
                   }}
                 />
               )}
             /><span style={{ marginLeft: '10px' }}> ซื้อจากร้านอาหาร </span>
           </div>
+          {errors.cooks && <div className="ms-1" style={{ color: "red" }}>{errors.cooks}</div>}
         </div>
       </div>
       <div className="info3 card mt-3">
@@ -700,13 +820,13 @@ export const Nutrition = ({ onDataChange }) => {
         <div className="ms-4">
           <p className="mt-2 mb-2" style={{ color: "#666" }}>ประเมินภาวะโภชนาการอย่างย่อ</p>
         </div>
-        <div className='m-1'>
+        <div className='m-1 mb-4'>
           <label className="form-label ms-4 me-4 ">ภาวะโภชนาการ <span style={{ color: 'red' }}> *</span></label>
           <div className='ms-4 me-4'>
             <Controller
               name="nutritionStatus"
               control={control}
-              defaultValue=" "
+              defaultValue=""
               render={({ field }) => (
                 <input
                   type="radio"
@@ -725,6 +845,7 @@ export const Nutrition = ({ onDataChange }) => {
             <Controller
               name="nutritionStatus"
               control={control}
+              defaultValue=""
               render={({ field }) => (
                 <input
                   type="radio"
@@ -739,10 +860,11 @@ export const Nutrition = ({ onDataChange }) => {
               )}
             /> <span style={{ marginLeft: '10px' }}>เกินเกณฑ์ </span>
           </div>
-          <div className='ms-4 me-4 mb-4'>
+          <div className='ms-4 me-4'>
             <Controller
               name="nutritionStatus"
               control={control}
+              defaultValue=""
               render={({ field }) => (
                 <input
                   type="radio"
@@ -757,6 +879,7 @@ export const Nutrition = ({ onDataChange }) => {
               )}
             /><span style={{ marginLeft: '10px' }}> ต่ำกว่าเกณฑ์ </span>
           </div>
+          {errors.nutritionStatus && <div className="ms-4" style={{ color: "red" }}>{errors.nutritionStatus}</div>}
         </div>
       </div>
 

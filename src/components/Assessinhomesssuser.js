@@ -930,7 +930,7 @@ export default function Assessinhomesssuser({ }) {
                         style={{ cursor: "pointer" }}
                       >
                         <td>{index + 1}</td>
-                        <td >{formatDate(form.createdAt)}</td>
+                        <td style={{ width: "25%" }}>{formatDate(form.createdAt)}</td>
                         <td><span className="normal-status"><i class="bi bi-check-circle"></i> {form.status_agenda}</span></td>
                         <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                         <td className="text-primary">รายละเอียด</td>
@@ -950,11 +950,10 @@ export default function Assessinhomesssuser({ }) {
               </table>
             </div>
           )}
-
           {selectedAssessment === "IN-HOME-SSS" && (
             <div>
               <div className="content-toolbar d-flex justify-content-between align-items-center mt-4">
-                <div className="toolbar mb-2">
+                <div className="search-bar position-relative mb-2">
                   {AssessinhomeForms && AssessinhomeForms.length > 0 && (
 
                     <button
@@ -973,15 +972,13 @@ export default function Assessinhomesssuser({ }) {
                   </p>
                 </div>
               </div>
-
-
               <table className="table table-hover">
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th onClick={sortByDateInHome} style={{ cursor: "pointer" }}>
+                    <th onClick={sortByDateAgenda} style={{ cursor: "pointer" }}>
                       วันที่บันทึก{" "}
-                      {sortOrderInHome === "asc" ? (
+                      {sortOrderAgenda === "asc" ? (
                         <i className="bi bi-caret-up-fill"></i> // เก่าสุด -> ใหม่สุด
                       ) : (
                         <i className="bi bi-caret-down-fill"></i> // ใหม่สุด -> เก่าสุด
@@ -992,7 +989,6 @@ export default function Assessinhomesssuser({ }) {
                     <th>รายละเอียด</th>
                   </tr>
                 </thead>
-
                 <tbody>
                   {AssessinhomeForms.length > 0 ? (
                     AssessinhomeForms.map((form, index) => (
@@ -1000,40 +996,29 @@ export default function Assessinhomesssuser({ }) {
                         onClick={() => navigate("/detailAssessinhomeForm", { state: { id: form._id } })}
                         style={{ cursor: "pointer" }}
                       >
-                        <td >{index + 1}</td>
-                        <td >{formatDate(form.createdAt)}</td>
-                        {/* <td style={{ width: "25%" }}>
-                      {form.updatedAt && form.updatedAt !== form.createdAt ? (
-                        formatDate(form.updatedAt)
-                      ) : (
-                        <span className="not-evaluated">ยังไม่มีการแก้ไขการประเมิน</span>
-                      )}
-                    </td> */}
-                        <td > <span className="normal-status"><i class="bi bi-check-circle"></i> {form.status_inhome}</span></td>
+                        <td>{index + 1}</td>
+                        <td style={{ width: "25%" }}>{formatDate(form.createdAt)}</td>
+                        <td><span className="normal-status"><i class="bi bi-check-circle"></i> {form.status_inhome}</span></td>
                         <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ไม่ระบุผู้ประเมิน"}</td>
                         <td className="text-primary">รายละเอียด</td>
                       </tr>
                     ))
                   ) : (
-                    // แสดงข้อความเมื่อไม่มีข้อมูล
                     <tr>
                       <td colSpan="5" style={{ textAlign: "center", verticalAlign: "middle" }}>
-                        <a
-                          className="info"
-                          onClick={() =>
-                            navigate("/assessinhomesssform", { state: { id: userData._id } })
-                          }
-                        >
+                        <a className="info" onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}>
                           <span className="not-evaluated">ยังไม่ได้รับการประเมิน</span>
                         </a>
                       </td>
                     </tr>
                   )}
                 </tbody>
+
               </table>
             </div>
           )}
-          
+
+
 
         </div>
 

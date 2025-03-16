@@ -269,7 +269,7 @@ export default function Updatecaregiver() {
   // };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -584,16 +584,16 @@ export default function Updatecaregiver() {
     };
     fetchUnreadCount();
   }, []);
-  
+
   useEffect(() => {
     if (!["พ่อ", "แม่", "ลูก", "ภรรยา", "สามี"].includes(formData.Relationship)) {
-        setShowOtherInput(true);
-        setOtherRelationship(formData.Relationship); // ✅ โหลดค่าที่มีอยู่แล้ว
+      setShowOtherInput(true);
+      setOtherRelationship(formData.Relationship); // ✅ โหลดค่าที่มีอยู่แล้ว
     } else {
-        setShowOtherInput(false);
-        setOtherRelationship(""); // ✅ รีเซ็ตค่า ถ้าเลือกกลับมาเป็นค่าปกติ
+      setShowOtherInput(false);
+      setOtherRelationship(""); // ✅ รีเซ็ตค่า ถ้าเลือกกลับมาเป็นค่าปกติ
     }
-}, [formData.Relationship]);
+  }, [formData.Relationship]);
 
   return (
     <main className="body">
@@ -884,52 +884,52 @@ export default function Updatecaregiver() {
               )}
             </div>
             <div className="mb-1">
-    <label>ความสัมพันธ์</label>
-    <div className="relationship-container">
-        <div className="relationship-group">
-            {["พ่อ", "แม่", "ลูก", "ภรรยา", "สามี"].map((option) => (
-                <div key={option}>
-                    <label>
+              <label>ความสัมพันธ์</label>
+              <div className="relationship-container">
+                <div className="relationship-group">
+                  {["พ่อ", "แม่", "ลูก", "ภรรยา", "สามี"].map((option) => (
+                    <div key={option}>
+                      <label>
                         <input
-                            type="radio"
-                            value={option}
-                            checked={formData.Relationship === option}
-                            onChange={handleRelationshipChange}
-                            style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                          type="radio"
+                          value={option}
+                          checked={formData.Relationship === option}
+                          onChange={handleRelationshipChange}
+                          style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
                         />
                         {option}
-                    </label>
-                </div>
-            ))}
-            <div>
-                <label>
-                    <input
+                      </label>
+                    </div>
+                  ))}
+                  <div>
+                    <label>
+                      <input
                         type="radio"
                         value="อื่นๆ"
                         checked={showOtherInput}
                         onChange={() => {
-                            setShowOtherInput(true);
-                            setFormData({ ...formData, Relationship: otherRelationship || "" });
+                          setShowOtherInput(true);
+                          setFormData({ ...formData, Relationship: otherRelationship || "" });
                         }}
                         style={{ transform: 'scale(1.5)', marginLeft: '5px' }}
+                      />
+                      อื่นๆ
+                    </label>
+                  </div>
+                </div>
+                {showOtherInput && (
+                  <div className="mt-2">
+                    <label>ระบุความสัมพันธ์อื่นๆ</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={otherRelationship}
+                      onChange={(e) => setOtherRelationship(e.target.value)}
                     />
-                    อื่นๆ
-                </label>
+                  </div>
+                )}
+              </div>
             </div>
-        </div>
-        {showOtherInput && (
-            <div className="mt-2">
-                <label>ระบุความสัมพันธ์อื่นๆ</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    value={otherRelationship}
-                    onChange={(e) => setOtherRelationship(e.target.value)}
-                />
-            </div>
-        )}
-    </div>
-</div>
 
             <div className="mb-1">
               <label>เบอร์โทรศัพท์</label>
