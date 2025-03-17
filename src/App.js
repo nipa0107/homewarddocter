@@ -45,6 +45,8 @@ import UpdateOTP from "./components/updateotp";
 import AgendaForm from "./components/AgendaForm";
 import UpdateCaregiver from "./components/updatecaregiver";
 import AddCaregiver from "./components/addcaregiver";
+import ScrollToTop from "../src/components/ScrollToTop";
+
 const PrivateRoute = ({ element, isLoggedIn }) => {
   return isLoggedIn === "true" ? (
     element
@@ -58,6 +60,7 @@ function App() {
 
   return (
     <Router>
+       <ScrollToTop /> 
       <div className="App">
         <Routes>
           <Route
