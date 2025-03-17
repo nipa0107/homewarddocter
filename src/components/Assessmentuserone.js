@@ -23,6 +23,8 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import "../css/contentgraph.css";
 import io from "socket.io-client";
+import { useLayoutEffect } from "react";
+
 const socket = io("http://localhost:5000");
 
 export default function Assessmentuserone() {
@@ -92,9 +94,6 @@ export default function Assessmentuserone() {
     normal: 0,
   });
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
 
   const getUnreadCount = useCallback(
     (type) => {
