@@ -32,7 +32,7 @@ import DetailAssessreadiness from "./components/detailassessrdn";
 import Assessinhomesss from "./components/Assessinhomesss";
 import Assessinhomesssuser from "./components/Assessinhomesssuser";
 import Assessreadinessuser from "./components/Assessreadinessuser";
-import MultiStepForm from "./components/MultiStepForm";
+// import MultiStepForm from "./components/MultiStepForm";
 import DetailAssessinhomesss from "./components/DetailAssessinhomeForm";
 import DetailAgenda from "./components/DetailAgendaForm";
 import Abnormalcase from "./components/Abnormalcase";
@@ -267,7 +267,7 @@ function App() {
               />
             }
           />
-          <Route
+          {/* <Route
             path="/MultiStepForm"
             element={
               <PrivateRoute
@@ -275,7 +275,7 @@ function App() {
                 isLoggedIn={isLoggedIn}
               />
             }
-          />
+          /> */}
           <Route
             path="/detailAssessinhomeForm"
             element={
