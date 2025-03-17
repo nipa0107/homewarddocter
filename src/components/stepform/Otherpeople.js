@@ -4,7 +4,7 @@ import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import Collapse from '@mui/material/Collapse';
 
 export const Otherpeople = ({ onDataChange }) => {
-  const { control, register, getValues, setValue } = useFormContext();
+  const { control, register, getValues, setValue, watch } = useFormContext();
   const { fields: existingFields, replace: replaceExisting } = useFieldArray({ control, name: "existingCaregivers" });
   const { fields: newFields, append: appendNew, remove: removeNew } = useFieldArray({ control, name: "newCaregivers" });
 
@@ -12,23 +12,46 @@ export const Otherpeople = ({ onDataChange }) => {
   const location = useLocation();
   const { id } = location.state || {};
 
+  // ✅ โหลดค่าจาก localStorage เมื่อหน้าโหลดขึ้นมา
   useEffect(() => {
     const savedData = JSON.parse(localStorage.getItem("otherPeopleData"));
     if (savedData) {
       replaceExisting(savedData.existingCaregivers || []);
-      appendNew(savedData.newCaregivers || []);
-    }
-  }, [replaceExisting, appendNew]);
-  
-  useEffect(() => {
-    const currentValues = {
-      existingCaregivers: getValues("existingCaregivers") || [],
-      newCaregivers: getValues("newCaregivers") || []
-    };
-    localStorage.setItem("otherPeopleData", JSON.stringify(currentValues));
-  }, [existingFields, newFields, getValues]);
 
-  
+      // ✅ ป้องกันการเพิ่มข้อมูลซ้ำซ้อน
+      if (Array.isArray(savedData.newCaregivers)) {
+        const currentNewCaregivers = getValues("newCaregivers") || [];
+
+        savedData.newCaregivers.forEach((caregiver) => {
+          // ตรวจสอบก่อนว่า caregiver คนนี้มีอยู่แล้วหรือไม่
+          if (!currentNewCaregivers.some(c => JSON.stringify(c) === JSON.stringify(caregiver))) {
+            appendNew(caregiver);
+          }
+        });
+      }
+    }
+  }, []);
+
+
+
+  // ✅ บันทึกค่าลง localStorage ทุกครั้งที่มีการเปลี่ยนแปลง
+  const watchAllFields = watch();
+  useEffect(() => {
+    if (watchAllFields) {
+        const existingData = JSON.parse(localStorage.getItem("otherPeopleData")) || {};
+        const updatedData = {
+            existingCaregivers: watchAllFields.existingCaregivers || [],
+            newCaregivers: watchAllFields.newCaregivers || [],
+        };
+
+        // ✅ ถ้า `localStorage` ยังไม่มีข้อมูล หรือข้อมูลเปลี่ยนไปจริงๆ ค่อยบันทึกใหม่
+        if (JSON.stringify(existingData) !== JSON.stringify(updatedData)) {
+            localStorage.setItem("otherPeopleData", JSON.stringify(updatedData));
+        }
+    }
+}, [watchAllFields]);
+
+
   useEffect(() => {
     handleFieldChange(); // เรียกฟังก์ชันเพื่อรวมข้อมูลใหม่ทุกครั้ง
   }, [existingFields, getValues]);
@@ -42,6 +65,7 @@ export const Otherpeople = ({ onDataChange }) => {
   };
 
   /** ✅ ดึงข้อมูล Existing Caregivers จาก API */
+  // ✅ ดึงข้อมูล Existing Caregivers จาก API (ถ้า localStorage ไม่มีข้อมูล)
   useEffect(() => {
     const fetchCaregiverData = async () => {
       try {
@@ -49,16 +73,16 @@ export const Otherpeople = ({ onDataChange }) => {
         const caregiverData = await response.json();
 
         if (caregiverData.status === "ok" && Array.isArray(caregiverData.data)) {
-          // ตรวจสอบว่ามีข้อมูลใน existingCaregivers หรือไม่
-          if (getValues("existingCaregivers").length === 0) {
+          const savedData = JSON.parse(localStorage.getItem("otherPeopleData"));
+
+          if (!savedData || savedData.existingCaregivers.length === 0) {
             replaceExisting(
               caregiverData.data.map((caregiver) => ({
                 CaregiverId: caregiver.id || "",
                 firstName: caregiver.name || "",
                 lastName: caregiver.surname || "",
-                relationship: caregiver.relationship || "ไม่ระบุความสัมพันธ์",  // ใช้ relationship จาก API
+                relationship: caregiver.relationship || "ไม่ระบุความสัมพันธ์",
                 birthDate: caregiver.birthDate || "",
-                role: caregiver.role || "",
                 occupation: caregiver.occupation || "",
                 status: caregiver.status || "",
                 education: caregiver.education || "",
@@ -80,7 +104,7 @@ export const Otherpeople = ({ onDataChange }) => {
     if (id) {
       fetchCaregiverData();
     }
-  }, [id, replaceExisting, getValues]);
+  }, [id, replaceExisting]);
 
   /** ✅ เพิ่มผู้ดูแลใหม่ */
   const handleAddPerson = () => {
@@ -144,13 +168,12 @@ export const Otherpeople = ({ onDataChange }) => {
       isNew: true,
     }));
 
-    onDataChange({
-      ...getValues(),
-      OtherPeople: {
-        existingCaregivers: existingCaregiversData,
-        newCaregivers: newCaregiversData,
-      },
-    });
+    const updatedData = {
+      existingCaregivers: getValues("existingCaregivers") || [],
+      newCaregivers: getValues("newCaregivers") || [],
+    };
+    localStorage.setItem("otherPeopleData", JSON.stringify(updatedData));
+    onDataChange(updatedData);
   };
 
 
@@ -262,6 +285,10 @@ export const Otherpeople = ({ onDataChange }) => {
                         <select
                           className="form-select"
                           {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handleFieldChange();
+                          }}
                         >
                           <option value="">เลือกอาชีพ</option>
                           <option value="ข้าราชการ">ข้าราชการ</option>
@@ -403,7 +430,7 @@ export const Otherpeople = ({ onDataChange }) => {
                         />
                       )}
                     />
-                    
+
                   </div>
                   <div className="mt-4">
                     <label>รายละเอียดการดูแลผู้ป่วย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น บันทึกอาการ การให้ยาผู้ป่วย)</span></label>
@@ -423,7 +450,7 @@ export const Otherpeople = ({ onDataChange }) => {
                         />
                       )}
                     />
-                    
+
                   </div>
                 </div>
               </Collapse>
@@ -434,7 +461,7 @@ export const Otherpeople = ({ onDataChange }) => {
               <b>ข้อมูลคนในครอบครัว</b><br></br>
               <div className="row" style={{ marginBottom: "-25px" }}>
                 <div className="col text-start" style={{ marginLeft: "-25px" }}>
-              
+
                   <span
                     onClick={() => toggleCollapse(index, "new")}
                     style={{
@@ -467,7 +494,7 @@ export const Otherpeople = ({ onDataChange }) => {
 
               <Collapse in={openIndex.new === index}>
                 <div className="p-2">
-                <div className="mt-3">
+                  <div className="mt-3">
                     <label>ชื่อ</label>
                     <Controller
                       name={`newCaregivers.${index}.firstName`}
@@ -495,7 +522,7 @@ export const Otherpeople = ({ onDataChange }) => {
                       )}
                     />
                   </div>
-                  
+
                   <div className="mt-3">
                     <label>ความสัมพันธ์</label>
                     <Controller
