@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
+import Sidebar from "./sidebar";
 import io from "socket.io-client";
 const socket = io("http://localhost:5000");
 
@@ -711,7 +712,7 @@ export default function Abnormalcaser({ }) {
 
     return (
         <main className="body">
-            <div className={`sidebar ${isActive ? "active" : ""}`}>
+            {/* <div className={`sidebar ${isActive ? "active" : ""}`}>
                 <div class="logo_content">
                     <div class="logo">
                         <div class="logo_name">
@@ -784,8 +785,8 @@ export default function Abnormalcaser({ }) {
                         </li>
                     </div>
                 </ul>
-            </div>
-
+            </div> */}
+            <Sidebar />
             <div className="home_content">
                 <div className="homeheader">
                     <div className="header">ผู้ป่วยที่มีอาการผิดปกติ</div>

@@ -13,36 +13,7 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
         'question_11', 'question_12'
     ];
 
-    // ✅ Calculate Total Score
-    // const calculateTotalScore = () => {
-    //     if (!ZaritData || typeof ZaritData !== "object") return;
 
-    //     let total = 0;
-    //     let hasMissing = false;
-
-    //     scoreKeys.forEach(key => {
-    //         if (!ZaritData[key]) {
-    //             hasMissing = true;  // ✅ Mark missing answers
-    //         } else {
-    //             total += parseInt(ZaritData[key], 10) || 0;
-    //         }
-    //     });
-
-    //     setHasError(hasMissing);
-    //     if (!hasMissing) setShowError(false);
-
-    //     setTotalScore(total);
-    //     setZaritData(prevData => ({ ...prevData, totalScore: total }));
-
-    //     let message = '';
-    //     if (total <= 10) message = 'ไม่มีภาระทางใจ';
-    //     else if (total >= 11 && total <= 20) message = 'มีภาระปานกลาง';
-    //     else if (total > 20) message = 'มีภาระหนัก';
-
-    //     setBurdenMessage(message);
-    // };
-
-    // ✅ Auto-update Score when ZaritData changes
     useEffect(() => {
         calculateTotalScore();
     }, [ZaritData]);
@@ -83,10 +54,10 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
                 <div className="card-body">
                     <div className="row p-3">
                         {[4, 3, 2, 1, 0].map(value => (
-                            <div 
-                              className="col-2 d-flex flex-column align-items-center justify-content-center " 
-                              style={{width:"20%"}}
-                              key={value}
+                            <div
+                                className="col-2 d-flex flex-column align-items-center justify-content-center "
+                                style={{ width: "20%" }}
+                                key={value}
                             >
                                 <Controller
                                     name={name}
@@ -117,8 +88,25 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
             </div>
         );
     };
+
+
+    const { reset, setValue } = useFormContext();
+
+    useEffect(() => {
+        const savedData = JSON.parse(localStorage.getItem("ZaritData"));
+        if (savedData) {
+            setZaritData(savedData);
+
+            // ✅ อัปเดตค่าใน react-hook-form
+            Object.keys(savedData).forEach(key => {
+                setValue(key, String(savedData[key])); // ใช้ String() เพื่อให้ค่าตรงกับ radio button
+            });
+        }
+    }, [setValue]);
+    useEffect(() => {
+        localStorage.setItem("ZaritData", JSON.stringify(ZaritData));
+    }, [ZaritData]);
     
-    const { reset } = useFormContext(); // เรียกใช้ reset จาก react-hook-form
     // ฟังก์ชันเคลียร์ข้อมูลทั้งหมด โดยเคลียร์ทั้ง state ของคุณเองและ state ใน react-hook-form
     const clearAllAnswers = () => {
         // รีเซ็ตค่าของ react-hook-form
@@ -134,6 +122,7 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
         setTotalScore(0);
         setBurdenMessage('');
         setShowError(false);
+        localStorage.removeItem("ZaritData"); // ✅ ล้างค่าจาก localStorage ด้วย
     };
 
     const getGroupStyle = () => {

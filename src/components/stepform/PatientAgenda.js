@@ -1,34 +1,22 @@
 import React, { useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const PatientAgenda = ({ onDataChange}) => {
+export const PatientAgenda = ({ onDataChange }) => {
     const { control, setValue, getValues } = useFormContext();
 
-    const storageKey = `patientAgendaData`; // ✅ ใช้ userId เพื่อแยกข้อมูลแต่ละคน
-
-    // ✅ โหลดข้อมูลจาก LocalStorage เมื่อลง Component
-    useEffect(() => {
-        const savedData = localStorage.getItem(storageKey);
-        if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            Object.keys(parsedData).forEach((key) => setValue(key, parsedData[key]));
-            onDataChange(parsedData);
-        } else {
-            // ✅ ถ้าไม่มีข้อมูล ให้เคลียร์ค่า
-            onDataChange({});
-        }
-    }, ); // ✅ รันใหม่เมื่อ userid เปลี่ยน
-
-    // ✅ บันทึกข้อมูลทุกครั้งที่มีการเปลี่ยนแปลง
-    const handleInputChange = (name, value) => {
-        setValue(name, value);
-        const updatedData = { ...getValues(), [name]: value };
-        onDataChange(updatedData);
-
-        // ✅ บันทึกข้อมูลลง localStorage
-        localStorage.setItem(storageKey, JSON.stringify(updatedData));
-    };
-
+  useEffect(() => {
+    // Load stored data from localStorage
+    const savedData = JSON.parse(localStorage.getItem("patientAgendaData")) || {};
+    Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
+    onDataChange(getValues());
+  }, []);
+    
+  const handleInputChange = (name, value) => {
+    setValue(name, value);
+    const updatedValues = { ...getValues(), [name]: value };
+    localStorage.setItem("patientAgendaData", JSON.stringify(updatedValues));
+    onDataChange(updatedValues);
+  };
     return (
         <div>
             <div className="title-form mt-1">
@@ -36,7 +24,7 @@ export const PatientAgenda = ({ onDataChange}) => {
                     <b>Patient Agenda</b>
                 </div>
                 <div style={{ marginLeft: '26px' }}>
-                    <p style={{color:"#666"}}><i class="bi bi-person-check" style={{color:"#008000"}}></i> ประเมินผู้ป่วยเบื้องต้น</p>
+                    <p style={{ color: "#666" }}><i class="bi bi-person-check" style={{ color: "#008000" }}></i> ประเมินผู้ป่วยเบื้องต้น</p>
                 </div>
             </div>
 
@@ -56,9 +44,9 @@ export const PatientAgenda = ({ onDataChange}) => {
                                 control={control}
                                 render={({ field: controllerField }) => (
                                     <textarea
-                                    className="form-control"
-                                    rows="2" // กำหนดจำนวนแถวเริ่มต้น
-                                    style={{ resize: "vertical" }}
+                                        className="form-control"
+                                        rows="2" // กำหนดจำนวนแถวเริ่มต้น
+                                        style={{ resize: "vertical" }}
                                         placeholder="กรอกคำตอบ"
                                         {...controllerField}
                                         onChange={(e) => {

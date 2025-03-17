@@ -6,24 +6,17 @@ export const Physicalexamination = ({ onDataChange }) => {
   const [otherTexts, setOtherTexts] = useState({});
 
   useEffect(() => {
-    const initialOtherTexts = {};
-    const fieldsWithOther = [
-      "moodandaffect",
-      "appearanceAndBehavior",
-      "eyeContact",
-      "attention",
-      "orientation",
-      "thoughtProcess",
-      "thoughtContent",
-    ];
-    fieldsWithOther.forEach((field) => {
-      const otherValue = getValues(`${field}Other`);
-      if (otherValue) {
-        initialOtherTexts[field] = otherValue;
-      }
-    });
-    setOtherTexts(initialOtherTexts);
-  }, [getValues]);
+    const savedData = JSON.parse(localStorage.getItem("physicalExamForm")) || {};
+    Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
+    onDataChange(getValues());
+  }, []);
+
+  const handleInputChange = (name, value) => {
+    setValue(name, value);
+    const updatedValues = { ...getValues(), [name]: value };
+    localStorage.setItem("physicalExamForm", JSON.stringify(updatedValues));
+    onDataChange(updatedValues);
+  };
 
   const handleCheckboxChange = (name, value, isChecked) => {
     const currentValues = getValues(name) || [];
@@ -31,8 +24,7 @@ export const Physicalexamination = ({ onDataChange }) => {
       ? [...currentValues, value]
       : currentValues.filter((item) => item !== value);
 
-    setValue(name, updatedValues);
-    onDataChange(getValues());
+    handleInputChange(name, updatedValues);
   };
 
   const handleOtherInputChange = (name, value) => {
@@ -41,17 +33,9 @@ export const Physicalexamination = ({ onDataChange }) => {
       ? [...currentValues.filter((item) => !item.startsWith("อื่นๆ:")), `อื่นๆ: ${value}`]
       : currentValues.filter((item) => !item.startsWith("อื่นๆ:"));
 
-    setValue(name, updatedValues);
-    onDataChange(getValues());
+    handleInputChange(name, updatedValues);
   };
 
-
-  const handleInputChange = (name, value) => {
-    setValue(name, value);
-    onDataChange(getValues());
-  };
-
-  // Reusable field with checkboxes and an "Other" input
   const renderCheckboxGroupWithOther = (fieldName, options, label) => (
     <div className="info3 card mt-3">
       <div className="m-4">
@@ -95,9 +79,7 @@ export const Physicalexamination = ({ onDataChange }) => {
               <textarea
                 className="form-control"
                 rows="2"
-                style={{ resize: "vertical" ,border: "1px solid #ddd",
-                  outline: "none",
-                  marginLeft: "30px", }}
+                style={{ resize: "vertical", border: "1px solid #ddd", outline: "none", marginLeft: "30px" }}
                 placeholder="กรอกคำตอบอื่นๆ"
                 value={
                   (field.value.find((item) => item.startsWith("อื่นๆ:")) || "").replace(
@@ -110,10 +92,7 @@ export const Physicalexamination = ({ onDataChange }) => {
                   handleOtherInputChange(fieldName, otherValue);
                   field.onChange(
                     otherValue
-                      ? [
-                        ...field.value.filter((item) => !item.startsWith("อื่นๆ:")),
-                        `อื่นๆ: ${otherValue}`,
-                      ]
+                      ? [...field.value.filter((item) => !item.startsWith("อื่นๆ:")), `อื่นๆ: ${otherValue}`]
                       : field.value.filter((item) => !item.startsWith("อื่นๆ:"))
                   );
                 }}

@@ -6,6 +6,7 @@ import logow from "../img/logow.png";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
+import Sidebar from "./sidebar";
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
 export default function Assessreadiness() {
@@ -280,7 +281,7 @@ export default function Assessreadiness() {
   }, [datauser]);
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -510,81 +511,7 @@ export default function Assessreadiness() {
   }, []);
   return (
     <main className="body">
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div class="logo_content">
-          <div class="logo">
-            <div class="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul class="nav-list">
-          <li>
-            <a href="home">
-              <i class="bi bi-house"></i>
-              <span class="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i class="bi bi-clipboard2-pulse"></i>
-              <span class="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i className="bi bi-people"></i>
-              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss" >
-              <i class="bi bi-house-check"></i>
-              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (user?.userId && String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-          <div class="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  class="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span class="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
-
+      <Sidebar />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">ประเมินความพร้อมการดูแล</div>
@@ -737,9 +664,9 @@ export default function Assessreadiness() {
         </div>
         <div className="content-toolbar d-flex justify-content-between align-items-center mt-5 mb-4">
           <div className="search-bar position-relative">
-            <i className="bi bi-search search-icon"></i> 
+            <i className="bi bi-search search-icon"></i>
             <input
-              className="search-text" 
+              className="search-text"
               type="text"
               placeholder="ค้นหา"
               value={searchKeyword}
@@ -754,68 +681,68 @@ export default function Assessreadiness() {
         </div>
 
         <div className="content">
-        <div className="table-container">
-        <table className=" table-all table-user">
-            <thead>
-              <tr>
-                <th>HN</th>
-                <th>AN</th>
-                <th>ชื่อ-สกุล</th>
-                <th>ผู้ป่วยโรค</th>
-                <th>รายละเอียด</th>
-              </tr>
-            </thead>
-            <tbody>
-              {datauser.filter((user) => user.deletedAt === null).length > 0 ? (
-
-                datauser
-                  .filter((user) => user.deletedAt === null)
-                  .map((user, index) => {
-                    const userBirthday = user.birthday ? new Date(user.birthday) : null;
-                    const ageDiff = userBirthday ? currentDate.getFullYear() - userBirthday.getFullYear() : 0;
-                    const monthDiff = userBirthday ? currentDate.getMonth() - userBirthday.getMonth() : 0;
-                    const isBeforeBirthday = userBirthday ? (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())) : false;
-                    const userAge = userBirthday ? (isBeforeBirthday ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน` : `${ageDiff} ปี ${monthDiff} เดือน`) : 'ไม่มีข้อมูล';
-
-                    return (
-                      <tr key={index}>
-                        <td>
-                          <span style={{ color: medicalData[user._id]?.hn ? 'inherit' : '#B2B2B2' }}>
-                            {medicalData[user._id]?.hn ? medicalData[user._id]?.hn : "ไม่มีข้อมูล"}
-                          </span>
-                        </td>
-                        <td>
-                          <span style={{ color: medicalData[user._id]?.an ? 'inherit' : '#B2B2B2' }}>
-                            {medicalData[user._id]?.an ? medicalData[user._id]?.an : "ไม่มีข้อมูล"}
-                          </span>
-                        </td>
-                        <td>{user.name} {user.surname}</td>
-                        <td>
-                          <span style={{ color: medicalData[user._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
-                            {medicalData[user._id]?.diagnosis ? medicalData[user._id]?.diagnosis : "ไม่มีข้อมูล"}
-                          </span>
-                        </td>
-                        <td>
-
-                          <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id: user._id } })}>
-                            รายละเอียด
-                          </a>
-
-                        </td>
-                      </tr>
-                    );
-                  })
-              ) : (
+          <div className="table-container">
+            <table className=" table-all table-user">
+              <thead>
                 <tr>
-                  <td colSpan="5" style={{ textAlign: "center", color: "#B2B2B2" }}>
-                    ไม่พบข้อมูลที่คุณค้นหา
-                  </td>
+                  <th>HN</th>
+                  <th>AN</th>
+                  <th>ชื่อ-สกุล</th>
+                  <th>ผู้ป่วยโรค</th>
+                  <th>รายละเอียด</th>
                 </tr>
-              )}
-            </tbody>
+              </thead>
+              <tbody>
+                {datauser.filter((user) => user.deletedAt === null).length > 0 ? (
 
-          </table>
-        </div>
+                  datauser
+                    .filter((user) => user.deletedAt === null)
+                    .map((user, index) => {
+                      const userBirthday = user.birthday ? new Date(user.birthday) : null;
+                      const ageDiff = userBirthday ? currentDate.getFullYear() - userBirthday.getFullYear() : 0;
+                      const monthDiff = userBirthday ? currentDate.getMonth() - userBirthday.getMonth() : 0;
+                      const isBeforeBirthday = userBirthday ? (monthDiff < 0 || (monthDiff === 0 && currentDate.getDate() < userBirthday.getDate())) : false;
+                      const userAge = userBirthday ? (isBeforeBirthday ? `${ageDiff - 1} ปี ${12 + monthDiff} เดือน` : `${ageDiff} ปี ${monthDiff} เดือน`) : 'ไม่มีข้อมูล';
+
+                      return (
+                        <tr key={index}>
+                          <td>
+                            <span style={{ color: medicalData[user._id]?.hn ? 'inherit' : '#B2B2B2' }}>
+                              {medicalData[user._id]?.hn ? medicalData[user._id]?.hn : "ไม่มีข้อมูล"}
+                            </span>
+                          </td>
+                          <td>
+                            <span style={{ color: medicalData[user._id]?.an ? 'inherit' : '#B2B2B2' }}>
+                              {medicalData[user._id]?.an ? medicalData[user._id]?.an : "ไม่มีข้อมูล"}
+                            </span>
+                          </td>
+                          <td>{user.name} {user.surname}</td>
+                          <td>
+                            <span style={{ color: medicalData[user._id]?.diagnosis ? 'inherit' : '#B2B2B2' }}>
+                              {medicalData[user._id]?.diagnosis ? medicalData[user._id]?.diagnosis : "ไม่มีข้อมูล"}
+                            </span>
+                          </td>
+                          <td>
+
+                            <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id: user._id } })}>
+                              รายละเอียด
+                            </a>
+
+                          </td>
+                        </tr>
+                      );
+                    })
+                ) : (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: "center", color: "#B2B2B2" }}>
+                      ไม่พบข้อมูลที่คุณค้นหา
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+
+            </table>
+          </div>
         </div>
       </div>
     </main>

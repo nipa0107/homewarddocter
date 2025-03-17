@@ -4,8 +4,29 @@ import { Controller, useFormContext } from 'react-hook-form';
 export const Housing = ({ onDataChange }) => {
   const { control, setValue, getValues } = useFormContext();
 
+  useEffect(() => {
+    const storedData = JSON.parse(localStorage.getItem("housingData")) || {};
+    
+    // อัปเดตค่าใน react-hook-form
+    Object.keys(storedData).forEach((key) => {
+      setValue(key, storedData[key]); 
+    });
+    
+  }, [setValue]); // เรียกใช้เมื่อ `setValue` เปลี่ยนแปลง
+  
+
+  // ฟังก์ชันบันทึกข้อมูลลง LocalStorage
+  const saveToLocalStorage = (data) => {
+    localStorage.setItem("housingData", JSON.stringify(data));
+  };
+
+  // โหลดข้อมูลจาก LocalStorage
+  const storedHousingData = JSON.parse(localStorage.getItem("housingData")) || {};
+
   // ดึงค่าเริ่มต้นจาก form
-  const initialNeighborRelationship = getValues("neighborRelationship") || "";
+  const initialNeighborRelationship = getValues("neighborRelationship") || storedHousingData.neighborRelationship || "";
+
+  // กำหนดค่าเริ่มต้นของ state
   const [neighborRelationship, setNeighborRelationship] = useState(
     ["ดี", "ไม่ดี"].includes(initialNeighborRelationship) ? initialNeighborRelationship : ""
   );
@@ -15,10 +36,13 @@ export const Housing = ({ onDataChange }) => {
   );
 
 
-  const handleInputChange = (name, value) => {
-    setValue(name, value); // อัปเดต react-hook-form state โดยตรง
-    onDataChange({ ...getValues() }); // ส่งค่าล่าสุดทั้งหมดกลับไป
-  };
+const handleInputChange = (name, value) => {
+  const updatedData = { ...getValues(), [name]: value }; // ดึงค่าทั้งหมดจากฟอร์ม
+  
+  setValue(name, value); // อัปเดต react-hook-form
+  onDataChange(updatedData); // ส่งค่ากลับไปยัง parent component
+  saveToLocalStorage(updatedData); // บันทึกลง localStorage
+};
 
   useEffect(() => {
     if (neighborRelationship === "อื่นๆ" && tempOtherRelationship.trim() !== "") {
@@ -29,12 +53,21 @@ export const Housing = ({ onDataChange }) => {
 
   const handleRadioChange = (value) => {
     setNeighborRelationship(value);
+    
     if (value === "ดี" || value === "ไม่ดี") {
       handleInputChange("neighborRelationship", value);
     } else if (value === "อื่นๆ") {
       handleInputChange("neighborRelationship", tempOtherRelationship);
     }
   };
+  
+  // โหลดค่าที่บันทึกไว้ใน localStorage เมื่อเปิดหน้า
+  useEffect(() => {
+    if (storedHousingData.neighborRelationship) {
+      setNeighborRelationship(storedHousingData.neighborRelationship);
+    }
+  }, []);
+  
 
   return (
     <div>
@@ -98,7 +131,7 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
-            
+
           </div>
         </div>
         <div className='m-1'>
@@ -121,7 +154,7 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
-            
+
           </div>
         </div>
         <div className='m-1'>
@@ -144,7 +177,7 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
-            
+
           </div>
         </div>
         <div className='m-1 mb-4'>
@@ -167,7 +200,7 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
-            
+
           </div>
         </div>
       </div>
@@ -443,7 +476,7 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
-            
+
           </div>
         </div>
         <div className='m-1 mb-4'>
@@ -496,7 +529,7 @@ export const Housing = ({ onDataChange }) => {
                 />
               )}
             />
-            
+
           </div>
         </div>
         <div className='m-1'>

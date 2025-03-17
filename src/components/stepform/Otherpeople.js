@@ -13,6 +13,23 @@ export const Otherpeople = ({ onDataChange }) => {
   const { id } = location.state || {};
 
   useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem("otherPeopleData"));
+    if (savedData) {
+      replaceExisting(savedData.existingCaregivers || []);
+      appendNew(savedData.newCaregivers || []);
+    }
+  }, [replaceExisting, appendNew]);
+  
+  useEffect(() => {
+    const currentValues = {
+      existingCaregivers: getValues("existingCaregivers") || [],
+      newCaregivers: getValues("newCaregivers") || []
+    };
+    localStorage.setItem("otherPeopleData", JSON.stringify(currentValues));
+  }, [existingFields, newFields, getValues]);
+
+  
+  useEffect(() => {
     handleFieldChange(); // เรียกฟังก์ชันเพื่อรวมข้อมูลใหม่ทุกครั้ง
   }, [existingFields, getValues]);
 

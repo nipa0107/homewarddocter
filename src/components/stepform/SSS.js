@@ -1,26 +1,25 @@
-import React from 'react'
+import React, { useState, useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 import Paper from '../../img/exam.png'
 
 export const SSS = ({ onDataChange }) => {
   const { control, setValue, getValues } = useFormContext();
 
-  // ✅ แก้ไข: ทำให้แน่ใจว่าข้อมูลอัปเดตและส่งไปยัง Parent
+  useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem("sssData")) || {};
+    Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
+    onDataChange(getValues());
+  }, []);
+
   const handleInputChange = (group, name, value) => {
     const currentValues = getValues(group) || {}; 
     const updatedValues = { ...currentValues, [name]: value }; 
-
-    // ✅ อัปเดตค่าในฟอร์มก่อนส่งออก
     setValue(group, updatedValues); 
-
-    // ✅ ส่งข้อมูลของทั้ง SSS กลับไปยัง Parent
-    if (onDataChange) {
-      onDataChange({
-        ...getValues(), // ✅ ส่งค่าทั้งหมด
-        [group]: updatedValues
-      });
-    }
+    const updatedData = { ...getValues(), [group]: updatedValues };
+    localStorage.setItem("sssData", JSON.stringify(updatedData));
+    onDataChange(updatedData);
   };
+
   return (
     <div>
       <div className="title-form mt-1">

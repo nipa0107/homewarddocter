@@ -13,10 +13,20 @@ export const CaregiverAgenda = ({ onDataChange }) => {
   const { id } = location.state || {};
 
   useEffect(() => {
-    handleFieldChange(); // อัปเดตข้อมูลเมื่อ existingCaregivers เปลี่ยนแปลง
+    const savedData = JSON.parse(localStorage.getItem("caregiverAgendaData"));
+    if (savedData) {
+      replaceExisting(savedData.existingCaregivers || []);
+      replaceNew(savedData.newCaregivers || []);
+    }
+  }, [replaceExisting, replaceNew]);
+
+  useEffect(() => {
+    localStorage.setItem("caregiverAgendaData", JSON.stringify({
+      existingCaregivers: getValues("existingCaregivers") || [],
+      newCaregivers: getValues("newCaregivers") || []
+    }));
   }, [existingCaregivers, newCaregivers, getValues]);
 
-  /** ✅ เปิด/ปิด Collapse */
   const toggleCollapse = (index, type) => {
     setOpenIndex((prev) => ({
       ...prev,
@@ -24,7 +34,6 @@ export const CaregiverAgenda = ({ onDataChange }) => {
     }));
   };
 
-  /** ✅ ดึงข้อมูลผู้ดูแลเดิมจาก API */
   useEffect(() => {
     const fetchCaregivers = async () => {
       try {
@@ -38,10 +47,10 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                 CaregiverId: cg.id || "",
                 firstName: cg.firstName || "",
                 lastName: cg.lastName || "",
-                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์", 
+                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์",
                 caregiver_idea: cg.caregiver_idea || "",
                 caregiver_feeling: cg.caregiver_feeling || "",
-                caregiver_funtion: cg.caregiver_function || "",
+                caregiver_function: cg.caregiver_function || "",
                 caregiver_expectation: cg.caregiver_expectation || "",
                 isNew: false,
               }))
@@ -58,6 +67,10 @@ export const CaregiverAgenda = ({ onDataChange }) => {
     }
   }, [id, replaceExisting, getValues]);
 
+  useEffect(() => {
+    handleFieldChange(); // อัปเดตข้อมูลเมื่อ existingCaregivers เปลี่ยนแปลง
+  }, [existingCaregivers, newCaregivers, getValues]);
+  
   /** ✅ ดึงข้อมูลผู้ดูแลใหม่จาก API */
   useEffect(() => {
     const fetchNewCaregivers = async () => {
@@ -71,10 +84,10 @@ export const CaregiverAgenda = ({ onDataChange }) => {
               data.data.map((cg) => ({
                 firstName: cg.firstName || "",
                 lastName: cg.lastName || "",
-                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์", 
+                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์",
                 caregiver_idea: cg.caregiver_idea || "",
                 caregiver_feeling: cg.caregiver_feeling || "",
-                caregiver_funtion: cg.caregiver_function || "",
+                caregiver_function: cg.caregiver_function || "",
                 caregiver_expectation: cg.caregiver_expectation || "",
                 isNew: false,
               }))
@@ -100,7 +113,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
       relationship: getValues(`existingCaregivers.${index}.relationship`) || cg.relationship || "",
       caregiver_idea: getValues(`existingCaregivers.${index}.caregiver_idea`) || "",
       caregiver_feeling: getValues(`existingCaregivers.${index}.caregiver_feeling`) || "",
-      caregiver_funtion: getValues(`existingCaregivers.${index}.caregiver_function`) || "",
+      caregiver_function: getValues(`existingCaregivers.${index}.caregiver_function`) || "",
       caregiver_expectation: getValues(`existingCaregivers.${index}.caregiver_expectation`) || "",
       isNew: false,
     }));
@@ -111,7 +124,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
       relationship: getValues(`newCaregivers.${index}.relationship`) || "",
       caregiver_idea: getValues(`newCaregivers.${index}.caregiver_idea`) || "",
       caregiver_feeling: getValues(`newCaregivers.${index}.caregiver_feeling`) || "",
-      caregiver_funtion: getValues(`newCaregivers.${index}.caregiver_function`) || "",
+      caregiver_function: getValues(`newCaregivers.${index}.caregiver_function`) || "",
       caregiver_expectation: getValues(`newCaregivers.${index}.caregiver_expectation`) || "",
       isNew: true,
     }));
@@ -174,7 +187,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Funtion </label>
+                  <label className="form-label mt-4">Function </label>
                   <Controller
                     name={`existingCaregivers.${index}.caregiver_function`}
                     control={control}
@@ -217,7 +230,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
             <div key={caregiver.id}>
               <span
                 onClick={() => toggleCollapse(index, "new")}
-                style={{ cursor: "pointer", color: "#007BFF", display: "block", marginTop:"8px" }}
+                style={{ cursor: "pointer", color: "#007BFF", display: "block", marginTop: "8px" }}
               >
                 <b>{`คนที่ ${index + 1} : ${caregiver.firstName} ${caregiver.lastName} (${caregiver.relationship})`}</b>
               </span>

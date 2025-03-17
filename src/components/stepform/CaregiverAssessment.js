@@ -12,6 +12,21 @@ export const CaregiverAssessment = ({ onDataChange }) => {
   const { id } = location.state || {};
 
   useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem("careAssessmentData"));
+    if (savedData) {
+      replaceExisting(savedData.existingCaregivers || []);
+      replaceNew(savedData.newCaregivers || []);
+    }
+  }, [replaceExisting, replaceNew]);
+
+  useEffect(() => {
+    localStorage.setItem("careAssessmentData", JSON.stringify({
+      existingCaregivers: getValues("existingCaregivers") || [],
+      newCaregivers: getValues("newCaregivers") || []
+    }));
+  }, [existingCaregivers, newCaregivers, getValues]);
+
+  useEffect(() => {
     handleFieldChange(); // อัปเดตข้อมูลเมื่อ existingCaregivers เปลี่ยนแปลง
   }, [existingCaregivers, newCaregivers, getValues]);
 
@@ -35,7 +50,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                 CaregiverId: cg.id || "",
                 firstName: cg.firstName || "",
                 lastName: cg.lastName || "",
-                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์", 
+                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์",
                 care: cg.care || "",
                 affection: cg.affection || "",
                 rest: cg.rest || "",
@@ -71,7 +86,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
               data.data.map((cg) => ({
                 firstName: cg.firstName || "",
                 lastName: cg.lastName || "",
-                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์", 
+                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์",
                 care: cg.care || "",
                 affection: cg.affection || "",
                 rest: cg.rest || "",
@@ -322,7 +337,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                 <b>{`คนที่ ${index + 1} : ${caregiver.firstName} ${caregiver.lastName} (${caregiver.relationship})`}</b>
               </span>
               <Collapse in={openIndex.new === index}>
-              <div>
+                <div>
                   <label className="form-label mt-2">Care (ดูแลเรื่องอะไรบ้าง) </label>
                   <Controller
                     name={`newCaregivers.${index}.care`}

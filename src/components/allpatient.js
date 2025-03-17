@@ -6,6 +6,7 @@ import logow from "../img/logow.png";
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
+import Sidebar from "./sidebar";
 import io from 'socket.io-client';
 const socket = io("http://localhost:5000");
 export default function Allpatient({ }) {
@@ -494,81 +495,7 @@ export default function Allpatient({ }) {
   }, []);
   return (
     <main className="body">
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div class="logo_content">
-          <div class="logo">
-            <div class="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i class="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul class="nav-list">
-          <li>
-            <a href="home">
-              <i class="bi bi-house"></i>
-              <span class="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i class="bi bi-clipboard2-pulse"></i>
-              <span class="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i class="bi bi-people"></i>
-              <span class="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i class="bi bi-clipboard-check"></i>
-              <span class="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss" >
-              <i class="bi bi-house-check"></i>
-              <span class="links_name" >แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (user?.userId && String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-          <div class="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  class="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span class="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
-
+      <Sidebar />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">จัดการข้อมูลการดูแลผู้ป่วย </div>
@@ -612,15 +539,6 @@ export default function Allpatient({ }) {
             </li>
           </ul>
         </div>
-        {/* <div className="search-bar">
-          <input
-            className="search-text"
-            type="text"
-            placeholder="ค้นหา"
-            value={searchKeyword}
-            onChange={(e) => setSearchKeyword(e.target.value)}
-          />
-        </div> */}
         {showNotifications && (
           <div className="notifications-dropdown" ref={notificationsRef}>
             <div className="notifications-head">
@@ -730,9 +648,9 @@ export default function Allpatient({ }) {
         )}
         <div className="content-toolbar d-flex justify-content-between align-items-center mt-5 mb-4">
           <div className="search-bar position-relative">
-            <i className="bi bi-search search-icon"></i> 
+            <i className="bi bi-search search-icon"></i>
             <input
-              className="search-text" 
+              className="search-text"
               type="text"
               placeholder="ค้นหา"
               value={searchKeyword}

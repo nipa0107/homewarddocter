@@ -9,6 +9,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Sidebar from "./sidebar";
 import PatientAgendaForm from "./UpdateAssessinhomesss/updatePatientAgenda.js";
 import CaregiverAgendaForm from "./UpdateAssessinhomesss/updateCaregiverAgenda.js";
 import CaregiverAssessmentForm from "./UpdateAssessinhomesss/updateCaregiverAssessment.js";
@@ -757,71 +758,7 @@ export default function DetailAgendaForm() {
   return (
     <main className="body">
       <ToastContainer />
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div className="logo_content">
-          <div className="logo">
-            <div className="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i className="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul className="nav-list">
-          <li>
-            <a href="home">
-              <i className="bi bi-house"></i>
-              <span className="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i className="bi bi-clipboard2-pulse"></i>
-              <span className="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i className="bi bi-people"></i>
-              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i className="bi bi-clipboard-check"></i>
-              <span className="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss">
-              <i className="bi bi-house-check"></i>
-              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {countUnreadUsers() !== 0 && (
-                <span className="notification-countchat">
-                  {countUnreadUsers()}
-                </span>
-              )}
-            </a>
-          </li>
-          <div className="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  className="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span className="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
+      <Sidebar />
 
       <div className="home_content">
         <div className="homeheader">

@@ -536,16 +536,34 @@ export default function AgendaForm({ }) {
     const [hasError, setHasError] = useState(false); // ตรวจสอบข้อผิดพลาด
     const [showError, setShowError] = useState(false); // ควบคุมการแสดงข้อความแจ้งเตือน
 
+    const [PatientAgendaData, setPatientAgendaData] = useState(() => JSON.parse(localStorage.getItem("patientAgendaData")) || {});
+    const [careAgenda, setCaregiverAgendaData] = useState(() => JSON.parse(localStorage.getItem("caregiverAgendaData")) || {});
+    const [careAssessment, setCaregiverAssessmentData] = useState(() => JSON.parse(localStorage.getItem("careAssessmentData")) || {});
+    const [ZaritData, setZaritData] = useState(() => {
+        const storedData = JSON.parse(localStorage.getItem("ZaritData"));
+        return storedData ?? {
+            question_1: "", question_2: "", question_3: "", question_4: "", question_5: "",
+            question_6: "", question_7: "", question_8: "", question_9: "", question_10: "",
+            question_11: "", question_12: "", totalScore: 0
+        };
+    });
+    
+    useEffect(() => {
+        localStorage.setItem("patientAgendaData", JSON.stringify(PatientAgendaData));
+        localStorage.setItem("caregiverAgendaData", JSON.stringify(careAgenda));
+        localStorage.setItem("careAssessmentData", JSON.stringify(careAssessment));
+        localStorage.setItem("ZaritData", JSON.stringify(ZaritData));
+    }, [PatientAgendaData, careAgenda, careAssessment, ZaritData]);
+
     const handleNext = async (data) => {
         console.log("Form data at step", activeStep, data);
-        const storageKey = `patientAgendaData`;
 
         if (activeStep === 0) {
-            setPatientAgendaData(PatientAgendaData);
+            setPatientAgendaData(PatientAgendaData || {});
         } else if (activeStep === 1) {
-            setCaregiverAgendaData(careAgenda); // Ensure latest data is stored!
+            setCaregiverAgendaData(careAgenda|| {}); // Ensure latest data is stored!
         } else if (activeStep === 2) {
-            setCaregiverAssessmentData(careAssessment);
+            setCaregiverAssessmentData(careAssessment || {});
         } else if (activeStep === 3) {
             if (hasError) {
                 setShowError(true); // ✅ แสดงข้อผิดพลาด
@@ -567,18 +585,17 @@ export default function AgendaForm({ }) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userId: userid,
-                        MPersonnel: mpersonnel,
-                        Caregiver: caregiver,
-                        newCaregivers: newCaregivers.map(cg => cg.id),
-                        PatientAgenda: PatientAgendaData,
+                        MPersonnel: mpersonnel || "", 
+                        Caregiver: caregiver || "", 
+                        newCaregivers: newCaregivers.map(cg => cg.id) || [],
+                        PatientAgenda: PatientAgendaData || {},
                         CaregiverAgenda: {
-                            Old_Caregiver_Agenda: careAgenda.existingCaregivers,
-                            New_Caregiver_Agenda: careAgenda.newCaregivers
-                          },
-                        // 🔹 แบ่ง `CaregiverAssessment` เป็น `Old_Caregiver_Assessment` และ `New_Caregiver_Assessment`
+                            Old_Caregiver_Agenda: careAgenda.existingCaregivers || [],
+                            New_Caregiver_Agenda: careAgenda.newCaregivers || []
+                        },
                         CaregiverAssessment: {
-                            Old_Caregiver_Assessment: careAssessment.existingCaregivers,
-                            New_Caregiver_Assessment: careAssessment.newCaregivers
+                            Old_Caregiver_Assessment: careAssessment.existingCaregivers || [],
+                            New_Caregiver_Assessment: careAssessment.newCaregivers || []
                         },
                         Zaritburdeninterview: ZaritData,
                         status_agenda: 'ประเมินแล้ว',
@@ -588,13 +605,23 @@ export default function AgendaForm({ }) {
                 const result = await response.json();
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
-                    // ✅ ล้างข้อมูลใน LocalStorage หลังจากบันทึกสำเร็จ
-                    localStorage.removeItem(storageKey);
+                    // ✅ ล้างข้อมูลจาก localStorage ก่อนอัปเดต state
+                    localStorage.removeItem("patientAgendaData");
+                    localStorage.removeItem("caregiverAgendaData");
+                    localStorage.removeItem("careAssessmentData");
+                    localStorage.removeItem("ZaritData");
+
+                    // ✅ รีเซ็ตค่าให้เริ่มใหม่ (ใช้ callback function เพื่อให้แน่ใจว่าใช้ค่าล่าสุด)
+                    setPatientAgendaData(() => ({}));
+                    setCaregiverAgendaData(() => ({}));
+                    setCaregiverAssessmentData(() => ({}));
+                    setZaritData(() => ({}));
 
                     // ✅ รีเซ็ตค่าให้เริ่มใหม่
                     setPatientAgendaData({});
                     setTimeout(() => {
                         navigate("/assessinhomesssuser", { state: { id } });
+                        window.location.reload(); // ✅ รีเฟรชเพื่อให้แน่ใจว่า localStorage ถูกเคลียร์
                     }, 1000);
                 } else {
                     console.error("Error during ReadinessForm submission:", data);
@@ -617,24 +644,7 @@ export default function AgendaForm({ }) {
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
 
-    const [PatientAgendaData, setPatientAgendaData] = useState({});
-    const [careAgenda, setCaregiverAgendaData] = useState({});
-    const [careAssessment, setCaregiverAssessmentData] = useState({});
-    const [ZaritData, setZaritData] = useState({
-        question_1: 0,
-        question_2: 0,
-        question_3: 0,
-        question_4: 0,
-        question_5: 0,
-        question_6: 0,
-        question_7: 0,
-        question_8: 0,
-        question_9: 0,
-        question_10: 0,
-        question_11: 0,
-        question_12: 0,
-        totalScore: 0,
-    });
+
 
     useEffect(() => {
         // ดึงข้อมูล unread count เมื่อเปิดหน้า

@@ -3,15 +3,21 @@ import { Controller, useFormContext } from 'react-hook-form';
 
 export const Medication = ({ onDataChange }) => {
   const { register, control, setValue, getValues } = useFormContext();
+  
   useEffect(() => {
-    onDataChange(getValues()); // ส่งค่าเริ่มต้นให้ Parent Component
+    // Load stored data from localStorage
+    const savedData = JSON.parse(localStorage.getItem("medicationForm")) || {};
+    Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
+    onDataChange(getValues());
   }, []);
 
   const handleInputChange = (name, value) => {
     setValue(name, value);
-    onDataChange({ ...getValues() });
+    const updatedValues = { ...getValues(), [name]: value };
+    localStorage.setItem("medicationForm", JSON.stringify(updatedValues));
+    onDataChange(updatedValues);
   };
-
+  
   return (
     <div>
       <div className="title-form mt-1">

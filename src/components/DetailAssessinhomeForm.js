@@ -15,6 +15,7 @@ import OtherpeopleForm from "./UpdateAssessinhomesss/updateOtherpeople.js";
 import MedicationForm from "./UpdateAssessinhomesss/updateMedication.js";
 import PhysicalExaminationForm from "./UpdateAssessinhomesss/updatePhysicalExamination.js";
 import SSSForm from "./UpdateAssessinhomesss/updateSSS.js";
+import Sidebar from "./sidebar";
 import io from "socket.io-client";
 const socket = io("http://localhost:5000");
 
@@ -748,81 +749,7 @@ export default function DetailAssessinhomeForm() {
   return (
     <main className="body">
       <ToastContainer />
-      <div className={`sidebar ${isActive ? "active" : ""}`}>
-        <div className="logo_content">
-          <div className="logo">
-            <div className="logo_name">
-              <img src={logow} className="logow" alt="logo"></img>
-            </div>
-          </div>
-          <i className="bi bi-list" id="btn" onClick={handleToggleSidebar}></i>
-        </div>
-        <ul className="nav-list">
-          <li>
-            <a href="home">
-              <i className="bi bi-house"></i>
-              <span className="links_name">หน้าหลัก</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessment">
-              <i className="bi bi-clipboard2-pulse"></i>
-              <span className="links_name">ติดตาม/ประเมินอาการ</span>
-            </a>
-          </li>
-          <li>
-            <a href="allpatient">
-              <i className="bi bi-people"></i>
-              <span className="links_name">จัดการข้อมูลการดูแลผู้ป่วย</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessreadiness">
-              <i className="bi bi-clipboard-check"></i>
-              <span className="links_name">ประเมินความพร้อมการดูแล</span>
-            </a>
-          </li>
-          <li>
-            <a href="assessinhomesss">
-              <i className="bi bi-house-check"></i>
-              <span className="links_name">แบบประเมินเยี่ยมบ้าน</span>
-            </a>
-          </li>
-          <li>
-            <a href="chat" style={{ position: "relative" }}>
-              <i className="bi bi-chat-dots"></i>
-              <span className="links_name">แช็ต</span>
-              {userUnreadCounts.map((user) => {
-                if (user?.userId && String(user.userId) === String(sender._id)) {
-                  return (
-                    <div key={user.userId}>
-                      {user.totalUnreadCount > 0 && (
-                        <div className="notification-countchat">
-                          {user.totalUnreadCount}
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-                return null;
-              })}
-            </a>
-          </li>
-          <div className="nav-logout">
-            <li>
-              <a href="./" onClick={logOut}>
-                <i
-                  className="bi bi-box-arrow-right"
-                  id="log_out"
-                  onClick={logOut}
-                ></i>
-                <span className="links_name">ออกจากระบบ</span>
-              </a>
-            </li>
-          </div>
-        </ul>
-      </div>
-
+      <Sidebar />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">แบบประเมินเยี่ยมบ้าน</div>
@@ -1039,8 +966,8 @@ export default function DetailAssessinhomeForm() {
             <span> {formatDate(AssessinhomeForms.createdAt)}</span><br></br>
             <label className="text-secondary mt-2">วันที่แก้ไขล่าสุด : </label>
             <span> {AssessinhomeForms.updatedAt === AssessinhomeForms.createdAt
-                ? " -"
-                : formatDate(AssessinhomeForms.updatedAt)}
+              ? " -"
+              : formatDate(AssessinhomeForms.updatedAt)}
             </span>
           </div>
 
@@ -1999,8 +1926,8 @@ export default function DetailAssessinhomeForm() {
           formData={tempFormValues}
           onSave={handleSaveChanges}
           onClose={handleCloseModal}
-          name={name} 
-          surname={surname} 
+          name={name}
+          surname={surname}
         />
       )}
       {isModalOpen && currentEditSection === "Housing" && (
