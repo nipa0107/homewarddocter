@@ -69,7 +69,7 @@ export const Otherpeople = ({ onDataChange }) => {
   useEffect(() => {
     const fetchCaregiverData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getcaregivers/${id}`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getcaregivers/${id}`);
         const caregiverData = await response.json();
 
         if (caregiverData.status === "ok" && Array.isArray(caregiverData.data)) {

@@ -8,7 +8,7 @@ import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
 import Sidebar from "./sidebar";
 import io from 'socket.io-client';
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function Allpatient({ }) {
   const navigate = useNavigate();
   const [data, setData] = useState("");
@@ -37,7 +37,7 @@ export default function Allpatient({ }) {
 
   const fetchLatestAssessments = async () => {
     try {
-      const response = await fetch("http://localhost:5000/latest-assessments");
+      const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
       const data = await response.json();
       console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -188,7 +188,7 @@ export default function Allpatient({ }) {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -259,7 +259,7 @@ export default function Allpatient({ }) {
   }, [token]);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -341,7 +341,7 @@ export default function Allpatient({ }) {
   };
 
   const getAllUser = () => {
-    fetch("http://localhost:5000/alluser", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alluser", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -361,7 +361,7 @@ export default function Allpatient({ }) {
         if (user.deletedAt === null) {
           try {
             const response = await fetch(
-              `http://localhost:5000/medicalInformation/${user._id}`
+              `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${user._id}`
             );
             const medicalInfo = await response.json();
             return {
@@ -416,7 +416,7 @@ export default function Allpatient({ }) {
     const searchUser = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/searchassessment?keyword=${encodeURIComponent(
+          `https://backend-deploy-render-mxok.onrender.com/searchassessment?keyword=${encodeURIComponent(
             searchKeyword
           )}`,
           {
@@ -477,7 +477,7 @@ export default function Allpatient({ }) {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {

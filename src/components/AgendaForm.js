@@ -16,7 +16,7 @@ import { CaregiverAssessment } from './stepform/CaregiverAssessment';
 import { Zarit } from './stepform/Zaritburdeninterview';
 import io from 'socket.io-client';
 // import MultiStep from "react-multistep";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function AgendaForm({ }) {
     const navigate = useNavigate();
@@ -60,7 +60,7 @@ export default function AgendaForm({ }) {
 
     const fetchLatestAssessments = async () => {
         try {
-            const response = await fetch("http://localhost:5000/latest-assessments");
+            const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
             const data = await response.json();
             console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -211,7 +211,7 @@ export default function AgendaForm({ }) {
     }, []);
 
     const fetchUserData = (token) => {
-        return fetch("http://localhost:5000/profiledt", {
+        return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
             method: "POST",
             crossDomain: true,
             headers: {
@@ -285,7 +285,7 @@ export default function AgendaForm({ }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getuser/${id}`);
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser/${id}`);
                 const data = await response.json();
                 setUserData(data);
                 setUsername(data.username);
@@ -304,7 +304,7 @@ export default function AgendaForm({ }) {
     useEffect(() => {
         const fetchMedicalData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/medicalInformation/${userid}`);
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/medicalInformation/${userid}`);
                 const data = await response.json();
 
                 if (response.ok) {
@@ -357,7 +357,7 @@ export default function AgendaForm({ }) {
     }, [token]);
 
     const markAllByTypeAsViewed = (type) => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+        fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -502,7 +502,7 @@ export default function AgendaForm({ }) {
     useEffect(() => {
         const fetchCaregiverData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getCaregiversByUser/${userid}`);
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getCaregiversByUser/${userid}`);
                 const caregiverData = await response.json();
                 if (caregiverData.status === 'ok') {
                     setCaregiver(caregiverData.data);
@@ -517,7 +517,7 @@ export default function AgendaForm({ }) {
     useEffect(() => {
         const fetchNewCaregivers = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getcaregivesotherpeople/${id}`);
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getcaregivesotherpeople/${id}`);
                 const data = await response.json();
                 console.log("Fetched new caregivers:", data); // ตรวจสอบข้อมูลใน console
                 if (data.status === "ok") {
@@ -580,7 +580,7 @@ export default function AgendaForm({ }) {
 
         if (activeStep === steps.length - 1) {
             try {
-                const response = await fetch(`http://localhost:5000/submitagenda/${userid}`, {
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/submitagenda/${userid}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -651,7 +651,7 @@ export default function AgendaForm({ }) {
         const fetchUnreadCount = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:5000/update-unread-count"
+                    "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
                 );
 
                 if (!response.ok) {

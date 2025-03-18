@@ -1,5 +1,5 @@
 export const markAllAsRead = (token, setAlerts, setUnreadCount) => {
-    fetch(`http://localhost:5000/alerts/markAllAsRead`, {
+    fetch(`https://backend-deploy-render-mxok.onrender.com/alerts/markAllAsRead`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

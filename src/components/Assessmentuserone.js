@@ -25,7 +25,7 @@ import "../css/contentgraph.css";
 import io from "socket.io-client";
 import { useLayoutEffect } from "react";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function Assessmentuserone() {
   const navigate = useNavigate();
@@ -260,7 +260,7 @@ export default function Assessmentuserone() {
   };
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -321,7 +321,7 @@ export default function Assessmentuserone() {
   }, []);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -405,7 +405,7 @@ export default function Assessmentuserone() {
   //   const fetchpatientForms = async () => {
   //     try {
   //       const response = await fetch(
-  //         `http://localhost:5000/getpatientformsone/${id}`,
+  //         `https://backend-deploy-render-mxok.onrender.com/getpatientformsone/${id}`,
   //         {
   //           method: "GET",
   //           headers: { Authorization: `Bearer ${token}` },
@@ -426,7 +426,7 @@ export default function Assessmentuserone() {
   //     const fetchData = async () => {
   //       try {
   //         const response = await fetch(
-  //           `http://localhost:5000/getuser/${patientFormsone.user}`
+  //           `https://backend-deploy-render-mxok.onrender.com/getuser/${patientFormsone.user}`
   //         );
   //         const data = await response.json();
   //         setName(data.name);
@@ -447,7 +447,7 @@ export default function Assessmentuserone() {
   //     const fetchMedicalInfo = async () => {
   //       try {
   //         const response = await fetch(
-  //           `http://localhost:5000/medicalInformation/${patientFormsone.user}`
+  //           `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${patientFormsone.user}`
   //         );
   //         const data = await response.json();
   //         console.log("Medical Information:", data);
@@ -464,11 +464,11 @@ export default function Assessmentuserone() {
     const fetchAllData = async () => {
       try {
         const [patientFormRes, userRes, medicalRes] = await Promise.all([
-          fetch(`http://localhost:5000/getpatientformsone/${id}`, {
+          fetch(`https://backend-deploy-render-mxok.onrender.com/getpatientformsone/${id}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch(`http://localhost:5000/getuser/${patientFormsone.user}`),
-          fetch(`http://localhost:5000/medicalInformation/${patientFormsone.user}`),
+          fetch(`https://backend-deploy-render-mxok.onrender.com/getuser/${patientFormsone.user}`),
+          fetch(`https://backend-deploy-render-mxok.onrender.com/medicalInformation/${patientFormsone.user}`),
         ]);
   
         const patientFormData = await patientFormRes.json();
@@ -508,7 +508,7 @@ export default function Assessmentuserone() {
       return;
     }
 
-    fetch("http://localhost:5000/addassessment", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/addassessment", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -540,7 +540,7 @@ export default function Assessmentuserone() {
 
   const fetchAssessments = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:5000/allAssessments`, {
+      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allAssessments`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -578,7 +578,7 @@ export default function Assessmentuserone() {
   const handleViewHistory = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/assessment/${assessmentId}`
+        `https://backend-deploy-render-mxok.onrender.com/assessment/${assessmentId}`
       );
       const data = await response.json();
       setHistory(data.data.history);
@@ -617,7 +617,7 @@ export default function Assessmentuserone() {
   const handleUpdateAssessment = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`http://localhost:5000/updateassessment/${assessmentId}`, {
+      await fetch(`https://backend-deploy-render-mxok.onrender.com/updateassessment/${assessmentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -655,7 +655,7 @@ export default function Assessmentuserone() {
           const token = window.localStorage.getItem("token");
           if (token) {
             const response = await fetch(
-              "http://localhost:5000/get-threshold",
+              "https://backend-deploy-render-mxok.onrender.com/get-threshold",
               {
                 method: "POST",
                 headers: {
@@ -762,7 +762,7 @@ export default function Assessmentuserone() {
       try {
         if (patientFormsone.user && patientFormsone._id) {
           const response = await fetch(
-            `http://localhost:5000/getPatientData/${patientFormsone.user}/${patientFormsone._id}`,
+            `https://backend-deploy-render-mxok.onrender.com/getPatientData/${patientFormsone.user}/${patientFormsone._id}`,
             {
               method: "GET",
               headers: {
@@ -956,7 +956,7 @@ export default function Assessmentuserone() {
       try {
         if (patientFormsone.user && patientFormsone._id) {
           const response = await fetch(
-            `http://localhost:5000/countSymptoms/${patientFormsone.user}/${patientFormsone._id}`
+            `https://backend-deploy-render-mxok.onrender.com/countSymptoms/${patientFormsone.user}/${patientFormsone._id}`
           );
           if (!response.ok) {
             throw new Error("Network response was not ok");

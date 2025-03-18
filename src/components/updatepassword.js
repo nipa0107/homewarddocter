@@ -13,7 +13,7 @@ import Sidebar from "./sidebar";
 
 // import 'react-toastify/dist/ReactToastify.css';
 import io from 'socket.io-client';
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 function Updatepassword() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -144,7 +144,7 @@ const [unreadCountsByType, setUnreadCountsByType] = useState({
   // }, [notificationsRef]);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -276,7 +276,7 @@ const [unreadCountsByType, setUnreadCountsByType] = useState({
   };
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -382,7 +382,7 @@ const [unreadCountsByType, setUnreadCountsByType] = useState({
 
     if (hasError) return;
 
-    fetch(`http://localhost:5000/updatepassword/${location.state._id}`, {
+    fetch(`https://backend-deploy-render-mxok.onrender.com/updatepassword/${location.state._id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -10,7 +10,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Sidebar from "./sidebar";
 import "react-toastify/dist/ReactToastify.css";
 import io from 'socket.io-client';
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function DetailAssessreadiness() {
   const navigate = useNavigate();
   const [data, setData] = useState("");
@@ -50,7 +50,7 @@ export default function DetailAssessreadiness() {
 
   const fetchLatestAssessments = async () => {
     try {
-      const response = await fetch("http://localhost:5000/latest-assessments");
+      const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
       const data = await response.json();
       console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -201,7 +201,7 @@ export default function DetailAssessreadiness() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -263,7 +263,7 @@ export default function DetailAssessreadiness() {
   }, [token]);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -417,7 +417,7 @@ export default function DetailAssessreadiness() {
   useEffect(() => {
     const fetchReadinessForm = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getReadinessForm/${id}`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getReadinessForm/${id}`);
         const data = await response.json();
 
         if (response.ok) {
@@ -437,7 +437,7 @@ export default function DetailAssessreadiness() {
       const fetchData = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/getuser/${readinessForms.user}`
+            `https://backend-deploy-render-mxok.onrender.com/getuser/${readinessForms.user}`
           );
           const data = await response.json();
           setName(data.name);
@@ -458,7 +458,7 @@ export default function DetailAssessreadiness() {
       const fetchMedicalInfo = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/medicalInformation/${readinessForms.user}`
+            `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${readinessForms.user}`
           );
           const data = await response.json();
           console.log("Medical Information:", data);
@@ -499,7 +499,7 @@ export default function DetailAssessreadiness() {
     try {
 
       // ทำการบันทึกข้อมูล readiness_status, detail, mpersonnel, readinessForm ID
-      const response = await fetch(`http://localhost:5000/addReadinessAssessment`, {
+      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/addReadinessAssessment`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -527,7 +527,7 @@ export default function DetailAssessreadiness() {
   useEffect(() => {
     const fetchReadinessAssessments = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/allReadinessAssessments`, {
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allReadinessAssessments`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -561,7 +561,7 @@ export default function DetailAssessreadiness() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {

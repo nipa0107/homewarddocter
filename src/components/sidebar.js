@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logow from "../img/logow.png";
 import "../css/sidebar.css";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function Sidebar() {
   const [isActive, setIsActive] = useState(window.innerWidth > 967);
@@ -48,7 +48,7 @@ export default function Sidebar() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -103,7 +103,7 @@ export default function Sidebar() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {

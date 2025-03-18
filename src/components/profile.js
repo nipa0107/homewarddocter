@@ -10,7 +10,7 @@ import { renderAlerts } from "./Alert/renderAlerts";
 import io from "socket.io-client";
 import Sidebar from "./sidebar";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function Home() {
   const [data, setData] = useState([]);
@@ -151,7 +151,7 @@ export default function Home() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -220,7 +220,7 @@ export default function Home() {
   }, []);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

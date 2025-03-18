@@ -442,4 +442,20 @@ hr{
     .sidebar ul li a{
         justify-content: flex-start;
     }
+
+    .home_content .header{
+        font-size: 1rem;
+    }
+     .profile_details .links_name{
+        display: none;
+    }
+   /* .profile_details .bi{
+        margin-right: 0;
+    }
+    .home_content .breadcrumbs{
+        font-size: 0.9rem;
+        margin-top: 10px;
+    } */
 }
+
+

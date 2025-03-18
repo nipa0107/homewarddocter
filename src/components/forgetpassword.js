@@ -17,7 +17,7 @@ export default class Reset extends Component {
     e.preventDefault();
     const { email } = this.state;
     console.log(email);
-    fetch("http://localhost:5000/forgot-passworddt", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/forgot-passworddt", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

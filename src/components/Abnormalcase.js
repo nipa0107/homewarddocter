@@ -8,7 +8,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function Abnormalcaser({ }) {
     const navigate = useNavigate();
@@ -49,7 +49,7 @@ export default function Abnormalcaser({ }) {
 
     const fetchLatestAssessments = async () => {
         try {
-            const response = await fetch("http://localhost:5000/latest-assessments");
+            const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
             const data = await response.json();
             console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -205,7 +205,7 @@ export default function Abnormalcaser({ }) {
 
 
     const fetchUserData = (token) => {
-        return fetch("http://localhost:5000/profiledt", {
+        return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
             method: "POST",
             crossDomain: true,
             headers: {
@@ -243,7 +243,7 @@ export default function Abnormalcaser({ }) {
     };
 
     const getAllUser = () => {
-        fetch("http://localhost:5000/alluser", {
+        fetch("https://backend-deploy-render-mxok.onrender.com/alluser", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -293,7 +293,7 @@ export default function Abnormalcaser({ }) {
     }, [token]);
 
     const markAllByTypeAsViewed = (type) => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+        fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -386,7 +386,7 @@ export default function Abnormalcaser({ }) {
         const fetchData = async () => {
             try {
                 const currentDate = new Date();
-                let url = "http://localhost:5000/assessments/abnormal";
+                let url = "https://backend-deploy-render-mxok.onrender.com/assessments/abnormal";
 
                 if (timeRange === "7days") {
                     const sevenDaysAgo = new Date(currentDate.setDate(currentDate.getDate() - 7));
@@ -422,7 +422,7 @@ export default function Abnormalcaser({ }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getuser`);
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser`);
                 const data = await response.json();
                 setUserData(data);
                 setUsername(data.username);
@@ -443,7 +443,7 @@ export default function Abnormalcaser({ }) {
             const fetchMedicalInfo = async () => {
                 try {
                     const response = await fetch(
-                        `http://localhost:5000/medicalInformation/${userData._id}`
+                        `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${userData._id}`
                     );
                     const data = await response.json();
                     console.log("Medical Information:", data);
@@ -462,7 +462,7 @@ export default function Abnormalcaser({ }) {
         if (id) {
             const fetchPatientFormDetails = async () => {
                 try {
-                    const response = await fetch(`http://localhost:5000/getpatientform/${id}`);
+                    const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getpatientform/${id}`);
                     const data = await response.json();
 
                     if (data.success) {
@@ -512,7 +512,7 @@ export default function Abnormalcaser({ }) {
 
     const fetchAssessments = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/allAssessment`, {
+            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allAssessment`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -532,7 +532,7 @@ export default function Abnormalcaser({ }) {
 
     const fetchMpersonnel = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allMpersonnel`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -625,7 +625,7 @@ export default function Abnormalcaser({ }) {
         const fetchUnreadCount = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:5000/update-unread-count"
+                    "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
                 );
 
                 if (!response.ok) {
@@ -647,7 +647,7 @@ export default function Abnormalcaser({ }) {
     useEffect(() => {
         const fetchAbnormalCases = async () => {
             try {
-                const response = await fetch("http://localhost:5000/assessments/abnormal");
+                const response = await fetch("https://backend-deploy-render-mxok.onrender.com/assessments/abnormal");
                 const data = await response.json();
 
                 if (data.success) {

@@ -15,7 +15,7 @@ import CaregiverAgendaForm from "./UpdateAssessinhomesss/updateCaregiverAgenda.j
 import CaregiverAssessmentForm from "./UpdateAssessinhomesss/updateCaregiverAssessment.js";
 import ZaritburdeninterviewForm from "./UpdateAssessinhomesss/updateZaritburdeninterview.js";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function DetailAgendaForm() {
   const navigate = useNavigate();
@@ -50,7 +50,7 @@ export default function DetailAgendaForm() {
 
   const fetchLatestAssessments = async () => {
     try {
-      const response = await fetch("http://localhost:5000/latest-assessments");
+      const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
       const data = await response.json();
       console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -202,7 +202,7 @@ export default function DetailAgendaForm() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -273,7 +273,7 @@ export default function DetailAgendaForm() {
   }, [token]);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -429,14 +429,14 @@ export default function DetailAgendaForm() {
   const fetchAllUsers = async (userId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/alluserchat?userId=${userId}`
+        `https://backend-deploy-render-mxok.onrender.com/alluserchat?userId=${userId}`
       );
       const data = await response.json();
 
       const usersWithLastMessage = await Promise.all(
         data.data.map(async (user) => {
           const lastMessageResponse = await fetch(
-            `http://localhost:5000/lastmessage/${user._id}?loginUserId=${userId}`
+            `https://backend-deploy-render-mxok.onrender.com/lastmessage/${user._id}?loginUserId=${userId}`
           );
           const lastMessageData = await lastMessageResponse.json();
 
@@ -493,7 +493,7 @@ export default function DetailAgendaForm() {
     const fetchAgendaForms = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/getAgendaForm/${id}`
+          `https://backend-deploy-render-mxok.onrender.com/getAgendaForm/${id}`
         );
         const data = await response.json();
 
@@ -515,7 +515,7 @@ export default function DetailAgendaForm() {
       const fetchData = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/getuser/${AgendaForms.user}`
+            `https://backend-deploy-render-mxok.onrender.com/getuser/${AgendaForms.user}`
           );
           const data = await response.json();
           setName(data.name);
@@ -536,7 +536,7 @@ export default function DetailAgendaForm() {
       const fetchMedicalInfo = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/medicalInformation/${AgendaForms.user}`
+            `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${AgendaForms.user}`
           );
           const data = await response.json();
           console.log("Medical Information:", data);
@@ -686,7 +686,7 @@ export default function DetailAgendaForm() {
           newAgendaForms.CaregiverAgenda.New_Caregiver_Agenda = updatedNewCaregiverAgenda;
         }
       }
-      const response = await fetch(`http://localhost:5000/updateAgenda/${id}`, {
+      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/updateAgenda/${id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newAgendaForms),
@@ -696,7 +696,7 @@ export default function DetailAgendaForm() {
       if (!response.ok) throw new Error(result.message || "Failed to update data");
 
       // ✅ อัปเดตค่าที่ได้จากเซิร์ฟเวอร์กลับมา
-      const updatedForm = await fetch(`http://localhost:5000/getAgendaForm/${id}`);
+      const updatedForm = await fetch(`https://backend-deploy-render-mxok.onrender.com/getAgendaForm/${id}`);
       const updatedDataFromServer = await updatedForm.json();
 
       toast.success("แก้ไขข้อมูลสำเร็จ", {
