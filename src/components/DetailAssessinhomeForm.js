@@ -548,7 +548,7 @@ export default function DetailAssessinhomeForm() {
     }
   }, [AssessinhomeForms.user]);
 
-  const handleEditClick = (section , index, isNewCaregiver = false) => {
+  const handleEditClick = (section, index, isNewCaregiver = false) => {
     setCurrentEditSection(section);
     if (section === "Immobility") {
       setTempFormValues({ ...AssessinhomeForms.Immobility });
@@ -558,12 +558,6 @@ export default function DetailAssessinhomeForm() {
     }
     else if (section === "Housing") {
       setTempFormValues({ ...AssessinhomeForms.Housing });
-    }
-    else if (section === "OtherPeople") {
-      const caregiver = isNewCaregiver
-        ? AssessinhomeForms.OtherPeople.newCaregivers[index]
-        : AssessinhomeForms.OtherPeople.existingCaregivers[index];
-      setTempFormValues({ ...caregiver });
     }
     else if (section === "Medication") {
       setTempFormValues({ ...AssessinhomeForms.Medication });
@@ -588,17 +582,25 @@ export default function DetailAssessinhomeForm() {
     setTempFormValues({});
   };
 
-  const handleSaveChanges = async (updatedData, index, isNewCaregiver) => {
-      // ตรวจสอบว่า updatedData มีข้อมูลครบถ้วน
-  console.log(updatedData); // เช็คข้อมูลที่ได้รับ
+  // เพิ่ม state สำหรับติดตามการแก้ไขบุคคลใน OtherPeople
+  const [editingOtherPerson, setEditingOtherPerson] = useState(null);
 
-  if (!updatedData) {
-    console.error("ไม่มีข้อมูลเพื่อบันทึก");
-    return;
-  }
+  // ฟังก์ชันสำหรับเริ่มแก้ไขบุคคลเฉพาะ
+  const handleEditOtherPerson = (group, index) => {
+    setEditingOtherPerson({ group, index });
+    setTempFormValues(AssessinhomeForms.OtherPeople[group][index]);
+    setIsModalOpen(true);
+  };
+
+  const handleSaveChanges = async (updatedData) => {
     try {
       let newAssessinhomeForms = { ...AssessinhomeForms };
-
+      if (editingOtherPerson) {
+        // อัปเดตข้อมูลของบุคคลในกลุ่มที่เลือก
+        newAssessinhomeForms.OtherPeople[editingOtherPerson.group][editingOtherPerson.index] = updatedData;
+        // เคลียร์สถานะการแก้ไข
+        setEditingOtherPerson(null);
+      }
       if (currentEditSection === "Immobility") {
         newAssessinhomeForms.Immobility = updatedData;
       }
@@ -607,14 +609,7 @@ export default function DetailAssessinhomeForm() {
       }
       else if (currentEditSection === "Housing") {
         newAssessinhomeForms.Housing = updatedData;
-      } else if (currentEditSection === "OtherPeople") {
-        if (isNewCaregiver) {
-          newAssessinhomeForms.OtherPeople.newCaregivers[index] = updatedData; // Update new caregivers
-        } else {
-          newAssessinhomeForms.OtherPeople.existingCaregivers[index] = updatedData; // Update existing caregivers
-        } console.log(newAssessinhomeForms); // เช็คข้อมูลก่อนการส่งไปยังเซิร์ฟเวอร์
       }
-
       else if (currentEditSection === "Medication") {
         newAssessinhomeForms.Medication = updatedData;
       }
@@ -1354,7 +1349,7 @@ export default function DetailAssessinhomeForm() {
                 </div>
               )}
 
-              {activeTab === "OtherPeople" && (
+              {/* {activeTab === "OtherPeople" && (
                 <div className="tab-pane fade show active">
                   <p className="ms-2" style={{ color: "#10B981" }}> ข้อมูลผู้ดูแลหรือบุคคลในครอบครัว</p>
                   <h5 className="ms-2" style={{ color: "#444" }}> <b>1. ผู้ดูแล</b></h5>
@@ -1428,7 +1423,6 @@ export default function DetailAssessinhomeForm() {
                               <button
                                 className="btn m-2"
                                 style={{ backgroundColor: "#ffde59", color: "black" }}
-                                onClick={() => handleEditClick("OtherPeople", index, false)}
                               >
                                 <i className="bi bi-pencil-fill"></i> แก้ไข
                               </button>
@@ -1441,7 +1435,6 @@ export default function DetailAssessinhomeForm() {
                     <p className="p-2">ไม่มีข้อมูลผู้ดูแล</p>
                   )}
 
-                  {/* 🔹 ส่วนที่ 2: รายชื่อคนในครอบครัว */}
                   <h5 className="ms-2 mt-4" style={{ color: "#444" }}> <b>2. คนในครอบครัว</b></h5>
                   {AssessinhomeForms.OtherPeople?.newCaregivers?.length > 0 ? (
                     AssessinhomeForms.OtherPeople?.newCaregivers?.map((cg, index) => (
@@ -1486,6 +1479,10 @@ export default function DetailAssessinhomeForm() {
                               <div className="col-sm-9"><p>{cg.status || "-"}</p></div>
                             </div>
                             <div className="row">
+                              <div className="col-sm-3"><strong>การศึกษา :</strong></div>
+                              <div className="col-sm-9"><p>{cg.education || "-"}</p></div>
+                            </div>
+                            <div className="row">
                               <div className="col-sm-3"><strong>รายได้ต่อเดือน :</strong></div>
                               <div className="col-sm-9"><p>{cg.income || "-"}</p></div>
                             </div>
@@ -1509,7 +1506,181 @@ export default function DetailAssessinhomeForm() {
                               <button
                                 className="btn m-2"
                                 style={{ backgroundColor: "#ffde59", color: "black" }}
-                                onClick={() => handleEditClick("OtherPeople", index, true)}
+                              >
+                                <i className="bi bi-pencil-fill"></i> แก้ไข
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="p-2">ไม่มีข้อมูลคนในครอบครัว</p>
+                  )}
+                </div>
+              )} */}
+              {activeTab === "OtherPeople" && (
+                <div className="tab-pane fade show active">
+                  <p className="ms-2" style={{ color: "#10B981" }}>
+                    ข้อมูลผู้ดูแลหรือบุคคลในครอบครัว
+                  </p>
+                  <h5 className="ms-2" style={{ color: "#444" }}>
+                    <b>1. ผู้ดูแล</b>
+                  </h5>
+                  {AssessinhomeForms.OtherPeople?.existingCaregivers?.length > 0 ? (
+                    AssessinhomeForms.OtherPeople.existingCaregivers.map((cg, index) => (
+                      <div key={index}>
+                        <div
+                          className="row mb-2"
+                          onClick={() => toggleAccordion(`caregiver-${index}`)}
+                        >
+                          <div className="col-sm-4 mt-3">
+                            <strong
+                              style={{
+                                cursor: "pointer",
+                                color: "#007BFF",
+                                transition: "color 0.1s ease",
+                              }}
+                              onMouseEnter={(e) => (e.target.style.color = "#95d7ff")}
+                              onMouseLeave={(e) => (e.target.style.color = "#007BFF")}
+                            >
+                              ผู้ดูแลคนที่ {index + 1} : {cg.firstName} {cg.lastName || "-"} (
+                              {cg.relationship || "-"})
+                            </strong>
+                          </div>
+                        </div>
+
+                        {openIndex === `caregiver-${index}` && (
+                          <div className="p-3 border rounded ms-2">
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>วันเกิด :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>
+                                  {cg.birthDate ? formatThaiDate(cg.birthDate) : "- ปี - เดือน"}
+                                </p>
+                              </div>
+                              <div className="col-sm-3"><strong>ความสัมพันธ์ :</strong></div>
+                              <div className="col-sm-9"><p> {cg.relationship || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>อาชีพ :</strong></div>
+                              <div className="col-sm-9"><p>{cg.occupation || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>สถานภาพ :</strong></div>
+                              <div className="col-sm-9"><p>{cg.status || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>การศึกษา :</strong></div>
+                              <div className="col-sm-9"><p>{cg.education || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>รายได้ต่อเดือน :</strong></div>
+                              <div className="col-sm-9"><p>{cg.income || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>สิทธิ :</strong></div>
+                              <div className="col-sm-9"><p>{cg.benefit || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>โรคประจำตัว :</strong></div>
+                              <div className="col-sm-9"><p>{cg.ud || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>อุปนิสัย :</strong></div>
+                              <div className="col-sm-9"><p>{cg.habit || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>รายละเอียดการดูแลผู้ป่วย :</strong></div>
+                              <div className="col-sm-7"><p>{cg.careDetails || "-"}</p></div>
+                            </div>
+                            {/* รายละเอียดเพิ่มเติม */}
+                            <div className="col-sm-2">
+                              <button
+                                className="btn m-2"
+                                style={{ backgroundColor: "#ffde59", color: "black" }}
+                                onClick={() =>
+                                  handleEditOtherPerson("existingCaregivers", index)
+                                }
+                              >
+                                <i className="bi bi-pencil-fill"></i> แก้ไข
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="p-2">ไม่มีข้อมูลผู้ดูแล</p>
+                  )}
+
+                  {/* ส่วนที่ 2: คนในครอบครัว */}
+                  <h5 className="ms-2 mt-4" style={{ color: "#444" }}>
+                    <b>2. คนในครอบครัว</b>
+                  </h5>
+                  {AssessinhomeForms.OtherPeople?.newCaregivers?.length > 0 ? (
+                    AssessinhomeForms.OtherPeople.newCaregivers.map((cg, index) => (
+                      <div key={index}>
+                        <div
+                          className="row mb-2 mt-3"
+                          onClick={() => toggleAccordion(`family-${index}`)}
+                        >
+                          <div className="col-sm-4">
+                            <strong
+                              style={{
+                                cursor: "pointer",
+                                color: "#007BFF",
+                                transition: "color 0.1s ease",
+                              }}
+                              onMouseEnter={(e) => (e.target.style.color = "#95d7ff")}
+                              onMouseLeave={(e) => (e.target.style.color = "#007BFF")}
+                            >
+                              คนที่ {index + 1} : {cg.firstName} {cg.lastName || "-"} (
+                              {cg.relationship || "-"})
+                            </strong>
+                          </div>
+                        </div>
+
+                        {openIndex === `family-${index}` && (
+                          <div className="p-3 border rounded ms-2">
+                            <div className="row">
+                              <div className="col-sm-3">
+                                <strong>วันเกิด :</strong>
+                              </div>
+                              <div className="col-sm-9">
+                                <p>
+                                  {cg.birthDate ? formatThaiDate(cg.birthDate) : "- ปี - เดือน"}
+                                </p>
+                              </div>
+                              <div className="col-sm-3"><strong>ความสัมพันธ์ :</strong></div>
+                              <div className="col-sm-9"><p> {cg.relationship || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>อาชีพ :</strong></div>
+                              <div className="col-sm-9"><p>{cg.occupation || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>สถานภาพ :</strong></div>
+                              <div className="col-sm-9"><p>{cg.status || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>การศึกษา :</strong></div>
+                              <div className="col-sm-9"><p>{cg.education || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>รายได้ต่อเดือน :</strong></div>
+                              <div className="col-sm-9"><p>{cg.income || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>สิทธิ :</strong></div>
+                              <div className="col-sm-9"><p>{cg.benefit || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>โรคประจำตัว :</strong></div>
+                              <div className="col-sm-9"><p>{cg.ud || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>อุปนิสัย :</strong></div>
+                              <div className="col-sm-9"><p>{cg.habit || "-"}</p></div>
+
+                              <div className="col-sm-3"><strong>รายละเอียดการดูแลผู้ป่วย :</strong></div>
+                              <div className="col-sm-7"><p>{cg.careDetails || "-"}</p></div>
+                            </div>
+                            {/* รายละเอียดเพิ่มเติม */}
+                            <div className="col-sm-2">
+                              <button
+                                className="btn m-2"
+                                style={{ backgroundColor: "#ffde59", color: "black" }}
+                                onClick={() =>
+                                  handleEditOtherPerson("newCaregivers", index)
+                                }
                               >
                                 <i className="bi bi-pencil-fill"></i> แก้ไข
                               </button>
@@ -1910,7 +2081,14 @@ export default function DetailAssessinhomeForm() {
           onClose={handleCloseModal}
         />
       )}
-      {isModalOpen && currentEditSection === "OtherPeople" && (
+      {/* {isModalOpen && currentEditSection === "OtherPeople" && (
+        <OtherpeopleForm
+          formData={tempFormValues}
+          onSave={handleSaveChanges}
+          onClose={handleCloseModal}
+        />
+      )} */}
+      {isModalOpen && editingOtherPerson && (
         <OtherpeopleForm
           formData={tempFormValues}
           onSave={handleSaveChanges}

@@ -22,7 +22,6 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
 
         onSave(formValues); // ส่งข้อมูลที่อัปเดตกลับไปยัง `DetailAgendaForm`
     };
-
     return (
         <div className="modal show d-block" tabIndex="-1">
             <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -60,7 +59,9 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 <input
                                     className="form-control"
                                     value={formValues.relationship || ""}
-                                    disabled
+                                    onChange={(e) =>
+                                        handleChange("relationship", e.target.value)
+                                    }
                                 />
                             </div>
                             <div className="m-2">
@@ -164,10 +165,11 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                             </div>
                             <div className="m-2">
                                 <label className="form-label mt-2">โรคประจำตัว :</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={formValues.ud}
+                                <textarea
+                                    className="form-control mt-2"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                    value={formValues.ud || ""}
                                     onChange={(e) =>
                                         handleChange("ud", e.target.value)
                                     }
@@ -175,10 +177,11 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                             </div>
                             <div className="m-2">
                                 <label className="form-label mt-2">อุปนิสัย :</label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={formValues.habit}
+                                <textarea
+                                    className="form-control mt-2"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                    value={formValues.habit || ""}
                                     onChange={(e) =>
                                         handleChange("habit", e.target.value)
                                     }
@@ -190,7 +193,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                     className="form-control mt-1"
                                     rows="2"
                                     style={{ resize: "vertical" }}
-                                    value={formValues.careDetails}
+                                    value={formValues.careDetails || ""}
                                     onChange={(e) =>
                                         handleChange("careDetails", e.target.value)
                                     }
