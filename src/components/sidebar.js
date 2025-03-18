@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logow from "../img/logow.png";
 import "../css/sidebar.css";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function Sidebar() {
   const [isActive, setIsActive] = useState(window.innerWidth > 967);
@@ -48,7 +48,7 @@ export default function Sidebar() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -103,7 +103,7 @@ export default function Sidebar() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {
@@ -182,13 +182,15 @@ export default function Sidebar() {
         </li>
         <li>
           {data?.username && data?.password && (
+            // <a
+            //   href={`http://localhost:5173/auth?username=${encodeURIComponent(
+            //     data.username
+            //   )}&password=${encodeURIComponent(data.password)}`}
+            //   target="_blank"
+            //   rel="noopener noreferrer"
+            // >
             <a
-              href={`http://localhost:5173/auth?username=${encodeURIComponent(
-                data.username
-              )}&password=${encodeURIComponent(data.password)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            href={`https://ptah-doctor.com/dashboard`}>
               <i className="bi bi-window-dock"></i>
               <span className="links_name">PTAH กายภาพ</span>
             </a>

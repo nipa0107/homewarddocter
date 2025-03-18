@@ -8,7 +8,7 @@ import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
 import Sidebar from "./sidebar";
 import io from 'socket.io-client';
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function Assessreadinessuser({ }) {
     const navigate = useNavigate();
     const [data, setData] = useState([]);
@@ -50,7 +50,7 @@ export default function Assessreadinessuser({ }) {
 
     const fetchLatestAssessments = async () => {
         try {
-            const response = await fetch("http://localhost:5000/latest-assessments");
+            const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
             const data = await response.json();
             console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -201,7 +201,7 @@ export default function Assessreadinessuser({ }) {
     }, []);
 
     const fetchUserData = (token) => {
-        return fetch("http://localhost:5000/profiledt", {
+        return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
             method: "POST",
             crossDomain: true,
             headers: {
@@ -263,7 +263,7 @@ export default function Assessreadinessuser({ }) {
     }, [token]);
 
     const markAllByTypeAsViewed = (type) => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+        fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -347,7 +347,7 @@ export default function Assessreadinessuser({ }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getuser/${id}`);
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser/${id}`);
                 const data = await response.json();
                 setUserData(data);
                 setUsername(data.username);
@@ -368,7 +368,7 @@ export default function Assessreadinessuser({ }) {
             const fetchMedicalInfo = async () => {
                 try {
                     const response = await fetch(
-                        `http://localhost:5000/medicalInformation/${userData._id}`
+                        `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${userData._id}`
                     );
                     const data = await response.json();
                     console.log("Medical Information:", data);
@@ -446,7 +446,7 @@ export default function Assessreadinessuser({ }) {
     const fetchreadinessForms = async () => {
         try {
             const response = await fetch(
-                `http://localhost:5000/getReadinessForms/${id}`,
+                `https://backend-deploy-render-mxok.onrender.com/getReadinessForms/${id}`,
                 {
                     method: "GET",
                     headers: {
@@ -473,7 +473,7 @@ export default function Assessreadinessuser({ }) {
 
     const fetchMpersonnel = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allMpersonnel`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -493,7 +493,7 @@ export default function Assessreadinessuser({ }) {
 
     const fetchReadinessAssessments = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/allReadinessAssessment`, {
+            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allReadinessAssessment`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -516,7 +516,7 @@ export default function Assessreadinessuser({ }) {
         const fetchUnreadCount = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:5000/update-unread-count"
+                    "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
                 );
 
                 if (!response.ok) {

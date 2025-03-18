@@ -17,7 +17,7 @@ import PhysicalExaminationForm from "./UpdateAssessinhomesss/updatePhysicalExami
 import SSSForm from "./UpdateAssessinhomesss/updateSSS.js";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function DetailAssessinhomeForm() {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export default function DetailAssessinhomeForm() {
 
   const fetchLatestAssessments = async () => {
     try {
-      const response = await fetch("http://localhost:5000/latest-assessments");
+      const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
       const data = await response.json();
       console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -204,7 +204,7 @@ export default function DetailAssessinhomeForm() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -275,7 +275,7 @@ export default function DetailAssessinhomeForm() {
   }, [token]);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -445,7 +445,7 @@ export default function DetailAssessinhomeForm() {
     const fetchAssessinhomeForms = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/getAssessinhomeForm/${id}`
+          `https://backend-deploy-render-mxok.onrender.com/getAssessinhomeForm/${id}`
         );
         const data = await response.json();
 
@@ -467,7 +467,7 @@ export default function DetailAssessinhomeForm() {
       const fetchData = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/getuser/${AssessinhomeForms.user}`
+            `https://backend-deploy-render-mxok.onrender.com/getuser/${AssessinhomeForms.user}`
           );
           const data = await response.json();
           setName(data.name);
@@ -488,7 +488,7 @@ export default function DetailAssessinhomeForm() {
       const fetchMedicalInfo = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/medicalInformation/${AssessinhomeForms.user}`
+            `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${AssessinhomeForms.user}`
           );
           const data = await response.json();
           console.log("Medical Information:", data);
@@ -624,7 +624,7 @@ export default function DetailAssessinhomeForm() {
         newAssessinhomeForms[currentEditSection] = updatedData;
       }
       const response = await fetch(
-        `http://localhost:5000/updateAssessinhomesss/${id}`,
+        `https://backend-deploy-render-mxok.onrender.com/updateAssessinhomesss/${id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -636,7 +636,7 @@ export default function DetailAssessinhomeForm() {
       if (!response.ok) throw new Error(result.message || "Failed to update data");
 
       // ✅ อัปเดตค่าที่ได้จากเซิร์ฟเวอร์กลับมา
-      const updatedForm = await fetch(`http://localhost:5000/getAssessinhomeForm/${id}`);
+      const updatedForm = await fetch(`https://backend-deploy-render-mxok.onrender.com/getAssessinhomeForm/${id}`);
       const updatedDataFromServer = await updatedForm.json();
 
       toast.success("แก้ไขข้อมูลสำเร็จ", {
@@ -677,7 +677,7 @@ export default function DetailAssessinhomeForm() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {

@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function AddCaregiver() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -149,7 +149,7 @@ export default function AddCaregiver() {
     };
   }, []);
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -216,7 +216,7 @@ export default function AddCaregiver() {
   }, []);
 
   const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -258,7 +258,7 @@ export default function AddCaregiver() {
   const handleSave = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/addcaregiver", {
+      const response = await fetch("https://backend-deploy-render-mxok.onrender.com/addcaregiver", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -341,7 +341,7 @@ export default function AddCaregiver() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {

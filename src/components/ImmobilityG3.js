@@ -8,7 +8,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function ImmobilityG3({ }) {
     const navigate = useNavigate();
@@ -49,7 +49,7 @@ export default function ImmobilityG3({ }) {
 
     const fetchLatestAssessments = async () => {
         try {
-            const response = await fetch("http://localhost:5000/latest-assessments");
+            const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
             const data = await response.json();
             console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -204,7 +204,7 @@ export default function ImmobilityG3({ }) {
 
 
     const fetchUserData = (token) => {
-        return fetch("http://localhost:5000/profiledt", {
+        return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
             method: "POST",
             crossDomain: true,
             headers: {
@@ -234,7 +234,7 @@ export default function ImmobilityG3({ }) {
     };
 
     const getAllUser = () => {
-        fetch("http://localhost:5000/alluser", {
+        fetch("https://backend-deploy-render-mxok.onrender.com/alluser", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -281,7 +281,7 @@ export default function ImmobilityG3({ }) {
     }, [token]);
 
     const markAllByTypeAsViewed = (type) => {
-        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+        fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -367,7 +367,7 @@ export default function ImmobilityG3({ }) {
     useEffect(() => {
         const fetchGroup3Users = async () => {
             try {
-                const response = await fetch("http://localhost:5000/immobility/group3");
+                const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/group3");
                 const result = await response.json();
                 if (response.ok) {
                     setGroup3Users(result.data); // เก็บข้อมูลที่ดึงมา
@@ -392,7 +392,7 @@ export default function ImmobilityG3({ }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/getuser`);
+                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser`);
                 const data = await response.json();
                 setUserData(data);
                 setUsername(data.username);
@@ -413,7 +413,7 @@ export default function ImmobilityG3({ }) {
             const fetchMedicalInfo = async () => {
                 try {
                     const response = await fetch(
-                        `http://localhost:5000/medicalInformation/${userData._id}`
+                        `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${userData._id}`
                     );
                     const data = await response.json();
                     console.log("Medical Information:", data);
@@ -432,7 +432,7 @@ export default function ImmobilityG3({ }) {
         if (id) {
             const fetchPatientFormDetails = async () => {
                 try {
-                    const response = await fetch(`http://localhost:5000/getpatientform/${id}`);
+                    const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getpatientform/${id}`);
                     const data = await response.json();
 
                     if (data.success) {
@@ -476,7 +476,7 @@ export default function ImmobilityG3({ }) {
 
     const fetchAssessments = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/allAssessment`, {
+            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allAssessment`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -496,7 +496,7 @@ export default function ImmobilityG3({ }) {
 
     const fetchMpersonnel = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allMpersonnel`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -575,7 +575,7 @@ export default function ImmobilityG3({ }) {
         const fetchUnreadCount = async () => {
             try {
                 const response = await fetch(
-                    "http://localhost:5000/update-unread-count"
+                    "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
                 );
 
                 if (!response.ok) {

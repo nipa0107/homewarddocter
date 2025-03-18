@@ -1,6 +1,6 @@
 export const fetchAlerts = async (token,userId) => {
   try {
-    const response = await fetch(`http://localhost:5000/alerts?userId=${userId}`, {
+    const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/alerts?userId=${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

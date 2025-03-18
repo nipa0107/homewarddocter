@@ -8,7 +8,7 @@ import { renderAlerts } from "./Alert/renderAlerts";
 import io from "socket.io-client";
 import Sidebar from "./sidebar";
 
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function Assessmentuser() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
@@ -160,7 +160,7 @@ export default function Assessmentuser() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -227,7 +227,7 @@ export default function Assessmentuser() {
   }, []);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -311,7 +311,7 @@ export default function Assessmentuser() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getuser/${id}`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser/${id}`);
         const data = await response.json();
         setUserData(data);
         setName(data.name);
@@ -331,7 +331,7 @@ export default function Assessmentuser() {
       const fetchMedicalInfo = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/medicalInformation/${userData._id}`
+            `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${userData._id}`
           );
           const data = await response.json();
           console.log("Medical Information:", data);
@@ -348,7 +348,7 @@ export default function Assessmentuser() {
   const fetchpatientForms = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/getpatientforms/${id}`,
+        `https://backend-deploy-render-mxok.onrender.com/getpatientforms/${id}`,
         {
           method: "GET",
           headers: {
@@ -372,7 +372,7 @@ export default function Assessmentuser() {
 
   const fetchAssessments = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/allAssessment`, {
+      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allAssessment`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -392,7 +392,7 @@ export default function Assessmentuser() {
 
   const fetchMpersonnel = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/allMpersonnel`, {
+      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allMpersonnel`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -413,7 +413,7 @@ export default function Assessmentuser() {
   const checkVitalSigns = async (formId) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/checkVitals/${formId}`
+        `https://backend-deploy-render-mxok.onrender.com/checkVitals/${formId}`
       );
       const data = await response.json();
       setVitalStatuses((prev) => ({ ...prev, [formId]: data.status }));

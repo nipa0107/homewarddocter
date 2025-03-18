@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function Updatepatient() {
   const location = useLocation();
@@ -137,7 +137,7 @@ export default function Updatepatient() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getuser/${id}`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser/${id}`);
         const data = await response.json();
         setUsername(data.username);
         setName(data.name);
@@ -158,7 +158,7 @@ export default function Updatepatient() {
     const fetchCaregiverData = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/getcaregiver/${id}`
+          `https://backend-deploy-render-mxok.onrender.com/getcaregiver/${id}`
         );
         const caregiverData = await response.json();
         if (caregiverData.status === "ok") {
@@ -221,7 +221,7 @@ export default function Updatepatient() {
     };
   }, []);
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -283,7 +283,7 @@ export default function Updatepatient() {
   }, []);
 
   const markAllAlertsAsViewed = () => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -405,7 +405,7 @@ export default function Updatepatient() {
         Relationship,
       };
 
-      const response = await fetch(`http://localhost:5000/updateuserinfo`, {
+      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/updateuserinfo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -559,7 +559,7 @@ export default function Updatepatient() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {

@@ -11,7 +11,7 @@ import { ToastContainer, toast } from "react-toastify";
 import Sidebar from "./sidebar";
 
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function UpdateProfile() {
   const [data, setData] = useState([]);
   const navigate = useNavigate();
@@ -133,7 +133,7 @@ export default function UpdateProfile() {
   }, []);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -166,7 +166,7 @@ export default function UpdateProfile() {
     const token = window.localStorage.getItem("token");
     setToken(token);
     if (token) {
-      fetch("http://localhost:5000/profiledt", {
+      fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
         method: "POST",
         crossDomain: true,
         headers: {
@@ -236,7 +236,7 @@ export default function UpdateProfile() {
         surname,
       };
       const response = await fetch(
-        `http://localhost:5000/updateprofile/${location.state._id}`,
+        `https://backend-deploy-render-mxok.onrender.com/updateprofile/${location.state._id}`,
         {
           method: "POST",
           headers: {
@@ -364,7 +364,7 @@ export default function UpdateProfile() {
   };
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

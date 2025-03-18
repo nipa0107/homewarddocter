@@ -45,7 +45,7 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getuser/${id}`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser/${id}`);
         const data = await response.json();
 
         setGender(data.gender);

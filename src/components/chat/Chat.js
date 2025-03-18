@@ -9,7 +9,7 @@ import { renderAlerts } from "../Alert/renderAlerts";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
-const socketnew = io("http://localhost:5000");
+const socketnew = io("https://backend-deploy-render-mxok.onrender.com");
 const ChatComponent = () => {
   const [users, setUsers] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState(null);
@@ -205,7 +205,7 @@ const ChatComponent = () => {
   };
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -298,7 +298,7 @@ const ChatComponent = () => {
   }, []);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -387,7 +387,7 @@ const ChatComponent = () => {
         return;
       }
       try {
-        const response = await fetch(`http://localhost:5000/users`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/users`);
         const result = await response.json();
         if (response.ok) {
           setUsers(result.users);
@@ -404,7 +404,7 @@ const ChatComponent = () => {
     }
 
     // เชื่อมต่อ Socket.IO
-    const newSocket = io("http://localhost:5000");
+    const newSocket = io("https://backend-deploy-render-mxok.onrender.com");
     setSocket(newSocket);
 
     return () => {
@@ -417,7 +417,7 @@ const ChatComponent = () => {
       const fetchSelectedUserData = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/getUserById/${selectedUserId}`
+            `https://backend-deploy-render-mxok.onrender.com/getUserById/${selectedUserId}`
           );
           const result = await response.json();
           if (response.ok) {
@@ -437,7 +437,7 @@ const ChatComponent = () => {
       const fetchChatHistory = async () => {
         try {
           const response = await fetch(
-            `http://localhost:5000/getChatHistory/${selectedUserId}`
+            `https://backend-deploy-render-mxok.onrender.com/getChatHistory/${selectedUserId}`
           );
           const result = await response.json();
           if (response.ok) {
@@ -522,7 +522,7 @@ const ChatComponent = () => {
         textareaRef.current.style.height = "40px";
       }
       try {
-        const response = await fetch("http://localhost:5000/sendchat", {
+        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/sendchat", {
           method: "POST",
           body: formData,
         });

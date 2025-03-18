@@ -7,7 +7,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function EmailVerification() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -143,7 +143,7 @@ export default function EmailVerification() {
   // }, [notificationsRef]);
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -273,7 +273,7 @@ export default function EmailVerification() {
   };
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -353,7 +353,7 @@ export default function EmailVerification() {
       return;
     }
 
-    fetch("http://localhost:5000/send-otp2", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/send-otp2", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

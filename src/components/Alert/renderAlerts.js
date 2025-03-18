@@ -88,7 +88,7 @@ export const renderAlerts = (
           }
           try {
             const response = await fetch(
-              `http://localhost:5000/alerts/${alert._id}/viewed`,
+              `https://backend-deploy-render-mxok.onrender.com/alerts/${alert._id}/viewed`,
               {
                 method: "PUT",
                 headers: {

@@ -51,7 +51,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
   useEffect(() => {
     const fetchCaregivers = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getCaregiverstoAgenda/${id}`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getCaregiverstoAgenda/${id}`);
         const data = await response.json();
         if (data.status === "ok" && Array.isArray(data.data)) {
           if (getValues("existingCaregivers").length === 0) {
@@ -87,7 +87,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
   useEffect(() => {
     const fetchNewCaregivers = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getcaregivesotherpeople/${id}`);
+        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getcaregivesotherpeople/${id}`);
         const data = await response.json();
         console.log("Fetched new caregivers:", data); // ตรวจสอบข้อมูลใน console
         if (data.status === "ok" && Array.isArray(data.data)) {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CountUp from "react-countup";
-import { Modal, Button } from "react-bootstrap";
+// import { Modal, Button } from "react-bootstrap";
 
 const ZaritburdeninterviewForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
