@@ -39,23 +39,6 @@ const CaregiverAgendaForm = ({ formData, onSave, onClose }) => {
                                     value={`${formValues.firstName || ""} ${formValues.lastName || ""}`}
                                 />
                             </div>
-                            {/* {[
-                                { id: "caregiver_idea", label: "Idea" },
-                                { id: "caregiver_feeling", label: "Feeling" },
-                                { id: "caregiver_funtion", label: "Function" },
-                                { id: "caregiver_expectation", label: "Expectation" },
-                            ].map((item) => (
-                                <div className="m-2" key={item.id}>
-                                    <label className="form-label">{item.label}</label>
-                                    <textarea
-                                        className="form-control mt-2"
-                                        rows="2"
-                                        style={{ resize: "vertical" }}
-                                        value={formValues[item.id] || ""}
-                                        onChange={(e) => handleChange(item.id, e.target.value)}
-                                    />
-                                </div>
-                            ))} */}
                             <div className="m-2">
                                 <label className="form-label mt-2">Idea</label>
                                 <textarea

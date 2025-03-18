@@ -13,11 +13,21 @@ export const CaregiverAssessment = ({ onDataChange }) => {
 
   useEffect(() => {
     const savedData = JSON.parse(localStorage.getItem("careAssessmentData"));
+  
     if (savedData) {
-      replaceExisting(savedData.existingCaregivers || []);
-      replaceNew(savedData.newCaregivers || []);
+      console.log("Loaded from localStorage:", savedData); // ✅ Debugging
+  
+      if (!Array.isArray(savedData.existingCaregivers)) {
+        savedData.existingCaregivers = [];
+      }
+      if (!Array.isArray(savedData.newCaregivers)) {
+        savedData.newCaregivers = [];
+      }
+  
+      replaceExisting(savedData.existingCaregivers);
+      replaceNew(savedData.newCaregivers);
     }
-  }, [replaceExisting, replaceNew]);
+  }, []); // ✅ โหลดครั้งเดียวเมื่อ component mount
 
   useEffect(() => {
     localStorage.setItem("careAssessmentData", JSON.stringify({
@@ -111,7 +121,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
     if (id) {
       fetchNewCaregivers();
     }
-  }, [id, replaceNew, getValues]);
+  }, [id]);
 
   /** ✅ อัปเดตข้อมูลทุกครั้งที่มีการเปลี่ยนแปลง */
   const handleFieldChange = () => {

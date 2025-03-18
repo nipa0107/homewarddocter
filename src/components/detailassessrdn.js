@@ -490,8 +490,13 @@ export default function DetailAssessreadiness() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
+     // ✅ ตรวจสอบว่าผู้ใช้เลือกสถานะหรือยัง
+     if (!readinessStatus) {
+      window.alert("กรุณาเลือกสถานะการประเมิน");
+      return; // ออกจากฟังก์ชัน ถ้ายังไม่ได้เลือก
+  }
 
+    try {
 
       // ทำการบันทึกข้อมูล readiness_status, detail, mpersonnel, readinessForm ID
       const response = await fetch(`http://localhost:5000/addReadinessAssessment`, {

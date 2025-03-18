@@ -6,7 +6,7 @@ export const Physicalexamination = ({ onDataChange }) => {
   const [otherTexts, setOtherTexts] = useState({});
 
   useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem("physicalExamForm")) || {};
+    const savedData = JSON.parse(localStorage.getItem("physicalExamData")) || {};
     Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
     onDataChange(getValues());
   }, []);
@@ -14,7 +14,7 @@ export const Physicalexamination = ({ onDataChange }) => {
   const handleInputChange = (name, value) => {
     setValue(name, value);
     const updatedValues = { ...getValues(), [name]: value };
-    localStorage.setItem("physicalExamForm", JSON.stringify(updatedValues));
+    localStorage.setItem("physicalExamData", JSON.stringify(updatedValues));
     onDataChange(updatedValues);
   };
 

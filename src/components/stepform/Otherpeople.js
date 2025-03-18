@@ -190,9 +190,10 @@ export const Otherpeople = ({ onDataChange }) => {
       </div>
       <div className="info3 card mt-4">
         <div className="m-4">
+        <b>ข้อมูลผู้ดูแล</b><br></br>
           {existingFields.map((field, index) => (
             <div key={field.id}>
-              <b>ข้อมูลผู้ดูแล</b><br></br>
+              
               <span
                 onClick={() => toggleCollapse(index, "existing")}
                 style={{

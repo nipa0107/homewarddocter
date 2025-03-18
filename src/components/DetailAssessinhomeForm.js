@@ -548,7 +548,7 @@ export default function DetailAssessinhomeForm() {
     }
   }, [AssessinhomeForms.user]);
 
-  const handleEditClick = (section) => {
+  const handleEditClick = (section , index, isNewCaregiver = false) => {
     setCurrentEditSection(section);
     if (section === "Immobility") {
       setTempFormValues({ ...AssessinhomeForms.Immobility });
@@ -560,7 +560,10 @@ export default function DetailAssessinhomeForm() {
       setTempFormValues({ ...AssessinhomeForms.Housing });
     }
     else if (section === "OtherPeople") {
-      setTempFormValues({ existingCaregivers: [...AssessinhomeForms.OtherPeople.existingCaregivers] });
+      const caregiver = isNewCaregiver
+        ? AssessinhomeForms.OtherPeople.newCaregivers[index]
+        : AssessinhomeForms.OtherPeople.existingCaregivers[index];
+      setTempFormValues({ ...caregiver });
     }
     else if (section === "Medication") {
       setTempFormValues({ ...AssessinhomeForms.Medication });
@@ -585,7 +588,14 @@ export default function DetailAssessinhomeForm() {
     setTempFormValues({});
   };
 
-  const handleSaveChanges = async (updatedData, index, isNewCaregiver = false) => {
+  const handleSaveChanges = async (updatedData, index, isNewCaregiver) => {
+      // ตรวจสอบว่า updatedData มีข้อมูลครบถ้วน
+  console.log(updatedData); // เช็คข้อมูลที่ได้รับ
+
+  if (!updatedData) {
+    console.error("ไม่มีข้อมูลเพื่อบันทึก");
+    return;
+  }
     try {
       let newAssessinhomeForms = { ...AssessinhomeForms };
 
@@ -597,7 +607,14 @@ export default function DetailAssessinhomeForm() {
       }
       else if (currentEditSection === "Housing") {
         newAssessinhomeForms.Housing = updatedData;
+      } else if (currentEditSection === "OtherPeople") {
+        if (isNewCaregiver) {
+          newAssessinhomeForms.OtherPeople.newCaregivers[index] = updatedData; // Update new caregivers
+        } else {
+          newAssessinhomeForms.OtherPeople.existingCaregivers[index] = updatedData; // Update existing caregivers
+        } console.log(newAssessinhomeForms); // เช็คข้อมูลก่อนการส่งไปยังเซิร์ฟเวอร์
       }
+
       else if (currentEditSection === "Medication") {
         newAssessinhomeForms.Medication = updatedData;
       }
@@ -608,32 +625,6 @@ export default function DetailAssessinhomeForm() {
       if (currentEditSection.startsWith("SSS_")) {
         const subSection = currentEditSection.split("_")[1]; // ดึงเฉพาะส่วนที่ต้องแก้ไข
         newAssessinhomeForms.SSS[subSection] = updatedData;
-      } else {
-        newAssessinhomeForms[currentEditSection] = updatedData;
-      }
-
-      if (currentEditSection === "OtherPeople") {
-        if (isNewCaregiver) {
-          let updatedNewCaregivers = [...newAssessinhomeForms.OtherPeople.newCaregivers];
-          updatedNewCaregivers[index] = { ...updatedData };
-          newAssessinhomeForms = {
-            ...newAssessinhomeForms,
-            OtherPeople: {
-              ...newAssessinhomeForms.OtherPeople,
-              newCaregivers: updatedNewCaregivers,
-            }
-          };
-        } else {
-          let updatedexistingCaregivers = [...newAssessinhomeForms.OtherPeople.existingCaregivers];
-          updatedexistingCaregivers[index] = { ...updatedData };
-          newAssessinhomeForms = {
-            ...newAssessinhomeForms,
-            OtherPeople: {
-              ...newAssessinhomeForms.OtherPeople,
-              existingCaregivers: updatedexistingCaregivers,
-            }
-          };
-        }
       } else {
         newAssessinhomeForms[currentEditSection] = updatedData;
       }
@@ -662,8 +653,6 @@ export default function DetailAssessinhomeForm() {
 
       });
 
-
-      // อัพเดต State
 
       setTimeout(() => {
         setAssessinhomeForms(updatedDataFromServer.data);
@@ -727,23 +716,7 @@ export default function DetailAssessinhomeForm() {
   }, [isModalOpen]);
 
   const [activeTab, setActiveTab] = useState("Immobility"); // ค่าเริ่มต้น
-  const [editingIndex, setEditingIndex] = useState(null); // เก็บ index ของผู้ดูแลที่กำลังแก้ไข
 
-  const handleEditexistingCaregivers = (index) => {
-    setCurrentEditSection("OtherPeople");
-    setIsModalOpen(true);
-    setEditingIndex(index); // ✅ เก็บ index ที่เลือกไว้
-    setTempFormValues({ ...AssessinhomeForms.OtherPeople.existingCaregivers[index] });
-  };
-
-  const [editingNewCaregiverIndex, setEditingNewCaregiverIndex] = useState(null);
-
-  const handleEditNewCaregivers = (index) => {
-    setCurrentEditSection("OtherPeople");
-    setIsModalOpen(true);
-    setEditingNewCaregiverIndex(index); // ✅ เก็บ index ที่เลือกไว้
-    setTempFormValues({ ...AssessinhomeForms.OtherPeople.newCaregivers[index] });
-  };
 
 
   return (
@@ -1181,14 +1154,14 @@ export default function DetailAssessinhomeForm() {
                     </div>
 
                     {/* อาหารทางอื่นๆ */}
-                    <div className="row">
+                    {/* <div className="row">
                       <div className="col-sm-3">
                         <strong>อาหารอื่นๆ :</strong>
                       </div>
                       <div className="col-sm-7">
                         <p>{AssessinhomeForms.Nutrition?.otherFood || "-"}</p>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* อาหารที่ชอบ */}
                     <div className="row">
@@ -1455,7 +1428,7 @@ export default function DetailAssessinhomeForm() {
                               <button
                                 className="btn m-2"
                                 style={{ backgroundColor: "#ffde59", color: "black" }}
-                                onClick={() => handleEditexistingCaregivers(index)}
+                                onClick={() => handleEditClick("OtherPeople", index, false)}
                               >
                                 <i className="bi bi-pencil-fill"></i> แก้ไข
                               </button>
@@ -1465,13 +1438,13 @@ export default function DetailAssessinhomeForm() {
                       </div>
                     ))
                   ) : (
-                    <p className="p-2">ไม่มีข้อมูลผู้ดูแลปัจจุบัน</p>
+                    <p className="p-2">ไม่มีข้อมูลผู้ดูแล</p>
                   )}
 
                   {/* 🔹 ส่วนที่ 2: รายชื่อคนในครอบครัว */}
                   <h5 className="ms-2 mt-4" style={{ color: "#444" }}> <b>2. คนในครอบครัว</b></h5>
                   {AssessinhomeForms.OtherPeople?.newCaregivers?.length > 0 ? (
-                    AssessinhomeForms.OtherPeople.newCaregivers.map((cg, index) => (
+                    AssessinhomeForms.OtherPeople?.newCaregivers?.map((cg, index) => (
                       <div key={index}>
                         <div
                           className="row mb-2 mt-3"
@@ -1497,7 +1470,7 @@ export default function DetailAssessinhomeForm() {
                             <div className="row">
                               <div className="col-sm-3"><strong>วันเกิด :</strong></div>
                               <div className="col-sm-9">
-                                <p>{cg.birthDate ? formatThaiDate(cg.birthDate) : "0 ปี 0 เดือน"}</p>
+                                <p>{cg.birthDate ? formatThaiDate(cg.birthDate) : "- ปี - เดือน"}</p>
                               </div>
                             </div>
                             <div className="row">
@@ -1536,7 +1509,7 @@ export default function DetailAssessinhomeForm() {
                               <button
                                 className="btn m-2"
                                 style={{ backgroundColor: "#ffde59", color: "black" }}
-                                onClick={() => handleEditNewCaregivers(index)}
+                                onClick={() => handleEditClick("OtherPeople", index, true)}
                               >
                                 <i className="bi bi-pencil-fill"></i> แก้ไข
                               </button>
@@ -1940,14 +1913,7 @@ export default function DetailAssessinhomeForm() {
       {isModalOpen && currentEditSection === "OtherPeople" && (
         <OtherpeopleForm
           formData={tempFormValues}
-          onSave={(updatedData) => handleSaveChanges(updatedData, editingIndex)}
-          onClose={handleCloseModal}
-        />
-      )}
-      {isModalOpen && currentEditSection === "OtherPeople" && editingNewCaregiverIndex !== null && (
-        <OtherpeopleForm
-          formData={tempFormValues}
-          onSave={(updatedData) => handleSaveChanges(updatedData, editingNewCaregiverIndex, true)}
+          onSave={handleSaveChanges}
           onClose={handleCloseModal}
         />
       )}

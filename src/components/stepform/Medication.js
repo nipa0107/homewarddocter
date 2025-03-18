@@ -6,7 +6,7 @@ export const Medication = ({ onDataChange }) => {
   
   useEffect(() => {
     // Load stored data from localStorage
-    const savedData = JSON.parse(localStorage.getItem("medicationForm")) || {};
+    const savedData = JSON.parse(localStorage.getItem("medicationData")) || {};
     Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
     onDataChange(getValues());
   }, []);
@@ -14,7 +14,7 @@ export const Medication = ({ onDataChange }) => {
   const handleInputChange = (name, value) => {
     setValue(name, value);
     const updatedValues = { ...getValues(), [name]: value };
-    localStorage.setItem("medicationForm", JSON.stringify(updatedValues));
+    localStorage.setItem("medicationData", JSON.stringify(updatedValues));
     onDataChange(updatedValues);
   };
   

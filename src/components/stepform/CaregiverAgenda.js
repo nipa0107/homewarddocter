@@ -14,11 +14,22 @@ export const CaregiverAgenda = ({ onDataChange }) => {
 
   useEffect(() => {
     const savedData = JSON.parse(localStorage.getItem("caregiverAgendaData"));
+  
     if (savedData) {
-      replaceExisting(savedData.existingCaregivers || []);
-      replaceNew(savedData.newCaregivers || []);
+      console.log("Loaded from localStorage:", savedData); // ✅ Debugging
+  
+      if (!Array.isArray(savedData.existingCaregivers)) {
+        savedData.existingCaregivers = [];
+      }
+      if (!Array.isArray(savedData.newCaregivers)) {
+        savedData.newCaregivers = [];
+      }
+  
+      replaceExisting(savedData.existingCaregivers);
+      replaceNew(savedData.newCaregivers);
     }
-  }, [replaceExisting, replaceNew]);
+  }, []); // ✅ โหลดครั้งเดียวเมื่อ component mount
+  
 
   useEffect(() => {
     localStorage.setItem("caregiverAgendaData", JSON.stringify({
@@ -77,8 +88,11 @@ export const CaregiverAgenda = ({ onDataChange }) => {
       try {
         const response = await fetch(`http://localhost:5000/getcaregivesotherpeople/${id}`);
         const data = await response.json();
-
+  
         if (data.status === "ok" && Array.isArray(data.data)) {
+          console.log("Fetched new caregivers:", data.data); // ✅ Debugging
+  
+          // ถ้า newCaregivers ใน form มีข้อมูลแล้ว ไม่ต้อง replace
           if (getValues("newCaregivers").length === 0) {
             replaceNew(
               data.data.map((cg) => ({
@@ -89,7 +103,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                 caregiver_feeling: cg.caregiver_feeling || "",
                 caregiver_function: cg.caregiver_function || "",
                 caregiver_expectation: cg.caregiver_expectation || "",
-                isNew: false,
+                isNew: true,
               }))
             );
           }
@@ -98,12 +112,13 @@ export const CaregiverAgenda = ({ onDataChange }) => {
         console.error("Error fetching new caregivers:", error);
       }
     };
-
+  
     if (id) {
       fetchNewCaregivers();
     }
-  }, [id, replaceNew, getValues]);
-
+  }, [id]); // ✅ ไม่ใส่ replaceNew ใน dependency เพื่อป้องกัน override ค่าผิดพลาด
+  
+  
   /** ✅ อัปเดตข้อมูลทุกครั้งที่มีการเปลี่ยนแปลง */
   const handleFieldChange = () => {
     const existingData = existingCaregivers.map((cg, index) => ({

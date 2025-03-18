@@ -204,7 +204,7 @@ const NutritionForm = ({ formData, onSave, onClose , name, surname}) => {
                                     onChange={handleChange}
                                 />
                             </div>
-                            <div className="m-2">
+                            {/* <div className="m-2">
                                 <label className="form-label mt-3">อาหารอื่นๆ (ถ้ามี) :</label>
                                 <input
                                     type="text"
@@ -213,7 +213,7 @@ const NutritionForm = ({ formData, onSave, onClose , name, surname}) => {
                                     value={formValues.otherFood || ""}
                                     onChange={handleChange}
                                 />
-                            </div>
+                            </div> */}
                             <div className="m-2">
                                 <label className="form-label mt-3">คนปรุงอาหาร :</label>
                                 <p style={{ color: "gray" }}>(เลือกได้มากกว่า 1 ข้อ)</p>
