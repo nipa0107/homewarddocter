@@ -182,13 +182,15 @@ export default function Sidebar() {
         </li>
         <li>
           {data?.username && data?.password && (
+            // <a
+            //   href={`http://localhost:5173/auth?username=${encodeURIComponent(
+            //     data.username
+            //   )}&password=${encodeURIComponent(data.password)}`}
+            //   target="_blank"
+            //   rel="noopener noreferrer"
+            // >
             <a
-              href={`http://localhost:5173/auth?username=${encodeURIComponent(
-                data.username
-              )}&password=${encodeURIComponent(data.password)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            href={`https://ptah-doctor.com/dashboard`}>
               <i className="bi bi-window-dock"></i>
               <span className="links_name">PTAH กายภาพ</span>
             </a>
