@@ -1052,7 +1052,7 @@ export default function DetailAgendaForm() {
                         <strong>Function :</strong>
                       </div>
                       <div class="col-sm-9">
-                        <p>{AgendaForms.PatientAgenda?.patient_funtion || "-"}</p>
+                        <p>{AgendaForms.PatientAgenda?.patient_function || "-"}</p>
                       </div>
                     </div>
                     <div className="row">
@@ -1089,7 +1089,7 @@ export default function DetailAgendaForm() {
                           className="row mb-2 mt-3"
                           onClick={() => toggleAccordion(`caregiver-${index}`)}
                         >
-                          <div className="col-sm-3">
+                          <div className="col-sm-8">
                             <strong
                               style={{
                                 cursor: "pointer",
@@ -1100,7 +1100,7 @@ export default function DetailAgendaForm() {
                               onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
                             >
                               ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
-                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                              {agenda.lastName || "-"} ({agenda.relationship || "ไม่ระบุความสัมพันธ์"})
                             </strong>
                           </div>
 
@@ -1165,7 +1165,7 @@ export default function DetailAgendaForm() {
                           className="row mb-2 mt-3"
                           onClick={() => toggleAccordion(`family-${index}`)}
                         >
-                          <div className="col-sm-6">
+                          <div className="col-sm-8">
                             <strong
                               style={{
                                 cursor: "pointer",
@@ -1176,7 +1176,7 @@ export default function DetailAgendaForm() {
                               onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
                             >
                               คนที่ {index + 1} : {agenda.firstName}{" "}
-                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                              {agenda.lastName || "-"} ({agenda.relationship || "ไม่ระบุความสัมพันธ์"})
                             </strong>
                           </div>
 
@@ -1248,7 +1248,7 @@ export default function DetailAgendaForm() {
                           className="row mb-2 mt-3"
                           onClick={() => toggleAccordion(`caregiver-${index}`)}
                         >
-                          <div className="col-sm-3">
+                          <div className="col-sm-8">
                             <strong
                               style={{
                                 cursor: "pointer",
@@ -1259,77 +1259,77 @@ export default function DetailAgendaForm() {
                               onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
                             >
                               ผู้ดูแลคนที่ {index + 1} : {agenda.firstName}{" "}
-                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                              {agenda.lastName || "-"} ({agenda.relationship || "ไม่ระบุความสัมพันธ์"})
                             </strong>
                           </div>
                         </div>
                         {openIndex === `caregiver-${index}` && (
                           <div className="p-3 border rounded ms-2">
                             <div className="row ">
-                              <div className="col-sm-2">
-                                <strong>Care  :</strong>
+                              <div className="col-sm-4">
+                                <strong>Care :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.care || "-"}</p>
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-2">
+                              <div className="col-sm-4">
                                 <strong>Affection :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.affection || "-"}</p>
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-2">
+                              <div className="col-sm-4">
                                 <strong>Rest :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.rest || "-"}</p>
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-2">
+                              <div className="col-sm-4">
                                 <strong>Empathy :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.empathy || "-"}</p>
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-2">
+                              <div className="col-sm-4">
                                 <strong>Goal Of Care :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.goalOfCare || "-"}</p>
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-2">
+                              <div className="col-sm-4">
                                 <strong>Ventilation :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.ventilation || "-"}</p>
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-2">
+                              <div className="col-sm-4">
                                 <strong>Empowerment :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.empowerment || "-"}</p>
                               </div>
                             </div>
                             <div className="row">
-                              <div className="col-sm-2">
+                              <div className="col-sm-4">
                                 <strong>Resource :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-8">
                                 <p>{agenda.resource || "-"}</p>
                               </div>
                             </div>
-                            <div className="col-sm-2">
+                            <div className="col-sm-4">
                               <button
                                 className="btn m-2"
                                 style={{ backgroundColor: "#ffde59", color: "black" }}
@@ -1354,7 +1354,7 @@ export default function DetailAgendaForm() {
                           className="row mb-2 mt-3"
                           onClick={() => toggleAccordion(`family-${index}`)}
                         >
-                          <div className="col-sm-6">
+                          <div className="col-sm-8">
                             <strong
                               style={{
                                 cursor: "pointer",
@@ -1365,7 +1365,7 @@ export default function DetailAgendaForm() {
                               onMouseLeave={(e) => e.target.style.color = "#007BFF"} // เมื่อออกจาก hover
                             >
                               คนที่ {index + 1} : {agenda.firstName}{" "}
-                              {agenda.lastName || "-"} ({agenda.relationship || "-"})
+                              {agenda.lastName || "-"} ({agenda.relationship || "ไม่ระบุความสัมพันธ์"})
                             </strong>
                           </div>
                         </div>
@@ -1472,9 +1472,9 @@ export default function DetailAgendaForm() {
                                   AgendaForms.Zaritburdeninterview.totalScore
                                 )}
                               >
-                                {AgendaForms.Zaritburdeninterview.totalScore ||
+                                <b>{AgendaForms.Zaritburdeninterview.totalScore ||
                                   "0"}{" "}
-                                คะแนน
+                                คะแนน</b>
                               </p>
                             </div>
                           </div>

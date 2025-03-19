@@ -418,6 +418,9 @@
 	.info-row span {
 		font-size: 0.9rem;
 	}
+	.assessment-tabs {
+        width: 60%;
+    }
 }
 
 @media screen and (max-width: 767px) {
@@ -445,4 +448,7 @@
 	  .errormessage {
 		font-size:0.8rem;
 	  }
+	  .assessment-tabs {
+        width: 90%;
+    }
 }

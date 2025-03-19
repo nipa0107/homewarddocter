@@ -8,7 +8,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("https://backend-deploy-render-mxok.onrender.com");
+const socket = io("http://localhost:5000");
 
 export default function ImmobilityG3({ }) {
     const navigate = useNavigate();
@@ -49,7 +49,7 @@ export default function ImmobilityG3({ }) {
 
     const fetchLatestAssessments = async () => {
         try {
-            const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
+            const response = await fetch("http://localhost:5000/latest-assessments");
             const data = await response.json();
             console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -204,7 +204,7 @@ export default function ImmobilityG3({ }) {
 
 
     const fetchUserData = (token) => {
-        return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
+        return fetch("http://localhost:5000/profiledt", {
             method: "POST",
             crossDomain: true,
             headers: {
@@ -234,7 +234,7 @@ export default function ImmobilityG3({ }) {
     };
 
     const getAllUser = () => {
-        fetch("https://backend-deploy-render-mxok.onrender.com/alluser", {
+        fetch("http://localhost:5000/alluser", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -281,7 +281,7 @@ export default function ImmobilityG3({ }) {
     }, [token]);
 
     const markAllByTypeAsViewed = (type) => {
-        fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
+        fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -367,7 +367,7 @@ export default function ImmobilityG3({ }) {
     useEffect(() => {
         const fetchGroup3Users = async () => {
             try {
-                const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/group3");
+                const response = await fetch("http://localhost:5000/immobility/group3");
                 const result = await response.json();
                 if (response.ok) {
                     setGroup3Users(result.data); // เก็บข้อมูลที่ดึงมา
@@ -392,7 +392,7 @@ export default function ImmobilityG3({ }) {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getuser`);
+                const response = await fetch(`http://localhost:5000/getuser`);
                 const data = await response.json();
                 setUserData(data);
                 setUsername(data.username);
@@ -413,7 +413,7 @@ export default function ImmobilityG3({ }) {
             const fetchMedicalInfo = async () => {
                 try {
                     const response = await fetch(
-                        `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${userData._id}`
+                        `http://localhost:5000/medicalInformation/${userData._id}`
                     );
                     const data = await response.json();
                     console.log("Medical Information:", data);
@@ -432,7 +432,7 @@ export default function ImmobilityG3({ }) {
         if (id) {
             const fetchPatientFormDetails = async () => {
                 try {
-                    const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getpatientform/${id}`);
+                    const response = await fetch(`http://localhost:5000/getpatientform/${id}`);
                     const data = await response.json();
 
                     if (data.success) {
@@ -476,7 +476,7 @@ export default function ImmobilityG3({ }) {
 
     const fetchAssessments = async () => {
         try {
-            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allAssessment`, {
+            const response = await fetch(`http://localhost:5000/allAssessment`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -496,7 +496,7 @@ export default function ImmobilityG3({ }) {
 
     const fetchMpersonnel = async () => {
         try {
-            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allMpersonnel`, {
+            const response = await fetch(`http://localhost:5000/allMpersonnel`, {
                 method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -575,7 +575,7 @@ export default function ImmobilityG3({ }) {
         const fetchUnreadCount = async () => {
             try {
                 const response = await fetch(
-                    "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
+                    "http://localhost:5000/update-unread-count"
                 );
 
                 if (!response.ok) {
@@ -614,7 +614,7 @@ export default function ImmobilityG3({ }) {
             // นับจำนวนเคสผิดปกติ
             const ImmobilityG3 = group3Users.length;
 
-            
+
             setImmobilityG3Count(ImmobilityG3);
 
         } else {
@@ -625,7 +625,7 @@ export default function ImmobilityG3({ }) {
 
     return (
         <main className="body">
-<Sidebar />
+            <Sidebar />
 
             <div className="home_content">
                 <div className="homeheader">
@@ -680,62 +680,67 @@ export default function ImmobilityG3({ }) {
                     <div className="case-summary">
                         <p className="Emergency-status">จำนวนเคสที่ช่วยเหลือตัวเองได้น้อย : <strong>{ImmobilityG3Count} เคส</strong> </p>
                     </div>
-                    <div className="table-responsive">
-                        {filteredUsers.length === 0 ? (
-                            <>
+                    <div className="table-container">
+                        <div className="table-all tableass table-hover">
+                            {filteredUsers.length === 0 ? (
+                                <>
+                                    <table className="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" style={{ width: "5%" }}>ลำดับ</th>
+                                                <th scope="col">วันที่ประเมิน</th>
+                                                <th scope="col">ชื่อ-สกุล</th>
+                                                <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                                                <th scope="col">คะแนนรวม</th>
+                                                
+                                                <th scope="col">สถานะ</th>
+                                            </tr>
+                                        </thead>
+                                    </table>
+                                    <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> {/* ข้อความเมื่อไม่มีข้อมูล */}
+                                </>
+                            ) : (
                                 <table className="table table-hover">
                                     <thead>
                                         <tr>
                                             <th scope="col" style={{ width: "5%" }}>ลำดับ</th>
+                                            <th scope="col" style={{ width: "30%" }}>วันที่ประเมิน</th>
                                             <th scope="col">ชื่อ-สกุล</th>
-                                            <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
+                                            <th scope="col" style={{ width: "20%" }}>ผู้ป่วยโรค</th>
                                             <th scope="col">คะแนนรวม</th>
-                                            <th scope="col">วันที่ประเมิน</th>
+                                            
                                             <th scope="col">สถานะ</th>
                                         </tr>
                                     </thead>
+                                    <tbody>
+                                        {filteredUsers.map((user, index) => (
+                                            <tr
+                                                key={index}
+                                                onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                                style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
+                                            >
+                                                <td style={{ width: "5%" }}>{index + 1}</td>
+                                                <td style={{ width: "30%" }}>{formatDate(user.createdAt)}</td>
+                                                <td>{user.user.name} {user.user.surname}</td>
+                                                <td style={{ width: "20%" }}>{user.Diagnosis}</td>
+                                                <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
+                                                
+                                                <td>
+                                                    <a
+                                                        href=""
+                                                        onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
+                                                        style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
+                                                    >
+                                                        รายละเอียด
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+
                                 </table>
-                                <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> {/* ข้อความเมื่อไม่มีข้อมูล */}
-                            </>
-                        ) : (
-                            <table className="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th scope="col" style={{ width: "5%" }}>ลำดับ</th>
-                                        <th scope="col">ชื่อ-สกุล</th>
-                                        <th scope="col" style={{ width: "20%" }}>ผู้ป่วยโรค</th>
-                                        <th scope="col">คะแนนรวม</th>
-                                        <th scope="col" style={{ width: "30%" }}>วันที่ประเมิน</th>
-                                        <th scope="col">สถานะ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredUsers.slice(indexOfFirstUser, indexOfLastUser).map((user, index) => (
-                                        <tr
-                                            key={index}
-                                            onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
-                                            style={{ cursor: "pointer" }} /* เปลี่ยน cursor เมื่อ hover */
-                                        >
-                                            <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
-                                            <td>{user.user.name} {user.user.surname}</td>
-                                            <td style={{ width: "20%" }}>{user.Diagnosis}</td>
-                                            <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
-                                            <td style={{ width: "30%" }}>{formatDate(user.createdAt)}</td>
-                                            <td>
-                                                <a
-                                                    href=""
-                                                    onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
-                                                    style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
-                                                >
-                                                    รายละเอียด
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
-                        {/* {filteredUsers.length > 0 && (
+                            )}
+                            {/* {filteredUsers.length > 0 && (
                             <nav aria-label="Page navigation example" className="mt-3">
                                 <ul className="pagination justify-content-end">
                                     <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
@@ -775,117 +780,117 @@ export default function ImmobilityG3({ }) {
                                 </ul>
                             </nav>
                         )} */}
+                        </div>
                     </div>
+                    </div>
+                    {showNotifications && (
+                        <div className="notifications-dropdown" ref={notificationsRef}>
+                            <div className="notifications-head">
+                                <h2 className="notifications-title">การแจ้งเตือน</h2>
+                            </div>
+                            <div className="notifications-filter">
+                                <div
+                                    className={`notification-box ${filterType === "all" ? "active" : ""
+                                        }`}
+                                    onClick={() => handleFilterChange("all")}
+                                >
+                                    <div className="notification-item">
+                                        <i className="bi bi-bell"></i>
+                                        ทั้งหมด
+                                    </div>
+                                    <div className="notification-right">
+                                        {unreadCount > 0 && (
+                                            <span className="notification-count-noti">{unreadCount}</span>
+                                        )}
+                                        <i className="bi bi-chevron-right"></i>
+                                    </div>
+                                </div>
+                                <div
+                                    className={`notification-box ${filterType === "abnormal" ? "active" : ""
+                                        }`}
+                                    onClick={() => handleFilterChange("abnormal")}
+                                >
+                                    <div className="notification-item">
+                                        <i className="bi bi-exclamation-triangle"></i>
+                                        ผิดปกติ
+                                    </div>
+                                    <div className="notification-right">
+                                        {unreadCountsByType.abnormal > 0 && (
+                                            <span className="notification-count-noti">
+                                                {unreadCountsByType.abnormal}
+                                            </span>
+                                        )}
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                </div>
+                                <div
+                                    className={`notification-box ${filterType === "normal" ? "active" : ""
+                                        }`}
+                                    onClick={() => handleFilterChange("normal")}
+                                >
+                                    <div className="notification-item">
+                                        {" "}
+                                        <i className="bi bi-journal-text"></i>
+                                        บันทึกอาการ
+                                    </div>
+                                    <div className="notification-right">
+                                        {unreadCountsByType.normal > 0 && (
+                                            <span className="notification-count-noti">
+                                                {unreadCountsByType.normal}
+                                            </span>
+                                        )}
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                </div>
+
+                                <div
+                                    className={`notification-box ${filterType === "assessment" ? "active" : ""
+                                        }`}
+                                    onClick={() => handleFilterChange("assessment")}
+                                >
+                                    <div className="notification-item">
+                                        <i className="bi bi-clipboard-check"></i>
+                                        ประเมินอาการ
+                                    </div>
+                                    <div className="notification-right">
+                                        {unreadCountsByType.assessment > 0 && (
+                                            <span className="notification-count-noti">
+                                                {unreadCountsByType.assessment}
+                                            </span>
+                                        )}
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="selected-filter">
+                                <p>
+                                    การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
+                                </p>
+                                <p
+                                    className="mark-all-read-btn"
+                                    onClick={() => markAllByTypeAsViewed(filterType)}
+                                >
+                                    ทำเครื่องหมายว่าอ่านทั้งหมด
+                                </p>
+                            </div>
+                            {filteredAlerts.length > 0 ? (
+                                <div>
+                                    {renderAlerts(
+                                        filteredAlerts,
+                                        token,
+                                        userId,
+                                        navigate,
+                                        setAlerts,
+                                        setUnreadCount,
+                                        formatDate
+                                    )}
+                                </div>
+                            ) : (
+                                <p className="no-notification">ไม่มีการแจ้งเตือน</p>
+                            )}
+                        </div>
+                    )}
                 </div>
-
-                {showNotifications && (
-                    <div className="notifications-dropdown" ref={notificationsRef}>
-                        <div className="notifications-head">
-                            <h2 className="notifications-title">การแจ้งเตือน</h2>
-                        </div>
-                        <div className="notifications-filter">
-                            <div
-                                className={`notification-box ${filterType === "all" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("all")}
-                            >
-                                <div className="notification-item">
-                                    <i className="bi bi-bell"></i>
-                                    ทั้งหมด
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCount > 0 && (
-                                        <span className="notification-count-noti">{unreadCount}</span>
-                                    )}
-                                    <i className="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-                            <div
-                                className={`notification-box ${filterType === "abnormal" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("abnormal")}
-                            >
-                                <div className="notification-item">
-                                    <i className="bi bi-exclamation-triangle"></i>
-                                    ผิดปกติ
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCountsByType.abnormal > 0 && (
-                                        <span className="notification-count-noti">
-                                            {unreadCountsByType.abnormal}
-                                        </span>
-                                    )}
-                                    <i class="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-                            <div
-                                className={`notification-box ${filterType === "normal" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("normal")}
-                            >
-                                <div className="notification-item">
-                                    {" "}
-                                    <i className="bi bi-journal-text"></i>
-                                    บันทึกอาการ
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCountsByType.normal > 0 && (
-                                        <span className="notification-count-noti">
-                                            {unreadCountsByType.normal}
-                                        </span>
-                                    )}
-                                    <i class="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-
-                            <div
-                                className={`notification-box ${filterType === "assessment" ? "active" : ""
-                                    }`}
-                                onClick={() => handleFilterChange("assessment")}
-                            >
-                                <div className="notification-item">
-                                    <i className="bi bi-clipboard-check"></i>
-                                    ประเมินอาการ
-                                </div>
-                                <div className="notification-right">
-                                    {unreadCountsByType.assessment > 0 && (
-                                        <span className="notification-count-noti">
-                                            {unreadCountsByType.assessment}
-                                        </span>
-                                    )}
-                                    <i class="bi bi-chevron-right"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="selected-filter">
-                            <p>
-                                การแจ้งเตือน: <strong>{getFilterLabel(filterType)}</strong>
-                            </p>
-                            <p
-                                className="mark-all-read-btn"
-                                onClick={() => markAllByTypeAsViewed(filterType)}
-                            >
-                                ทำเครื่องหมายว่าอ่านทั้งหมด
-                            </p>
-                        </div>
-                        {filteredAlerts.length > 0 ? (
-                            <div>
-                                {renderAlerts(
-                                    filteredAlerts,
-                                    token,
-                                    userId,
-                                    navigate,
-                                    setAlerts,
-                                    setUnreadCount,
-                                    formatDate
-                                )}
-                            </div>
-                        ) : (
-                            <p className="no-notification">ไม่มีการแจ้งเตือน</p>
-                        )}
-                    </div>
-                )}
-            </div>
         </main>
     );
 }

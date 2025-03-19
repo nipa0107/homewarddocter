@@ -22,7 +22,7 @@ const CaregiverAssessmentForm = ({ formData, onSave, onClose }) => {
 
         // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
         if (!isEdited) {
-            const confirmSave = window.confirm("ไม่มีการเปลี่ยนแปลงข้อมูล ต้องการบันทึกหรือไม่?");
+            const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
             if (!confirmSave) return;
         }
 
@@ -60,23 +60,53 @@ const CaregiverAssessmentForm = ({ formData, onSave, onClose }) => {
                                 />
                             </div>
                             {[
-                                { id: "care", label: "Care" },
-                                { id: "affection", label: "Affection" },
-                                { id: "rest", label: "Rest" },
-                                { id: "empathy", label: "Empathy" },
-                                { id: "goalOfCare", label: "Goal Of Care" },
-                                { id: "information", label: "Information" },
-                                { id: "ventilation", label: "Ventilation" },
-                                { id: "empowerment", label: "Empowerment" },
-                                { id: "resource", label: "Resource" },
+                                { id: "care", label: "Care" ,placeholder:"กรอกคำตอบ" },
+                                { id: "affection", label: "Affection",placeholder:"กรอกคำตอบ" },
+                                { id: "rest", label: "Rest",placeholder:"กรอกคำตอบ" },
+                                { id: "empathy", label: "Empathy" ,placeholder:"กรอกคำตอบ"},
+                                { id: "goalOfCare", label: "Goal Of Care",placeholder:"กรอกคำตอบ" },
+                                { id: "information", label: "Information",placeholder:"กรอกคำตอบ" },
+                                { id: "ventilation", label: "Ventilation",placeholder:"กรอกคำตอบ" },
+                                { id: "empowerment", label: "Empowerment" ,placeholder:"กรอกคำตอบ"},
+                                { id: "resource", label: "Resource",placeholder:"กรอกคำตอบ" },
                             ].map((item) => (
                                 <div className="m-2" key={item.id}>
-                                    <label className="form-label mt-3">{item.label}</label>
+                                    <label className="form-label mt-3">{item.label}
+                                        {item.id === "care" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (ดูแลเรื่องอะไรบ้าง)</span>
+                                        )}
+                                        {item.id === "affection" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (ส่งผลต่อตนเองอย่างไรบ้าง)</span>
+                                        )}
+                                        {item.id === "rest" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (มีเวลาพักผ่อนบ้างหรือไม่)</span>
+                                        )}
+                                        {item.id === "empathy" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (การแสดงความเข้าอกเข้าใจเป็นอย่างไรบ้าง)</span>
+                                        )}
+                                        {item.id === "goalOfCare" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (เป้าหมายในการรักษาของผู้ดูแลคืออะไร)</span>
+                                        )}
+                                        {item.id === "information" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (การให้ข้อมูล ความรู้เพิ่มเติม)</span>
+                                        )}
+                                        {item.id === "ventilation" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (การรับฟังความกังวลใจ)</span>
+                                        )}
+                                        {item.id === "empowerment" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (การให้กำลังใจ)</span>
+                                        )}{item.id === "resource" && (
+                                            <span style={{ color: "#666", fontSize: "15px" }}> (แนะนำช่องทางช่วยเหลือ)</span>
+                                        )}
+                                        
+
+                                    </label>
                                     <textarea
                                         id={item.id}
                                         className="form-control mt-1"
                                         rows="2"
                                         style={{ resize: "vertical" }}
+                                        placeholder={item.placeholder}
                                         value={formValues[item.id] || ""}
                                         onChange={handleChange}
                                     />

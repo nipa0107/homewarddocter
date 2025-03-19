@@ -265,7 +265,7 @@ export default function Updatepatient() {
   };
 
   useEffect(() => {
-    if (hasFetchedUserData.current) return; 
+    if (hasFetchedUserData.current) return;
     hasFetchedUserData.current = true;
     const token = window.localStorage.getItem("token");
     setToken(token);
@@ -310,40 +310,40 @@ export default function Updatepatient() {
   };
 
   const filteredAlerts =
-  filterType === "unread"
+    filterType === "unread"
       ? alerts.filter((alert) => !alert.viewedBy.includes(userId))
       : filterType === "assessment"
+        ? alerts.filter(
+          (alert) =>
+            alert.alertType === "assessment" &&
+            alert.alertMessage !== "เคสฉุกเฉิน"
+        )
+        : filterType === "abnormal"
           ? alerts.filter(
-              (alert) =>
-                  alert.alertType === "assessment" &&
-                  alert.alertMessage !== "เคสฉุกเฉิน"
+            (alert) =>
+              alert.alertType === "abnormal" ||
+              alert.alertMessage === "เคสฉุกเฉิน"
           )
-          : filterType === "abnormal"
-              ? alerts.filter(
-                  (alert) =>
-                      alert.alertType === "abnormal" ||
-                      alert.alertMessage === "เคสฉุกเฉิน"
-              )
-              : filterType === "normal"
-                  ? alerts.filter((alert) => alert.alertType === "normal")
-                  : alerts;
+          : filterType === "normal"
+            ? alerts.filter((alert) => alert.alertType === "normal")
+            : alerts;
 
-    const getFilterLabel = (type) => {
-        switch (type) {
-            case "all":
-                return "ทั้งหมด";
-            case "unread":
-                return "ยังไม่อ่าน";
-            case "normal":
-                return "บันทึกอาการ";
-            case "abnormal":
-                return "ผิดปกติ";
-            case "assessment":
-                return "ประเมินอาการ";
-            default:
-                return "ไม่ทราบ";
-        }
-    };
+  const getFilterLabel = (type) => {
+    switch (type) {
+      case "all":
+        return "ทั้งหมด";
+      case "unread":
+        return "ยังไม่อ่าน";
+      case "normal":
+        return "บันทึกอาการ";
+      case "abnormal":
+        return "ผิดปกติ";
+      case "assessment":
+        return "ประเมินอาการ";
+      default:
+        return "ไม่ทราบ";
+    }
+  };
 
   const currentDate = new Date();
 
@@ -460,11 +460,9 @@ export default function Updatepatient() {
       "ธันวาคม",
     ];
 
-    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${
-      year + 543
-    } เวลา ${hours < 10 ? "0" + hours : hours}:${
-      minutes < 10 ? "0" + minutes : minutes
-    } น.`;
+    return `${day < 10 ? "0" + day : day} ${thaiMonths[month - 1]} ${year + 543
+      } เวลา ${hours < 10 ? "0" + hours : hours}:${minutes < 10 ? "0" + minutes : minutes
+      } น.`;
   };
 
   const handleRelationshipChange = (e) => {
@@ -575,9 +573,10 @@ export default function Updatepatient() {
     };
     fetchUnreadCount();
   }, []);
+
   return (
     <main className="body">
-<Sidebar />
+      <Sidebar />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
@@ -703,10 +702,10 @@ export default function Updatepatient() {
             </li>
           </ul>
         </div>
-        <h3>แก้ไขข้อมูลทั่วไป</h3>
+        {/* <h3>แก้ไขข้อมูลทั่วไป</h3> */}
         <div className="adminall card mb-1">
-      
-        <div className="mb-1">
+        <p className="title-header">แก้ไขข้อมูลผู้ป่วย</p>
+          <div className="mb-1">
             <label>ชื่อผู้ใช้</label>
             <input
               type="text"
@@ -806,121 +805,11 @@ export default function Updatepatient() {
               className={`form-control ${telError ? "input-error" : ""}`}
               onChange={handleInputChange}
             />
-             {telError && <span className="error-text">{telError}</span>}
+            {telError && <span className="error-text">{telError}</span>}
 
           </div>
-          {/* <div className="mb-1">
-            <label>ชื่อ(ผู้ดูแล)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={caregiverName}
-              onChange={(e) => setCaregiverName(e.target.value)}
-            />
-          </div>
-          <div className="mb-1">
-            <label>นามสกุล(ผู้ดูแล)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={caregiverSurname}
-              onChange={(e) => setCaregiverSurname(e.target.value)}
-            />
-          </div>
-          <div className="mb-1">
-            <label>ความสัมพันธ์</label>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="พ่อ"
-                  checked={Relationship === "พ่อ"}
-                  onChange={handleRelationshipChange}
-                />
-                พ่อ
-              </label>
-            </div>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="แม่"
-                  checked={Relationship === "แม่"}
-                  onChange={handleRelationshipChange}
-                />
-                แม่
-              </label>
-            </div>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="ลูก"
-                  checked={Relationship === "ลูก"}
-                  onChange={handleRelationshipChange}
-                />
-                ลูก
-              </label>
-            </div>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="ภรรยา"
-                  checked={Relationship === "ภรรยา"}
-                  onChange={handleRelationshipChange}
-                />
-                ภรรยา
-              </label>
-            </div>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="สามี"
-                  checked={Relationship === "สามี"}
-                  onChange={handleRelationshipChange}
-                />
-                สามี
-              </label>
-            </div>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  value="อื่นๆ"
-                  checked={showOtherInput}
-                  onChange={handleRelationshipChange}
-                />
-                อื่นๆ
-              </label>
-              {showOtherInput && (
-                <div className="mt-2">
-                  <label>กรุณาระบุ:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={otherRelationship}
-                    onChange={handleOtherRelationshipChange}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="mb-1">
-            <label>เบอร์โทรศัพท์(ผู้ดูแล)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={caregiverTel}
-              onChange={(e) => setCaregiverTel(e.target.value)}
-            />
-          </div>*/}
-        </div> 
-        <div className="btn-group">
-          <div className="btn-next">
+          <div className="d-grid">
             <button
-              type="button"
               onClick={Updatepatient}
               className="btn btn-outline py-2"
             >
@@ -929,7 +818,6 @@ export default function Updatepatient() {
           </div>
         </div>
       </div>
-      <div></div>
     </main>
   );
 }

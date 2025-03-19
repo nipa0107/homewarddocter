@@ -59,18 +59,44 @@
 }
 
 .adminall {
-  width: 70%;
+  /* width: 75%; */
+  width: 100%;
+  max-width: 80%;
   margin-left: auto;
   margin-right: auto;
   box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
-  line-height: 50px;
-  padding: 20px;
+  line-height: 2.2rem;
+  padding: 1rem;
+  border-radius: 10px;
+  min-height: 4rem;
 }
-
+.adminall .card-body {
+  display: flex;
+  /* Use flexbox */
+  justify-content: space-between;
+  /* Align items with space between */
+  align-items: center;
+  /* Center vertically */
+  /* padding: 1rem; */
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
 .adminall form {
   padding: 20px;
 }
 
+.adminall label {
+  font-weight: 500;
+}
+
+.adminall input[type="text"],
+.adminall input[type="file"] {
+  width: 100%;
+  /* padding: 10px; */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  /* margin-bottom: 10px; */
+}
 .editimg {
   border-radius: 10px;
   width: 5vh;
@@ -354,8 +380,7 @@ tr.assessmentnull {
 
 .readiness {
   width: 80%;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto;
   line-height: 40px;
   overflow: hidden;
   border-collapse: collapse;
@@ -384,7 +409,13 @@ tr.assessmentnull {
   font-size: 20px;
 
 }
-
+.readiness .divass{
+  background-color: #87CEFA;
+  color: #fff;
+  text-align: center;
+  padding: 15px;
+  font-weight: 600;
+}
 .contentinass {
   background: #fff;
   padding: 15px;
@@ -846,7 +877,7 @@ p .label {
   /* align-items: flex-start;  */
   gap: 20px;
   line-height: normal;
-  max-width: 80%;
+  max-width: 94%;
   /* หรือค่าที่เหมาะสม */
   width: 100%;
   /* ให้ขยายเต็มเฉพาะ container */
@@ -879,7 +910,7 @@ p .label {
 
 .inline-container-caregiver {
   margin-left: 21px;
-  display: flex;
+  /* display: flex; */
   flex-wrap: wrap;
   gap: 1rem;
   justify-content: flex-start;
@@ -968,18 +999,7 @@ input[type="radio"] {
   font-size: 0.875em;
 }
 
-.assessment-tabs {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 50%;
-  margin: 16px auto;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  /* ป้องกันขอบมนเกินไป */
-  background: #f1f1f1;
-  margin-top: 40px;
-}
+
 
 .tab-btn {
   flex: 1;
@@ -998,6 +1018,7 @@ input[type="radio"] {
   background: #007bff;
   color: white;
   font-weight: bold;
+  
 
 }
 
@@ -1054,7 +1075,7 @@ input[type="radio"] {
   border-radius: 8px;
   margin-bottom: 20px;
   text-align: center;
-  width: 90%;
+  width: 80%;
   padding: 15px;
 }
 
@@ -1065,4 +1086,260 @@ input[type="radio"] {
 .case-summary p {
   margin: 5px 0;
   font-size: 16px;
+}
+
+.medical-info-section{
+  padding-left: 6%;
+}
+/*  */
+.medical-info-section .col-sm-5.file-label {
+  margin-bottom: -10px;
+}
+.d-grid {
+  margin-top: 1%; /* ลดช่องว่าง */
+  padding: 0;
+}
+@media (max-width: 992px) {
+  .adminall.card {
+      width: 100%;
+      max-width: 90%;
+  }
+
+  .save-img.card {
+      width: 100%;
+      max-width: 75%;
+  }
+
+  .adminall.card,
+  .save-img.card {
+    margin: 1.5rem auto;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+    padding: 1rem 2rem;
+    border: 1px solid #87CEFA;
+      border-radius: 10px;
+  }
+
+  .adminall label {
+      font-size: 0.9rem;
+  }
+
+  .adminall input[type="text"],
+  .adminall input[type="file"] {
+      font-size: 0.9rem;
+  }
+
+  /* หน้าขม.ผู้ป่วย */
+  .forminfo {
+      width: 85%;
+  }
+
+  .col-sm-9 p {
+      line-height: 1.56;
+      /* เพิ่มระยะห่างระหว่างบรรทัด */
+      padding-right: 5px;
+      /* เพิ่มระยะห่างด้านขวา */
+  }
+
+  .col-sm-3 p {
+      line-height: 1.56;
+      /* เพิ่มระยะห่างระหว่างบรรทัด */
+  }
+
+  .col-sm-5 p {
+      line-height: 1.6;
+  }
+
+  .col-sm-7 p {
+      line-height: 1.6;
+  }
+
+  .user-info {
+      padding-left: 6%;
+
+  }
+
+}
+@media screen and (min-width: 992px) {
+  .medical-info-section .col-sm-7 p {
+    white-space: pre-wrap;
+    /* ให้ข้อความขึ้นบรรทัดใหม่อัตโนมัติ */
+    word-break: break-word;
+    /* ป้องกันข้อความล้น */
+    line-height: 1.6;
+  }
+
+  /* กำหนดให้ .col-sm-7 (ค่าข้อมูล) แสดงเต็มบรรทัดเฉพาะข้อความยาวๆ */
+  .medical-info-section .col-sm-7.long-text {
+    display: block !important;
+    /* บังคับให้ขึ้นบรรทัดใหม่ */
+    width: 100% !important;
+    /* ใช้พื้นที่เต็ม ไม่ให้แคบ */
+    flex: unset !important;
+    /* ปิด flex ที่ Bootstrap ใช้ */
+  }
+
+  /* ค่าที่เป็นข้อความสั้นๆ ให้อยู่บรรทัดเดียวกับ label */
+  .medical-info-section .col-sm-7.short-text {
+    display: inline !important;
+    width: auto !important;
+  }
+
+  .col-sm-5 p,
+  .col-sm-7 p {
+    line-height: 1.6;
+  }
+}
+@media (max-width: 622px) {
+  .medical-info-section .col-sm-5 {
+    flex: 0 0 auto;
+    width: 75% !important;
+  }
+}
+
+@media (max-width: 677px) {
+  .medical-info-section .col-sm-5 {
+    flex: 0 0 auto;
+    width: 100% !important;
+  }
+  
+}
+
+@media (min-width: 678px) {
+  .medical-info-section .col-sm-5 {
+    flex: 0 0 auto;
+    width: 65% !important;
+  }
+}
+
+@media (min-width: 833px) {
+  .medical-info-section .col-sm-5 {
+    flex: 0 0 auto;
+    width: 41.66666667% !important;
+  }
+}
+
+@media screen and (min-width: 576px) {
+  .medical-info-section .col-sm-7 p {
+    white-space: pre-wrap;
+    /* ให้ข้อความขึ้นบรรทัดใหม่อัตโนมัติ */
+    word-break: break-word;
+    /* ป้องกันข้อความล้น */
+    line-height: 1.6;
+  }
+
+  /* กำหนดให้ .col-sm-7 (ค่าข้อมูล) แสดงเต็มบรรทัดเฉพาะข้อความยาวๆ */
+  .medical-info-section .col-sm-7.long-text {
+    display: block !important;
+    /* บังคับให้ขึ้นบรรทัดใหม่ */
+    width: 100% !important;
+    /* ใช้พื้นที่เต็ม ไม่ให้แคบ */
+    flex: unset !important;
+    /* ปิด flex ที่ Bootstrap ใช้ */
+  }
+
+  /* ค่าที่เป็นข้อความสั้นๆ ให้อยู่บรรทัดเดียวกับ label */
+  .medical-info-section .col-sm-7.short-text {
+    display: inline !important;
+    width: auto !important;
+  }
+
+  /* .medical-info-section .col-sm-7 a b{
+    margin-bottom: 10px;
+  } */
+  .col-sm-5 p,
+  .col-sm-7 p {
+    line-height: 1.6;
+  }
+  .col-sm-9 p {
+    line-height: 1.5;
+    /* เพิ่มระยะห่างระหว่างบรรทัด */
+    padding-right: 5px;
+    /* เพิ่มระยะห่างด้านขวา */
+  }
+
+  .col-sm-3 p {
+    line-height: 1.5;
+    /* เพิ่มระยะห่างระหว่างบรรทัด */
+  }
+}
+
+@media (max-width: 777px) {
+  .medical-info-section .col-sm-7 p {
+    white-space: pre-wrap;
+    /* ให้ข้อความขึ้นบรรทัดใหม่อัตโนมัติ */
+    word-break: break-word;
+    /* ป้องกันข้อความล้น */
+    line-height: 1.6;
+  }
+
+  /* บังคับให้หัวข้อของไฟล์ขึ้นบรรทัดใหม่เสมอ */
+  .medical-info-section .col-sm-5.file-label {
+    display: block !important;
+    /* width: 100% !important; */
+  }
+
+  /* บังคับให้ค่าของไฟล์ (ลิงก์) ขึ้นบรรทัดใหม่ */
+  .medical-info-section .col-sm-7 a {
+    display: block !important;
+    white-space: nowrap;
+    /* ป้องกันการขึ้นบรรทัดใหม่ภายในลิงก์ */
+    margin-bottom: 10px;
+    word-break: break-word;
+    /* ป้องกันข้อความล้น */
+    white-space: pre-wrap;
+    /* ให้ข้อความขึ้นบรรทัดใหม่อัตโนมัติ */
+  }
+
+  .col-sm-5 p,
+  .col-sm-7 p {
+    line-height: 1.6;
+  }
+}
+
+@media screen and (min-width: 993px) and (max-width: 1200px) {
+  .medical-info-section .col-sm-5 {
+    flex: 0 0 auto;
+    /* width: 65% !important; */
+  }
+}
+/* @media (max-width: 575px) {
+  .medical-info-section .col-sm-7.short-text {
+    display: inline !important;
+    }
+} */
+
+/* ทำให้ตารางสามารถเลื่อนได้แนวนอนในหน้าจอเล็ก */
+.equipment-category {
+  width: 100%;
+  overflow-x: auto;
+
+}
+
+/* ป้องกันการย่อ column ให้เล็กเกินไป */
+.equipment-table {
+  min-width: 600px; /* กำหนดขนาดขั้นต่ำของตาราง */
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* ปรับขนาด checkbox ให้เหมาะกับมือถือ */
+.equipment-table input[type="checkbox"] {
+  transform: scale(1.2);
+}
+
+/* ซ่อนบาง column ในมือถือ */
+@media screen and (max-width: 767px) {
+  .equipment-table th:nth-child(2),
+  .equipment-table td:nth-child(2) /* ซ่อน column # */
+  {
+    display: none;
+  }
+
+  /* ปรับขนาดตัวอักษร */
+  .equipment-table th, .equipment-table td {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+
 }

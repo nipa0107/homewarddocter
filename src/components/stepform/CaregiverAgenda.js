@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import Collapse from '@mui/material/Collapse';
 
-export const CaregiverAgenda = ({ onDataChange }) => {
+export const CaregiverAgenda = ({ userid, onDataChange }) => {
   const { control, getValues, setValue } = useFormContext();
   const { fields: existingCaregivers, replace: replaceExisting } = useFieldArray({ control, name: "existingCaregivers" });
   const { fields: newCaregivers, replace: replaceNew } = useFieldArray({ control, name: "newCaregivers" });
@@ -12,31 +12,38 @@ export const CaregiverAgenda = ({ onDataChange }) => {
   const location = useLocation();
   const { id } = location.state || {};
 
+  // ✅ ฟังก์ชันสร้างคีย์ `localStorage` ตาม `userId`
+  const getLocalStorageKey = (key) => `agenda_${userid}_${key}`;
+
   useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem("caregiverAgendaData"));
-  
+    if (!userid) return; // ถ้า userId ไม่มีค่าให้หยุดทำงาน
+    const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey("caregiverAgendaData")));
+
     if (savedData) {
       console.log("Loaded from localStorage:", savedData); // ✅ Debugging
-  
+
       if (!Array.isArray(savedData.existingCaregivers)) {
         savedData.existingCaregivers = [];
       }
       if (!Array.isArray(savedData.newCaregivers)) {
         savedData.newCaregivers = [];
       }
-  
+
       replaceExisting(savedData.existingCaregivers);
       replaceNew(savedData.newCaregivers);
     }
-  }, []); // ✅ โหลดครั้งเดียวเมื่อ component mount
-  
+  }, [userid]); // ✅ โหลดครั้งเดียวเมื่อ component mount
 
+
+  /** ✅ บันทึกข้อมูลลง `localStorage` ตาม `userId` */
   useEffect(() => {
-    localStorage.setItem("caregiverAgendaData", JSON.stringify({
-      existingCaregivers: getValues("existingCaregivers") || [],
-      newCaregivers: getValues("newCaregivers") || []
-    }));
-  }, [existingCaregivers, newCaregivers, getValues]);
+    if (userid) {
+      localStorage.setItem(getLocalStorageKey("caregiverAgendaData"), JSON.stringify({
+        existingCaregivers: getValues("existingCaregivers") || [],
+        newCaregivers: getValues("newCaregivers") || []
+      }));
+    }
+  }, [existingCaregivers, newCaregivers, getValues, userid]);
 
   const toggleCollapse = (index, type) => {
     setOpenIndex((prev) => ({
@@ -81,17 +88,17 @@ export const CaregiverAgenda = ({ onDataChange }) => {
   useEffect(() => {
     handleFieldChange(); // อัปเดตข้อมูลเมื่อ existingCaregivers เปลี่ยนแปลง
   }, [existingCaregivers, newCaregivers, getValues]);
-  
+
   /** ✅ ดึงข้อมูลผู้ดูแลใหม่จาก API */
   useEffect(() => {
     const fetchNewCaregivers = async () => {
       try {
         const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getcaregivesotherpeople/${id}`);
         const data = await response.json();
-  
+
         if (data.status === "ok" && Array.isArray(data.data)) {
           console.log("Fetched new caregivers:", data.data); // ✅ Debugging
-  
+
           // ถ้า newCaregivers ใน form มีข้อมูลแล้ว ไม่ต้อง replace
           if (getValues("newCaregivers").length === 0) {
             replaceNew(
@@ -112,13 +119,13 @@ export const CaregiverAgenda = ({ onDataChange }) => {
         console.error("Error fetching new caregivers:", error);
       }
     };
-  
+
     if (id) {
       fetchNewCaregivers();
     }
   }, [id]); // ✅ ไม่ใส่ replaceNew ใน dependency เพื่อป้องกัน override ค่าผิดพลาด
-  
-  
+
+
   /** ✅ อัปเดตข้อมูลทุกครั้งที่มีการเปลี่ยนแปลง */
   const handleFieldChange = () => {
     const existingData = existingCaregivers.map((cg, index) => ({
@@ -148,6 +155,13 @@ export const CaregiverAgenda = ({ onDataChange }) => {
       existingCaregivers: existingData,
       newCaregivers: newData,
     });
+    // ✅ บันทึกข้อมูลแยก userId ลง `localStorage`
+    if (userid) {
+      localStorage.setItem(getLocalStorageKey("caregiverAgendaData"), JSON.stringify({
+        existingCaregivers: existingData,
+        newCaregivers: newData,
+      }));
+    }
   };
 
   return (
@@ -155,6 +169,9 @@ export const CaregiverAgenda = ({ onDataChange }) => {
       <div className="title-form mt-1">
         <div className="header">
           <b>Caregiver Agenda</b>
+        </div>
+        <div style={{ marginLeft: '26px' }}>
+          <p style={{ color: "#666" }}><i class="bi bi-person-check" style={{ color: "#008000" }}></i> ประเมินผู้ดูแลเบื้องต้น</p>
         </div>
       </div>
       <div className="info3 card mt-4">
@@ -170,7 +187,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
               </span>
               <Collapse in={openIndex.existing === index}>
                 <div>
-                  <label className="form-label mt-2">Idea </label>
+                  <label className="form-label mt-2">Idea <span style={{ color: "#666", fontSize: "15px" }}>(ระบุแนวคิดหลักเกี่ยวกับบทบาทของผู้ดูแล เช่น หน้าที่ในการดูแล)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.caregiver_idea`}
                     control={control}
@@ -186,7 +203,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Feeling </label>
+                  <label className="form-label mt-4">Feeling <span style={{ color: "#666", fontSize: "15px" }}>(ระบุความรู้สึกของผู้ดูแลว่ามีความกังวลในการดูแลผู้ป่วยหรือไม่)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.caregiver_feeling`}
                     control={control}
@@ -202,7 +219,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Function </label>
+                  <label className="form-label mt-4">Function <span style={{ color: "#666", fontSize: "15px" }}>(ระบุหน้าที่ที่ผู้ดูแลต้องทำในแต่ละวัน)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.caregiver_function`}
                     control={control}
@@ -218,7 +235,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Expectation </label>
+                  <label className="form-label mt-4">Expectation <span style={{ color: "#666", fontSize: "15px" }}>(ระบุสิ่งที่ผู้ดูแลคาดหวัง เช่น การอบรม คำแนะนำการดูแล)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.caregiver_expectation`}
                     control={control}
@@ -251,7 +268,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
               </span>
               <Collapse in={openIndex.new === index}>
                 <div>
-                  <label className="form-label mt-2">Idea</label>
+                  <label className="form-label mt-2">Idea <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่ามีส่วนร่วมในกระบวนการดูแลผู้ป่วยอย่างไร เช่น การแบ่งหน้าที่กับผู้ดูแลหลัก)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.caregiver_idea`}
                     control={control}
@@ -267,7 +284,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Feeling </label>
+                  <label className="form-label mt-4">Feeling <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่าคนในครอบครัวรู้สึกอย่างไรเกี่ยวกับการดูแลผู้ป่วย)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.caregiver_feeling`}
                     control={control}
@@ -283,7 +300,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Function</label>
+                  <label className="form-label mt-4">Function <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่าคนในครอบครัวคาดหวังอะไรจากระบบการดูแล เช่น การสนับสนุนเพิ่มเติม)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.caregiver_function`}
                     control={control}
@@ -299,7 +316,7 @@ export const CaregiverAgenda = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Expectation </label>
+                  <label className="form-label mt-4">Expectation <span style={{ color: "#666", fontSize: "15px" }}>(ระบุความรู้สึกของผู้ดูแลว่ามีความกังวลในการดูแลผู้ป่วยหรือไม่)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.caregiver_expectation`}
                     control={control}

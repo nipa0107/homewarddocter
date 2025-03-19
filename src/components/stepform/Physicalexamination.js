@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const Physicalexamination = ({ onDataChange }) => {
+export const Physicalexamination = ({ userid,onDataChange }) => {
   const { control, setValue, getValues } = useFormContext();
   const [otherTexts, setOtherTexts] = useState({});
 
+  /** ✅ ฟังก์ชันสร้าง Key สำหรับ LocalStorage ตาม userId */
+  const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
+
   useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem("physicalExamData")) || {};
+    if (!userid) return;
+    const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey(userid, "physicalExaminationData"))) || {};
     Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
     onDataChange(getValues());
-  }, []);
+  }, [userid]);
 
   const handleInputChange = (name, value) => {
     setValue(name, value);
     const updatedValues = { ...getValues(), [name]: value };
-    localStorage.setItem("physicalExamData", JSON.stringify(updatedValues));
+    localStorage.setItem(getLocalStorageKey(userid, "physicalExaminationData"), JSON.stringify(updatedValues));
     onDataChange(updatedValues);
   };
 

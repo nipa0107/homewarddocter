@@ -3,6 +3,12 @@ import React, { useState, useEffect } from "react";
 const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
     const [tempOtherValues, setTempOtherValues] = useState({}); // ค่าชั่วคราวของ "อื่นๆ"
+const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
+
+    useEffect(() => {
+        // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
+        setIsEdited(JSON.stringify(formValues) !== JSON.stringify(formData));
+    }, [formValues, formData]);
 
     // กำหนดตัวเลือกที่เป็นค่า default ของแต่ละฟิลด์
     const optionLists = {
@@ -87,9 +93,24 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
+        if (!isEdited) {
+            const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
+            if (!confirmSave) return;
+        }
+
         onSave(formValues);
     };
 
+    const handleCancel = () => {
+        // 🔹 ถ้ามีการแก้ไขแล้วกดยกเลิก ให้แสดงแจ้งเตือน
+        if (isEdited) {
+            const confirmExit = window.confirm("ต้องการยกเลิกการแก้ไขหรือไม่?\nหากยกเลิก การแก้ไขที่ไม่ได้บันทึกจะถูกละทิ้ง");
+            if (!confirmExit) return;
+        }
+        onClose(); // ปิด Modal
+    };
     const renderCheckboxGroupWithOther = (fieldName, label) => (
         <div className="mt-2">
             <div className="m-2">
@@ -110,17 +131,18 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
                 {/* ช่องกรอก "อื่นๆ" */}
                 <div style={{ display: "flex", alignItems: "center", marginTop: "10px" }}>
                     <span style={{ marginLeft: "4px" }}> อื่นๆ</span>
-                    <input
-                        type="text"
-                        placeholder="กรอกคำตอบอื่นๆ"
+                    <textarea
                         className="form-control"
+                        rows="2"
+                        style={{ resize: "vertical", border: "1px solid #ddd", outline: "none", marginLeft: "30px" }}
+                        placeholder="กรอกคำตอบอื่นๆ"
                         value={tempOtherValues[fieldName] || ""}
                         onChange={(e) => handleOtherInputChange(fieldName, e.target.value)}
-                        style={{
-                            outline: "none",
-                            marginLeft: "30px",
-                            width: "85%",
-                        }}
+                    // style={{
+                    //     outline: "none",
+                    //     marginLeft: "30px",
+                    //     width: "85%",
+                    // }}
                     />
                 </div>
             </div>
@@ -140,64 +162,74 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
                     <div className="modal-body">
                         <form onSubmit={handleSubmit}>
                             <div className="m-2">
-                                <label className="form-label">Temperature (°C) :</label>
+                                <label className="form-label">อุณหภูมิร่างกาย ( °C) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็มหรือทศนิยม เช่น 35,36.8)</span></label>
                                 <input
-                                    type="text"
-                                    className="form-control mt-2"
+                                    type="number"
+                                    style={{ width: "35%" }}
+                                    className="form-control"
+                                    placeholder="กรอกตัวเลข"
                                     id="temperature"
                                     value={formValues.temperature || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Blood pressure (mmHg) :</label>
+                                <label className="form-label mt-3">ความดันโลหิต (mmHg) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็ม เช่น 120/80)</span></label>
                                 <input
-                                    type="text"
+                                    type="number"
+                                    style={{ width: "35%" }}
                                     className="form-control"
+                                    placeholder="กรอกตัวเลข"
                                     id="bloodPressure"
                                     value={formValues.bloodPressure || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Pulse (min) :</label>
+                                <label className="form-label mt-3">อัตราการเต้นของหัวใจ (bpm) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็ม เช่น 72)</span></label>
                                 <input
-                                    type="text"
-                                    className="form-control "
+                                    type="number"
+                                    style={{ width: "35%" }}
+                                    className="form-control"
+                                    placeholder="กรอกตัวเลข"
                                     id="pulse"
                                     value={formValues.pulse || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Respiration (min) :</label>
+                                <label className="form-label mt-3">อัตราการหายใจ (min) <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลขเต็ม เช่น 16)</span></label>
                                 <input
-                                    type="text"
-                                    className="form-control "
+                                    type="number"
+                                    style={{ width: "35%" }}
+                                    className="form-control"
+                                    placeholder="กรอกตัวเลข"
                                     id="respiratoryRate"
                                     value={formValues.respiratoryRate || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">General Appearance :</label>
+                                <label className="form-label mt-3">GA <span style={{ color: "#666", fontSize: "15px" }}>(ลักษณะโดยรวม)</span></label>
                                 <textarea
                                     className="form-control mt-1"
                                     rows="2"
                                     style={{ resize: "vertical" }}
+                                    placeholder="กรอกคำตอบ"
                                     id="generalAppearance"
                                     value={formValues.generalAppearance || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Cardiovascular System :</label>
-                                
+                                <label className="form-label mt-3">CVS <span style={{ color: "#666", fontSize: "15px" }}>(ระบบหัวใจ)</span></label>
+
                                 <div>
                                     <textarea
-                                    className="form-control mt-1"
-                                    rows="2"
-                                    style={{ resize: "vertical" }}
+                                        className="form-control mt-1"
+                                        rows="2"
+                                        style={{ resize: "vertical" }}
+                                        placeholder="กรอกคำตอบ"
                                         id="cardiovascularSystem"
                                         value={formValues.cardiovascularSystem || ""}
                                         onChange={handleChange}
@@ -205,13 +237,14 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
                                 </div>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Respiratory System :</label>
-                                
+                                <label className="form-label mt-3">RS <span style={{ color: "#666", fontSize: "15px" }}>(ระบบหายใจ)</span></label>
+
                                 <div>
-                                <textarea
-                                    className="form-control mt-1"
-                                    rows="2"
-                                    style={{ resize: "vertical" }}
+                                    <textarea
+                                        className="form-control mt-1"
+                                        rows="2"
+                                        style={{ resize: "vertical" }}
+                                        placeholder="กรอกคำตอบ"
                                         id="respiratorySystem"
                                         value={formValues.respiratorySystem || ""}
                                         onChange={handleChange}
@@ -219,13 +252,14 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
                                 </div>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Abdominal :</label>
-                                
+                                <label className="form-label mt-3">Abd <span style={{ color: "#666", fontSize: "15px" }}>(ช่องท้อง)</span></label>
+
                                 <div>
-                                <textarea
-                                    className="form-control mt-1"
-                                    rows="2"
-                                    style={{ resize: "vertical" }}
+                                    <textarea
+                                        className="form-control mt-1"
+                                        rows="2"
+                                        style={{ resize: "vertical" }}
+                                        placeholder="กรอกคำตอบ"
                                         id="abdominal"
                                         value={formValues.abdominal || ""}
                                         onChange={handleChange}
@@ -233,13 +267,14 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
                                 </div>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Nervous System :</label>
-                                
+                                <label className="form-label mt-3">NS <span style={{ color: "#666", fontSize: "15px" }}>(ระบบประสาท)</span></label>
+
                                 <div>
-                                <textarea
-                                    className="form-control mt-1"
-                                    rows="2"
-                                    style={{ resize: "vertical" }}
+                                    <textarea
+                                        className="form-control mt-1"
+                                        rows="2"
+                                        style={{ resize: "vertical" }}
+                                        placeholder="กรอกคำตอบ"
                                         id="nervousSystem"
                                         value={formValues.nervousSystem || ""}
                                         onChange={handleChange}
@@ -247,13 +282,14 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
                                 </div>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">Extremities :</label>
-                                
+                                <label className="form-label mt-3">Ext <span style={{ color: "#666", fontSize: "15px" }}>(รยางค์แขน/ขา)</span></label>
+
                                 <div>
-                                <textarea
-                                    className="form-control mt-1"
-                                    rows="2"
-                                    style={{ resize: "vertical" }}
+                                    <textarea
+                                        className="form-control mt-1"
+                                        rows="2"
+                                        style={{ resize: "vertical" }}
+                                        placeholder="กรอกคำตอบ"
                                         id="extremities"
                                         value={formValues.extremities || ""}
                                         onChange={handleChange}
@@ -268,13 +304,13 @@ const PhysicalExaminationForm = ({ formData, onSave, onClose }) => {
                             {renderCheckboxGroupWithOther("orientation", "Orientation")}
                             {renderCheckboxGroupWithOther("thoughtProcess", "Thought process")}
                             {renderCheckboxGroupWithOther("thoughtContent", "Thought content")}
-                           
+
                         </form>
                     </div>
 
                     {/* Footer */}
                     <div className="modal-footer d-flex justify-content-between">
-                        <button className="btn-EditMode btn-secondary" onClick={onClose}>
+                        <button className="btn-EditMode btn-secondary" onClick={handleCancel}>
                             ยกเลิก
                         </button>
                         <button className="btn-EditMode btnsave" onClick={handleSubmit}>

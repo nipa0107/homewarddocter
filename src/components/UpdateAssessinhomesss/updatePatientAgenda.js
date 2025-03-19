@@ -47,21 +47,42 @@ const PatientAgendaForm = ({ formData, onSave, onClose }) => {
                         <h5 className="modal-title text-black text-center">แก้ไข Patient Agenda</h5>
                     </div>
 
-                    {/* Body */}
                     <div className="modal-body">
                         <form onSubmit={handleSubmit}>
                             {[
-                                { id: "patient_idea", label: "Idea" },
-                                { id: "patient_feeling", label: "Feeling" },
-                                { id: "patient_funtion", label: "Function" },
-                                { id: "patient_expectation", label: "Expectation" },
+                                { id: "patient_idea", label: "Idea", placeholder: "กรอกคำตอบ" },
+                                { id: "patient_feeling", label: "Feeling", placeholder: "กรอกคำตอบ" },
+                                { id: "patient_function", label: "Function", placeholder: "กรอกคำตอบ" },
+                                { id: "patient_expectation", label: "Expectation", placeholder: "กรอกคำตอบ" },
                             ].map((item) => (
                                 <div className="m-2" key={item.id}>
-                                    <label className="form-label">{item.label}</label>
+                                    <label className="form-label mt-3">{item.label}
+                                        {item.id === "patient_idea" && (
+                                            <span style={{ color: "#666", fontSize: "15px", marginLeft: "5px" }}>
+                                                (แนวคิดของผู้ป่วย)
+                                            </span>
+                                        )}
+                                        {item.id === "patient_feeling" && (
+                                            <span style={{ color: "#666", fontSize: "15px", marginLeft: "5px" }}>
+                                                (ความรู้สึกของผู้ป่วย ณ ขณะนั้น)
+                                            </span>
+                                        )}
+                                        {item.id === "patient_function" && (
+                                            <span style={{ color: "#666", fontSize: "15px", marginLeft: "5px" }}>
+                                                (ผลกระทบของอาการป่วยที่มีต่อกิจวัตรประจำวัน)
+                                            </span>
+                                        )}
+                                        {item.id === "patient_expectation" && (
+                                            <span style={{ color: "#666", fontSize: "15px", marginLeft: "5px" }}>
+                                                (สิ่งที่ผู้ป่วยคาดหวังจากการพบแพทย์)
+                                            </span>
+                                        )}
+                                    </label>
                                     <textarea
-                                        className="form-control mt-2"
+                                        className="form-control"
                                         rows="2"
                                         style={{ resize: "vertical" }}
+                                        placeholder={item.placeholder} // ✅ ใส่ placeholder ที่กำหนดไว
                                         id={item.id}
                                         value={formValues[item.id] || ""}
                                         onChange={handleChange}
@@ -71,7 +92,6 @@ const PatientAgendaForm = ({ formData, onSave, onClose }) => {
                         </form>
                     </div>
 
-                    {/* Footer */}
                     <div className="modal-footer d-flex justify-content-between">
                         <button className="btn-EditMode btn-secondary" onClick={handleCancel}>
                             ยกเลิก

@@ -641,7 +641,7 @@ export default function DetailAssessinhomeForm() {
 
       toast.success("แก้ไขข้อมูลสำเร็จ", {
         position: "top-right", // ให้แสดงด้านบนขวา
-        autoClose: 1000, // ปิดอัตโนมัติภายใน 1 วินาที
+        autoClose: 1100, // ปิดอัตโนมัติภายใน 1 วินาที
         closeOnClick: true, // ปิดเมื่อคลิก
         pauseOnHover: false, // ไม่หยุดเมื่อโฮเวอร์
         draggable: true, // ลากออกได้
@@ -654,7 +654,7 @@ export default function DetailAssessinhomeForm() {
         setOriginalData(updatedDataFromServer.data);
         setIsModalOpen(false);
         // window.location.reload();
-      }, 1000);
+      }, 1100);
     } catch (error) {
       console.error("Error updating data:", error);
       toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
@@ -1209,116 +1209,116 @@ export default function DetailAssessinhomeForm() {
 
                     <>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>ลักษณะบ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.houseType || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>วัสดุที่ใช้ทำ :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.material || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>จำนวนชั้น :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.numFloors || "-"} ชั้น</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>จำนวนห้อง :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.numRooms || "-"} ห้อง</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>ผู้ป่วยอาศัยอยู่ชั้นไหน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.patientFloor || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>ความสะอาดในบ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.cleanliness || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>ความเป็นระเบียบเรียบร้อยในบ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.orderliness || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>แสงสว่างในบ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.lighting || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>การระบายอากาศ :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.ventilation || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>สิ่งแวดล้อมรอบๆ บ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>
                             {AssessinhomeForms.Housing?.homeEnvironment?.join(", ") || "-"}
                           </p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆ บ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.homeEnvironment_petType || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>อื่นๆ :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.otherHomeEnvironment || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>จำนวนเพื่อนบ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.numneighbor || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>ความสัมพันธ์กับเพื่อนบ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>
                             {["ดี", "ไม่ดี"].includes(AssessinhomeForms.Housing?.neighborRelationship)
                               ? AssessinhomeForms.Housing?.neighborRelationship
@@ -1327,10 +1327,10 @@ export default function DetailAssessinhomeForm() {
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-4">
+                        <div className="col-sm-5">
                           <strong>ความช่วยเหลือกันของเพื่อนบ้าน :</strong>
                         </div>
-                        <div className="col-sm-8">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Housing?.neighborHelp || "-"}</p>
                         </div>
                       </div>
@@ -1545,7 +1545,7 @@ export default function DetailAssessinhomeForm() {
                               onMouseLeave={(e) => (e.target.style.color = "#007BFF")}
                             >
                               ผู้ดูแลคนที่ {index + 1} : {cg.firstName} {cg.lastName || "-"} (
-                              {cg.relationship || "-"})
+                              {cg.relationship || "ไม่ระบุความสัมพันธ์"})
                             </strong>
                           </div>
                         </div>
@@ -1556,34 +1556,34 @@ export default function DetailAssessinhomeForm() {
                               <div className="col-sm-3">
                                 <strong>วันเกิด :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-7">
                                 <p>
                                   {cg.birthDate ? formatThaiDate(cg.birthDate) : "- ปี - เดือน"}
                                 </p>
                               </div>
                               <div className="col-sm-3"><strong>ความสัมพันธ์ :</strong></div>
-                              <div className="col-sm-9"><p> {cg.relationship || "-"}</p></div>
+                              <div className="col-sm-7"><p> {cg.relationship || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>อาชีพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.occupation || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.occupation || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>สถานภาพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.status || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.status || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>การศึกษา :</strong></div>
-                              <div className="col-sm-9"><p>{cg.education || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.education || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>รายได้ต่อเดือน :</strong></div>
-                              <div className="col-sm-9"><p>{cg.income || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.income || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>สิทธิ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.benefit || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.benefit || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>โรคประจำตัว :</strong></div>
-                              <div className="col-sm-9"><p>{cg.ud || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.ud || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>อุปนิสัย :</strong></div>
-                              <div className="col-sm-9"><p>{cg.habit || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.habit || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>รายละเอียดการดูแลผู้ป่วย :</strong></div>
                               <div className="col-sm-7"><p>{cg.careDetails || "-"}</p></div>
@@ -1630,7 +1630,7 @@ export default function DetailAssessinhomeForm() {
                               onMouseLeave={(e) => (e.target.style.color = "#007BFF")}
                             >
                               คนที่ {index + 1} : {cg.firstName} {cg.lastName || "-"} (
-                              {cg.relationship || "-"})
+                              {cg.relationship || "ไม่ระบุความสัมพันธ์"})
                             </strong>
                           </div>
                         </div>
@@ -1641,34 +1641,34 @@ export default function DetailAssessinhomeForm() {
                               <div className="col-sm-3">
                                 <strong>วันเกิด :</strong>
                               </div>
-                              <div className="col-sm-9">
+                              <div className="col-sm-7">
                                 <p>
                                   {cg.birthDate ? formatThaiDate(cg.birthDate) : "- ปี - เดือน"}
                                 </p>
                               </div>
                               <div className="col-sm-3"><strong>ความสัมพันธ์ :</strong></div>
-                              <div className="col-sm-9"><p> {cg.relationship || "-"}</p></div>
+                              <div className="col-sm-7"><p> {cg.relationship || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>อาชีพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.occupation || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.occupation || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>สถานภาพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.status || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.status || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>การศึกษา :</strong></div>
-                              <div className="col-sm-9"><p>{cg.education || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.education || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>รายได้ต่อเดือน :</strong></div>
-                              <div className="col-sm-9"><p>{cg.income || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.income || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>สิทธิ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.benefit || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.benefit || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>โรคประจำตัว :</strong></div>
-                              <div className="col-sm-9"><p>{cg.ud || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.ud || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>อุปนิสัย :</strong></div>
-                              <div className="col-sm-9"><p>{cg.habit || "-"}</p></div>
+                              <div className="col-sm-7"><p>{cg.habit || "-"}</p></div>
 
                               <div className="col-sm-3"><strong>รายละเอียดการดูแลผู้ป่วย :</strong></div>
                               <div className="col-sm-7"><p>{cg.careDetails || "-"}</p></div>
@@ -1701,38 +1701,38 @@ export default function DetailAssessinhomeForm() {
                   {AssessinhomeForms.Medication ? (
                     <div className="p-3 border rounded ms-2">
                       <div className="row">
-                        <div className="col-sm-2"><strong>ยาที่แพทย์สั่ง :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>ยาที่แพทย์สั่ง :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Medication.prescribedMedication || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-2"><strong>การใช้ยาจริง :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>การใช้ยาจริง :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Medication.actualMedication || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-2"><strong>อาหารเสริม :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>อาหารเสริม :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Medication.supplements || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-2"><strong>การบริหารยา :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>การบริหารยา :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Medication.administration || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-2"><strong>การรับประทานยา :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>การรับประทานยา :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Medication.intake || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-2"><strong>ความสม่ำเสมอ :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>ความสม่ำเสมอ :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.Medication.consistency || "-"}</p>
                         </div>
                       </div>
@@ -1760,32 +1760,32 @@ export default function DetailAssessinhomeForm() {
                   {AssessinhomeForms.PhysicalExamination ? (
                     <div className="p-3 border rounded ms-2">
                       <div className="row">
-                        <div className="col-sm-3"><strong>Temperature :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>อุณหภูมิร่างกาย :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.temperature || "0"}  °C</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-3"><strong>Blood pressure :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>ความดันโลหิต :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.bloodPressure || "0"} mmHg</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-3"><strong>Pulse :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>อัตราการเต้นของหัวใจ :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.pulse || "0"} min</p>
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-sm-3"><strong>Respiration :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-3"><strong>อัตราการหายใจ :</strong></div>
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.respiratoryRate || "0"} min</p>
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-sm-3"><strong>GA (ลักษณะโดยรวม) :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.generalAppearance || "-"}</p>
                         </div>
                       </div>
@@ -1793,31 +1793,31 @@ export default function DetailAssessinhomeForm() {
                       {/* ระบบต่างๆ ของร่างกาย */}
                       <div className="row">
                         <div className="col-sm-3"><strong>CVS (ระบบหัวใจ) :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.cardiovascularSystem || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-sm-3"><strong>RS (ระบบหายใจ) :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.respiratorySystem || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-sm-3"><strong>Abd (ช่องท้อง) :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.abdominal || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-sm-3"><strong>NS (ระบบประสาท) :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.nervousSystem || "-"}</p>
                         </div>
                       </div>
                       <div className="row">
                         <div className="col-sm-3"><strong>Ext (รยางค์แขน/ขา) :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>{AssessinhomeForms.PhysicalExamination.extremities || "-"}</p>
                         </div>
                       </div>
@@ -1825,7 +1825,7 @@ export default function DetailAssessinhomeForm() {
                       {/* สภาวะทางอารมณ์และจิตใจ */}
                       <div className="row">
                         <div className="col-sm-3"><strong>Mood and affect :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>
                             {AssessinhomeForms.PhysicalExamination.moodandaffect?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.moodandaffect.map((item) =>
@@ -1837,7 +1837,7 @@ export default function DetailAssessinhomeForm() {
                       </div>
                       <div className="row">
                         <div className="col-sm-3"><strong>Appearance and Behavior :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>
                             {AssessinhomeForms.PhysicalExamination.appearanceAndBehavior?.length > 0 ? (
                               AssessinhomeForms.PhysicalExamination.appearanceAndBehavior
@@ -1853,7 +1853,7 @@ export default function DetailAssessinhomeForm() {
 
                       <div className="row">
                         <div className="col-sm-3"><strong>Eye contact :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           {AssessinhomeForms.PhysicalExamination.eyeContact?.length > 0 ? (
                             <p>
                               {AssessinhomeForms.PhysicalExamination.eyeContact
@@ -1871,7 +1871,7 @@ export default function DetailAssessinhomeForm() {
                       {/* กระบวนการคิดและการรับรู้ */}
                       <div className="row">
                         <div className="col-sm-3"><strong>Attention :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>
                             {AssessinhomeForms.PhysicalExamination.attention?.length > 0 ? (
                               AssessinhomeForms.PhysicalExamination.attention
@@ -1887,7 +1887,7 @@ export default function DetailAssessinhomeForm() {
 
                       <div className="row">
                         <div className="col-sm-3"><strong>Orientation :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>
                             {AssessinhomeForms.PhysicalExamination.orientation?.length > 0 ? (
                               AssessinhomeForms.PhysicalExamination.orientation
@@ -1903,7 +1903,7 @@ export default function DetailAssessinhomeForm() {
 
                       <div className="row">
                         <div className="col-sm-3"><strong>Thought process :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>
                             {AssessinhomeForms.PhysicalExamination.thoughtProcess?.length > 0 ? (
                               AssessinhomeForms.PhysicalExamination.thoughtProcess
@@ -1919,7 +1919,7 @@ export default function DetailAssessinhomeForm() {
 
                       <div className="row">
                         <div className="col-sm-3"><strong>Thought content :</strong></div>
-                        <div className="col-sm-9">
+                        <div className="col-sm-7">
                           <p>
                             {AssessinhomeForms.PhysicalExamination.thoughtContent?.length > 0 ? (
                               AssessinhomeForms.PhysicalExamination.thoughtContent
@@ -1975,7 +1975,7 @@ export default function DetailAssessinhomeForm() {
                         ].map((item, index) => (
                           <div className="row" key={index}>
                             <div className="col-sm-4"><strong>{item.label} :</strong></div>
-                            <div className="col-sm-8"><p>{item.value || "-"}</p></div>
+                            <div className="col-sm-7"><p>{item.value || "-"}</p></div>
                           </div>
                         ))}
                         <div className="col-sm-2">

@@ -589,14 +589,13 @@ export default function Assessreadiness1() {
 
     // ฟังชันเมื่อกดส่งฟอร์ม
     const onSubmit = async (formData) => {
-        setIsSubmitted(true); // บันทึกว่ากดบันทึกแล้ว
-
+        setIsSubmitted(true);
+    
         if (!validateForm(formData)) {
             toast.error("กรุณาเลือกคำตอบให้ครบทุกข้อ");
             return;
         }
-
-        // ถ้าข้อมูลครบ ให้ดำเนินการส่งฟอร์ม
+    
         const requestData = {
             userId: id,
             MPersonnel: mpersonnel,
@@ -617,9 +616,9 @@ export default function Assessreadiness1() {
             },
             status_name: 'ประเมินแล้ว'
         };
-
+    
         console.log("📤 Data to submit:", requestData);
-
+    
         try {
             const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/submitReadinessForm/${id}`, {
                 method: 'POST',
@@ -629,24 +628,23 @@ export default function Assessreadiness1() {
                 },
                 body: JSON.stringify(requestData),
             });
-
+    
             const data = await response.json();
             console.log("Response:", data);
-
+    
             if (response.ok) {
                 toast.success("บันทึกข้อมูลสำเร็จ");
+    
+                // ✅ ใช้ `_id` ของฟอร์มที่เพิ่งบันทึกเพื่อนำไปที่หน้ารายละเอียด
+                setTimeout(() => {
+                    navigate("/detailassessreadiness", { state: { id: data.data._id } });
+                }, 1000);
+    
                 // ✅ ลบข้อมูลจาก localStorage
                 localStorage.removeItem(LOCAL_STORAGE_KEY);
-
+    
                 // ✅ รีเซ็ตค่าฟอร์มทั้งหมด
-                [
-                    "question1_1", "question1_2", "question1_3", "question1_4",
-                    "Disease", "Medication", "Environment", "Treatment",
-                    "Health", "Out_patient", "Diet"
-                ].forEach(field => setValue(field, "")); // เคลียร์ค่าฟอร์ม
-                setTimeout(() => {
-                    navigate("/assessreadinessuser", { state: { id } });
-                }, 1000);
+                requiredFields.forEach(field => setValue(field, ""));
             } else {
                 toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             }
@@ -655,6 +653,7 @@ export default function Assessreadiness1() {
             toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
         }
     };
+    
 
 
     const clearForm = () => {

@@ -1040,6 +1040,7 @@ export default function Home() {
           </div>
 
           {/* <h6 className="m-0" style={{fontWeight:"bold" , color:"#5ab1f8"}}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6> */}
+          
           <div class="row">
             <div class="col-xl-4 col-lg-5">
               <div class="card shadow mb-4" style={{ border: 'none' }}>
@@ -1049,7 +1050,7 @@ export default function Home() {
 
                 </div>
                 <div class="card-body pt-2">
-                  <div className="chart-pie mb-5 ">
+                  <div className="chart-pie mb-2 ">
                     <DoughnutChartComponent data={diagnosisData} colors={COLORS_DIAGNOSIS} />
                   </div>
                   <div className="row">
@@ -1113,7 +1114,7 @@ export default function Home() {
                     รวมเคสปกติ/ผิดปกติ/เคสฉุกเฉิน
                   </h6>
                 </div>
-                <div className="card-body pt-2">
+                <div className="card-body pt-2 mb-4">
                   <div className="chart-pie mb-5">
                     <DoughnutChartComponent data={caseStats} colors={COLORS_STATUS} />
                   </div>

@@ -536,24 +536,48 @@ export default function AgendaForm({ }) {
     const [hasError, setHasError] = useState(false); // ตรวจสอบข้อผิดพลาด
     const [showError, setShowError] = useState(false); // ควบคุมการแสดงข้อความแจ้งเตือน
 
-    const [PatientAgendaData, setPatientAgendaData] = useState(() => JSON.parse(localStorage.getItem("patientAgendaData")) || {});
-    const [careAgenda, setCaregiverAgendaData] = useState(() => JSON.parse(localStorage.getItem("caregiverAgendaData")) || {});
-    const [careAssessment, setCaregiverAssessmentData] = useState(() => JSON.parse(localStorage.getItem("careAssessmentData")) || {});
+    // ใช้ userId เป็นส่วนหนึ่งของ localStorage key
+    const getLocalStorageKey = (key) => `agenda_${userid}_${key}`;
+
+    const [PatientAgendaData, setPatientAgendaData] = useState(() => {
+        return JSON.parse(localStorage.getItem(getLocalStorageKey("patientAgendaData"))) || {};
+    });
+
+    const [careAgenda, setCaregiverAgendaData] = useState(() => {
+        return JSON.parse(localStorage.getItem(getLocalStorageKey("caregiverAgendaData"))) || {};
+    });
+
+    const [careAssessment, setCaregiverAssessmentData] = useState(() => {
+        return JSON.parse(localStorage.getItem(getLocalStorageKey("careAssessmentData"))) || {};
+    });
+
     const [ZaritData, setZaritData] = useState(() => {
-        const storedData = JSON.parse(localStorage.getItem("ZaritData"));
+        const storedData = JSON.parse(localStorage.getItem(getLocalStorageKey("ZaritData")));
         return storedData ?? {
             question_1: "", question_2: "", question_3: "", question_4: "", question_5: "",
             question_6: "", question_7: "", question_8: "", question_9: "", question_10: "",
             question_11: "", question_12: "", totalScore: 0
         };
     });
-    
+
+    // ✅ อัปเดต localStorage เมื่อข้อมูลเปลี่ยนแปลง
     useEffect(() => {
-        localStorage.setItem("patientAgendaData", JSON.stringify(PatientAgendaData));
-        localStorage.setItem("caregiverAgendaData", JSON.stringify(careAgenda));
-        localStorage.setItem("careAssessmentData", JSON.stringify(careAssessment));
-        localStorage.setItem("ZaritData", JSON.stringify(ZaritData));
-    }, [PatientAgendaData, careAgenda, careAssessment, ZaritData]);
+        if (userid) {
+            localStorage.setItem(getLocalStorageKey("patientAgendaData"), JSON.stringify(PatientAgendaData));
+            localStorage.setItem(getLocalStorageKey("caregiverAgendaData"), JSON.stringify(careAgenda));
+            localStorage.setItem(getLocalStorageKey("careAssessmentData"), JSON.stringify(careAssessment));
+            localStorage.setItem(getLocalStorageKey("ZaritData"), JSON.stringify(ZaritData));
+        }
+    }, [PatientAgendaData, careAgenda, careAssessment, ZaritData, userid]);
+
+    // ✅ ล้างข้อมูลเฉพาะของ userId ที่กำลังใช้งานอยู่
+    const clearUserLocalStorage = () => {
+        if (!userid) return; // ป้องกันการล้างข้อมูลผิดพลาด
+        localStorage.removeItem(getLocalStorageKey("patientAgendaData"));
+        localStorage.removeItem(getLocalStorageKey("caregiverAgendaData"));
+        localStorage.removeItem(getLocalStorageKey("careAssessmentData"));
+        localStorage.removeItem(getLocalStorageKey("ZaritData"));
+    };
 
     const handleNext = async (data) => {
         console.log("Form data at step", activeStep, data);
@@ -561,7 +585,7 @@ export default function AgendaForm({ }) {
         if (activeStep === 0) {
             setPatientAgendaData(PatientAgendaData || {});
         } else if (activeStep === 1) {
-            setCaregiverAgendaData(careAgenda|| {}); // Ensure latest data is stored!
+            setCaregiverAgendaData(careAgenda || {}); // Ensure latest data is stored!
         } else if (activeStep === 2) {
             setCaregiverAssessmentData(careAssessment || {});
         } else if (activeStep === 3) {
@@ -585,8 +609,8 @@ export default function AgendaForm({ }) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userId: userid,
-                        MPersonnel: mpersonnel || "", 
-                        Caregiver: caregiver || "", 
+                        MPersonnel: mpersonnel || "",
+                        Caregiver: caregiver || "",
                         newCaregivers: newCaregivers.map(cg => cg.id) || [],
                         PatientAgenda: PatientAgendaData || {},
                         CaregiverAgenda: {
@@ -602,14 +626,12 @@ export default function AgendaForm({ }) {
                     }),
                 });
 
-                const result = await response.json();
+                const data = await response.json();
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
-                    // ✅ ล้างข้อมูลจาก localStorage ก่อนอัปเดต state
-                    localStorage.removeItem("patientAgendaData");
-                    localStorage.removeItem("caregiverAgendaData");
-                    localStorage.removeItem("careAssessmentData");
-                    localStorage.removeItem("ZaritData");
+
+                    // ✅ ล้างข้อมูล localStorage ของ userId นี้
+                    clearUserLocalStorage();
 
                     // ✅ รีเซ็ตค่าให้เริ่มใหม่ (ใช้ callback function เพื่อให้แน่ใจว่าใช้ค่าล่าสุด)
                     setPatientAgendaData(() => ({}));
@@ -620,14 +642,14 @@ export default function AgendaForm({ }) {
                     // ✅ รีเซ็ตค่าให้เริ่มใหม่
                     setPatientAgendaData({});
                     setTimeout(() => {
-                        navigate("/assessinhomesssuser", { state: { id } });
+                        navigate("/detailAgendaForm", { state: { id: data.data._id } });
                         window.location.reload(); // ✅ รีเฟรชเพื่อให้แน่ใจว่า localStorage ถูกเคลียร์
                     }, 1000);
                 } else {
                     console.error("Error during ReadinessForm submission:", data);
                     toast.error("เกิดข้อผิดพลาดในการประเมิน");
                 }
-                console.log('Data saved:', result);
+                console.log('Data saved:', data);
             } catch (error) {
                 console.error('Error saving data:', error);
             }
@@ -878,16 +900,16 @@ export default function AgendaForm({ }) {
                                     <FormProvider {...methods}>
                                         <form onSubmit={methods.handleSubmit(handleNext)}>
                                             {activeStep === 0 && (
-                                                <PatientAgenda onDataChange={(data) => setPatientAgendaData(data)} />
+                                                <PatientAgenda userid={userid} onDataChange={(data) => setPatientAgendaData(data)} />
                                             )}
                                             {activeStep === 1 && (
-                                                <CaregiverAgenda onDataChange={(data) => setCaregiverAgendaData(data)} />
+                                                <CaregiverAgenda userid={userid} onDataChange={(data) => setCaregiverAgendaData(data)} />
                                             )}
                                             {activeStep === 2 && (
-                                                <CaregiverAssessment onDataChange={(data) => setCaregiverAssessmentData(data)} />
+                                                <CaregiverAssessment userid={userid} onDataChange={(data) => setCaregiverAssessmentData(data)} />
                                             )}
                                             {activeStep === 3 && (
-                                                <Zarit ZaritData={ZaritData} setZaritData={setZaritData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
+                                                <Zarit userid={userid} ZaritData={ZaritData} setZaritData={setZaritData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
                                             )}
 
                                             <div className="btn-group">

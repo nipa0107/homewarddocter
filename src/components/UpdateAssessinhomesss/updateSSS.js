@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const SSSForm = ({ formData, onSave, onClose, currentSection }) => {
     const [formValues, setFormValues] = useState({ ...formData });
+    const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
+
+    useEffect(() => {
+        // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
+        setIsEdited(JSON.stringify(formValues) !== JSON.stringify(formData));
+    }, [formValues, formData]);
 
     const handleChange = (field, value) => {
         setFormValues((prev) => ({
@@ -37,11 +43,12 @@ const SSSForm = ({ formData, onSave, onClose, currentSection }) => {
     // ฟังก์ชันสร้าง Text Input
     const renderTextField = (label, field) => (
         <div className="m-3">
-            <label className="form-label">{label} :</label>
+            <label className="form-label">{label}</label>
             <textarea
                 className="form-control "
                 rows="2"
                 style={{ resize: "vertical" }}
+                placeholder="กรอกคำตอบ"
                 value={formValues[field] || ""}
                 onChange={(e) => handleChange(field, e.target.value)}
             />
@@ -50,7 +57,23 @@ const SSSForm = ({ formData, onSave, onClose, currentSection }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
+        if (!isEdited) {
+            const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
+            if (!confirmSave) return;
+        }
+
         onSave(formValues);
+    };
+
+    const handleCancel = () => {
+        // 🔹 ถ้ามีการแก้ไขแล้วกดยกเลิก ให้แสดงแจ้งเตือน
+        if (isEdited) {
+            const confirmExit = window.confirm("ต้องการยกเลิกการแก้ไขหรือไม่?\nหากยกเลิก การแก้ไขที่ไม่ได้บันทึกจะถูกละทิ้ง");
+            if (!confirmExit) return;
+        }
+        onClose(); // ปิด Modal
     };
 
     return (
@@ -115,7 +138,7 @@ const SSSForm = ({ formData, onSave, onClose, currentSection }) => {
                         </form>
                     </div>
                     <div className="modal-footer d-flex justify-content-between">
-                        <button className="btn-EditMode btn-secondary" onClick={onClose}>
+                        <button className="btn-EditMode btn-secondary" onClick={handleCancel}>
                             ยกเลิก
                         </button>
                         <button className="btn-EditMode btnsave" onClick={handleSubmit}>
