@@ -726,18 +726,30 @@ export default function DetailAssessreadiness() {
             <li className="arrow">
               <i className="bi bi-chevron-double-right"></i>
             </li>
-            <li>
+            <li className="middle">
               <a href="assessreadiness">ประเมินความพร้อมการดูแล</a>
             </li>
-            <li className="arrow">
-              <i className="bi bi-chevron-double-right"></i>
-            </li>
-            <li>
+            <li className="arrow middle">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="ellipsis">
+                  <a href="assessreadiness">...</a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+            <li className="middle">
               <a onClick={handleBreadcrumbClick} className="info">บันทึกการประเมิน</a>
             </li>
-            <li className="arrow">
-              <i className="bi bi-chevron-double-right"></i>
-            </li>
+            <li className="arrow middle">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="ellipsis">
+                  <a onClick={handleBreadcrumbClick} className="info" >...</a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
             <li>
               <a>รายละเอียดการประเมิน</a>
             </li>

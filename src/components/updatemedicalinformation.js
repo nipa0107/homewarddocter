@@ -752,18 +752,42 @@ export default function Updatemedicalinformation() {
                         <li className="arrow">
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
-                        <li>
-                            <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li>
-                            <a href="infopatient" onClick={() => navigate("/infopatient", { state: { id: id, user: user } })}>ข้อมูลการดูแลผู้ป่วย</a>
-                        </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
+                        <li className="middle">
+              <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
+            </li>
+            <li className="arrow middle">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="ellipsis">
+                  <a href="allpatient">...</a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+            <li className="middle">
+              <a
+                href="infopatient"
+                onClick={() =>
+                  navigate("/infopatient", { state: { id: id, user: user } })
+                }
+              >
+                ข้อมูลการดูแลผู้ป่วย
+              </a>
+            </li>
+            <li className="arrow middle">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="ellipsis">
+                  <a className="info" href="infopatient"
+                onClick={() =>
+                  navigate("/infopatient", { state: { id: id, user: user } })
+                }>
+                    ...
+                  </a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
                         <li>
                             <a>แก้ไขข้อมูลการเจ็บป่วย</a>
                         </li>

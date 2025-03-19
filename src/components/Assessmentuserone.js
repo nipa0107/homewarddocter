@@ -94,7 +94,6 @@ export default function Assessmentuserone() {
     normal: 0,
   });
 
-
   const getUnreadCount = useCallback(
     (type) => {
       const filteredByType = alerts.filter(
@@ -321,14 +320,17 @@ export default function Assessmentuserone() {
   }, []);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ userId: userId, type: type }),
-    })
+    fetch(
+      "https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ userId: userId, type: type }),
+      }
+    )
       .then((res) => res.json())
       .then((data) => {
         if (data.message === "All selected alerts marked as viewed") {
@@ -464,17 +466,24 @@ export default function Assessmentuserone() {
     const fetchAllData = async () => {
       try {
         const [patientFormRes, userRes, medicalRes] = await Promise.all([
-          fetch(`https://backend-deploy-render-mxok.onrender.com/getpatientformsone/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`https://backend-deploy-render-mxok.onrender.com/getuser/${patientFormsone.user}`),
-          fetch(`https://backend-deploy-render-mxok.onrender.com/medicalInformation/${patientFormsone.user}`),
+          fetch(
+            `https://backend-deploy-render-mxok.onrender.com/getpatientformsone/${id}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          ),
+          fetch(
+            `https://backend-deploy-render-mxok.onrender.com/getuser/${patientFormsone.user}`
+          ),
+          fetch(
+            `https://backend-deploy-render-mxok.onrender.com/medicalInformation/${patientFormsone.user}`
+          ),
         ]);
-  
+
         const patientFormData = await patientFormRes.json();
         const userData = await userRes.json();
         const medicalData = await medicalRes.json();
-  
+
         setPatientFormsone(patientFormData.data);
         setName(userData.name);
         setSurname(userData.surname);
@@ -485,13 +494,12 @@ export default function Assessmentuserone() {
         console.error("Error fetching data:", error);
       }
     };
-  
+
     if (id && token) {
       fetchAllData();
     }
   }, [id, token, patientFormsone.user]);
 
-  
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!statusName && !PPS) {
@@ -540,12 +548,15 @@ export default function Assessmentuserone() {
 
   const fetchAssessments = useCallback(async () => {
     try {
-      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/allAssessments`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `https://backend-deploy-render-mxok.onrender.com/allAssessments`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const data = await response.json();
 
       const currentAssessment = data.data.find(
@@ -589,11 +600,11 @@ export default function Assessmentuserone() {
   };
   const [chartWidth, setChartWidth] = useState("100%");
   const [chartHeight, setChartHeight] = useState(300);
-  
+
   useEffect(() => {
     const updateChartSize = () => {
       if (window.innerWidth < 576) {
-        setChartWidth("100%"); 
+        setChartWidth("100%");
         setChartHeight(200);
       } else if (window.innerWidth < 768) {
         setChartWidth("100%");
@@ -606,28 +617,30 @@ export default function Assessmentuserone() {
         setChartHeight(300);
       }
     };
-  
+
     updateChartSize(); // เรียกใช้ครั้งแรก
     window.addEventListener("resize", updateChartSize); // 📌 อัปเดตเมื่อ resize
-  
+
     return () => window.removeEventListener("resize", updateChartSize); // ลบ event เมื่อ component ออกจาก DOM
   }, []);
 
-  
   const handleUpdateAssessment = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`https://backend-deploy-render-mxok.onrender.com/updateassessment/${assessmentId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          suggestion,
-          detail,
-          status_name: statusName,
-          PPS,
-          MPersonnel: data._id,
-        }),
-      });
+      await fetch(
+        `https://backend-deploy-render-mxok.onrender.com/updateassessment/${assessmentId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            suggestion,
+            detail,
+            status_name: statusName,
+            PPS,
+            MPersonnel: data._id,
+          }),
+        }
+      );
       setTimeout(() => {
         toast.success("แก้ไขสำเร็จ");
       }, 1000);
@@ -932,7 +945,6 @@ export default function Assessmentuserone() {
       }
     }, 500);
   };
-  
 
   const handleButtonClick = (value) => {
     setStatusName(value);
@@ -949,7 +961,6 @@ export default function Assessmentuserone() {
   };
 
   const dynamicFontSize = window.innerWidth < 768 ? 10 : 12;
-
 
   useEffect(() => {
     const fetchSymptomsCount = async () => {
@@ -971,7 +982,6 @@ export default function Assessmentuserone() {
 
     fetchSymptomsCount();
   }, [patientFormsone.user, patientFormsone._id]);
-
 
   const handleScroll = () => {
     if (window.scrollY > 300) {
@@ -1084,12 +1094,18 @@ export default function Assessmentuserone() {
             </li>
             {location.state?.fromAbnormalCases ? (
               <>
-                <li>
+                <li className="middle">
                   <a href="/abnormalcase" className="info">
                     บันทึกผู้ป่วยที่มีอาการผิดปกติ
                   </a>
                 </li>
-                <li className="arrow">
+                <li className="arrow middle">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="ellipsis">
+                  <a href="/abnormalcase">...</a>
+                </li>
+                <li className="arrow ellipsis">
                   <i className="bi bi-chevron-double-right"></i>
                 </li>
                 <li>
@@ -1098,22 +1114,37 @@ export default function Assessmentuserone() {
               </>
             ) : (
               <>
-                <li>
+                <li className="middle">
                   <a href="assessment" className="info">
                     ติดตาม/ประเมินอาการ
                   </a>
                 </li>
-                <li className="arrow">
+                <li className="arrow middle">
                   <i className="bi bi-chevron-double-right"></i>
                 </li>
-                <li>
+                <li className="ellipsis">
+                  <a href="assessment">...</a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="middle">
                   <a onClick={handleBreadcrumbClick} className="info">
                     การบันทึกอาการผู้ป่วย
                   </a>
                 </li>
-                <li className="arrow">
+                <li className="arrow middle">
                   <i className="bi bi-chevron-double-right"></i>
                 </li>
+                <li className="ellipsis">
+                  <a className="info" onClick={handleBreadcrumbClick}>
+                    ...
+                  </a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+
                 <li>
                   <a>รายละเอียดอาการผู้ป่วย</a>
                 </li>
@@ -1123,7 +1154,7 @@ export default function Assessmentuserone() {
         </div>
 
         <div className="content">
-        <div className="patient-card-ass patient-card-style">
+          <div className="patient-card-ass patient-card-style">
             <p className="patient-name">
               <label>ข้อมูลผู้ป่วย</label>
             </p>
@@ -1211,7 +1242,9 @@ export default function Assessmentuserone() {
                     <p className="text-unit"></p>
                   </div>
                   <div className="patient-data">
-                    <label className="title-Vitalsigns">ระดับน้ำตาลในเลือด:</label>
+                    <label className="title-Vitalsigns">
+                      ระดับน้ำตาลในเลือด:
+                    </label>
                     <p className="text">{patientFormsone.DTX || "-"}</p>
                     <p className="text-unit">mg/dL</p>
                   </div>
@@ -1300,22 +1333,24 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
-                 <div className="chart-wrapper"> 
-                <div className="chart-containerass1">
-                <ResponsiveContainer width={chartWidth} height={chartHeight}>
-
-                    <ComposedChart
-                      // width={1000}
-                      // height={300}
-                      data={patientdata}
-                       margin={
-                           timeRange === "1month"
-                             ? { top: 10, right: 30, left: 0, bottom: 0 }  // ลด bottom เป็น 0
-                             : { top: 10, right: 30, left: 0, bottom: 10 } // ค่าปกติ
-                         }
+                <div className="chart-wrapper">
+                  <div className="chart-containerass1">
+                    <ResponsiveContainer
+                      width={chartWidth}
+                      height={chartHeight}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      {/* <XAxis
+                      <ComposedChart
+                        // width={1000}
+                        // height={300}
+                        data={patientdata}
+                        margin={
+                          timeRange === "1month"
+                            ? { top: 10, right: 30, left: 0, bottom: 0 } // ลด bottom เป็น 0
+                            : { top: 10, right: 30, left: 0, bottom: 10 } // ค่าปกติ
+                        }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        {/* <XAxis
                         dataKey="createdAt"
                         tickFormatter={formatDateTime}
                         interval="preserveStartEnd"
@@ -1327,9 +1362,11 @@ export default function Assessmentuserone() {
                             : { fontSize: 10, lineHeight: 1.5 }
                         }
                       />{" "} */}
-                        <XAxis 
+                        <XAxis
                           dataKey="createdAt"
-                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          tickFormatter={
+                            timeRange === "1month" ? undefined : formatDateTime
+                          }
                           interval="preserveStartEnd"
                           minTickGap={5}
                           tickLine={timeRange === "1month" ? false : true}
@@ -1338,82 +1375,91 @@ export default function Assessmentuserone() {
                               ? false
                               : (props) => {
                                   const { x, y, payload } = props;
-                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
-                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  const formattedText = formatDateTime(
+                                    payload.value
+                                  ).split("\n"); // แยกบรรทัด
+                                  const fontSize =
+                                    window.innerWidth < 768 ? 8 : 10;
                                   return (
-                                    <g transform={`translate(${x},${y+10})`}>
-                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
-                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
-                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                    <g transform={`translate(${x},${y + 10})`}>
+                                      <text
+                                        textAnchor="middle"
+                                        fontSize={fontSize}
+                                        fill="#666"
+                                      >
+                                        <tspan x="0" dy="0">
+                                          {formattedText[0]}
+                                        </tspan>
+                                        <tspan x="0" dy="1.2em">
+                                          {formattedText[1]}
+                                        </tspan>
                                       </text>
                                     </g>
                                   );
                                 }
                           }
                         />
-                      <YAxis
-                        domain={[30, 40]}
-                        tick={{ fontSize: window.innerWidth < 768 ? 8 : 10 }} 
-                        ticks={[30, 32, 34, 36, 38, 40]}
-                        // hide={timeRange !== "1month"}
-                      />
-                      <Tooltip content={<CustomTooltipTemperature />} />
-                      <ReferenceLine
-                        y={min.Temperature}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <ReferenceLine
-                        y={max.Temperature}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="Temperature"
-                        stroke="rgb(229, 113, 63)"
-                        fill="rgb(229, 113, 63,0.3)"
-                        connectNulls={true}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="Temperature"
-                        stroke="#e5713f"
-                        strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                        connectNulls={true}
-                      >
-                      </Line>                    
-                    </ComposedChart>
-                  </ResponsiveContainer>    
-                </div>          
-                </div>          
+                        <YAxis
+                          domain={[30, 40]}
+                          tick={{ fontSize: window.innerWidth < 768 ? 8 : 10 }}
+                          ticks={[30, 32, 34, 36, 38, 40]}
+                          // hide={timeRange !== "1month"}
+                        />
+                        <Tooltip content={<CustomTooltipTemperature />} />
+                        <ReferenceLine
+                          y={min.Temperature}
+                          stroke="#00b300"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Min",
+                            fill: "#00b300",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <ReferenceLine
+                          y={max.Temperature}
+                          stroke="#ff0000"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Max",
+                            fill: "#ff0000",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="Temperature"
+                          stroke="rgb(229, 113, 63)"
+                          fill="rgb(229, 113, 63,0.3)"
+                          connectNulls={true}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="Temperature"
+                          stroke="#e5713f"
+                          strokeWidth={3}
+                          dot={timeRange === "1month" ? false : { r: 4 }}
+                          isAnimationActive={true}
+                          animationDuration={1500}
+                          connectNulls={true}
+                        ></Line>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               )}
-             {timeRange === "1month" &&
+              {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)}{" "}{" "}-{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
             </div>
 
-            
             <div className="contentgraph">
               <div className="inline-containers">
                 <div className="graph-label">
@@ -1422,20 +1468,26 @@ export default function Assessmentuserone() {
                 </div>
               </div>
               {patientdata && (
-                <div className="chart-wrapper"> 
-                <div className="chart-containerass1">
-                <ResponsiveContainer width={chartWidth} height={chartHeight}>
-                    <ComposedChart
-                      data={patientdata}
-                      margin={
-                        timeRange === "1month"
-                          ? { top: 10, right: 30, left: 0, bottom: 0 } 
-                          : { top: 10, right: 30, left: 0, bottom: 10 } 
-                      }>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis 
+                <div className="chart-wrapper">
+                  <div className="chart-containerass1">
+                    <ResponsiveContainer
+                      width={chartWidth}
+                      height={chartHeight}
+                    >
+                      <ComposedChart
+                        data={patientdata}
+                        margin={
+                          timeRange === "1month"
+                            ? { top: 10, right: 30, left: 0, bottom: 0 }
+                            : { top: 10, right: 30, left: 0, bottom: 10 }
+                        }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
                           dataKey="createdAt"
-                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          tickFormatter={
+                            timeRange === "1month" ? undefined : formatDateTime
+                          }
                           interval="preserveStartEnd"
                           minTickGap={5}
                           tickLine={timeRange === "1month" ? false : true}
@@ -1444,77 +1496,87 @@ export default function Assessmentuserone() {
                               ? false
                               : (props) => {
                                   const { x, y, payload } = props;
-                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
-                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  const formattedText = formatDateTime(
+                                    payload.value
+                                  ).split("\n"); // แยกบรรทัด
+                                  const fontSize =
+                                    window.innerWidth < 768 ? 8 : 10;
                                   return (
-                                    <g transform={`translate(${x},${y+10})`}>
-                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
-                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
-                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                    <g transform={`translate(${x},${y + 10})`}>
+                                      <text
+                                        textAnchor="middle"
+                                        fontSize={fontSize}
+                                        fill="#666"
+                                      >
+                                        <tspan x="0" dy="0">
+                                          {formattedText[0]}
+                                        </tspan>
+                                        <tspan x="0" dy="1.2em">
+                                          {formattedText[1]}
+                                        </tspan>
                                       </text>
                                     </g>
                                   );
                                 }
                           }
                         />
-                      <YAxis
-                        domain={[80, 200]} 
-                        tickCount={12}
-                        ticks={[80, 100, 120, 140, 160, 180, 200]}
-                        tick={{ fontSize: window.innerWidth < 768 ? 8 : 10 }} 
-                      />
-                      <Tooltip content={<CustomTooltipSBP />} />
-                      <ReferenceLine
-                        y={min.SBP}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <ReferenceLine
-                        y={max.SBP}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="SBP"
-                        stroke="rgb(93, 93, 233)"
-                        fill="rgb(93, 93, 233,0.3)"
-                        connectNulls={true}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="SBP"
-                        name="ความดันตัวบน"
-                        stroke="rgb(93, 93, 233)"
-                        strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                        connectNulls={true}
-                      >
-                      </Line>
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
+                        <YAxis
+                          domain={[80, 200]}
+                          tickCount={12}
+                          ticks={[80, 100, 120, 140, 160, 180, 200]}
+                          tick={{ fontSize: window.innerWidth < 768 ? 8 : 10 }}
+                        />
+                        <Tooltip content={<CustomTooltipSBP />} />
+                        <ReferenceLine
+                          y={min.SBP}
+                          stroke="#00b300"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Min",
+                            fill: "#00b300",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <ReferenceLine
+                          y={max.SBP}
+                          stroke="#ff0000"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Max",
+                            fill: "#ff0000",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="SBP"
+                          stroke="rgb(93, 93, 233)"
+                          fill="rgb(93, 93, 233,0.3)"
+                          connectNulls={true}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="SBP"
+                          name="ความดันตัวบน"
+                          stroke="rgb(93, 93, 233)"
+                          strokeWidth={3}
+                          dot={timeRange === "1month" ? false : { r: 4 }}
+                          isAnimationActive={true}
+                          animationDuration={1500}
+                          connectNulls={true}
+                        ></Line>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1529,20 +1591,25 @@ export default function Assessmentuserone() {
               </div>
               {patientdata && (
                 <div className="chart-wrapper">
-                <div className="chart-containerass1">
-                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
-                    <ComposedChart
-                      data={patientdata}
-                      margin={
-                           timeRange === "1month"
-                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
-                             : { top: 10, right: 30, left: 0, bottom: 10 } 
-                         }
+                  <div className="chart-containerass1">
+                    <ResponsiveContainer
+                      width={chartWidth}
+                      height={chartHeight}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
+                      <ComposedChart
+                        data={patientdata}
+                        margin={
+                          timeRange === "1month"
+                            ? { top: 10, right: 30, left: 0, bottom: 0 }
+                            : { top: 10, right: 30, left: 0, bottom: 10 }
+                        }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
                           dataKey="createdAt"
-                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          tickFormatter={
+                            timeRange === "1month" ? undefined : formatDateTime
+                          }
                           interval="preserveStartEnd"
                           minTickGap={5}
                           tickLine={timeRange === "1month" ? false : true}
@@ -1551,79 +1618,90 @@ export default function Assessmentuserone() {
                               ? false
                               : (props) => {
                                   const { x, y, payload } = props;
-                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
-                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  const formattedText = formatDateTime(
+                                    payload.value
+                                  ).split("\n"); // แยกบรรทัด
+                                  const fontSize =
+                                    window.innerWidth < 768 ? 8 : 10;
                                   return (
-                                    <g transform={`translate(${x},${y+10})`}>
-                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
-                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
-                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                    <g transform={`translate(${x},${y + 10})`}>
+                                      <text
+                                        textAnchor="middle"
+                                        fontSize={fontSize}
+                                        fill="#666"
+                                      >
+                                        <tspan x="0" dy="0">
+                                          {formattedText[0]}
+                                        </tspan>
+                                        <tspan x="0" dy="1.2em">
+                                          {formattedText[1]}
+                                        </tspan>
                                       </text>
                                     </g>
                                   );
                                 }
                           }
                         />
-                      <YAxis
-                        domain={[50, 120]}
-                        ticks={[50, 60, 70, 80, 90, 100, 110, 120]}
-                        tick={{ fontSize: 12 }}
-                        // padding={{ top: 10, bottom: 10 }}
-                      />
-                      <Tooltip content={<CustomTooltipDBP />} />
-                      <ReferenceLine
-                        y={min.DBP}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <ReferenceLine
-                        y={max.DBP}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
+                        <YAxis
+                          domain={[50, 120]}
+                          ticks={[50, 60, 70, 80, 90, 100, 110, 120]}
+                          tick={{ fontSize: 12 }}
+                          // padding={{ top: 10, bottom: 10 }}
+                        />
+                        <Tooltip content={<CustomTooltipDBP />} />
+                        <ReferenceLine
+                          y={min.DBP}
+                          stroke="#00b300"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Min",
+                            fill: "#00b300",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <ReferenceLine
+                          y={max.DBP}
+                          stroke="#ff0000"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Max",
+                            fill: "#ff0000",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
 
-                      {/* <Legend verticalAlign="top" align="center" wrapperStyle={{ color: '#000' }} /> */}
+                        {/* <Legend verticalAlign="top" align="center" wrapperStyle={{ color: '#000' }} /> */}
 
-                      <Area
-                        type="monotone"
-                        dataKey="DBP"
-                        stroke="#5ec1ff"
-                        fill="rgb(94, 193, 255,0.3)"
-                        connectNulls={true}
-                        legendType="none"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="DBP"
-                        name="ความดันตัวล่าง"
-                        stroke="#5ec1ff"
-                        // fill="rgb(94, 193, 255,0.3)"
-                        strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="DBP" />
-                        //   )
-                        // }
-                        connectNulls={true}
-                      >
-                        {/* {timeRange !== "1month" && (
+                        <Area
+                          type="monotone"
+                          dataKey="DBP"
+                          stroke="#5ec1ff"
+                          fill="rgb(94, 193, 255,0.3)"
+                          connectNulls={true}
+                          legendType="none"
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="DBP"
+                          name="ความดันตัวล่าง"
+                          stroke="#5ec1ff"
+                          // fill="rgb(94, 193, 255,0.3)"
+                          strokeWidth={3}
+                          dot={timeRange === "1month" ? false : { r: 4 }}
+                          isAnimationActive={true}
+                          animationDuration={1500}
+                          // dot={
+                          //   timeRange === "1month" ? (
+                          //     false
+                          //   ) : (
+                          //     <CustomDot dataKey="DBP" />
+                          //   )
+                          // }
+                          connectNulls={true}
+                        >
+                          {/* {timeRange !== "1month" && (
                           <LabelList
                             dataKey="DBP"
                             position="inside"
@@ -1631,17 +1709,17 @@ export default function Assessmentuserone() {
                             dot={<CustomDot dataKey="DBP" />}
                           />
                         )} */}
-                      </Line>
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
+                        </Line>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1655,22 +1733,27 @@ export default function Assessmentuserone() {
               </div>
               {patientdata && (
                 <div className="chart-wrapper">
-                <div className="chart-containerass1">
-                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
-                    <ComposedChart
-                      // width={1000}
-                      // height={300}
-                      data={patientdata}
-                      margin={
-                           timeRange === "1month"
-                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
-                             : { top: 10, right: 30, left: 0, bottom: 10 } 
-                         }
+                  <div className="chart-containerass1">
+                    <ResponsiveContainer
+                      width={chartWidth}
+                      height={chartHeight}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
+                      <ComposedChart
+                        // width={1000}
+                        // height={300}
+                        data={patientdata}
+                        margin={
+                          timeRange === "1month"
+                            ? { top: 10, right: 30, left: 0, bottom: 0 }
+                            : { top: 10, right: 30, left: 0, bottom: 10 }
+                        }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
                           dataKey="createdAt"
-                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          tickFormatter={
+                            timeRange === "1month" ? undefined : formatDateTime
+                          }
                           interval="preserveStartEnd"
                           minTickGap={5}
                           tickLine={timeRange === "1month" ? false : true}
@@ -1679,81 +1762,91 @@ export default function Assessmentuserone() {
                               ? false
                               : (props) => {
                                   const { x, y, payload } = props;
-                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
-                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  const formattedText = formatDateTime(
+                                    payload.value
+                                  ).split("\n"); // แยกบรรทัด
+                                  const fontSize =
+                                    window.innerWidth < 768 ? 8 : 10;
                                   return (
-                                    <g transform={`translate(${x},${y+10})`}>
-                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
-                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
-                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                    <g transform={`translate(${x},${y + 10})`}>
+                                      <text
+                                        textAnchor="middle"
+                                        fontSize={fontSize}
+                                        fill="#666"
+                                      >
+                                        <tspan x="0" dy="0">
+                                          {formattedText[0]}
+                                        </tspan>
+                                        <tspan x="0" dy="1.2em">
+                                          {formattedText[1]}
+                                        </tspan>
                                       </text>
                                     </g>
                                   );
                                 }
                           }
                         />{" "}
-                      {/* {timeRange === "1month" && (
+                        {/* {timeRange === "1month" && (
                         <YAxis
                           tick={{ fontSize: 10 }}
                           ticks={[0, 25, 50, 75, 100, 125, 150]}
                         />
                       )} */}
-                      <YAxis
-                        domain={[0, 150]}
-                        tick={{ fontSize: 10 }}
-                        ticks={[0, 25, 50, 75, 100, 125, 150]}
-                      />
-                      <Tooltip content={<CustomTooltipPulseRate />} />
-                      <ReferenceLine
-                        y={min.PulseRate}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <ReferenceLine
-                        y={max.PulseRate}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="PulseRate"
-                        stroke="rgb(224, 44, 98)"
-                        fill="rgb(224, 44, 98,0.3)"
-                        connectNulls={true}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="PulseRate"
-                        stroke="rgb(224, 44, 98)"
-                        strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                      >
-                      </Line>
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
+                        <YAxis
+                          domain={[0, 150]}
+                          tick={{ fontSize: 10 }}
+                          ticks={[0, 25, 50, 75, 100, 125, 150]}
+                        />
+                        <Tooltip content={<CustomTooltipPulseRate />} />
+                        <ReferenceLine
+                          y={min.PulseRate}
+                          stroke="#00b300"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Min",
+                            fill: "#00b300",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <ReferenceLine
+                          y={max.PulseRate}
+                          stroke="#ff0000"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Max",
+                            fill: "#ff0000",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="PulseRate"
+                          stroke="rgb(224, 44, 98)"
+                          fill="rgb(224, 44, 98,0.3)"
+                          connectNulls={true}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="PulseRate"
+                          stroke="rgb(224, 44, 98)"
+                          strokeWidth={3}
+                          dot={timeRange === "1month" ? false : { r: 4 }}
+                          connectNulls={true}
+                          isAnimationActive={true}
+                          animationDuration={1500}
+                        ></Line>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1768,27 +1861,32 @@ export default function Assessmentuserone() {
               </div>
               {patientdata && (
                 <div className="chart-wrapper">
-                <div className="chart-containerass1">
-                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
-                    <ComposedChart
-                      // width={1000}
-                      // height={300}
-                      data={patientdata}
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
-                      margin={
-                           timeRange === "1month"
-                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
-                             : { top: 10, right: 30, left: 0, bottom: 10 } 
-                         }
+                  <div className="chart-containerass1">
+                    <ResponsiveContainer
+                      width={chartWidth}
+                      height={chartHeight}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
+                      <ComposedChart
+                        // width={1000}
+                        // height={300}
+                        data={patientdata}
+                        // margin={
+                        //   timeRange === "1month"
+                        //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                        //     : { right: 28, left: 28 }
+                        // }
+                        margin={
+                          timeRange === "1month"
+                            ? { top: 10, right: 30, left: 0, bottom: 0 }
+                            : { top: 10, right: 30, left: 0, bottom: 10 }
+                        }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
                           dataKey="createdAt"
-                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          tickFormatter={
+                            timeRange === "1month" ? undefined : formatDateTime
+                          }
                           interval="preserveStartEnd"
                           minTickGap={5}
                           tickLine={timeRange === "1month" ? false : true}
@@ -1797,80 +1895,91 @@ export default function Assessmentuserone() {
                               ? false
                               : (props) => {
                                   const { x, y, payload } = props;
-                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
-                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  const formattedText = formatDateTime(
+                                    payload.value
+                                  ).split("\n"); // แยกบรรทัด
+                                  const fontSize =
+                                    window.innerWidth < 768 ? 8 : 10;
                                   return (
-                                    <g transform={`translate(${x},${y+10})`}>
-                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
-                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
-                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                    <g transform={`translate(${x},${y + 10})`}>
+                                      <text
+                                        textAnchor="middle"
+                                        fontSize={fontSize}
+                                        fill="#666"
+                                      >
+                                        <tspan x="0" dy="0">
+                                          {formattedText[0]}
+                                        </tspan>
+                                        <tspan x="0" dy="1.2em">
+                                          {formattedText[1]}
+                                        </tspan>
                                       </text>
                                     </g>
                                   );
                                 }
                           }
                         />{" "}
-                      <YAxis
-                        tick={{ fontSize: 10 }}
-                        ticks={[0, 10, 20, 30, 40]}
-                        // hide={timeRange !== "1month"}
-                      />
-                      <Tooltip content={<CustomTooltipRespiration />} />
-                      <ReferenceLine
-                        y={min.Respiration}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <ReferenceLine
-                        y={max.Respiration}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="Respiration"
-                        stroke="rgb(44, 223, 71)"
-                        fill="rgb(44, 223, 71,0.3)"
-                        connectNulls={true}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="Respiration"
-                        stroke="rgb(44, 223, 71)"
-                        strokeWidth={3}
-                        // dot={
-                        //   timeRange === "1month" ? (
-                        //     false
-                        //   ) : (
-                        //     <CustomDot dataKey="Respiration" />
-                        //   )
-                        // }
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                      >
-                        {/* {timeRange !== "1month" && (
+                        <YAxis
+                          tick={{ fontSize: 10 }}
+                          ticks={[0, 10, 20, 30, 40]}
+                          // hide={timeRange !== "1month"}
+                        />
+                        <Tooltip content={<CustomTooltipRespiration />} />
+                        <ReferenceLine
+                          y={min.Respiration}
+                          stroke="#00b300"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Min",
+                            fill: "#00b300",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <ReferenceLine
+                          y={max.Respiration}
+                          stroke="#ff0000"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Max",
+                            fill: "#ff0000",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="Respiration"
+                          stroke="rgb(44, 223, 71)"
+                          fill="rgb(44, 223, 71,0.3)"
+                          connectNulls={true}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="Respiration"
+                          stroke="rgb(44, 223, 71)"
+                          strokeWidth={3}
+                          // dot={
+                          //   timeRange === "1month" ? (
+                          //     false
+                          //   ) : (
+                          //     <CustomDot dataKey="Respiration" />
+                          //   )
+                          // }
+                          dot={timeRange === "1month" ? false : { r: 4 }}
+                          connectNulls={true}
+                          isAnimationActive={true}
+                          animationDuration={1500}
+                        >
+                          {/* {timeRange !== "1month" && (
                           <LabelList
                             dataKey="Respiration"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                           />
                         )} */}
-                      </Line>
-                      {/* {timeRange === "1month" && (
+                        </Line>
+                        {/* {timeRange === "1month" && (
                       <Brush
                         tickFormatter={formatDateTime}
                         dataKey="createdAt"
@@ -1879,16 +1988,16 @@ export default function Assessmentuserone() {
                         stroke="#878787"
                       />
                     )} */}
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -1902,27 +2011,32 @@ export default function Assessmentuserone() {
               </div>
               {patientdata && (
                 <div className="chart-wrapper">
-                <div className="chart-containerass1">
-                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
-                    <ComposedChart
-                      // width={1000}
-                      // height={300}
-                      data={patientdata}
-                      margin={
-                           timeRange === "1month"
-                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
-                             : { top: 10, right: 30, left: 0, bottom: 10 } 
-                         }
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                  <div className="chart-containerass1">
+                    <ResponsiveContainer
+                      width={chartWidth}
+                      height={chartHeight}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
+                      <ComposedChart
+                        // width={1000}
+                        // height={300}
+                        data={patientdata}
+                        margin={
+                          timeRange === "1month"
+                            ? { top: 10, right: 30, left: 0, bottom: 0 }
+                            : { top: 10, right: 30, left: 0, bottom: 10 }
+                        }
+                        // margin={
+                        //   timeRange === "1month"
+                        //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                        //     : { right: 28, left: 28 }
+                        // }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
                           dataKey="createdAt"
-                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          tickFormatter={
+                            timeRange === "1month" ? undefined : formatDateTime
+                          }
                           interval="preserveStartEnd"
                           minTickGap={5}
                           tickLine={timeRange === "1month" ? false : true}
@@ -1931,13 +2045,24 @@ export default function Assessmentuserone() {
                               ? false
                               : (props) => {
                                   const { x, y, payload } = props;
-                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
-                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  const formattedText = formatDateTime(
+                                    payload.value
+                                  ).split("\n"); // แยกบรรทัด
+                                  const fontSize =
+                                    window.innerWidth < 768 ? 8 : 10;
                                   return (
-                                    <g transform={`translate(${x},${y+10})`}>
-                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
-                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
-                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                    <g transform={`translate(${x},${y + 10})`}>
+                                      <text
+                                        textAnchor="middle"
+                                        fontSize={fontSize}
+                                        fill="#666"
+                                      >
+                                        <tspan x="0" dy="0">
+                                          {formattedText[0]}
+                                        </tspan>
+                                        <tspan x="0" dy="1.2em">
+                                          {formattedText[1]}
+                                        </tspan>
                                       </text>
                                     </g>
                                   );
@@ -1945,55 +2070,55 @@ export default function Assessmentuserone() {
                           }
                         />
 
-                      <YAxis
-                        domain={[0, 10]}
-                        tick={{ fontSize: 10 }}
-                        ticks={[0, 2, 4, 6, 8, 10]}
-                        // hide={timeRange !== "1month"}
-                      />
+                        <YAxis
+                          domain={[0, 10]}
+                          tick={{ fontSize: 10 }}
+                          ticks={[0, 2, 4, 6, 8, 10]}
+                          // hide={timeRange !== "1month"}
+                        />
 
-                      <Tooltip content={<CustomTooltipPainscore />} />
-                      <ReferenceLine
-                        y={painscore}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Med",
-                          fill: "#00b300",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
+                        <Tooltip content={<CustomTooltipPainscore />} />
+                        <ReferenceLine
+                          y={painscore}
+                          stroke="#00b300"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Med",
+                            fill: "#00b300",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
 
-                      <Area
-                        type="monotone"
-                        dataKey="Painscore"
-                        stroke="rgb(197, 44, 224)"
-                        fill="rgb(197, 44, 224,0.3)"
-                        connectNulls={true}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="Painscore"
-                        stroke="rgb(197, 44, 224)"
-                        // fill="rgb(197, 44, 224,0.3)"
-                        name="ระดับความเจ็บปวด"
-                        strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        // dot={timeRange === "1month" ? false : <CustomDot />}
-                        connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                      >
-                        {/* {timeRange !== "1month" && (
+                        <Area
+                          type="monotone"
+                          dataKey="Painscore"
+                          stroke="rgb(197, 44, 224)"
+                          fill="rgb(197, 44, 224,0.3)"
+                          connectNulls={true}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="Painscore"
+                          stroke="rgb(197, 44, 224)"
+                          // fill="rgb(197, 44, 224,0.3)"
+                          name="ระดับความเจ็บปวด"
+                          strokeWidth={3}
+                          dot={timeRange === "1month" ? false : { r: 4 }}
+                          // dot={timeRange === "1month" ? false : <CustomDot />}
+                          connectNulls={true}
+                          isAnimationActive={true}
+                          animationDuration={1500}
+                        >
+                          {/* {timeRange !== "1month" && (
                           <LabelList
                             dataKey="Painscore"
                             position="inside"
                             style={{ fill: "white", fontSize: "10" }}
                           />
                         )} */}
-                      </Line>
-                      {/* {timeRange === "1month" && (
+                        </Line>
+                        {/* {timeRange === "1month" && (
                       <Brush
                         tickFormatter={formatDateTime}
                         dataKey="createdAt"
@@ -2002,16 +2127,16 @@ export default function Assessmentuserone() {
                         stroke="#878787"
                       />
                     )} */}
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}
@@ -2026,27 +2151,32 @@ export default function Assessmentuserone() {
               </div>
               {patientdata && (
                 <div className="chart-wrapper">
-                <div className="chart-containerass1">
-                  <ResponsiveContainer width={chartWidth} height={chartHeight}>
-                    <ComposedChart
-                      // width={1000}
-                      // height={300}
-                      data={patientdata}
-                      margin={
-                           timeRange === "1month"
-                             ? { top: 10, right: 30, left: 0, bottom: 0 }  
-                             : { top: 10, right: 30, left: 0, bottom: 10 } 
-                         }
-                      // margin={
-                      //   timeRange === "1month"
-                      //     ? { top: 0, right: 0, left: -30, bottom: 0 }
-                      //     : { right: 28, left: 28 }
-                      // }
+                  <div className="chart-containerass1">
+                    <ResponsiveContainer
+                      width={chartWidth}
+                      height={chartHeight}
                     >
-                      <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
+                      <ComposedChart
+                        // width={1000}
+                        // height={300}
+                        data={patientdata}
+                        margin={
+                          timeRange === "1month"
+                            ? { top: 10, right: 30, left: 0, bottom: 0 }
+                            : { top: 10, right: 30, left: 0, bottom: 10 }
+                        }
+                        // margin={
+                        //   timeRange === "1month"
+                        //     ? { top: 0, right: 0, left: -30, bottom: 0 }
+                        //     : { right: 28, left: 28 }
+                        // }
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis
                           dataKey="createdAt"
-                          tickFormatter={timeRange === "1month" ? undefined : formatDateTime} 
+                          tickFormatter={
+                            timeRange === "1month" ? undefined : formatDateTime
+                          }
                           interval="preserveStartEnd"
                           minTickGap={5}
                           tickLine={timeRange === "1month" ? false : true}
@@ -2055,78 +2185,89 @@ export default function Assessmentuserone() {
                               ? false
                               : (props) => {
                                   const { x, y, payload } = props;
-                                  const formattedText = formatDateTime(payload.value).split("\n"); // แยกบรรทัด
-                                  const fontSize = window.innerWidth < 768 ? 8 : 10;
+                                  const formattedText = formatDateTime(
+                                    payload.value
+                                  ).split("\n"); // แยกบรรทัด
+                                  const fontSize =
+                                    window.innerWidth < 768 ? 8 : 10;
                                   return (
-                                    <g transform={`translate(${x},${y+10})`}>
-                                      <text textAnchor="middle"fontSize={fontSize} fill="#666" >
-                                        <tspan x="0" dy="0">{formattedText[0]}</tspan>
-                                        <tspan x="0" dy="1.2em">{formattedText[1]}</tspan>
+                                    <g transform={`translate(${x},${y + 10})`}>
+                                      <text
+                                        textAnchor="middle"
+                                        fontSize={fontSize}
+                                        fill="#666"
+                                      >
+                                        <tspan x="0" dy="0">
+                                          {formattedText[0]}
+                                        </tspan>
+                                        <tspan x="0" dy="1.2em">
+                                          {formattedText[1]}
+                                        </tspan>
                                       </text>
                                     </g>
                                   );
                                 }
                           }
                         />
-                      {/* {timeRange === "1month" && ( */}
-                      <YAxis
-                        domain={[60, 180]}
-                        tick={{ fontSize: 10 }}
-                        ticks={[60, 85, 110, 135, 160, 185, 210]}
-                      />
-                      {/* )} */}
-                      <Tooltip content={<CustomTooltipDTX />} />
-                      <ReferenceLine
-                        y={min.DTX}
-                        stroke="#00b300"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Min",
-                          fill: "#00b300",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
-                      <ReferenceLine
-                        y={max.DTX}
-                        stroke="#ff0000"
-                        strokeDasharray="5 5"
-                        label={{
-                          position: "right",
-                          value: "Max",
-                          fill: "#ff0000",
-                          fontSize: dynamicFontSize,
-                        }}
-                      />
+                        {/* {timeRange === "1month" && ( */}
+                        <YAxis
+                          domain={[60, 180]}
+                          tick={{ fontSize: 10 }}
+                          ticks={[60, 85, 110, 135, 160, 185, 210]}
+                        />
+                        {/* )} */}
+                        <Tooltip content={<CustomTooltipDTX />} />
+                        <ReferenceLine
+                          y={min.DTX}
+                          stroke="#00b300"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Min",
+                            fill: "#00b300",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
+                        <ReferenceLine
+                          y={max.DTX}
+                          stroke="#ff0000"
+                          strokeDasharray="5 5"
+                          label={{
+                            position: "right",
+                            value: "Max",
+                            fill: "#ff0000",
+                            fontSize: dynamicFontSize,
+                          }}
+                        />
 
-                      <Area
-                        type="monotone"
-                        dataKey="DTX"
-                        stroke="rgb(237, 219, 51)"
-                        fill="rgb(237, 219, 51,0.3)"
-                        connectNulls={true}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="DTX"
-                        stroke="rgb(237, 219, 51)"
-                        strokeWidth={3}
-                        dot={timeRange === "1month" ? false : { r: 4 }}
-                        // dot={timeRange === "1month" ? false : <CustomDot />}
-                        connectNulls={true}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                      ></Line>
-                    </ComposedChart>
-                  </ResponsiveContainer>
-                </div>
+                        <Area
+                          type="monotone"
+                          dataKey="DTX"
+                          stroke="rgb(237, 219, 51)"
+                          fill="rgb(237, 219, 51,0.3)"
+                          connectNulls={true}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="DTX"
+                          stroke="rgb(237, 219, 51)"
+                          strokeWidth={3}
+                          dot={timeRange === "1month" ? false : { r: 4 }}
+                          // dot={timeRange === "1month" ? false : <CustomDot />}
+                          connectNulls={true}
+                          isAnimationActive={true}
+                          animationDuration={1500}
+                        ></Line>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
               )}
               {timeRange === "1month" &&
                 patientdata &&
                 patientdata.length > 0 && (
                   <p className="textgraph">
-                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} {" "}-{" "}
+                    ข้อมูลระหว่างวันที่ {formatDate(patientdata[0].createdAt)} -{" "}
                     {formatDate(patientdata[patientdata.length - 1].createdAt)}
                   </p>
                 )}

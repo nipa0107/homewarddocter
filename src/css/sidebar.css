@@ -388,6 +388,9 @@ hr{
     font-weight: bold;
 }
 
+.breadcrumbs ul li.ellipsis {
+    display: none;
+}
 .countchat{
     justify-content: flex-end;
     align-items: flex-end;
@@ -449,6 +452,10 @@ hr{
      .profile_details .links_name{
         display: none;
     }
+    .home_content .breadcrumbs{
+        font-size: 0.9rem;
+        margin-top: 10px !important;
+    }
    /* .profile_details .bi{
         margin-right: 0;
     }
@@ -459,3 +466,23 @@ hr{
 }
 
 
+@media (max-width: 767px) {
+    .breadcrumbs ul li.middle {
+        display: none;
+    }
+
+    /* แสดง "..." ที่กดได้แทน */
+    .breadcrumbs ul li.ellipsis {
+        display: inline-block;
+    }
+
+    .breadcrumbs ul li.ellipsis a {
+        font-weight: bold;
+        text-decoration: none;
+        color: black;
+    }
+
+    .breadcrumbs ul li.ellipsis a:hover {
+        color: #87CEFA;
+    }
+}

@@ -735,13 +735,19 @@ export default function Assessinhomesssuser({ }) {
             <li className="arrow">
               <i class="bi bi-chevron-double-right"></i>
             </li>
-            <li>
+            <li className="middle">
               <a href="assessinhomesss" className="info">
                 แบบประเมินเยี่ยมบ้าน
               </a>
             </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
+            <li className="arrow middle">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a href="assessinhomesss">...</a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
             </li>
             <li>
               <a>บันทึกการประเมิน</a>

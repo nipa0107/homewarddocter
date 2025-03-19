@@ -429,11 +429,17 @@ export default function UpdateEmail() {
             <li className="arrow">
               <i class="bi bi-chevron-double-right"></i>
             </li>
-            <li>
+            <li className="middle">
               <a href="profile">โปรไฟล์</a>
             </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
+            <li className="arrow middle">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a href="profile">...</a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
             </li>
             <li>
               <a>เปลี่ยนอีเมล</a>
