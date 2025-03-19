@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const OtherPeopleForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
+    const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
+
+    useEffect(() => {
+        // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
+        setIsEdited(JSON.stringify(formValues) !== JSON.stringify(formData));
+    }, [formValues, formData]);
 
     const handleChange = (field, value) => {
         setFormValues((prev) => ({
@@ -14,13 +20,22 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
         e.preventDefault();
         // 🔹 เช็คว่ามีการเปลี่ยนแปลงหรือไม่
         if (JSON.stringify(formValues) === JSON.stringify(formData)) {
-            const confirmSave = window.confirm("ไม่มีการเปลี่ยนแปลงข้อมูล ต้องการบันทึกหรือไม่?");
+            const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
             if (!confirmSave) {
                 return; // ❌ ถ้าผู้ใช้กดยกเลิก ไม่ต้องบันทึก
             }
         }
 
         onSave(formValues); // ส่งข้อมูลที่อัปเดตกลับไปยัง `DetailAgendaForm`
+    };
+
+    const handleCancel = () => {
+        // 🔹 ถ้ามีการแก้ไขแล้วกดยกเลิก ให้แสดงแจ้งเตือน
+        if (isEdited) {
+            const confirmExit = window.confirm("ต้องการยกเลิกการแก้ไขหรือไม่?\nหากยกเลิก การแก้ไขที่ไม่ได้บันทึกจะถูกละทิ้ง");
+            if (!confirmExit) return;
+        }
+        onClose(); // ปิด Modal
     };
     return (
         <div className="modal show d-block" tabIndex="-1">
@@ -45,7 +60,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">วันเกิด :</label>
+                                <label className="form-label mt-2">วันเกิด </label>
                                 <input
                                     type="date"
                                     className="form-control"
@@ -55,7 +70,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">ความสัมพันธ์ :</label>
+                                <label className="form-label mt-2">ความสัมพันธ์ </label>
                                 <input
                                     className="form-control"
                                     value={formValues.relationship || ""}
@@ -65,7 +80,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">อาชีพ :</label>
+                                <label className="form-label mt-2">อาชีพ </label>
                                 <select
                                     className="form-select"
                                     value={formValues.occupation || ""}
@@ -90,7 +105,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 </select>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">สถานภาพ :</label>
+                                <label className="form-label mt-2">สถานภาพ </label>
                                 <select
                                     className="form-select"
                                     value={formValues.status || ""}
@@ -107,7 +122,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 </select>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">การศึกษา :</label>
+                                <label className="form-label mt-2">การศึกษา </label>
                                 <select
                                     className="form-select"
                                     value={formValues.education || ""}
@@ -129,7 +144,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 </select>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">รายได้ต่อเดือน :</label>
+                                <label className="form-label mt-2">รายได้ต่อเดือน </label>
                                 <select
                                     className="form-select"
                                     value={formValues.income || ""}
@@ -146,7 +161,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 </select>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">สิทธิ :</label>
+                                <label className="form-label mt-2">สิทธิ </label>
                                 <select
                                     className="form-select"
                                     value={formValues.benefit || ""}
@@ -164,11 +179,12 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 </select>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">โรคประจำตัว :</label>
+                                <label className="form-label mt-2">โรคประจำตัว <span style={{ color: "#666", fontSize: "15px" }}>(เช่น โรคเบาหวาน ความดัน)</span></label>
                                 <textarea
                                     className="form-control mt-2"
                                     rows="2"
                                     style={{ resize: "vertical" }}
+                                    placeholder="กรอกโรคประจำตัว"
                                     value={formValues.ud || ""}
                                     onChange={(e) =>
                                         handleChange("ud", e.target.value)
@@ -176,11 +192,12 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">อุปนิสัย :</label>
+                                <label className="form-label mt-2">อุปนิสัย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น ใจดี มีความรับผิดชอบ)</span></label>
                                 <textarea
                                     className="form-control mt-2"
                                     rows="2"
                                     style={{ resize: "vertical" }}
+                                    placeholder="กรอกอุปนิสัย"
                                     value={formValues.habit || ""}
                                     onChange={(e) =>
                                         handleChange("habit", e.target.value)
@@ -188,11 +205,12 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-2">รายละเอียดการดูแลผู้ป่วย :</label>
+                                <label className="form-label mt-2">รายละเอียดการดูแลผู้ป่วย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น บันทึกอาการ การให้ยาผู้ป่วย)</span></label>
                                 <textarea
                                     className="form-control mt-1"
                                     rows="2"
                                     style={{ resize: "vertical" }}
+                                    placeholder="กรอกรายละเอียดการดูแลผู้ป่วย"
                                     value={formValues.careDetails || ""}
                                     onChange={(e) =>
                                         handleChange("careDetails", e.target.value)
@@ -202,7 +220,7 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                         </form>
                     </div>
                     <div className="modal-footer d-flex justify-content-between">
-                        <button className="btn-EditMode btn-secondary" onClick={onClose}>
+                        <button className="btn-EditMode btn-secondary" onClick={handleCancel}>
                             ยกเลิก
                         </button>
                         <button className="btn-EditMode btnsave" onClick={handleSubmit}>

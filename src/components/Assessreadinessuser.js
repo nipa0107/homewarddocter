@@ -790,72 +790,72 @@ export default function Assessreadinessuser({ }) {
                             </p>
                         </div>
                     </div>
-
-                    <table className="table table-hover mt-3">
-                        <thead>
-                            <tr>
-                                <th >#</th>
-                                <th onClick={() => sortData("createdAt")} style={{ cursor: "pointer" }}>
-                                    วันที่บันทึก{" "}
-                                    <i className={`bi ${sortConfig.key === "createdAt" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
-                                </th>
-                                <th onClick={() => sortData("readiness_status")} style={{ cursor: "pointer" }}>
-                                    ผลการประเมินความพร้อม{" "}
-                                    <i className={`bi ${sortConfig.key === "readiness_status" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
-                                </th>
-                                <th>ผู้บันทึก</th>
-                                <th>รายละเอียด</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {readinessForms.length > 0 ? (
-                                readinessForms.map((form, index) => {
-                                    const assessment = readinessAssessments.find(ra => ra.ReadinessForm === form._id);
-                                    const status = assessment?.readiness_status || "";
-
-                                    return (
-                                        <tr
-                                            key={form._id}
-                                            onClick={() => navigate("/detailassessreadiness", { state: { id: form._id } })}
-                                            style={{ cursor: "pointer" }}
-                                        >
-                                            <td style={{ width: "10%" }}>{index + 1}</td>
-                                            <td>{formatDate(form.createdAt)}</td>
-                                            <td>
-                                                <span className={status === "มีความพร้อม" ? "normal-status"
-                                                    : status === "ยังไม่มีความพร้อม" ? "abnormal-status"
-                                                        : "end-of-treatment-status"}>
-                                                    {status === "มีความพร้อม" ? <i className="bi bi-check-circle me-1"></i>
-                                                        : status === "ยังไม่มีความพร้อม" ? <i className="bi bi-exclamation-circle me-1"></i>
-                                                            : <span className="not-evaluated">
-                                                                ยังไม่ประเมินสถานะความพร้อม
-                                                            </span>}
-                                                    {status}
-                                                </span>
-                                            </td>
-                                            <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ยังไม่ได้รับการประเมิน"}</td>
-                                            <td className="text-primary">รายละเอียด</td>
-                                        </tr>
-                                    );
-                                })
-                            ) : (
+                    <div className="table-container">
+                        <table className="table-all tableass table-hover mt-3">
+                            <thead>
                                 <tr>
-                                    <td colSpan="5" style={{ textAlign: "center" }}>
-                                        <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}>
-                                            <span className="not-evaluated">
-                                                ยังไม่ได้รับการประเมิน
-                                            </span>
-                                        </a>
-                                    </td>
+                                    {/* <th >#</th> */}
+                                    <th onClick={() => sortData("createdAt")} style={{ cursor: "pointer" }}>
+                                        วันที่บันทึก{" "}
+                                        <i className={`bi ${sortConfig.key === "createdAt" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
+                                    </th>
+                                    <th onClick={() => sortData("readiness_status")} style={{ cursor: "pointer" }}>
+                                        ผลการประเมินความพร้อม{" "}
+                                        <i className={`bi ${sortConfig.key === "readiness_status" && sortConfig.direction === "asc" ? "bi-caret-up-fill" : "bi-caret-down-fill"} ms-1`}></i>
+                                    </th>
+                                    <th>ผู้บันทึก</th>
+                                    <th>รายละเอียด</th>
                                 </tr>
-                            )}
-                        </tbody>
+                            </thead>
 
-                    </table>
+                            <tbody>
+                                {readinessForms.length > 0 ? (
+                                    readinessForms.map((form, index) => {
+                                        const assessment = readinessAssessments.find(ra => ra.ReadinessForm === form._id);
+                                        const status = assessment?.readiness_status || "";
 
+                                        return (
+                                            <tr
+                                                key={form._id}
+                                                onClick={() => navigate("/detailassessreadiness", { state: { id: form._id } })}
+                                                style={{ cursor: "pointer" }}
+                                            >
+                                                {/* <td >{index + 1}</td> */}
+                                                <td>{formatDate(form.createdAt)}</td>
+                                                <td>
+                                                    <span className={status === "มีความพร้อม" ? "normal-status"
+                                                        : status === "ยังไม่มีความพร้อม" ? "abnormal-status"
+                                                            : "end-of-treatment-status"}>
+                                                        {status === "มีความพร้อม" ? <i className="bi bi-check-circle me-1"></i>
+                                                            : status === "ยังไม่มีความพร้อม" ? <i className="bi bi-exclamation-circle me-1"></i>
+                                                                : <span className="not-evaluated">
+                                                                    ยังไม่ประเมินสถานะความพร้อม
+                                                                </span>}
+                                                        {status}
+                                                    </span>
+                                                </td>
+                                                <td>{form.MPersonnel ? `${form.MPersonnel.nametitle || ''} ${form.MPersonnel.name || ''} ${form.MPersonnel.surname || ''}` : "ยังไม่ได้รับการประเมิน"}</td>
+                                                <td className="text-primary">รายละเอียด</td>
+                                            </tr>
+                                        );
+                                    })
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5" style={{ textAlign: "center" }}>
+                                            <a className="info" onClick={() => navigate("/assessreadinesspage1", { state: { id: userData._id } })}>
+                                                <span className="not-evaluated">
+                                                    ยังไม่ได้รับการประเมิน
+                                                </span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+
+                        </table>
+                        </div>
+                    </div>
                 </div>
-            </div>
         </main>
     );
 }

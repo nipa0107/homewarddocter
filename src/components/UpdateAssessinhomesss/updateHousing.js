@@ -4,7 +4,12 @@ const HousingForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
     const [otherNeighborRelationship, setOtherNeighborRelationship] = useState("");
     const [showOtherInput, setShowOtherInput] = useState(false);
+    const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
 
+    useEffect(() => {
+        // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
+        setIsEdited(JSON.stringify(formValues) !== JSON.stringify(formData));
+    }, [formValues, formData]);
     // ตรวจสอบค่าเริ่มต้นของฟิลด์ "ความสัมพันธ์กับเพื่อนบ้าน"
     useEffect(() => {
         if (formData.neighborRelationship !== "ดี" && formData.neighborRelationship !== "ไม่ดี") {
@@ -60,9 +65,23 @@ const HousingForm = ({ formData, onSave, onClose }) => {
             neighborRelationship: showOtherInput ? otherNeighborRelationship : formValues.neighborRelationship,
         };
 
+        // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
+        if (!isEdited) {
+            const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
+            if (!confirmSave) return;
+        }
+
         onSave(updatedFormValues);
     };
 
+    const handleCancel = () => {
+        // 🔹 ถ้ามีการแก้ไขแล้วกดยกเลิก ให้แสดงแจ้งเตือน
+        if (isEdited) {
+            const confirmExit = window.confirm("ต้องการยกเลิกการแก้ไขหรือไม่?\nหากยกเลิก การแก้ไขที่ไม่ได้บันทึกจะถูกละทิ้ง");
+            if (!confirmExit) return;
+        }
+        onClose(); // ปิด Modal
+    };
 
 
     return (
@@ -78,50 +97,60 @@ const HousingForm = ({ formData, onSave, onClose }) => {
                     <div className="modal-body">
                         <form onSubmit={handleSubmit}>
                             <div className="m-2">
-                                <label className="form-label">ลักษณะบ้าน :</label>
-                                <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                <label className="form-label">ลักษณะบ้าน <span style={{ color: "#666", fontSize: "15px" }}>(เช่น บ้านเดี่ยว อพาร์ตเมนต์ ทาวน์เฮาส์)</span></label>
+                                <textarea
+                                    className="form-control"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                    placeholder="กรอกคำตอบ"
                                     id="houseType"
                                     value={formValues.houseType || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">วัสดุที่ใช้ทำ :</label>
-                                <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                <label className="form-label mt-3">วัสดุที่ใช้ทำ <span style={{ color: "#666", fontSize: "15px" }}>(เช่น ปูนซีเมนต์ ไม้ อิฐ)</span></label>
+                                <textarea
+                                    className="form-control"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                    placeholder="กรอกคำตอบ"
                                     id="material"
                                     value={formValues.material || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">จำนวนชั้น :</label>
+                                <label className="form-label mt-3">จำนวนชั้น <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label>
                                 <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                    type="number"
+                                    className="form-control"
+                                    style={{ width: "35%" }}
+                                    placeholder="กรอกจำนวนชั้น"
                                     id="numFloors"
                                     value={formValues.numFloors || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">จำนวนห้อง :</label>
+                                <label className="form-label mt-3">จำนวนห้อง <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label>
                                 <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                    type="number"
+                                    className="form-control"
+                                    style={{ width: "35%" }}
+                                    placeholder="กรอกจำนวนห้อง"
                                     id="numRooms"
                                     value={formValues.numRooms || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">ผู้ป่วยอาศัยอยู่ชั้นไหน :</label>
+                                <label className="form-label mt-3">ผู้ป่วยอาศัยอยู่ชั้นไหน <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label>
                                 <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                    type="number"
+                                    className="form-control"
+                                    style={{ width: "35%" }}
+                                    placeholder="กรอกตัวเลขชั้น"
                                     id="patientFloor"
                                     value={formValues.patientFloor || ""}
                                     onChange={handleChange}
@@ -260,10 +289,12 @@ const HousingForm = ({ formData, onSave, onClose }) => {
                                 </div>
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆบ้าน (ถ้ามี) :</label>
-                                <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                <label className="form-label mt-3">เลี้ยงสัตว์ใต้ถุนบ้าน/รอบๆบ้าน (ถ้ามี) <span style={{ color: "#666", fontSize: "15px" }}>(ชนิดของสัตว์ เช่น ไก่ สุนัข แมว วัว ควาย)</span></label>
+                                <textarea
+                                    className="form-control"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                    placeholder="กรอกชนิดของสัตว์"
                                     id="homeEnvironment_petType"
                                     value={formValues.homeEnvironment_petType || ""}
                                     onChange={handleChange}
@@ -271,19 +302,23 @@ const HousingForm = ({ formData, onSave, onClose }) => {
                             </div>
                             <div className="m-2">
                                 <label className="form-label mt-3">อื่นๆ (ถ้ามี) :</label>
-                                <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                <textarea
+                                    className="form-control"
+                                    rows="2"
+                                    style={{ resize: "vertical" }}
+                                    placeholder="กรอกคำตอบ"
                                     id="otherHomeEnvironment"
                                     value={formValues.otherHomeEnvironment || ""}
                                     onChange={handleChange}
                                 />
                             </div>
                             <div className="m-2">
-                                <label className="form-label mt-3">จำนวนเพื่อนบ้าน :</label>
+                                <label className="form-label mt-3">จำนวนเพื่อนบ้าน <span style={{ color: "#666", fontSize: "15px" }}>(ระบุเป็นตัวเลข เช่น 1,2,3)</span></label>
                                 <input
-                                    type="text"
-                                    className="form-control mt-1"
+                                    type="number"
+                                    className="form-control"
+                                    style={{ width: "40%" }}
+                                    placeholder="กรอกจำนวนเพื่อนบ้าน"
                                     id="patientFloor"
                                     value={formValues.patientFloor || ""}
                                     onChange={handleChange}
@@ -369,7 +404,7 @@ const HousingForm = ({ formData, onSave, onClose }) => {
                     </div>
                     {/* Footer */}
                     <div className="modal-footer d-flex justify-content-between">
-                        <button className="btn-EditMode btn-secondary" onClick={onClose}>ยกเลิก</button>
+                        <button className="btn-EditMode btn-secondary" onClick={handleCancel}>ยกเลิก</button>
                         <button className="btn-EditMode btnsave" onClick={handleSubmit}>บันทึก</button>
                     </div>
                 </div>

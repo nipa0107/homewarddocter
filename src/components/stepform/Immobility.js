@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Controller } from 'react-hook-form';
 import CountUp from 'react-countup';
 
-export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, showError, setShowError, control }) => {
+export const Immobility = ({ Immobilitydata, setImmobilityData, setHasError, showError, setShowError, control,userid }) => {
   const [totalScore, setTotalScore] = useState(null);
   const [group, setGroup] = useState('');
+  
+  // const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
 
   const scoreKeys = [
     'Pick_up_food', 'Clean_up', 'Put_on_clothes', 'Shower', 'Using_the_toilet',

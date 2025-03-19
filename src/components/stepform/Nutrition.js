@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Controller, useFormContext } from 'react-hook-form';
 import CountUp from 'react-countup';
 
-export const Nutrition = ({ onDataChange, setValidateForm }) => {
+export const Nutrition = ({ onDataChange, setValidateForm,userid }) => {
   const { control, getValues, setValue } = useFormContext();
   const location = useLocation();
   const { id } = location.state;
@@ -15,8 +15,10 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
   const [bmr, setBmr] = useState(0);
   const [tdee, setTdee] = useState(0);
 
+  const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
+
   const [nutritionData, setNutritionData] = useState(() => {
-    return JSON.parse(localStorage.getItem('nutritionData')) || {
+    return JSON.parse(localStorage.getItem(getLocalStorageKey(userid,'nutritionData'))) || {
       weight: "", height: "", bmr: 0, tdee: 0, activityLevel: "",
       intakeMethod: [], foodTypes: [], medicalFood: "", favoriteFood: "",
       cooks: [], nutritionStatus: ""
@@ -30,8 +32,11 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
   }, [setValue, nutritionData]);
 
   useEffect(() => {
-    localStorage.setItem('nutritionData', JSON.stringify(nutritionData));
-  }, [nutritionData]);
+    if (userid) {
+      localStorage.setItem(getLocalStorageKey(userid,"nutritionData"), JSON.stringify(nutritionData));
+  }
+
+  }, [nutritionData, userid]);
   
   const activityFactors = {
     sedentary: 1.2,
@@ -262,8 +267,8 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
           <label style={{ marginLeft: '10px', color: "#444" }}>{userAge} ปี {userAgeInMonths} เดือน</label>
         </div>
         <div className='m-1'>
-          <label className="form-label ms-4 mb-0">น้ำหนัก (กก.)</label>
-          <span style={{ color: 'red' }}> *</span><br></br>
+          <label className="form-label ms-4 mb-0">น้ำหนัก (กก.)<span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}> กรอกน้ำหนักเป็นตัวเลขหรือทศนิยม เช่น 40, 50.5</span></label>
+          <br></br>
           <div className='ms-4 me-4'>
             <Controller
               name="weight"
@@ -284,13 +289,13 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
                 />
               )}
             />
-            <span style={{ color: "#666", fontSize: "15px" }}>กรอกน้ำหนักเป็นตัวเลขหรือทศนิยม เช่น 40, 50.5</span>
+            
           </div>
           {errors.weight && <div className="ms-4" style={{ color: "red" }}>{errors.weight}</div>}
         </div>
         <div className='m-1'>
-          <label className="form-label mt-2 ms-4 mb-0">ส่วนสูง (ซม.)</label>
-          <span style={{ color: 'red' }}> *</span><br></br>
+          <label className="form-label mt-2 ms-4 mb-0">ส่วนสูง (ซม.) <span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}>กรอกส่วนสูงเป็นตัวเลขหรือทศนิยม เช่น 145, 165.5</span></label>
+          <br></br>
           <div className='ms-4 me-4'>
             <Controller
               name="height"
@@ -311,7 +316,7 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
                 />
               )}
             />
-            <span style={{ color: "#666", fontSize: "15px" }}>กรอกส่วนสูงเป็นตัวเลขหรือทศนิยม เช่น 145, 165.5</span>
+            
           </div>
           {errors.height && <div className="ms-4" style={{ color: "red" }}>{errors.height}</div>}
         </div>
@@ -659,7 +664,7 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
       </div>
       <div className="info3 card mt-3">
         <div className='m-1'>
-          <label className="form-label mt-3 ms-4 mb-0 ">อาหารทางการแพทย์ <span style={{ color: 'red' }}> *</span></label><br></br>
+          <label className="form-label mt-3 ms-4 mb-0 ">อาหารทางการแพทย์ <span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}>(ระบุชื่อผลิตภัณฑ์ หากไม่มี ให้พิมพ์ "ไม่มี" )</span></label><br></br>
           <div className="ms-4 me-4">
             <Controller
               name="medicalFood"
@@ -688,7 +693,7 @@ export const Nutrition = ({ onDataChange, setValidateForm }) => {
           {errors.medicalFood && <div className="ms-4" style={{ color: "red" }}>{errors.medicalFood}</div>}
         </div>
         <div className='m-1 mb-4'>
-          <label className="form-label mt-3 ms-4 mb-0">อาหารที่ชอบ <span style={{ color: 'red' }}> *</span></label><br></br>
+          <label className="form-label mt-3 ms-4 mb-0">อาหารที่ชอบ <span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}>(ระบุประเภทอาหาร เช่น ข้าวผัด หากไม่มี ให้พิมพ์ "ไม่มี")</span></label><br></br>
           <div className="ms-4 me-4">
             <Controller
               name="favoriteFood"

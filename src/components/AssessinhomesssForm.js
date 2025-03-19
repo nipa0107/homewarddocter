@@ -552,9 +552,12 @@ export default function AssessinhomesssForm({ }) {
 
     const [validateForm, setValidateForm] = useState(() => () => true);
 
+    /** ✅ ฟังก์ชันสร้าง Key สำหรับ LocalStorage ตาม userId */
+    const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
+
     // โหลดข้อมูลจาก LocalStorage เมื่อเปิดหน้า
     const [Immobilitydata, setImmobilityData] = useState(() => {
-        return JSON.parse(localStorage.getItem('immobilityData')) || {
+        return JSON.parse(localStorage.getItem(getLocalStorageKey(userid, "immobilityData"))) || {
             Pick_up_food: 0, Clean_up: 0, Put_on_clothes: 0, Shower: 0, Using_the_toilet: 0,
             Get_up: 0, Walk_inside: 0, Up_down_stairs: 0, Continence_urine: 0, Continence_stool: 0,
             Walk_outside: 0, Cooking: 0, Household_chores: 0, Shopping: 0, Taking_public_transportation: 0,
@@ -563,28 +566,57 @@ export default function AssessinhomesssForm({ }) {
     });
 
     const [nutritionData, setNutritionData] = useState(() => {
-        return JSON.parse(localStorage.getItem('nutritionData')) || {
-          weight: "", height: "", bmr: 0, tdee: 0, activityLevel: "",
-          intakeMethod: [], foodTypes: [], medicalFood: "", favoriteFood: "",
-          cooks: [], nutritionStatus: ""
+        return JSON.parse(localStorage.getItem(getLocalStorageKey(userid, 'nutritionData'))) || {
+            weight: "", height: "", bmr: 0, tdee: 0, activityLevel: "",
+            intakeMethod: [], foodTypes: [], medicalFood: "", favoriteFood: "",
+            cooks: [], nutritionStatus: ""
         };
-      });
-    const [HousingData, setHousingData] = useState(() => JSON.parse(localStorage.getItem('housingData')) || {});
-    const [medicationData, setMedicationData] = useState(() => JSON.parse(localStorage.getItem('medicationData')) || {});
-    const [PhysicalexaminationData, setPhysicalexaminationData] = useState(() => JSON.parse(localStorage.getItem('physicalExaminationData')) || {});
-    const [sssData, setsssData] = useState(() => JSON.parse(localStorage.getItem('sssData')) || {});
-    const [OtherpeopleData, setOtherpeopleData] = useState(() => JSON.parse(localStorage.getItem('otherPeopleData')) || []);
+    });
+    const [HousingData, setHousingData] = useState(() => {
+        return JSON.parse(localStorage.getItem(getLocalStorageKey(userid, 'housingData'))) || {
+        };
+    });
+
+    const [medicationData, setMedicationData] = useState(() =>{
+        return JSON.parse(localStorage.getItem(getLocalStorageKey(userid,'medicationData'))) || {
+        };
+    });
+
+    const [PhysicalexaminationData, setPhysicalexaminationData] = useState(() => {
+        return JSON.parse(localStorage.getItem(getLocalStorageKey(userid,'physicalExaminationData'))) || {
+        };
+    });
+
+    const [sssData, setsssData] = useState(() => {
+        return JSON.parse(localStorage.getItem(getLocalStorageKey(userid,'sssData'))) || {
+        };
+    });
+
+    const [OtherpeopleData, setOtherpeopleData] = useState(() =>
+        JSON.parse(localStorage.getItem(getLocalStorageKey(userId, "otherPeopleData"))) || []
+    );
 
     // บันทึกข้อมูลลง LocalStorage ทุกครั้งที่เปลี่ยนแปลง
     useEffect(() => {
-        localStorage.setItem('immobilityData', JSON.stringify(Immobilitydata));
-        localStorage.setItem('nutritionData', JSON.stringify(nutritionData));
-        localStorage.setItem('housingData', JSON.stringify(HousingData));
-        localStorage.setItem('medicationData', JSON.stringify(medicationData));
-        localStorage.setItem('physicalExaminationData', JSON.stringify(PhysicalexaminationData));
-        localStorage.setItem('sssData', JSON.stringify(sssData));
-        localStorage.setItem('otherPeopleData', JSON.stringify(OtherpeopleData));
+        localStorage.setItem(getLocalStorageKey(userid,'immobilityData'), JSON.stringify(Immobilitydata));
+        localStorage.setItem(getLocalStorageKey(userid,'nutritionData'), JSON.stringify(nutritionData));
+        localStorage.setItem(getLocalStorageKey(userid,'housingData'), JSON.stringify(HousingData));
+        localStorage.setItem(getLocalStorageKey(userid,'medicationData'), JSON.stringify(medicationData));
+        localStorage.setItem(getLocalStorageKey(userid,'physicalExaminationData'), JSON.stringify(PhysicalexaminationData));
+        localStorage.setItem(getLocalStorageKey(userid,'sssData'), JSON.stringify(sssData));
+        localStorage.setItem(getLocalStorageKey(userid,'otherPeopleData'), JSON.stringify(OtherpeopleData));
     }, [Immobilitydata, nutritionData, HousingData, medicationData, PhysicalexaminationData, sssData, OtherpeopleData]);
+
+    const clearUserLocalStorage = () => {
+        if (!userid) return; // ป้องกันการล้างข้อมูลผิดพลาด
+        localStorage.removeItem(getLocalStorageKey('immobilityData'));
+        localStorage.removeItem(getLocalStorageKey('nutritionData'));
+        localStorage.removeItem(getLocalStorageKey('housingData'));
+        localStorage.removeItem(getLocalStorageKey('medicationData'));
+        localStorage.removeItem(getLocalStorageKey('physicalExaminationData'));
+        localStorage.removeItem(getLocalStorageKey('sssData'));
+        localStorage.removeItem(getLocalStorageKey('otherPeopleData'));
+    };
 
     const handleNext = async (data) => {
         console.log("Form data at step", activeStep, data);
@@ -686,14 +718,15 @@ export default function AssessinhomesssForm({ }) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
 
                     // ล้างค่า LocalStorage
-                    localStorage.removeItem('immobilityData');
-                    localStorage.removeItem('nutritionData');
-                    localStorage.removeItem('housingData');
-                    localStorage.removeItem('medicationData');
-                    localStorage.removeItem('physicalExaminationData');
-                    localStorage.removeItem('sssData');
-                    localStorage.removeItem('otherPeopleData');
+                    clearUserLocalStorage();
 
+                    setImmobilityData(() => ({}));
+                    setNutritionData(() => ({}));
+                    setHousingData(() => ({}));
+                    setOtherpeopleData(() => ({}));
+                    setMedicationData(() => ({}));
+                    setPhysicalexaminationData(() => ({}));
+                    setsssData(() => ({}));
                     setTimeout(() => {
                         navigate("/assessinhomesssuser", { state: { id } });
                     }, 1000);
@@ -710,44 +743,16 @@ export default function AssessinhomesssForm({ }) {
         } else {
             // หากไม่ใช่หน้าสุดท้าย ให้เลื่อนไปยังหน้าถัดไป
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
-            window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนหน้าไปด้านบนสุด
+            window.scrollTo(0, 0); // เลื่อนหน้าไปด้านบนสุด
         }
 
     };
 
 
     const handleBack = () => {
-        window.scrollTo({ top: 0, behavior: "smooth" }); // เลื่อนหน้าไปด้านบนสุด
+        window.scrollTo(0, 0); // เลื่อนหน้าไปด้านบนสุด
         setActiveStep((prevActiveStep) => prevActiveStep - 1);
     };
-
-
-    // const [Immobilitydata, setImmobilityData] = useState({
-    //     Pick_up_food: 0,
-    //     Clean_up: 0,
-    //     Put_on_clothes: 0,
-    //     Shower: 0,
-    //     Using_the_toilet: 0,
-    //     Get_up: 0,
-    //     Walk_inside: 0,
-    //     Up_down_stairs: 0,
-    //     Continence_urine: 0,
-    //     Continence_stool: 0,
-    //     Walk_outside: 0,
-    //     Cooking: 0,
-    //     Household_chores: 0,
-    //     Shopping: 0,
-    //     Taking_public_transportation: 0,
-    //     Taking_medicine: 0,
-    //     totalScore: 0
-    // });
-    // const [nutritionData, setNutritionData] = useState({});
-    // const [HousingData, setHousingData] = useState({});
-
-    // const [medicationData, setMedicationData] = useState({});
-    // const [PhysicalexaminationData, setPhysicalexaminationData] = useState({});
-    // const [sssData, setsssData] = useState({});
-    // const [OtherpeopleData, setOtherpeopleData] = useState([]);
 
 
     useEffect(() => {
@@ -981,25 +986,25 @@ export default function AssessinhomesssForm({ }) {
                                     <FormProvider {...methods}>
                                         <form onSubmit={methods.handleSubmit(handleNext)}>
                                             {activeStep === 0 && (
-                                                <Immobility Immobilitydata={Immobilitydata} setImmobilityData={setImmobilityData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
+                                                <Immobility userid={userid} Immobilitydata={Immobilitydata} setImmobilityData={setImmobilityData} setHasError={setHasError} showError={showError} setShowError={setShowError} />
                                             )}
                                             {activeStep === 1 && (
-                                                <Nutrition onDataChange={(data) => setNutritionData(data)} setValidateForm={setValidateForm} />
+                                                <Nutrition userid={userid} onDataChange={(data) => setNutritionData(data)} setValidateForm={setValidateForm} />
                                             )}
                                             {activeStep === 2 && (
-                                                <Housing onDataChange={(data) => setHousingData(data)} />
+                                                <Housing userid={userid} onDataChange={(data) => setHousingData(data)} />
                                             )}
                                             {activeStep === 3 && (
-                                                <Otherpeople onDataChange={(data) => setOtherpeopleData(data)} />
+                                                <Otherpeople userid={userid} onDataChange={(data) => setOtherpeopleData(data)} />
                                             )}
                                             {activeStep === 4 && (
-                                                <Medication onDataChange={(data) => setMedicationData(data)} />
+                                                <Medication userid={userid} onDataChange={(data) => setMedicationData(data)} />
                                             )}
                                             {activeStep === 5 && (
-                                                <Physicalexamination onDataChange={(data) => setPhysicalexaminationData(data)} />
+                                                <Physicalexamination userid={userid} onDataChange={(data) => setPhysicalexaminationData(data)} />
                                             )}
                                             {activeStep === 6 && (
-                                                <SSS onDataChange={(data) => setsssData(data)} />
+                                                <SSS userid={userid} onDataChange={(data) => setsssData(data)} />
                                             )}
                                             <div className="btn-group">
                                                 <div className="btn-pre">

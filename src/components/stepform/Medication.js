@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const Medication = ({ onDataChange }) => {
+export const Medication = ({userid, onDataChange }) => {
   const { register, control, setValue, getValues } = useFormContext();
-  
+
+  const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
+
   useEffect(() => {
-    // Load stored data from localStorage
-    const savedData = JSON.parse(localStorage.getItem("medicationData")) || {};
+    if (!userid) return;
+    const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey(userid, "medicationData"))) || {};
+
     Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
     onDataChange(getValues());
-  }, []);
+  }, [userid]);
 
   const handleInputChange = (name, value) => {
     setValue(name, value);
     const updatedValues = { ...getValues(), [name]: value };
-    localStorage.setItem("medicationData", JSON.stringify(updatedValues));
+    localStorage.setItem(getLocalStorageKey(userid, "medicationData"), JSON.stringify(updatedValues));
     onDataChange(updatedValues);
   };
   

@@ -3,16 +3,18 @@ import { Controller, set, useFormContext } from 'react-hook-form';
 import CountUp from 'react-countup';
 import Paper from '../../img/exam.png'
 
-export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShowError, control }) => {
+export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShowError, control,userid }) => {
     const [totalScore, setTotalScore] = useState(0);
     const [burdenMessage, setBurdenMessage] = useState('');
+
+    // ฟังก์ชันสร้างคีย์สำหรับ localStorage โดยใช้ userId
+const getLocalStorageKey = (key) => `ZaritData_${userid}_${key}`;
 
     const scoreKeys = [
         'question_1', 'question_2', 'question_3', 'question_4', 'question_5',
         'question_6', 'question_7', 'question_8', 'question_9', 'question_10',
         'question_11', 'question_12'
     ];
-
 
     useEffect(() => {
         calculateTotalScore();
@@ -47,7 +49,7 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
         const hasError = fieldErrors[name];
         return (
             <div className="card m-3 mt-4"
-                style={{ width: "100%", border: (hasError && showError) ? "1px solid red" : "1px solid #dee2e6" }}>
+                style={{ border: (hasError && showError) ? "1px solid red" : "1px solid #dee2e6" }}>
                 <div className="card-header pt-3" style={{ backgroundColor: "#e8f5fd" }}>
                     <p>{label}<span style={{ color: 'red' }}> *</span></p>
                 </div>
@@ -93,7 +95,8 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
     const { reset, setValue } = useFormContext();
 
     useEffect(() => {
-        const savedData = JSON.parse(localStorage.getItem("ZaritData"));
+        if (!userid) return;
+        const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey("ZaritData")));
         if (savedData) {
             setZaritData(savedData);
 
@@ -102,10 +105,14 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
                 setValue(key, String(savedData[key])); // ใช้ String() เพื่อให้ค่าตรงกับ radio button
             });
         }
-    }, [setValue]);
-    useEffect(() => {
-        localStorage.setItem("ZaritData", JSON.stringify(ZaritData));
-    }, [ZaritData]);
+    }, [userid,setValue]);
+
+       /** ✅ อัปเดต `localStorage` เมื่อมีการเปลี่ยนแปลงค่า */
+       useEffect(() => {
+        if (userid) {
+            localStorage.setItem(getLocalStorageKey("ZaritData"), JSON.stringify(ZaritData));
+        }
+    }, [ZaritData, userid]);
     
     // ฟังก์ชันเคลียร์ข้อมูลทั้งหมด โดยเคลียร์ทั้ง state ของคุณเองและ state ใน react-hook-form
     const clearAllAnswers = () => {
@@ -172,7 +179,7 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
                         เคลียร์คำตอบ
                     </span>
                 </div>
-                <div className="card m-3 mt-4 shadow mb-5 rounded" style={{ width: "100%", backgroundColor: "#95d7ff", border: "none" }}>
+                <div className="card m-3 mt-4 shadow mb-5 rounded" style={{ backgroundColor: "#95d7ff", border: "none" }}>
                     <div className="card-body" >
                         <div className="row" style={{ marginLeft: "1px" }}>
                             <h4 className='text-center' >ประเมินผลคะแนน</h4>

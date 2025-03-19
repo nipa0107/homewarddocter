@@ -1,6 +1,7 @@
 .container-form {
     background-color: #e8f5fd;
-    padding: 5em;
+    padding-top: 5em;
+    padding-bottom: 3em;
     min-height: 100vh;
     margin-top: 40px !important;
 }
@@ -9,23 +10,23 @@
     justify-content: center !important;
 }
 
+/* ✅ ปรับ formcontent ให้อยู่กึ่งกลางของหน้า */
 .formcontent {
     background-color: white;
-    position: relative;
-    width: 70%;
-    padding: 1em;
+    width: 80%;
+    max-width: 900px;
+    /* กำหนดขนาดสูงสุดของฟอร์ม */
+    padding: 1.5em;
     border-radius: 8px;
-    border-left: 1px solid #ddd;
-    /* ขอบด้านซ้าย */
-    border-right: 1px solid #ddd;
-    /* ขอบด้านขวา */
+    border: 1px solid #ddd;
     border-top: 5px solid #87CEFA;
-    /* ขอบบนเป็นสีฟ้า */
-    border-bottom: 2px solid #87CEFA;
-    /* ขอบล่างเป็นสีฟ้า */
-    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.1);
-    margin-right: auto;
-    margin-left: auto;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    /* กึ่งกลางแนวนอน */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* จัดให้เนื้อหาภายในฟอร์มอยู่กึ่งกลาง */
 }
 
 .formcontent .row {
@@ -758,11 +759,12 @@ textarea {
     border: none;
     cursor: pointer;
 } */
-.stepper {
-    margin-bottom: 40px;
-    width: 70%;
-    margin-right: auto;
+/* ✅ คง stepper ไว้ด้านบน */
+.stepper .MuiStepper-root {
+    width: 80%;
     margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 40px;
 }
 
 .homeheader {
@@ -861,9 +863,28 @@ textarea {
     /* Hover → สีฟ้าเข้มขึ้น */
 }
 
-@media screen and (max-width: 767px) {
+.assessment-tabs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    margin: 16px auto;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    /* ป้องกันขอบมนเกินไป */
+    background: #f1f1f1;
+    margin-top: 40px;
+}
 
-    /* ประเมิน */
+/* ประเมิน */
+@media screen and (max-width: 1080px) {
+
+    .assessment-tabs {
+        width: 60%;
+    }
+}
+
+@media screen and (max-width: 768px) {
     .homeheaderform .links_name {
         display: none;
     }
@@ -872,99 +893,88 @@ textarea {
         padding: 0.7rem;
     }
 
-    .container-form {
-        width: 120%;
-        padding-left: 1.1rem;
-        padding-right: 3.6rem;
 
+    /* .assessment-tabs {
+        width: 90% !important;
+    } */
+}
+
+@media screen and (max-width: 992px) {
+    .col-sm-2 {
+        width: 20%;
+    }
+
+    .col-sm-9 {
+        width: 80%;
+    }
+
+    .col-sm-3 {
+        width: 40%;
+    }
+
+    .col-sm-4 {
+        width: 30%;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .stepper {
+        display: none;
     }
 
     .formcontent {
-        width: 110%;
-        /* ปรับให้เต็มจอมือถือ */
-        padding: 0.8rem;
-        /* ลด padding */
-        border-radius: 5px;
-        /* ลดขอบโค้ง */
+        padding: 0.5em;
+        /* ลด padding ด้านในของ formcontent */
+        margin: auto;
+        max-width: 90vw;
+        width: 640px;
+    }
 
+    .form-content {
+        margin-left: auto;
+        margin-right: auto;
+        width: 100%;
+        /* ลดระยะขอบซ้ายขวาให้แนบกับขอบจอมากขึ้น */
+    }
+
+    .form-content .card {
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .formcontent .row {
         display: flex;
         flex-direction: column;
-        /* เปลี่ยนจาก row เป็น column */
         gap: 10px;
-        /* เพิ่มระยะห่างระหว่าง sections */
-    }
-
-    .col-4 {
-        width: 100% !important;
-        /* ให้แต่ละ section กว้างเต็มจอ */
-    }
-
-    .col-8 {
-        width: 120% !important;
-        /* ให้แต่ละ section กว้างเต็มจอ */
-        margin-right: auto;
-        margin-left: auto;
-    }
-
-    .info3.card {
-        width: 107%;
-        margin-left: -14px;
-    }
-
-    .info3.card .header {
-        padding: 10px;
-    }
-
-
-    .btn-next button {
-        width: 100%;
-        /* ปรับให้ปุ่มกว้างเต็มจอ */
-    }
-
-    .stepper .MuiStepper-root {
-        width: 100%;
-        /* ให้ Stepper กว้างเต็มจอ */
-        margin-top: -10px;
-        margin-left: -25px;
-    }
-
-    .stepper .MuiStep-root {
-        min-width: 60px;
-        /* กำหนดความกว้างของแต่ละ Step */
-        flex: 1;
-    }
-
-    .stepper .MuiStepLabel-label {
-        font-size: 14px !important;
-        /* ลดขนาดตัวอักษร */
-        text-align: center;
-        display: none
-    }
-
-    .stepper .MuiStepIcon-root {
-        width: 24px !important;
-        /* ลดขนาดไอคอน */
-        height: 24px !important;
-    }
-
-    .description {
-        line-height: 50px;
-        /* ปรับระยะห่างระหว่างบรรทัด */
-        font-size: 14px;
-        /* ลดขนาดตัวอักษร */
-        padding: 5px;
-        /* ลด padding ด้านใน */
     }
 }
 
-@media screen and (max-width: 400px) {
-    .container-form {
-        width: 140%;
-        padding-left: 1.1rem;
-        padding-right: 3.6rem;
+/* แก้ตารางประเมินที่มันเคลื่อน */
+.table-container {
+    min-height: 400px;
+    /* กำหนดความสูงขั้นต่ำของตาราง */
 
-    }
+    /* จำกัดความสูงเพื่อให้ scrollbar แสดงเมื่อมีข้อมูลมาก */
+    overflow-y: auto;
+    /* เพิ่ม scrollbar เมื่อมีข้อมูลเยอะ */
+    overflow-x: auto;
+    /* ป้องกัน overflow ของตารางกว้าง */
+    width: 100%;
+    /* ให้ตารางกว้างเต็มพื้นที่ */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.tableass {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableass th,
+.tableass td {
+    white-space: nowrap;
+    /* ป้องกันการตัดคำในเซลล์ */
+    padding: 12px;
+    text-align: center;
 }

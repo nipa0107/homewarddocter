@@ -291,26 +291,26 @@ export default function Infopatient({ }) {
     useEffect(() => {
         const fetchCaregiverData = async () => {
             try {
-              const response = await fetch(
-                `https://backend-deploy-render-mxok.onrender.com/getcaregiver/${id}`
-              );
-              const caregiverData = await response.json();
-              if (caregiverData.status === "ok") {
-                setCaregiverInfo(caregiverData.data);
-                setCaregiverName(caregiverData.data.name);
-                setCaregiverSurname(caregiverData.data.surname);
-                setCaregiverTel(caregiverData.data.tel);
-                setRelationship(caregiverData.data.Relationship);
-              }
-              console.log("caregiverData", caregiverInfo);
+                const response = await fetch(
+                    `https://backend-deploy-render-mxok.onrender.com/getcaregiver/${id}`
+                );
+                const caregiverData = await response.json();
+                if (caregiverData.status === "ok") {
+                    setCaregiverInfo(caregiverData.data);
+                    setCaregiverName(caregiverData.data.name);
+                    setCaregiverSurname(caregiverData.data.surname);
+                    setCaregiverTel(caregiverData.data.tel);
+                    setRelationship(caregiverData.data.Relationship);
+                }
+                console.log("caregiverData", caregiverInfo);
             } catch (error) {
-              if (error.response && error.response.status === 404) {
-                setCaregiverInfo(null);
-              } else {
-                console.error("Error fetching caregiver info:", error);
-              }
+                if (error.response && error.response.status === 404) {
+                    setCaregiverInfo(null);
+                } else {
+                    console.error("Error fetching caregiver info:", error);
+                }
             }
-          };
+        };
         fetchCaregiverData();
     }, [id]);
 
@@ -507,7 +507,7 @@ export default function Infopatient({ }) {
     };
 
     useEffect(() => {
-        if (hasFetchedUserData.current) return; 
+        if (hasFetchedUserData.current) return;
         hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
@@ -752,7 +752,7 @@ export default function Infopatient({ }) {
 
     return (
         <main className="body">
-<Sidebar />
+            <Sidebar />
             {showNotifications && (
                 <div className="notifications-dropdown" ref={notificationsRef}>
                     <div className="notifications-head">
@@ -970,7 +970,7 @@ export default function Infopatient({ }) {
                                                         {[
                                                             {
                                                                 label: "เลขประจําตัวประชาชน", value: `${formatIDCardNumber(
-                                                                    caregiver.ID_card_number || "-" 
+                                                                    caregiver.ID_card_number || "-"
                                                                 )}`
                                                             },
                                                             { label: "ชื่อ-สกุล", value: `${caregiver.name || "-"} ${caregiver.surname || "-"}` },
@@ -985,7 +985,12 @@ export default function Infopatient({ }) {
                                                         <div className="col-sm-4 " style={{ color: "#444" }}><p><span>เบอร์โทรศัพท์ :</span></p></div>
                                                         <div className="col-sm-8 d-flex justify-content-between align-items-center fw-bold text-dark">
                                                             <p><span>{caregiver.tel || "-"}</span></p>
-                                                            <button className="button-edit ms-auto p-1" onClick={() => handleEdit(caregiver)}>
+                                                            {/* <button className="button-edit ms-auto p-1" onClick={() => handleEdit(caregiver)}>
+                                                                <i className="bi bi-pencil-square"></i> แก้ไข
+                                                            </button> */}
+                                                        </div>
+                                                        <div className="mt-3 mb-3 d-flex justify-content-center">
+                                                            <button className="button-edit p-1" onClick={() => handleEdit(caregiver)}>
                                                                 <i className="bi bi-pencil-square"></i> แก้ไข
                                                             </button>
                                                         </div>
@@ -1019,7 +1024,7 @@ export default function Infopatient({ }) {
                         </div>
                     </fieldset>
                 </div>
-                <div className="forminfo mb-4">
+                {/* <div className="forminfo mb-4">
                     <fieldset className="user-fieldset">
                         <legend><i className="bi bi-journal-medical"></i> ข้อมูลการเจ็บป่วย</legend>
                         {medicalInfo ? (
@@ -1151,8 +1156,159 @@ export default function Infopatient({ }) {
                             </div>
                         )}
                     </fieldset>
-                </div>
+                </div> */}
+                <div className="forminfo mb-4">
+                    <fieldset className="user-fieldset">
+                        <legend><i className="bi bi-journal-medical"></i> ข้อมูลการเจ็บป่วย</legend>
+                        {medicalInfo ? (
+                            <>
+                                <div className="user-info mt-3">
+                                    <div className="row">
+                                        {[
+                                            { label: "HN", value: medicalInfo.HN || "-" },
+                                            { label: "AN", value: medicalInfo.AN || "-" },
+                                            {
+                                                label: "วันที่ Admit",
+                                                value: medicalInfo.Date_Admit
+                                                    ? new Date(medicalInfo.Date_Admit).toLocaleDateString("th-TH", {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                    })
+                                                    : "-",
+                                            },
+                                            {
+                                                label: "วันที่ D/C",
+                                                value: medicalInfo.Date_DC
+                                                    ? new Date(medicalInfo.Date_DC).toLocaleDateString("th-TH", {
+                                                        day: "numeric",
+                                                        month: "long",
+                                                        year: "numeric",
+                                                    })
+                                                    : "-",
+                                            },
+                                            { label: "Diagnosis", value: medicalInfo.Diagnosis || "-" },
+                                            {
+                                                label: "แพทย์ผู้ดูแล",
+                                                value: (mdata.nametitle || mdata.name || mdata.surname)
+                                                    ? `${mdata.nametitle || ""} ${mdata.name || ""} ${mdata.surname || ""}`.trim()
+                                                    : "-",
+                                            },
+                                        ].map((item, index) => (
+                                            <React.Fragment key={index}>
+                                                <div className="col-sm-5" style={{ color: "#444" }}>
+                                                    <p><span>{item.label} :</span></p>
+                                                </div>
+                                                <div className="col-sm-7">
+                                                    <p><b>{item.value}</b></p>
+                                                </div>
+                                                <div className="w-100 d-none d-md-block"></div>
+                                            </React.Fragment>
+                                        ))}
+                                    </div>
+                                </div>
 
+                                <div className="medical-info-section">
+                                    <div className="row">
+                                        {[
+                                            { label: "Chief complaint", value: medicalInfo.Chief_complaint || "-" },
+                                            { label: "Present illness", value: medicalInfo.Present_illness || "-" },
+                                            {
+                                                label: (
+                                                    <>
+                                                        <i className="bi bi-file-earmark-pdf"></i> File Present illness
+                                                    </>
+                                                ),
+                                                value: medicalInfo.fileP ? (
+                                                    <a
+                                                        className="blue-500"
+                                                        href=""
+                                                        onClick={() => {
+                                                            window.open(`${medicalInfo.fileP}`, "_blank");
+                                                        }}
+                                                    >
+                                                        <b>{medicalInfo.filePName}</b>
+                                                    </a>
+                                                ) : "-",
+                                                isFile: true,
+                                            },
+                                            { label: "Management plan", value: medicalInfo.Management_plan || "-" },
+                                            {
+                                                label: (
+                                                    <>
+                                                        <i className="bi bi-file-earmark-pdf"></i> File Management plan
+                                                    </>
+                                                ),
+                                                value: medicalInfo.fileM ? (
+                                                    <a
+                                                        className="blue-500"
+                                                        href=""
+                                                        onClick={() => {
+                                                            window.open(`${medicalInfo.fileM}`, "_blank");
+                                                        }}
+                                                    >
+                                                        <b>{medicalInfo.fileMName}</b>
+                                                    </a>
+                                                ) : "-",
+                                                isFile: true,
+                                            },
+                                            { label: "Phychosocial assessment", value: medicalInfo.Phychosocial_assessment || "-" },
+                                            {
+                                                label: (
+                                                    <>
+                                                        <i className="bi bi-file-earmark-pdf"></i> File Phychosocial assessment
+                                                    </>
+                                                ),
+                                                value: medicalInfo.filePhy ? (
+                                                    <a
+                                                        className="blue-500"
+                                                        href=""
+                                                        onClick={() => {
+                                                            window.open(`${medicalInfo.filePhy}`, "_blank");
+                                                        }}
+                                                    >
+                                                        <b>{medicalInfo.fileMName}</b>
+                                                    </a>
+                                                ) : "-",
+                                                isFile: true,
+                                            },
+                                        ].map((item, index) => {
+                                            const isLongText = typeof item.value === "string" && item.value.length > 50;
+                                            return (
+                                                <React.Fragment key={index}>
+                                                    <div className={`col-sm-5 ${item.isFile ? "file-label" : ""}`} style={{ color: "#444" }}>
+                                                        <p><span>{item.label} :</span></p>
+                                                    </div>
+                                                    <div className={`col-sm-7 ${isLongText ? "long-text" : "short-text"}`}>
+                                                        {typeof item.value === "string" ? (
+                                                            <p><b>{item.value}</b></p>
+                                                        ) : (
+                                                            item.value
+                                                        )}
+                                                    </div>
+                                                    <div className="w-100 d-none d-md-block"></div>
+                                                </React.Fragment>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+
+                                <div className="btn-group mb-4">
+                                    <div className="editimg1">
+                                        <button onClick={() => navigate("/updatemedicalinformation", { state: { id } })}>
+                                            <i className="bi bi-pencil-square"></i> แก้ไข
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div>
+                                <p className="no-equipment">ไม่พบข้อมูล</p>
+                            </div>
+                        )}
+                    </fieldset>
+                </div>
                 <div className="forminfo mb-1">
                     <fieldset className="user-fieldset">
                         <legend>

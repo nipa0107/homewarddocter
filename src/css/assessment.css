@@ -135,7 +135,7 @@
 
 .btn-outline {
   border: 1px solid #ccc;
-  background-color: transparent;
+  /* background-color: transparent; */
 }
 
 .btn-normal {

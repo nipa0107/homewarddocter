@@ -6,6 +6,12 @@ const ZaritburdeninterviewForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
     const [totalScore, setTotalScore] = useState(0);
     const [burdenMessage, setBurdenMessage] = useState("");
+const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
+
+    useEffect(() => {
+        // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
+        setIsEdited(JSON.stringify(formValues) !== JSON.stringify(formData));
+    }, [formValues, formData]);
 
     useEffect(() => {
         calculateTotalScore();
@@ -41,9 +47,21 @@ const ZaritburdeninterviewForm = ({ formData, onSave, onClose }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+                // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
+                if (!isEdited) {
+                    const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
+                    if (!confirmSave) return;
+                }
         onSave({ ...formValues, totalScore });
     };
-
+    const handleCancel = () => {
+        // 🔹 ถ้ามีการแก้ไขแล้วกดยกเลิก ให้แสดงแจ้งเตือน
+        if (isEdited) {
+            const confirmExit = window.confirm("ต้องการยกเลิกการแก้ไขหรือไม่?\nหากยกเลิก การแก้ไขที่ไม่ได้บันทึกจะถูกละทิ้ง");
+            if (!confirmExit) return;
+        }
+        onClose(); // ปิด Modal
+    };
     const renderRadioGroup = (label, name) => (
         <div className="m-1">
             <label className="form-label ms-2 mb-0 mt-3">{label} <span style={{ color: 'red' }}> *</span></label>
@@ -131,7 +149,7 @@ const ZaritburdeninterviewForm = ({ formData, onSave, onClose }) => {
 
                     {/* Footer */}
                     <div className="modal-footer d-flex justify-content-between">
-                        <button className="btn-EditMode btn-secondary" onClick={onClose}>
+                        <button className="btn-EditMode btn-secondary" onClick={handleCancel}>
                             ยกเลิก
                         </button>
                         <button className="btn-EditMode btnsave" onClick={handleSubmit}>

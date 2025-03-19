@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import Collapse from '@mui/material/Collapse';
 
-export const CaregiverAssessment = ({ onDataChange }) => {
+export const CaregiverAssessment = ({ userid,onDataChange }) => {
   const { control, getValues } = useFormContext();
   const { fields: existingCaregivers, replace: replaceExisting } = useFieldArray({ control, name: "existingCaregivers" });
   const { fields: newCaregivers, replace: replaceNew } = useFieldArray({ control, name: "newCaregivers" });
@@ -11,8 +11,11 @@ export const CaregiverAssessment = ({ onDataChange }) => {
   const location = useLocation();
   const { id } = location.state || {};
 
+   const getLocalStorageKey = (key) =>  `agenda_${userid}_${key}`;
+
   useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem("careAssessmentData"));
+    if (!userid) return; // ถ้า userId ไม่มีค่าให้หยุดทำงาน
+    const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey("careAssessmentData")));
   
     if (savedData) {
       console.log("Loaded from localStorage:", savedData); // ✅ Debugging
@@ -27,14 +30,16 @@ export const CaregiverAssessment = ({ onDataChange }) => {
       replaceExisting(savedData.existingCaregivers);
       replaceNew(savedData.newCaregivers);
     }
-  }, []); // ✅ โหลดครั้งเดียวเมื่อ component mount
+  }, [userid]); // ✅ โหลดครั้งเดียวเมื่อ component mount
 
   useEffect(() => {
-    localStorage.setItem("careAssessmentData", JSON.stringify({
+    if (userid) {
+      localStorage.setItem(getLocalStorageKey("careAssessmentData"), JSON.stringify({
       existingCaregivers: getValues("existingCaregivers") || [],
       newCaregivers: getValues("newCaregivers") || []
     }));
-  }, [existingCaregivers, newCaregivers, getValues]);
+  }
+  }, [existingCaregivers, newCaregivers, getValues, userid]);
 
   useEffect(() => {
     handleFieldChange(); // อัปเดตข้อมูลเมื่อ existingCaregivers เปลี่ยนแปลง
@@ -162,6 +167,13 @@ export const CaregiverAssessment = ({ onDataChange }) => {
       existingCaregivers: existingData,
       newCaregivers: newData,
     });
+
+    if (userid) {
+      localStorage.setItem(getLocalStorageKey("careAssessmentData"), JSON.stringify({
+        existingCaregivers: existingData,
+        newCaregivers: newData,
+      }));
+    }
   };
 
   return (
@@ -187,7 +199,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
               </span>
               <Collapse in={openIndex.existing === index}>
                 <div>
-                  <label className="form-label mt-2">Care (ดูแลเรื่องอะไรบ้าง) </label>
+                  <label className="form-label mt-2">Care <span style={{ color: "#666", fontSize: "15px" }}>(ดูแลเรื่องอะไรบ้าง)</span> </label>
                   <Controller
                     name={`existingCaregivers.${index}.care`}
                     control={control}
@@ -203,7 +215,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Affection (ส่งผลต่อตนเองอย่างไรบ้าง) </label>
+                  <label className="form-label mt-4">Affection <span style={{ color: "#666", fontSize: "15px" }}>(ส่งผลต่อตนเองอย่างไรบ้าง)</span> </label>
                   <Controller
                     name={`existingCaregivers.${index}.affection`}
                     control={control}
@@ -219,7 +231,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Rest (มีเวลาพักผ่อนบ้างหรือไม่) </label>
+                  <label className="form-label mt-4">Rest <span style={{ color: "#666", fontSize: "15px" }}>(มีเวลาพักผ่อนบ้างหรือไม่)</span> </label>
                   <Controller
                     name={`existingCaregivers.${index}.rest`}
                     control={control}
@@ -235,7 +247,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Empathy (การแสดงความเข้าอกเข้าใจเป็นอย่างไรบ้าง) </label>
+                  <label className="form-label mt-4">Empathy <span style={{ color: "#666", fontSize: "15px" }}>(การแสดงความเข้าอกเข้าใจเป็นอย่างไรบ้าง) </span></label>
                   <Controller
                     name={`existingCaregivers.${index}.empathy`}
                     control={control}
@@ -251,7 +263,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Goal of care (เป้าหมายในการรักษาของผู้ดูแลคืออะไร) </label>
+                  <label className="form-label mt-4">Goal of care <span style={{ color: "#666", fontSize: "15px" }}>(เป้าหมายในการรักษาของผู้ดูแลคืออะไร)</span> </label>
                   <Controller
                     name={`existingCaregivers.${index}.goalOfCare`}
                     control={control}
@@ -267,7 +279,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Information (การให้ข้อมูล ความรู้เพิ่มเติม)</label>
+                  <label className="form-label mt-4">Information <span style={{ color: "#666", fontSize: "15px" }}>(การให้ข้อมูล ความรู้เพิ่มเติม)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.information`}
                     control={control}
@@ -283,7 +295,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Ventilation (การรับฟังความกังวลใจ)</label>
+                  <label className="form-label mt-4">Ventilation <span style={{ color: "#666", fontSize: "15px" }}>(การรับฟังความกังวลใจ)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.ventilation`}
                     control={control}
@@ -299,7 +311,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Empowerment (การให้กำลังใจ)</label>
+                  <label className="form-label mt-4">Empowerment <span style={{ color: "#666", fontSize: "15px" }}>(การให้กำลังใจ)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.empowerment`}
                     control={control}
@@ -315,7 +327,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Resource (แนะนำช่องทางช่วยเหลือ)</label>
+                  <label className="form-label mt-4">Resource <span style={{ color: "#666", fontSize: "15px" }}>(แนะนำช่องทางช่วยเหลือ)</span></label>
                   <Controller
                     name={`existingCaregivers.${index}.resource`}
                     control={control}
@@ -348,7 +360,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
               </span>
               <Collapse in={openIndex.new === index}>
                 <div>
-                  <label className="form-label mt-2">Care (ดูแลเรื่องอะไรบ้าง) </label>
+                  <label className="form-label mt-2">Care <span style={{ color: "#666", fontSize: "15px" }}>(ดูแลเรื่องอะไรบ้าง)</span> </label>
                   <Controller
                     name={`newCaregivers.${index}.care`}
                     control={control}
@@ -364,7 +376,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Affection (ส่งผลต่อตนเองอย่างไรบ้าง) </label>
+                  <label className="form-label mt-4">Affection <span style={{ color: "#666", fontSize: "15px" }}>(ส่งผลต่อตนเองอย่างไรบ้าง)</span> </label>
                   <Controller
                     name={`newCaregivers.${index}.affection`}
                     control={control}
@@ -380,7 +392,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Rest (มีเวลาพักผ่อนบ้างหรือไม่) </label>
+                  <label className="form-label mt-4">Rest <span style={{ color: "#666", fontSize: "15px" }}>(มีเวลาพักผ่อนบ้างหรือไม่)</span> </label>
                   <Controller
                     name={`newCaregivers.${index}.rest`}
                     control={control}
@@ -396,7 +408,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Empathy (การแสดงความเข้าอกเข้าใจเป็นอย่างไรบ้าง) </label>
+                  <label className="form-label mt-4">Empathy <span style={{ color: "#666", fontSize: "15px" }}>(การแสดงความเข้าอกเข้าใจเป็นอย่างไรบ้าง)</span> </label>
                   <Controller
                     name={`newCaregivers.${index}.empathy`}
                     control={control}
@@ -412,7 +424,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Goal of care (เป้าหมายในการรักษาของผู้ดูแลคืออะไร) </label>
+                  <label className="form-label mt-4">Goal of care <span style={{ color: "#666", fontSize: "15px" }}>(เป้าหมายในการรักษาของผู้ดูแลคืออะไร)</span> </label>
                   <Controller
                     name={`newCaregivers.${index}.goalOfCare`}
                     control={control}
@@ -428,7 +440,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Information (การให้ข้อมูล ความรู้เพิ่มเติม)</label>
+                  <label className="form-label mt-4">Information <span style={{ color: "#666", fontSize: "15px" }}>(การให้ข้อมูล ความรู้เพิ่มเติม)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.information`}
                     control={control}
@@ -444,7 +456,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Ventilation (การรับฟังความกังวลใจ)</label>
+                  <label className="form-label mt-4">Ventilation <span style={{ color: "#666", fontSize: "15px" }}>(การรับฟังความกังวลใจ)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.ventilation`}
                     control={control}
@@ -460,7 +472,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Empowerment (การให้กำลังใจ)</label>
+                  <label className="form-label mt-4">Empowerment <span style={{ color: "#666", fontSize: "15px" }}>(การให้กำลังใจ)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.empowerment`}
                     control={control}
@@ -476,7 +488,7 @@ export const CaregiverAssessment = ({ onDataChange }) => {
                         }} />
                     )}
                   />
-                  <label className="form-label mt-4">Resource (แนะนำช่องทางช่วยเหลือ)</label>
+                  <label className="form-label mt-4">Resource <span style={{ color: "#666", fontSize: "15px" }}>(แนะนำช่องทางช่วยเหลือ)</span></label>
                   <Controller
                     name={`newCaregivers.${index}.resource`}
                     control={control}

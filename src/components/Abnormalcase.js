@@ -836,7 +836,7 @@ export default function Abnormalcaser({ }) {
                     </ul>
                 </div>
                 <div class="container-fluid">
-                    <div className="case-summary">
+                    <div className="case-summary" style={{width:"90%"}}>
                         <p className="abnormal-status">จำนวนเคสผิดปกติ : <strong>{abnormalCaseCount} เคส</strong> </p>
                         <p className="Emergency-status">จำนวนเคสฉุกเฉิน : <strong>{emergencyCaseCount} เคส</strong> </p>
                     </div>

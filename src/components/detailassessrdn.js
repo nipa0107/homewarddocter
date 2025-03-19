@@ -716,7 +716,7 @@ export default function DetailAssessreadiness() {
             )}
           </div>
         )}
-        <div className="breadcrumbs mt-4">
+        <div className="breadcrumbs">
           <ul>
             <li>
               <a href="home">
@@ -887,7 +887,7 @@ export default function DetailAssessreadiness() {
             </div>
           </div>
           {isReadinessSubmitted ? (
-            <div className="contentin-outmost-ass mt-4">
+            <div className="readiness card mt-4">
               <div className="divass">
                 <div className="inline-container-ass">
                   <b className="textass" align="center">
@@ -925,7 +925,7 @@ export default function DetailAssessreadiness() {
               </div>
             </div>
           ) : (
-            <div className="contentin-outmost-ass mt-4">
+            <div className="readiness card mt-4">
               <div className="divass" >
                 <b className="textass" align="center" >
                   ประเมินความพร้อม

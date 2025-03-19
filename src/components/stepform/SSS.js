@@ -2,21 +2,24 @@ import React, { useState, useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 import Paper from '../../img/exam.png'
 
-export const SSS = ({ onDataChange }) => {
+export const SSS = ({ userid,onDataChange }) => {
   const { control, setValue, getValues } = useFormContext();
 
+  const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
+
   useEffect(() => {
-    const savedData = JSON.parse(localStorage.getItem("sssData")) || {};
+    if (!userid) return;
+    const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey(userid, "sssData"))) || {};
     Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
     onDataChange(getValues());
-  }, []);
+  }, [userid]);
 
   const handleInputChange = (group, name, value) => {
     const currentValues = getValues(group) || {}; 
     const updatedValues = { ...currentValues, [name]: value }; 
     setValue(group, updatedValues); 
     const updatedData = { ...getValues(), [group]: updatedValues };
-    localStorage.setItem("sssData", JSON.stringify(updatedData));
+    localStorage.setItem(getLocalStorageKey(userid, "sssData"), JSON.stringify(updatedData));
     onDataChange(updatedData);
   };
 

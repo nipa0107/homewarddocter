@@ -1,27 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const Housing = ({ onDataChange }) => {
+export const Housing = ({ userid,onDataChange }) => {
   const { control, setValue, getValues } = useFormContext();
 
+  const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
+
   useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem("housingData")) || {};
+    const storedData = JSON.parse(localStorage.getItem(getLocalStorageKey(userid,"housingData"))) || {};
     
     // อัปเดตค่าใน react-hook-form
     Object.keys(storedData).forEach((key) => {
       setValue(key, storedData[key]); 
     });
     
-  }, [setValue]); // เรียกใช้เมื่อ `setValue` เปลี่ยนแปลง
-  
+  }, [setValue, userid]); // เรียกใช้เมื่อ `setValue` เปลี่ยนแปลง
 
   // ฟังก์ชันบันทึกข้อมูลลง LocalStorage
   const saveToLocalStorage = (data) => {
-    localStorage.setItem("housingData", JSON.stringify(data));
+    localStorage.setItem(getLocalStorageKey(userid, "housingData"), JSON.stringify(data));
   };
 
   // โหลดข้อมูลจาก LocalStorage
-  const storedHousingData = JSON.parse(localStorage.getItem("housingData")) || {};
+  const storedHousingData = JSON.parse(localStorage.getItem(getLocalStorageKey(userid,"housingData"))) || {};
 
   // ดึงค่าเริ่มต้นจาก form
   const initialNeighborRelationship = getValues("neighborRelationship") || storedHousingData.neighborRelationship || "";
