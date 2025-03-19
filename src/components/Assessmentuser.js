@@ -557,13 +557,19 @@ export default function Assessmentuser() {
             <li className="arrow">
               <i class="bi bi-chevron-double-right"></i>
             </li>
-            <li>
+            <li className="middle">
               <a href="assessment" className="info">
                 ติดตาม/ประเมินอาการ
               </a>
             </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
+            <li className="arrow middle">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a href="assessment">...</a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
             </li>
             <li>
               <a>การบันทึกอาการผู้ป่วย</a>

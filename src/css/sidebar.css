@@ -418,7 +418,10 @@ hr {
     font-weight: bold;
 }
 
-.countchat {
+.breadcrumbs ul li.ellipsis {
+    display: none;
+}
+.countchat{
     justify-content: flex-end;
     align-items: flex-end;
 
@@ -538,13 +541,7 @@ hr {
     .profile_details .links_name {
         display: none;
     }
-
-    .home_content .breadcrumbs {
-        font-size: 0.9rem;
-        margin-top: 10px;
-    }
-
-    /* .profile_details .bi{
+   /* .profile_details .bi{
         margin-right: 0;
     }
     .home_content .breadcrumbs{
@@ -552,3 +549,5 @@ hr {
         margin-top: 10px;
     } */
 }
+
+

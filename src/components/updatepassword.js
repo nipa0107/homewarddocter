@@ -611,10 +611,17 @@ const [unreadCountsByType, setUnreadCountsByType] = useState({
             <li className="arrow">
               <i class="bi bi-chevron-double-right"></i>
             </li>
-            <li><a href="profile">โปรไฟล์</a>
+            <li className="middle">
+              <a href="profile">โปรไฟล์</a>
             </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
+            <li className="arrow middle">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a href="profile">...</a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
             </li>
             <li><a>เปลี่ยนรหัสผ่าน</a>
             </li>

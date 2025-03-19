@@ -716,14 +716,20 @@ export default function Assessreadinessuser({ }) {
                         <li className="arrow">
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
-                        <li>
+                        <li className="middle">
                             <a href="assessreadiness" className="info">
                                 ประเมินความพร้อมการดูแล
                             </a>
                         </li>
-                        <li className="arrow">
-                            <i class="bi bi-chevron-double-right"></i>
-                        </li>
+                        <li className="arrow middle">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a href="assessreadiness">...</a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
                         <li>
                             <a>บันทึกการประเมิน</a>
                         </li>
