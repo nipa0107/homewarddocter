@@ -642,7 +642,7 @@ export default function AgendaForm({ }) {
                     // ✅ รีเซ็ตค่าให้เริ่มใหม่
                     setPatientAgendaData({});
                     setTimeout(() => {
-                        navigate("/detailAgendaForm", { state: { id: data.data._id } });
+                        navigate("/assessinhomesssuser", { state: { id } });
                         window.location.reload(); // ✅ รีเฟรชเพื่อให้แน่ใจว่า localStorage ถูกเคลียร์
                     }, 1000);
                 } else {
