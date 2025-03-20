@@ -216,41 +216,42 @@ export default function Updatemedicalinformation() {
 
     const fetchUserData = (token) => {
         return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
-            method: "POST",
-            crossDomain: true,
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                "Access-Control-Allow-Origin": "*",
-            },
-            body: JSON.stringify({ token }),
+          method: "POST",
+          crossDomain: true,
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "Access-Control-Allow-Origin": "*",
+          },
+          body: JSON.stringify({ token }),
         })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.data === "token expired") {
-                    alert("Token expired login again");
-                    window.localStorage.clear();
-                    setTimeout(() => {
-                        window.location.replace("./");
-                    }, 0);
-                    return null;
-                }
-                setSender({
-                    name: data.data.name,
-                    surname: data.data.surname,
-                    _id: data.data._id,
-                });
-                setData(data.data);
-                if (data.data === "token expired") {
-                    window.localStorage.clear();
-                    window.location.href = "./";
-                }
-                return data.data;
-            })
-            .catch((error) => {
-                console.error("Error verifying token:", error);
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.data === "token expired") {
+              alert("Token expired login again");
+              window.localStorage.clear();
+              setTimeout(() => {
+                window.location.replace("./");
+              }, 0);
+              return null;
+            }
+            setProfileData(data.data);
+            setSender({
+              name: data.data.name,
+              surname: data.data.surname,
+              _id: data.data._id,
             });
-    };
+            setData(data.data);
+            if (data.data === "token expired") {
+              window.localStorage.clear();
+              window.location.href = "./";
+            }
+            return data.data;
+          })
+          .catch((error) => {
+            console.error("Error verifying token:", error);
+          });
+      };
 
     const fetchAndSetAlerts = (token, userId) => {
         fetchAlerts(token, userId)
@@ -267,7 +268,7 @@ export default function Updatemedicalinformation() {
     };
 
     useEffect(() => {
-        if (hasFetchedUserData.current) return;
+        if (hasFetchedUserData.current) return; 
         hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
@@ -628,7 +629,7 @@ export default function Updatemedicalinformation() {
                                 <a href="profile">
                                     <i className="bi bi-person"></i>
                                     <span className="links_name">
-                                        {data && data.nametitle + data.name + " " + data.surname}
+                                    {profileData && profileData.nametitle + profileData.name + " " + profileData.surname}
                                     </span>
                                 </a>
                             </li>
@@ -753,41 +754,41 @@ export default function Updatemedicalinformation() {
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
                         <li className="middle">
-                            <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
-                        </li>
-                        <li className="arrow middle">
-                            <i className="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li className="ellipsis">
-                            <a href="allpatient">...</a>
-                        </li>
-                        <li className="arrow ellipsis">
-                            <i className="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li className="middle">
-                            <a
-                                href="infopatient"
-                                onClick={() =>
-                                    navigate("/infopatient", { state: { id: id, user: user } })
-                                }
-                            >
-                                ข้อมูลการดูแลผู้ป่วย
-                            </a>
-                        </li>
-                        <li className="arrow middle">
-                            <i className="bi bi-chevron-double-right"></i>
-                        </li>
-                        <li className="ellipsis">
-                            <a className="info" href="infopatient"
-                                onClick={() =>
-                                    navigate("/infopatient", { state: { id: id, user: user } })
-                                }>
-                                ...
-                            </a>
-                        </li>
-                        <li className="arrow ellipsis">
-                            <i className="bi bi-chevron-double-right"></i>
-                        </li>
+              <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
+            </li>
+            <li className="arrow middle">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="ellipsis">
+                  <a href="allpatient">...</a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+            <li className="middle">
+              <a
+                href="infopatient"
+                onClick={() =>
+                  navigate("/infopatient", { state: { id: id, user: user } })
+                }
+              >
+                ข้อมูลการดูแลผู้ป่วย
+              </a>
+            </li>
+            <li className="arrow middle">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
+                <li className="ellipsis">
+                  <a className="info" href="infopatient"
+                onClick={() =>
+                  navigate("/infopatient", { state: { id: id, user: user } })
+                }>
+                    ...
+                  </a>
+                </li>
+                <li className="arrow ellipsis">
+                  <i className="bi bi-chevron-double-right"></i>
+                </li>
                         <li>
                             <a>แก้ไขข้อมูลการเจ็บป่วย</a>
                         </li>
@@ -992,7 +993,7 @@ export default function Updatemedicalinformation() {
                     </div>
 
                 )}
-                <div className="btn-group mt-4">
+                <div className="btn-group">
                     <div className="btn-next">
                         <button onClick={UpdateMedical} className="btn btn-outline py-2">
                             บันทึก

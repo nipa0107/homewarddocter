@@ -18,7 +18,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from 'socket.io-client';
-const socket = io("https://backend-deploy-render-mxok.onrender.com");
+const socket = io("http://localhost:5000");
 export default function Home() {
   const [data, setData] = useState([]);
   const [datauser, setDatauser] = useState([]);
@@ -38,7 +38,7 @@ export default function Home() {
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const hasFetchedUserData = useRef(false);
-  
+
   const [latestAssessments, setLatestAssessments] = useState({});
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
@@ -48,7 +48,7 @@ export default function Home() {
 
   const fetchLatestAssessments = async () => {
     try {
-      const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
+      const response = await fetch("http://localhost:5000/latest-assessments");
       const data = await response.json();
       console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -203,7 +203,7 @@ export default function Home() {
 
 
   const fetchUserData = (token) => {
-    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
+    return fetch("http://localhost:5000/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -221,7 +221,7 @@ export default function Home() {
           setTimeout(() => {
             window.location.replace("./");
           }, 0);
-          return null; 
+          return null;
         }
         setSender({
           name: data.data.name,
@@ -229,7 +229,7 @@ export default function Home() {
           _id: data.data._id,
         });
         setData(data.data);
-        return data.data; 
+        return data.data;
       })
       .catch((error) => {
         console.error("Error verifying token:", error);
@@ -237,7 +237,7 @@ export default function Home() {
   };
 
   const getAllUser = () => {
-    fetch("https://backend-deploy-render-mxok.onrender.com/alluser", {
+    fetch("http://localhost:5000/alluser", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -287,7 +287,7 @@ export default function Home() {
   }, [token]);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
+    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -408,7 +408,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCompletedCount = async () => {
       try {
-        const response = await fetch('https://backend-deploy-render-mxok.onrender.com/completedAssessmentsCount', {
+        const response = await fetch('http://localhost:5000/completedAssessmentsCount', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -428,7 +428,7 @@ export default function Home() {
       const promises = datauser.map(async (user) => {
         if (user.deletedAt === null) {
           try {
-            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/medicalInformation/${user._id}`);
+            const response = await fetch(`http://localhost:5000/medicalInformation/${user._id}`);
             const medicalInfo = await response.json();
             return {
               userId: user._id,
@@ -527,9 +527,8 @@ export default function Home() {
 
   // ข้อมูลสำหรับ PieChart
   const genderData = [
-    { name: "ชาย", value: totalUsers > 0 ? (genderCount.male / totalUsers) * 100 : 0 },
-    { name: "หญิง", value: totalUsers > 0 ? (genderCount.female / totalUsers) * 100 : 0 },
-    { name: "ไม่ระบุ", value: totalUsers > 0 ? (genderCount.unspecified / totalUsers) * 100 : 0 },
+    { name: "ชาย", value: totalUsers > 0 ? (genderCount.male / totalUsers) * 100 : 0, count: genderCount.male },
+    { name: "หญิง", value: totalUsers > 0 ? (genderCount.female / totalUsers) * 100 : 0, count: genderCount.female },
   ];
 
 
@@ -540,7 +539,7 @@ export default function Home() {
   useEffect(() => {
     const fetchGroup3Users = async () => {
       try {
-        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/group3");
+        const response = await fetch("http://localhost:5000/immobility/group3");
         const result = await response.json();
         if (response.ok) {
           setGroup3Users(result.data); // เก็บข้อมูลที่ดึงมา
@@ -625,7 +624,7 @@ export default function Home() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/assessments/stats", {
+        const response = await fetch("http://localhost:5000/assessments/stats", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -654,7 +653,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCaseCounts = async () => {
       try {
-        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/assessments/countcase");
+        const response = await fetch("http://localhost:5000/assessments/countcase");
         const data = await response.json();
         if (data.success) {
           setCaseCounts(data.stats);
@@ -674,7 +673,7 @@ export default function Home() {
   useEffect(() => {
     const fetchGroup3Count = async () => {
       try {
-        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/group3/count");
+        const response = await fetch("http://localhost:5000/immobility/group3/count");
         const data = await response.json();
         if (data.success) {
           setGroup3Count(data.count); // เก็บจำนวนรวมใน State
@@ -700,7 +699,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCaseStats = async () => {
       try {
-        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/assessments/countstats");
+        const response = await fetch("http://localhost:5000/assessments/countstats");
         const data = await response.json();
         if (data.success) {
           setCaseStats([
@@ -722,7 +721,7 @@ export default function Home() {
   useEffect(() => {
     const fetchImmobilityData = async () => {
       try {
-        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/groups");
+        const response = await fetch("http://localhost:5000/immobility/groups");
         const result = await response.json();
 
         if (result.success) {
@@ -769,7 +768,7 @@ export default function Home() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
+          "http://localhost:5000/update-unread-count"
         );
 
         if (!response.ok) {
@@ -786,10 +785,25 @@ export default function Home() {
     fetchUnreadCount();
   }, []);
 
+  const [topDiagnosis, setTopDiagnosis] = useState([]);
+  useEffect(() => {
+    const fetchTopDiagnosis = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/getDiagnosis/top3');
+        const data = await response.json();
+        setTopDiagnosis(data);
+      } catch (error) {
+        console.error('Error fetching top diagnosis:', error);
+      }
+    };
+
+    fetchTopDiagnosis();
+  }, []);
+
   return (
 
     <main className="body">
-<Sidebar />
+      <Sidebar />
       <div className="home_content" >
         <div className="homeheader">
           <div className="header">Dashboard</div>
@@ -1040,72 +1054,116 @@ export default function Home() {
           </div>
 
           {/* <h6 className="m-0" style={{fontWeight:"bold" , color:"#5ab1f8"}}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6> */}
-          
+
           <div class="row">
-            <div class="col-xl-4 col-lg-5">
-              <div class="card shadow mb-4" style={{ border: 'none' }}>
-                <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
-                  <h6 class="m-0 text-primary" style={{ fontWeight: "bolder" }}>โรคของผู้ป่วยที่กำลังรักษา</h6>
-
+            <div className="col-12 mb-4">
+              <div className="card shadow mb-4">
+                <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
+                  <h6 className="m-0 text-primary" style={{ fontWeight: "bolder" }}>โรคของผู้ป่วยที่กำลังรักษา</h6>
                 </div>
-                <div class="card-body pt-2">
-                  <div className="chart-pie mb-2 ">
-                    <DoughnutChartComponent data={diagnosisData} colors={COLORS_DIAGNOSIS} />
+                <div className="card-body pt-2">
+                  <div className="container text-center">
+                    <div class="row align-items-center">
+                      <div class="col">
+                        <div>
+                          <DoughnutChartComponent data={diagnosisData} colors={COLORS_DIAGNOSIS} />
+                        </div>
+                      </div>
+                      <div class="col align-middle">
+                        <ul>
+                          {diagnosisData.map((entry, index) => (
+                            <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                              <div className="col-7 text-left">
+                                <span
+                                  style={{
+                                    display: 'inline-block',
+                                    width: '12px',
+                                    height: '12px',
+                                    backgroundColor: COLORS[index % COLORS.length],
+                                    borderRadius: '50%',
+                                    marginRight: '10px',
+                                  }}
+                                ></span>
+                                <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
+                                  {entry.name} :
+                                </span>
+                              </div>
+                              <div className="col-3 ">
+                                <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
+                                  <b>{entry.value} เคส</b>
+                                </span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                  <div className="row">
-                    <ul>
-                      {diagnosisData.map((entry, index) => (
-                        <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                          <div className="col-11 text-left">
-                            <span
-                              style={{
-                                display: 'inline-block',
-                                width: '12px',
-                                height: '12px',
-                                backgroundColor: COLORS[index % COLORS.length],
-                                borderRadius: '50%',
-                                marginRight: '10px',
-                              }}
-                            ></span>
-                            <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
-                              {entry.name} :
-                            </span>
-                          </div>
-                          <div className="col-2 text-end">
-                            <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
-                            <b>{entry.value} เคส</b>
-                            </span>
-                          </div>
-
-                        </li>
-                      ))}
-                    </ul>
-
-                  </div>
-                  {/* <ul>
-                    {diagnosisData.map((entry, index) => (
-                      <li key={`item-${index}`} style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                        <span
-                          style={{
-                            display: 'inline-block',
-                            width: '10px',
-                            height: '10px',
-                            backgroundColor: COLORS[index % COLORS.length],
-                            borderRadius: '50%',
-                            marginRight: '10px',
-                          }}
-                        ></span>
-                        <span style={{ color: COLORS[index % COLORS.length], fontSize: '15px' }}>
-                          {entry.name} : {entry.value} เคส
-                        </span>
-                      </li>
-                    ))}
-                  </ul> */}
-
                 </div>
               </div>
             </div>
+            <div className="col-12 mb-4">
+              <div className="card shadow mb-4">
+                <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
+                  <h6 className="m-0 text-primary" style={{ fontWeight: "bolder" }}>โรคของผู้ป่วยที่เข้ารับการรักษามากที่สุด 3 อันดับแรก</h6>
+                </div>
+                <div className="card-body pt-2">
+                  <div className="container text-center">
+                    <p className="mt-3">Top 3 Diagnosis</p>
+                    <div class="row align-items-center">
+                      <div class="col align-middle">
+
+                        <div>
+
+                          {topDiagnosis.length > 0 && (
+                            <DoughnutChartComponent
+                              data={topDiagnosis.map((entry) => {
+                                // คำนวณจำนวนเคสทั้งหมด
+                                const totalCases = topDiagnosis.reduce((sum, entry) => sum + entry.count, 0);
+                                // คำนวณเปอร์เซ็นต์สำหรับแต่ละโรค
+                                const percentage = totalCases > 0 ? ((entry.count / totalCases) * 100).toFixed(2) : 0;
+
+                                return {
+                                  name: entry._id,   // ชื่อโรค
+                                  value: entry.count, // จำนวนเคส
+                                  percentage: percentage, // เปอร์เซ็นต์ของเคส
+                                };
+                              })}
+                              colors={["#0088FE", "#00C49F", "#FFBB28"]} // ใช้สีที่เหมาะสม
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <div className="col">
+                        {topDiagnosis.length > 0 ? (
+                          <table className="table-diagnosis">
+                            <thead>
+                              <tr>
+                                <th>ลำดับ</th>
+                                <th>ชื่อโรค</th>
+                                <th>จำนวนเคส</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {topDiagnosis.map((entry, index) => (
+                                <tr key={index}>
+                                  <td>{index + 1}</td> {/* ลำดับที่ 1, 2, 3 */}
+                                  <td>{entry._id}</td> {/* ชื่อโรค */}
+                                  <td>{entry.count} เคส</td> {/* จำนวนเคส */}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <p>ไม่มีข้อมูล</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="col-xl-4 col-lg-5">
               <div class="card shadow mb-4" style={{ border: 'none' }}>
                 <div
@@ -1118,7 +1176,7 @@ export default function Home() {
                   <div className="chart-pie mb-5">
                     <DoughnutChartComponent data={caseStats} colors={COLORS_STATUS} />
                   </div>
-                  <div className="row">
+                  <div className="row mb-1">
                     <ul>
                       {caseStats.map((entry, index) => (
                         <li
@@ -1150,28 +1208,6 @@ export default function Home() {
                       ))}
                     </ul>
                   </div>
-                  {/* <ul>
-                    {caseStats.map((entry, index) => (
-                      <li
-                        key={`legend-${index}`}
-                        style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
-                      >
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: "15px",
-                            height: "15px",
-                            backgroundColor: COLORS_STATUS[index % COLORS_STATUS.length],
-                            borderRadius: "50%",
-                            marginRight: "5px",
-                          }}
-                        ></span>
-                        <span style={{ color: COLORS_STATUS[index % COLORS_STATUS.length] }} >
-                          {entry.name} : {caseDetails[index].count} เคส
-                        </span>
-                      </li>
-                    ))}
-                  </ul> */}
                 </div>
               </div>
             </div>
@@ -1193,7 +1229,7 @@ export default function Home() {
                           colors={COLORS_IMMOBILITY}
                         />
                       </div>
-                      <div className="row">
+                      <div className="row mb-1">
                         <ul>
                           {immobilityData.map((entry, index) => (
                             <li
@@ -1216,7 +1252,7 @@ export default function Home() {
                               </div>
                               <div className="col-2 text-end">
                                 <span style={{ color: COLORS_IMMOBILITY[index % COLORS_IMMOBILITY.length] }}>
-                                <b>{entry.count} เคส</b></span>
+                                  <b>{entry.count} เคส</b></span>
                               </div>
 
 
@@ -1235,198 +1271,56 @@ export default function Home() {
 
               </div>
             </div>
-          </div>
-
-          <div class="row">
             <div class="col-xl-4 col-lg-5">
-              <div class="card shadow mb-4" style={{ border: 'none' }}>
+              <div class="card shadow mb-5" style={{ border: 'none' }}>
                 <div
                   class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
                   <h6 class="m-0 text-primary" style={{ fontWeight: "bolder" }}>สัดส่วนเพศผู้ป่วย</h6>
 
                 </div>
-                <div class="card-body pt-4">
-                  <div className="chart-pie mb-4">
+                <div class="card-body pt-6  mb-4">
+                  <div className="chart-pie mb-5">
                     <DoughnutChartComponent data={genderData} />
                   </div>
-                  <ul
-                    style={{
-                      display: "flex", // จัดเรียงเป็นแนวนอน
-                      justifyContent: "center", // จัดให้อยู่กึ่งกลางในแนวนอน
-                      alignItems: "center", // จัดให้อยู่ตรงกลางในแนวตั้ง
-                      padding: 0, // เอา padding ออก
-                      margin: 0, // เอา margin ออก
-                      listStyle: "none", // ลบ bullet points
-                    }}
-                  >
-                    {genderData.map((entry, index) => (
-                      <li
-                        key={`legend-${index}`}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          marginRight: "15px", // เพิ่มระยะห่างระหว่างแต่ละ `li`
-                        }}
-                      >
-                        <span
+                  <div className="row mb-4">
+                    <ul>
+                      {genderData.map((entry, index) => (
+                        <li
+                          key={`legend-${index}`}
                           style={{
-                            display: "inline-block",
-                            width: "15px",
-                            height: "15px",
-                            backgroundColor: COLORS_GENDER[index % COLORS_GENDER.length],
-                            borderRadius: "50%",
-                            marginRight: "5px", // ระยะห่างระหว่างสีและข้อความ
+                            display: "flex",
+                            alignItems: "center",
+                            marginBottom: '8px', // เพิ่มระยะห่างระหว่างแต่ละ `li`
                           }}
-                        ></span>
-                        <span style={{ color: COLORS_GENDER[index % COLORS_GENDER.length] }}>
-                          {entry.name}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                        >
+                          <div className="col-md-5 ms-md-auto text-left">
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: "12px",
+                                height: "12px",
+                                backgroundColor: COLORS_GENDER[index % COLORS_GENDER.length],
+                                borderRadius: "50%",
+                                marginRight: "10px", // ระยะห่างระหว่างสีและข้อความ
+                              }}
+                            ></span>
+                            <span style={{ color: COLORS_GENDER[index % COLORS_GENDER.length] }}>
+                              {entry.name}
+                            </span>
+                          </div>
+                          <div className="col-md-3 ms-auto text-end">
+                            <span style={{ color: COLORS_GENDER[index % COLORS_GENDER.length] }}>
+                              <b>{entry.count} คน</b> {/* Show the count of people */}
+                            </span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
 
               </div>
             </div>
-            {/* <div className="col-xl-8 col-lg-7" ref={tableRef}>
-              <div class="card shadow mb-4" style={{ border: 'none' }}>
-                <div
-                  class="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#ffe4e4", border: 'none' }}>
-                  <h6 class="m-0 abnormal-status-text" style={{ fontWeight: "bolder" }}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6>
-                  <div className="filter-options">
-                    <div className="dropdown">
-                      <a
-                        href=""
-                        id="filterMenuButton"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
-                        style={{ textDecoration: "none", border: "none", background: "transparent", padding: 0, color: "#FF6A6A" }}
-                      >
-                        <i className="bi bi-three-dots-vertical"></i>
-                      </a>
-                      <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="filterMenuButton">
-                        <li>
-                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("latest")}>
-                            ล่าสุด
-                          </a>
-                        </li>
-                        <li>
-                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("7days")}>
-                            7 วัน
-                          </a>
-                        </li>
-                        <li>
-                          <a className="dropdown-item" href="#" onClick={() => handleDateFilter("30days")}>
-                            30 วัน
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="card-body pt-2 pb-2">
-                  <div className="table-responsive">
-                    {filteredUsers.length === 0 ? (
-                      <>
-                        <table className="table custom-table table-hover">
-                          <thead>
-                            <tr>
-                              <th scope="col" style={{ width: "5%" }}>#</th>
-                              <th scope="col">ชื่อ-สกุล</th>
-                              <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
-                              <th scope="col">คะแนนรวม</th>
-                              <th scope="col">วันที่ประเมิน</th>
-                              <th scope="col">สถานะ</th>
-                            </tr>
-                          </thead>
-                        </table>
-                        <p className="text-center text-muted mt-3">ยังไม่มีข้อมูลในขณะนี้</p> 
-                      </>
-                    ) : (
-                      <table className="table custom-table table-hover">
-                        <thead>
-                          <tr>
-                            <th scope="col" style={{ width: "5%" }}>#</th>
-                            <th scope="col">ชื่อ-สกุล</th>
-                            <th scope="col" style={{ width: "25%" }}>ผู้ป่วยโรค</th>
-                            <th scope="col">คะแนนรวม</th>
-                            <th scope="col">วันที่ประเมิน</th>
-                            <th scope="col">สถานะ</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredUsers.slice(indexOfFirstUser, indexOfLastUser).map((user, index) => (
-                            <tr
-                              key={index}
-                              onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
-                              style={{ cursor: "pointer" }} 
-                            >
-                              <td style={{ width: "5%" }}>{indexOfFirstUser + index + 1}</td>
-                              <td>{user.user.name} {user.user.surname}</td>
-                              <td>{user.Diagnosis}</td>
-                              <td style={{ color: "red", fontWeight: "bold" }}>{user.Immobility.totalScore}</td>
-                              <td>{new Date(user.createdAt).toLocaleDateString("th-TH")}</td>
-                              <td>
-                                <a
-                                  href=""
-                                  onClick={() => navigate("/detailAssessinhomeForm", { state: { id: user._id } })}
-                                  style={{ textDecoration: "none", cursor: "pointer", color: "#5ab1f8" }}
-                                >
-                                  <i className="bi bi-three-dots"></i>
-                                </a>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-
-                  {filteredUsers.length > 0 && (
-                    <nav aria-label="Page navigation example" className="mt-3">
-                      <ul className="pagination justify-content-end">
-                        <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                          <a
-                            className="page-link"
-                            href="#"
-                            onClick={() => handleClick(currentPage - 1)}
-                          >
-                            ก่อนหน้า
-                          </a>
-                        </li>
-                        {Array.from({ length: totalPages }, (_, i) => (
-                          <li
-                            key={i + 1}
-                            className={`page-item ${currentPage === i + 1 ? "active" : ""}`}
-                          >
-                            <a
-                              className="page-link"
-                              href="#"
-                              onClick={() => handleClick(i + 1)}
-                            >
-                              {i + 1}
-                            </a>
-                          </li>
-                        ))}
-                        <li
-                          className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
-                        >
-                          <a
-                            className="page-link"
-                            href="#"
-                            onClick={() => handleClick(currentPage + 1)}
-                          >
-                            ถัดไป
-                          </a>
-                        </li>
-                      </ul>
-                    </nav>
-                  )}
-                </div>
-
-              </div>
-            </div> */}
           </div>
         </div>
       </div>

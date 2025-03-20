@@ -630,21 +630,19 @@ export default function AgendaForm({ }) {
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
 
-                    // ✅ ล้างข้อมูล localStorage ของ userId นี้
-                    clearUserLocalStorage();
-
-                    // ✅ รีเซ็ตค่าให้เริ่มใหม่ (ใช้ callback function เพื่อให้แน่ใจว่าใช้ค่าล่าสุด)
-                    setPatientAgendaData(() => ({}));
-                    setCaregiverAgendaData(() => ({}));
-                    setCaregiverAssessmentData(() => ({}));
-                    setZaritData(() => ({}));
-
-                    // ✅ รีเซ็ตค่าให้เริ่มใหม่
-                    setPatientAgendaData({});
+                    // รีเซ็ตข้อมูลหลังจากเปลี่ยนหน้า
                     setTimeout(() => {
+                        // ✅ ล้างข้อมูล localStorage ของ userId นี้
+                        clearUserLocalStorage();
+
+                        // ✅ รีเซ็ตค่าให้เริ่มใหม่
+                        setPatientAgendaData({});
+                        setCaregiverAgendaData({});
+                        setCaregiverAssessmentData({});
+                        setZaritData({});
                         navigate("/assessinhomesssuser", { state: { id } });
-                        window.location.reload(); // ✅ รีเฟรชเพื่อให้แน่ใจว่า localStorage ถูกเคลียร์
-                    }, 1000);
+                        window.location.reload(); // รีเฟรชหน้าเพื่อให้แน่ใจว่า localStorage ถูกเคลียร์
+                    }, 1000); // 1 วินาทีหลังจากที่ toast แสดงผล
                 } else {
                     console.error("Error during ReadinessForm submission:", data);
                     toast.error("เกิดข้อผิดพลาดในการประเมิน");
@@ -834,8 +832,8 @@ export default function AgendaForm({ }) {
                         {steps.map((label, index) => (
                             <Step key={index}>
                                 <StepLabel
-                                   
-                                    
+
+
                                 >
                                     {label}
                                 </StepLabel>
