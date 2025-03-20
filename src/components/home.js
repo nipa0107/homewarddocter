@@ -18,7 +18,7 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from 'socket.io-client';
-const socket = io("http://localhost:5000");
+const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function Home() {
   const [data, setData] = useState([]);
   const [datauser, setDatauser] = useState([]);
@@ -48,7 +48,7 @@ export default function Home() {
 
   const fetchLatestAssessments = async () => {
     try {
-      const response = await fetch("http://localhost:5000/latest-assessments");
+      const response = await fetch("https://backend-deploy-render-mxok.onrender.com/latest-assessments");
       const data = await response.json();
       console.log("Raw latestAssessments data:", data); // เช็กค่าที่ได้จาก API
 
@@ -203,7 +203,7 @@ export default function Home() {
 
 
   const fetchUserData = (token) => {
-    return fetch("http://localhost:5000/profiledt", {
+    return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
       method: "POST",
       crossDomain: true,
       headers: {
@@ -237,7 +237,7 @@ export default function Home() {
   };
 
   const getAllUser = () => {
-    fetch("http://localhost:5000/alluser", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alluser", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -287,7 +287,7 @@ export default function Home() {
   }, [token]);
 
   const markAllByTypeAsViewed = (type) => {
-    fetch("http://localhost:5000/alerts/mark-all-viewed-by-type", {
+    fetch("https://backend-deploy-render-mxok.onrender.com/alerts/mark-all-viewed-by-type", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -408,7 +408,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCompletedCount = async () => {
       try {
-        const response = await fetch('http://localhost:5000/completedAssessmentsCount', {
+        const response = await fetch('https://backend-deploy-render-mxok.onrender.com/completedAssessmentsCount', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -428,7 +428,7 @@ export default function Home() {
       const promises = datauser.map(async (user) => {
         if (user.deletedAt === null) {
           try {
-            const response = await fetch(`http://localhost:5000/medicalInformation/${user._id}`);
+            const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/medicalInformation/${user._id}`);
             const medicalInfo = await response.json();
             return {
               userId: user._id,
@@ -539,7 +539,7 @@ export default function Home() {
   useEffect(() => {
     const fetchGroup3Users = async () => {
       try {
-        const response = await fetch("http://localhost:5000/immobility/group3");
+        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/group3");
         const result = await response.json();
         if (response.ok) {
           setGroup3Users(result.data); // เก็บข้อมูลที่ดึงมา
@@ -624,7 +624,7 @@ export default function Home() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch("http://localhost:5000/assessments/stats", {
+        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/assessments/stats", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -653,7 +653,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCaseCounts = async () => {
       try {
-        const response = await fetch("http://localhost:5000/assessments/countcase");
+        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/assessments/countcase");
         const data = await response.json();
         if (data.success) {
           setCaseCounts(data.stats);
@@ -673,7 +673,7 @@ export default function Home() {
   useEffect(() => {
     const fetchGroup3Count = async () => {
       try {
-        const response = await fetch("http://localhost:5000/immobility/group3/count");
+        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/group3/count");
         const data = await response.json();
         if (data.success) {
           setGroup3Count(data.count); // เก็บจำนวนรวมใน State
@@ -699,7 +699,7 @@ export default function Home() {
   useEffect(() => {
     const fetchCaseStats = async () => {
       try {
-        const response = await fetch("http://localhost:5000/assessments/countstats");
+        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/assessments/countstats");
         const data = await response.json();
         if (data.success) {
           setCaseStats([
@@ -721,7 +721,7 @@ export default function Home() {
   useEffect(() => {
     const fetchImmobilityData = async () => {
       try {
-        const response = await fetch("http://localhost:5000/immobility/groups");
+        const response = await fetch("https://backend-deploy-render-mxok.onrender.com/immobility/groups");
         const result = await response.json();
 
         if (result.success) {
@@ -768,7 +768,7 @@ export default function Home() {
     const fetchUnreadCount = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/update-unread-count"
+          "https://backend-deploy-render-mxok.onrender.com/update-unread-count"
         );
 
         if (!response.ok) {
@@ -789,7 +789,7 @@ export default function Home() {
   useEffect(() => {
     const fetchTopDiagnosis = async () => {
       try {
-        const response = await fetch('http://localhost:5000/getDiagnosis/top3');
+        const response = await fetch('https://backend-deploy-render-mxok.onrender.com/getDiagnosis/top3');
         const data = await response.json();
         setTopDiagnosis(data);
       } catch (error) {
