@@ -582,7 +582,16 @@ export default function Assessinhomesssuser({ }) {
   };
 
   // สถานะของประเภทประเมินที่ถูกเลือก
-  const [selectedAssessment, setSelectedAssessment] = useState("Agenda");
+  const [selectedAssessment, setSelectedAssessment] = useState(
+    localStorage.getItem("selectedAssessment") || "Agenda"
+  );
+  
+  // เมื่อผู้ใช้เลือกเปลี่ยนแท็บ จะบันทึกค่าลง localStorage
+  const handleTabChange = (assessmentType) => {
+    setSelectedAssessment(assessmentType);
+    localStorage.setItem("selectedAssessment", assessmentType);
+  };
+  
 
 
   return (
@@ -799,20 +808,22 @@ export default function Assessinhomesssuser({ }) {
           </div>
 
           {/* Tab เมนูเลือกการประเมิน */}
-          <div className="assessment-tabs">
-            <button
-              className={`tab-btn ${selectedAssessment === "Agenda" ? "active" : ""}`}
-              onClick={() => setSelectedAssessment("Agenda")}
-            >
-              ประเมิน Agenda
-            </button>
-            <button
-              className={`tab-btn ${selectedAssessment === "IN-HOME-SSS" ? "active" : ""}`}
-              onClick={() => setSelectedAssessment("IN-HOME-SSS")}
-            >
-              ประเมิน IN-HOME-SSS
-            </button>
-          </div>
+          {/* Tab เมนูเลือกการประเมิน */}
+<div className="assessment-tabs">
+  <button
+    className={`tab-btn ${selectedAssessment === "Agenda" ? "active" : ""}`}
+    onClick={() => handleTabChange("Agenda")}
+  >
+    ประเมิน Agenda
+  </button>
+  <button
+    className={`tab-btn ${selectedAssessment === "IN-HOME-SSS" ? "active" : ""}`}
+    onClick={() => handleTabChange("IN-HOME-SSS")}
+  >
+    ประเมิน IN-HOME-SSS
+  </button>
+</div>
+
 
           {/* แสดงข้อมูลตามประเภทที่เลือก */}
           {selectedAssessment === "Agenda" && (

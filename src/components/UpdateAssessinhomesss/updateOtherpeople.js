@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const OtherPeopleForm = ({ formData, onSave, onClose }) => {
+const OtherPeopleForm = ({ formData, onSave, onClose , isExistingCaregiver}) => {
     const [formValues, setFormValues] = useState({ ...formData });
     const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
 
@@ -75,9 +75,16 @@ const OtherPeopleForm = ({ formData, onSave, onClose }) => {
                                     className="form-control"
                                     value={formValues.relationship || ""}
                                     onChange={(e) =>
-                                        handleChange("relationship", e.target.value)
+                                        !isExistingCaregiver && handleChange("relationship", e.target.value)
                                     }
+                                    disabled={isExistingCaregiver} // ✅ ปิดการแก้ไข
+                                    style={isExistingCaregiver ? { backgroundColor: "#e9ecef" } : {}}
                                 />
+                                {isExistingCaregiver && (
+                                    <small className="text-danger">
+                                        * ไม่สามารถแก้ไขความสัมพันธ์ของผู้ดูแลได้
+                                    </small>
+                                )}
                             </div>
                             <div className="m-2">
                                 <label className="form-label mt-2">อาชีพ </label>

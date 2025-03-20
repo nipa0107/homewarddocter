@@ -387,7 +387,6 @@ export default function Updatepatient() {
 
     try {
       const userData = {
-        username,
         name,
         surname,
         email,
@@ -398,14 +397,9 @@ export default function Updatepatient() {
         ID_card_number,
         nationality,
         Address,
-        user: id, // เชื่อมโยงกับผู้ใช้
-        caregivername: caregiverName, // เปลี่ยนเป็น lowercase ตาม Backend
-        caregiversurname: caregiverSurname,
-        caregivertel: caregiverTel,
-        Relationship,
       };
 
-      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/updateuserinfo`, {
+      const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/updateuserinfo/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -577,6 +571,7 @@ export default function Updatepatient() {
   return (
     <main className="body">
       <Sidebar />
+      <ToastContainer />
       <div className="home_content">
         <div className="homeheader">
           <div className="header">จัดการข้อมูลการดูแลผู้ป่วย</div>
@@ -665,14 +660,14 @@ export default function Updatepatient() {
               <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
             </li>
             <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a href="allpatient">...</a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a href="allpatient">...</a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
             <li className="middle">
               <a
                 href="infopatient"
@@ -684,27 +679,28 @@ export default function Updatepatient() {
               </a>
             </li>
             <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a className="info" href="infopatient"
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a className="info" href="infopatient"
                 onClick={() =>
                   navigate("/infopatient", { state: { id: id, user: user } })
                 }>
-                    ...
-                  </a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
+                ...
+              </a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
             <li>
               <a>แก้ไขข้อมูลทั่วไป</a>
             </li>
           </ul>
         </div>
         {/* <h3>แก้ไขข้อมูลทั่วไป</h3> */}
-        <div className="adminall card mb-1">
-        <p className="title-header">แก้ไขข้อมูลผู้ป่วย</p>
+        <h3>แก้ไขข้อมูลผู้ป่วย</h3>
+        <div className="adminall card mb-1 mt-4">
+          <p className="title-header"></p>
           <div className="mb-1">
             <label>ชื่อผู้ใช้</label>
             <input
@@ -808,15 +804,23 @@ export default function Updatepatient() {
             {telError && <span className="error-text">{telError}</span>}
 
           </div>
-          <div className="d-grid">
+          {/* <div className="d-grid">
             <button
               onClick={Updatepatient}
               className="btn btn-outline py-2"
             >
               บันทึก
             </button>
-          </div>
+          </div> */}
+          
         </div>
+        <div className="btn-group mt-4">
+            <div className="btn-next">
+              <button onClick={Updatepatient} className="btn btn-outline py-2">
+                บันทึก
+              </button>
+            </div>
+          </div>
       </div>
     </main>
   );

@@ -664,7 +664,7 @@ export const Nutrition = ({ onDataChange, setValidateForm,userid }) => {
       </div>
       <div className="info3 card mt-3">
         <div className='m-1'>
-          <label className="form-label mt-3 ms-4 mb-0 ">อาหารทางการแพทย์ <span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}>(ระบุชื่อผลิตภัณฑ์ หากไม่มี ให้พิมพ์ "ไม่มี" )</span></label><br></br>
+          <label className="form-label mt-3 ms-4 mb-0 ">อาหารทางการแพทย์ <span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}>(ระบุชื่อผลิตภัณฑ์ หากไม่มี ให้ใส่ "ไม่มี" หรือ - )</span></label><br></br>
           <div className="ms-4 me-4">
             <Controller
               name="medicalFood"
@@ -693,7 +693,7 @@ export const Nutrition = ({ onDataChange, setValidateForm,userid }) => {
           {errors.medicalFood && <div className="ms-4" style={{ color: "red" }}>{errors.medicalFood}</div>}
         </div>
         <div className='m-1 mb-4'>
-          <label className="form-label mt-3 ms-4 mb-0">อาหารที่ชอบ <span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}>(ระบุประเภทอาหาร เช่น ข้าวผัด หากไม่มี ให้พิมพ์ "ไม่มี")</span></label><br></br>
+          <label className="form-label mt-3 ms-4 mb-0">อาหารที่ชอบ <span style={{ color: 'red' }}> *</span> <span style={{ color: "#666", fontSize: "15px" }}>(ระบุประเภทอาหาร เช่น ข้าวผัด หากไม่มี ให้ใส่ "ไม่มี" หรือ - )</span></label><br></br>
           <div className="ms-4 me-4">
             <Controller
               name="favoriteFood"

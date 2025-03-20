@@ -659,18 +659,18 @@ export default function AssessinhomesssForm({ }) {
                 const values = Array.isArray(updatedPhysicalExamination[field])
                     ? updatedPhysicalExamination[field]
                     : [];
-
+    
                 updatedPhysicalExamination[field] = values.map((item) => {
-                    if (typeof item === "string" && item.startsWith("อื่นๆ:")) {
-                        return {
-                            value: item.replace("อื่นๆ: ", ""),
-                            isOther: true,
-                        };
+                    if (typeof item === "string") {
+                        if (item.startsWith("อื่นๆ:")) {
+                            return { value: item.replace("อื่นๆ: ", ""), isOther: true };
+                        }
+                        return { value: item, isOther: false };
                     }
-                    return { value: item, isOther: false };
+                    return item; // ถ้าเป็น object อยู่แล้วก็ไม่ต้องเปลี่ยน
                 });
             });
-
+            
             setPhysicalexaminationData(updatedPhysicalExamination);
         } else if (activeStep === 6) {
             setsssData(data);
@@ -928,7 +928,7 @@ export default function AssessinhomesssForm({ }) {
                         {steps.map((label, index) => (
                             <Step key={index}>
                                 <StepLabel
-                                    onClick={() => handleStepClick(index)}
+                                  
 
                                 >
                                     {label}
