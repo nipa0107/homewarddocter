@@ -677,11 +677,11 @@ export default function ImmobilityG3({ }) {
                 </div>
 
                 <div class="container-fluid">
-                    <div className="case-summary">
+                    <div className="case-summary" style={{width:"90%"}}>
                         <p className="Emergency-status">จำนวนเคสที่ช่วยเหลือตัวเองได้น้อย : <strong>{ImmobilityG3Count} เคส</strong> </p>
                     </div>
-                    <div className="table-container">
-                        <div className="table-all tableass table-hover">
+                    
+                        <div className="table-responsive mt-4">
                             {filteredUsers.length === 0 ? (
                                 <>
                                     <table className="table table-hover">
@@ -781,7 +781,7 @@ export default function ImmobilityG3({ }) {
                             </nav>
                         )} */}
                         </div>
-                    </div>
+                    
                     </div>
                     {showNotifications && (
                         <div className="notifications-dropdown" ref={notificationsRef}>
