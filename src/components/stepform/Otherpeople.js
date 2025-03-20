@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useFormContext, useFieldArray, Controller } from "react-hook-form";
 import Collapse from '@mui/material/Collapse';
 
-export const Otherpeople = ({userid, onDataChange }) => {
+export const Otherpeople = ({ onDataChange }) => {
   const { control, register, getValues, setValue } = useFormContext();
   const { fields: existingFields, replace: replaceExisting } = useFieldArray({ control, name: "existingCaregivers" });
   const { fields: newFields, append: appendNew, remove: removeNew } = useFieldArray({ control, name: "newCaregivers" });
@@ -12,17 +12,6 @@ export const Otherpeople = ({userid, onDataChange }) => {
   const location = useLocation();
   const { id } = location.state || {};
 
-  const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
-
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem(getLocalStorageKey(userid, "otherPeopleData"))) || { existingCaregivers: [], newCaregivers: [] };
-    if (Array.isArray(storedData.existingCaregivers)) {
-      replaceExisting(storedData.existingCaregivers);
-    }
-    if (Array.isArray(storedData.newCaregivers)) {
-      storedData.newCaregivers.forEach(appendNew);
-    }
-  }, [userid]);
   useEffect(() => {
     handleFieldChange(); // เรียกฟังก์ชันเพื่อรวมข้อมูลใหม่ทุกครั้ง
   }, [existingFields, getValues]);
@@ -39,7 +28,7 @@ export const Otherpeople = ({userid, onDataChange }) => {
   useEffect(() => {
     const fetchCaregiverData = async () => {
       try {
-        const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/getcaregivers/${id}`);
+        const response = await fetch(`http://localhost:5000/getcaregivers/${id}`);
         const caregiverData = await response.json();
 
         if (caregiverData.status === "ok" && Array.isArray(caregiverData.data)) {
@@ -138,13 +127,13 @@ export const Otherpeople = ({userid, onDataChange }) => {
       isNew: true,
     }));
 
-    const updatedData = {
-      existingCaregivers: existingCaregiversData,
-      newCaregivers: newCaregiversData,
-    };
-    
-    localStorage.setItem(getLocalStorageKey(userid, "otherPeopleData"), JSON.stringify(updatedData));
-    onDataChange(updatedData);
+    onDataChange({
+      ...getValues(),
+      OtherPeople: {
+        existingCaregivers: existingCaregiversData,
+        newCaregivers: newCaregiversData,
+      },
+    });
   };
 
 
@@ -161,9 +150,10 @@ export const Otherpeople = ({userid, onDataChange }) => {
       </div>
       <div className="info3 card mt-4">
         <div className="m-4">
+          <b>ข้อมูลผู้ดูแล</b><br></br>
           {existingFields.map((field, index) => (
             <div key={field.id}>
-              <b>ข้อมูลผู้ดูแล</b><br></br>
+
               <span
                 onClick={() => toggleCollapse(index, "existing")}
                 style={{
@@ -397,7 +387,7 @@ export const Otherpeople = ({userid, onDataChange }) => {
                         />
                       )}
                     />
-                    
+
                   </div>
                   <div className="mt-4">
                     <label>รายละเอียดการดูแลผู้ป่วย <span style={{ color: "#666", fontSize: "15px" }}>(เช่น บันทึกอาการ การให้ยาผู้ป่วย)</span></label>
@@ -417,18 +407,19 @@ export const Otherpeople = ({userid, onDataChange }) => {
                         />
                       )}
                     />
-                    
+
                   </div>
                 </div>
               </Collapse>
             </div>
           ))}
+
           {newFields.map((field, index) => (
             <div key={field.id} className="mt-3">
               <b>ข้อมูลคนในครอบครัว</b><br></br>
               <div className="row" style={{ marginBottom: "-25px" }}>
                 <div className="col text-start" style={{ marginLeft: "-25px" }}>
-              
+
                   <span
                     onClick={() => toggleCollapse(index, "new")}
                     style={{
@@ -461,7 +452,7 @@ export const Otherpeople = ({userid, onDataChange }) => {
 
               <Collapse in={openIndex.new === index}>
                 <div className="p-2">
-                <div className="mt-3">
+                  <div className="mt-3">
                     <label>ชื่อ</label>
                     <Controller
                       name={`newCaregivers.${index}.firstName`}
@@ -489,7 +480,7 @@ export const Otherpeople = ({userid, onDataChange }) => {
                       )}
                     />
                   </div>
-                  
+
                   <div className="mt-3">
                     <label>ความสัมพันธ์</label>
                     <Controller
@@ -721,3 +712,4 @@ export const Otherpeople = ({userid, onDataChange }) => {
     </div>
   );
 };
+// ไฟนอลแล้ว

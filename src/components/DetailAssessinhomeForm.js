@@ -587,6 +587,7 @@ export default function DetailAssessinhomeForm() {
 
   // ฟังก์ชันสำหรับเริ่มแก้ไขบุคคลเฉพาะ
   const handleEditOtherPerson = (group, index) => {
+    // setCurrentEditSection("OtherPeople");
     setEditingOtherPerson({ group, index });
     setTempFormValues(AssessinhomeForms.OtherPeople[group][index]);
     setIsModalOpen(true);
@@ -1348,177 +1349,6 @@ export default function DetailAssessinhomeForm() {
                   </div>
                 </div>
               )}
-
-              {/* {activeTab === "OtherPeople" && (
-                <div className="tab-pane fade show active">
-                  <p className="ms-2" style={{ color: "#10B981" }}> ข้อมูลผู้ดูแลหรือบุคคลในครอบครัว</p>
-                  <h5 className="ms-2" style={{ color: "#444" }}> <b>1. ผู้ดูแล</b></h5>
-                  {AssessinhomeForms.OtherPeople?.existingCaregivers?.length > 0 ? (
-                    AssessinhomeForms.OtherPeople?.existingCaregivers?.map((cg, index) => (
-                      <div key={index}>
-                        <div
-                          className="row mb-2"
-                          onClick={() => toggleAccordion(`caregiver-${index}`)}
-                        >
-                          <div className="col-sm-4 mt-3">
-                            <strong
-                              style={{
-                                cursor: "pointer",
-                                color: "#007BFF",
-                                transition: "color 0.1s ease",
-                              }}
-                              onMouseEnter={(e) => (e.target.style.color = "#95d7ff")}
-                              onMouseLeave={(e) => (e.target.style.color = "#007BFF")}
-                            >
-                              ผู้ดูแลคนที่ {index + 1} : {cg.firstName} {cg.lastName || "-"} ({cg.relationship || "-"})
-                            </strong>
-                          </div>
-                        </div>
-
-                        {openIndex === `caregiver-${index}` && (
-                          <div className="p-3 border rounded ms-2">
-                            <div className="row">
-                              <div className="col-sm-3"><strong>วันเกิด :</strong></div>
-                              <div className="col-sm-9">
-                                <p>{cg.birthDate ? formatThaiDate(cg.birthDate) : "0 ปี 0 เดือน"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>ความสัมพันธ์ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.relationship || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>อาชีพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.occupation || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>สถานภาพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.status || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>การศึกษา :</strong></div>
-                              <div className="col-sm-9"><p>{cg.education || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>รายได้ต่อเดือน :</strong></div>
-                              <div className="col-sm-9"><p>{cg.income || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>สิทธิ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.benefit || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>โรคประจำตัว :</strong></div>
-                              <div className="col-sm-9"><p>{cg.ud || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>อุปนิสัย :</strong></div>
-                              <div className="col-sm-9"><p>{cg.habit || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>รายละเอียดการดูแลผู้ป่วย :</strong></div>
-                              <div className="col-sm-7"><p>{cg.careDetails || "-"}</p></div>
-                            </div>
-                            <div className="col-sm-2">
-                              <button
-                                className="btn m-2"
-                                style={{ backgroundColor: "#ffde59", color: "black" }}
-                              >
-                                <i className="bi bi-pencil-fill"></i> แก้ไข
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="p-2">ไม่มีข้อมูลผู้ดูแล</p>
-                  )}
-
-                  <h5 className="ms-2 mt-4" style={{ color: "#444" }}> <b>2. คนในครอบครัว</b></h5>
-                  {AssessinhomeForms.OtherPeople?.newCaregivers?.length > 0 ? (
-                    AssessinhomeForms.OtherPeople?.newCaregivers?.map((cg, index) => (
-                      <div key={index}>
-                        <div
-                          className="row mb-2 mt-3"
-                          onClick={() => toggleAccordion(`family-${index}`)}
-                        >
-                          <div className="col-sm-4">
-                            <strong
-                              style={{
-                                cursor: "pointer",
-                                color: "#007BFF",
-                                transition: "color 0.1s ease",
-                              }}
-                              onMouseEnter={(e) => (e.target.style.color = "#95d7ff")}
-                              onMouseLeave={(e) => (e.target.style.color = "#007BFF")}
-                            >
-                              คนที่ {index + 1} : {cg.firstName} {cg.lastName || "-"} ({cg.relationship || "-"})
-                            </strong>
-                          </div>
-                        </div>
-
-                        {openIndex === `family-${index}` && (
-                          <div className="p-3 border rounded ms-2">
-                            <div className="row">
-                              <div className="col-sm-3"><strong>วันเกิด :</strong></div>
-                              <div className="col-sm-9">
-                                <p>{cg.birthDate ? formatThaiDate(cg.birthDate) : "- ปี - เดือน"}</p>
-                              </div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>ความสัมพันธ์ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.relationship || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>อาชีพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.occupation || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>สถานภาพ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.status || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>การศึกษา :</strong></div>
-                              <div className="col-sm-9"><p>{cg.education || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>รายได้ต่อเดือน :</strong></div>
-                              <div className="col-sm-9"><p>{cg.income || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>สิทธิ :</strong></div>
-                              <div className="col-sm-9"><p>{cg.benefit || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>โรคประจำตัว :</strong></div>
-                              <div className="col-sm-9"><p>{cg.ud || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>อุปนิสัย :</strong></div>
-                              <div className="col-sm-9"><p>{cg.habit || "-"}</p></div>
-                            </div>
-                            <div className="row">
-                              <div className="col-sm-3"><strong>รายละเอียดการดูแลผู้ป่วย :</strong></div>
-                              <div className="col-sm-7"><p>{cg.careDetails || "-"}</p></div>
-                            </div>
-                            <div className="col-sm-2">
-                              <button
-                                className="btn m-2"
-                                style={{ backgroundColor: "#ffde59", color: "black" }}
-                              >
-                                <i className="bi bi-pencil-fill"></i> แก้ไข
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="p-2">ไม่มีข้อมูลคนในครอบครัว</p>
-                  )}
-                </div>
-              )} */}
               {activeTab === "OtherPeople" && (
                 <div className="tab-pane fade show active">
                   <p className="ms-2" style={{ color: "#10B981" }}>
@@ -1825,7 +1655,7 @@ export default function DetailAssessinhomeForm() {
                       {/* สภาวะทางอารมณ์และจิตใจ */}
                       <div className="row">
                         <div className="col-sm-3"><strong>Mood and affect :</strong></div>
-                        <div className="col-sm-7">
+                        <div className="col-sm-9">
                           <p>
                             {AssessinhomeForms.PhysicalExamination.moodandaffect?.length > 0
                               ? AssessinhomeForms.PhysicalExamination.moodandaffect.map((item) =>
@@ -2093,6 +1923,7 @@ export default function DetailAssessinhomeForm() {
           formData={tempFormValues}
           onSave={handleSaveChanges}
           onClose={handleCloseModal}
+          isExistingCaregiver={editingOtherPerson?.group === "existingCaregivers"} 
         />
       )}
       {isModalOpen && currentEditSection === "Medication" && (

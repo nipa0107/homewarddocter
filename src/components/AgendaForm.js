@@ -834,13 +834,8 @@ export default function AgendaForm({ }) {
                         {steps.map((label, index) => (
                             <Step key={index}>
                                 <StepLabel
-                                    onClick={() => handleStepClick(index)}
-                                    style={{
-                                        cursor: "pointer",
-                                        color: activeStep === index ? "#95d7ff" : "#18aed6", // สีเขียวเมื่อเลือก, สีฟ้าสำหรับไม่เลือก
-                                        fontSize: "20px", // ขนาดฟอนต์ 20px
-                                        fontWeight: activeStep === index ? "bold" : "normal", // ตัวหนาเมื่อคลิก
-                                    }}
+                                   
+                                    
                                 >
                                     {label}
                                 </StepLabel>

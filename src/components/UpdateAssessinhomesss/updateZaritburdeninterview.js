@@ -6,7 +6,7 @@ const ZaritburdeninterviewForm = ({ formData, onSave, onClose }) => {
     const [formValues, setFormValues] = useState({ ...formData });
     const [totalScore, setTotalScore] = useState(0);
     const [burdenMessage, setBurdenMessage] = useState("");
-const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
+    const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
 
     useEffect(() => {
         // ตรวจสอบว่าผู้ใช้แก้ไขข้อมูลหรือไม่
@@ -44,14 +44,25 @@ const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่�
             setBurdenMessage("มีภาระหนัก");
         }
     };
-
+    // 🔹 ฟังก์ชันเคลียร์ค่าทั้งหมด
+    const handleClearSelections = () => {
+        const clearedValues = {};
+        Object.keys(formValues).forEach(key => {
+            if (key.startsWith("question_")) {
+                clearedValues[key] = null;
+            }
+        });
+        setFormValues({ ...formValues, ...clearedValues });
+        setTotalScore(0);
+        setBurdenMessage("");
+    };
     const handleSubmit = (e) => {
         e.preventDefault();
-                // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
-                if (!isEdited) {
-                    const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
-                    if (!confirmSave) return;
-                }
+        // 🔹 ถ้าข้อมูลไม่มีการเปลี่ยนแปลง แจ้งเตือนก่อนบันทึก
+        if (!isEdited) {
+            const confirmSave = window.confirm("ไม่มีการแก้ไขข้อมูล ต้องการบันทึกหรือไม่?");
+            if (!confirmSave) return;
+        }
         onSave({ ...formValues, totalScore });
     };
     const handleCancel = () => {
@@ -65,9 +76,9 @@ const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่�
     const renderRadioGroup = (label, name) => (
         <div className="m-1">
             <label className="form-label ms-2 mb-0 mt-3">{label} <span style={{ color: 'red' }}> *</span></label>
-    
+
             {[4, 3, 2, 1, 0].map((value) => (
-                <div key={value} className='ms-4 mt-2 d-flex align-items-center'> 
+                <div key={value} className='ms-4 mt-2 d-flex align-items-center'>
                     <input
                         type="radio"
                         name={name}
@@ -76,18 +87,18 @@ const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่�
                         onChange={(e) => handleChange(name, e.target.value)}
                         style={{
                             transform: 'scale(1.5)', // ลดขนาดให้เท่ากับ label
-                            marginRight: '8px', 
-                            verticalAlign: 'middle' 
+                            marginRight: '8px',
+                            verticalAlign: 'middle'
                         }}
                     />
-                    <label className="form-check-label" style={{ marginBottom: "0px", verticalAlign: "middle" ,marginLeft:"8px"}}>
+                    <label className="form-check-label" style={{ marginBottom: "0px", verticalAlign: "middle", marginLeft: "8px" }}>
                         {value} คะแนน
                     </label>
                 </div>
             ))}
         </div>
     );
-    
+
 
     const getGroupStyle = () => {
         if (totalScore > 20) return "text-danger"; // สีแดงสำหรับภาระหนัก
@@ -133,7 +144,12 @@ const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่�
                                 { name: "question_11", label: "11. คุณรู้สึกว่าคุณสูญเสียความสามารถในการตัดสินใจเพียงเพราะญาติของคุณหรือไม่?" },
                                 { name: "question_12", label: "12. คุณรู้สึกว่าคุณควรจะทำหน้าที่ดูแลญาติของคุณได้ดีกว่านี้หรือไม่?" },
                             ].map((item) => renderRadioGroup(item.label, item.name))}
-
+                            <div className="d-flex justify-content-end mt-2">
+                                <span className="clear-selection text-secondary"
+                                    onClick={handleClearSelections}>
+                                    เคลียร์คำตอบ
+                                </span>
+                            </div>
                             <div className="m-3">
                                 <b>
                                     {totalScore !== null && (

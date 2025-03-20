@@ -24,9 +24,13 @@ export const Physicalexamination = ({ userid,onDataChange }) => {
 
   const handleCheckboxChange = (name, value, isChecked) => {
     const currentValues = getValues(name) || [];
-    const updatedValues = isChecked
-      ? [...currentValues, value]
-      : currentValues.filter((item) => item !== value);
+
+    let updatedValues;
+    if (isChecked) {
+      updatedValues = [...currentValues, { value, isOther: false }];
+    } else {
+      updatedValues = currentValues.filter((item) => item.value !== value);
+    }
 
     handleInputChange(name, updatedValues);
   };
@@ -34,8 +38,8 @@ export const Physicalexamination = ({ userid,onDataChange }) => {
   const handleOtherInputChange = (name, value) => {
     const currentValues = getValues(name) || [];
     const updatedValues = value
-      ? [...currentValues.filter((item) => !item.startsWith("อื่นๆ:")), `อื่นๆ: ${value}`]
-      : currentValues.filter((item) => !item.startsWith("อื่นๆ:"));
+      ? [...currentValues.filter((item) => !item.isOther), { value, isOther: true }]
+      : currentValues.filter((item) => !item.isOther);
 
     handleInputChange(name, updatedValues);
   };
@@ -57,14 +61,14 @@ export const Physicalexamination = ({ userid,onDataChange }) => {
                 <input
                   type="checkbox"
                   value={option}
-                  checked={field.value.includes(option)}
+                  checked={field.value.some((item) => item.value === option)}
                   style={{ transform: "scale(1.3)", marginLeft: "5px" }}
                   onChange={(e) => {
                     handleCheckboxChange(fieldName, option, e.target.checked);
                     field.onChange(
                       e.target.checked
-                        ? [...field.value, option]
-                        : field.value.filter((item) => item !== option)
+                        ? [...field.value, { value: option, isOther: false }]
+                        : field.value.filter((item) => item.value !== option)
                     );
                   }}
                 />
@@ -85,19 +89,14 @@ export const Physicalexamination = ({ userid,onDataChange }) => {
                 rows="2"
                 style={{ resize: "vertical", border: "1px solid #ddd", outline: "none", marginLeft: "30px" }}
                 placeholder="กรอกคำตอบอื่นๆ"
-                value={
-                  (field.value.find((item) => item.startsWith("อื่นๆ:")) || "").replace(
-                    "อื่นๆ: ",
-                    ""
-                  )
-                }
+                value={field.value.find((item) => item.isOther)?.value || ""}
                 onChange={(e) => {
                   const otherValue = e.target.value;
                   handleOtherInputChange(fieldName, otherValue);
                   field.onChange(
                     otherValue
-                      ? [...field.value.filter((item) => !item.startsWith("อื่นๆ:")), `อื่นๆ: ${otherValue}`]
-                      : field.value.filter((item) => !item.startsWith("อื่นๆ:"))
+                      ? [...field.value.filter((item) => !item.isOther), { value: otherValue, isOther: true }]
+                      : field.value.filter((item) => !item.isOther)
                   );
                 }}
               />
@@ -414,3 +413,4 @@ export const Physicalexamination = ({ userid,onDataChange }) => {
     </div>
   )
 }
+//ไฟนอล

@@ -18,6 +18,7 @@ export default function AddEquipPatient() {
     const { id, user } = location.state;
     const [data, setData] = useState([]);
     const [equipments, setEquipments] = useState([]);
+    const [equipmentCounts, setEquipmentCounts] = useState({});
     const [profiledata, setProfiledata] = useState([]);
     const [validationMessage, setValidationMessage] = useState("");
     const [isActive, setIsActive] = useState(false);
@@ -34,7 +35,7 @@ export default function AddEquipPatient() {
     const bellRef = useRef(null);
     const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
     const [userUnreadCounts, setUserUnreadCounts] = useState([]);
-  const hasFetchedUserData = useRef(false);
+    const hasFetchedUserData = useRef(false);
     const [latestAssessments, setLatestAssessments] = useState({});
     const [unreadCountsByType, setUnreadCountsByType] = useState({
         assessment: 0,
@@ -214,16 +215,16 @@ export default function AddEquipPatient() {
                     alert("Token expired login again");
                     window.localStorage.clear();
                     setTimeout(() => {
-                      window.location.replace("./");
+                        window.location.replace("./");
                     }, 0);
-                    return null; 
-                  }
+                    return null;
+                }
 
                 setSender({
                     name: data.data.name,
                     surname: data.data.surname,
                     _id: data.data._id,
-                  });
+                });
                 setProfiledata(data.data);
                 return data.data;
             });
@@ -361,7 +362,14 @@ export default function AddEquipPatient() {
                 } else {
                     setEquipments([]); // ป้องกัน error ถ้า API คืนค่าผิด
                 }
+                // นับจำนวนอุปกรณ์แต่ละประเภท
+                const counts = data.data.reduce((acc, item) => {
+                    acc[item.equipment_type] = (acc[item.equipment_type] || 0) + 1;
+                    return acc;
+                }, {});
+                setEquipmentCounts(counts);
             })
+
             .catch((error) => {
                 console.error("Error fetching equipment data:", error);
             });
@@ -433,7 +441,7 @@ export default function AddEquipPatient() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-    
+
         if (selectedEquipments.length === 0) {
             setValidationMessage("โปรดเลือกอุปกรณ์อย่างน้อยหนึ่งรายการ");
             return;
@@ -442,11 +450,11 @@ export default function AddEquipPatient() {
             setValidationMessage("ไม่พบข้อมูลผู้ใช้");
             return;
         }
-    
+
         if (Object.keys(equipValidationMessages).length > 0) {
             return;
         }
-    
+
         fetch("https://backend-deploy-render-mxok.onrender.com/addequipuser", {
             method: "POST",
             headers: {
@@ -457,30 +465,30 @@ export default function AddEquipPatient() {
             },
             body: JSON.stringify({ equipments: selectedEquipments, userId: id }),
         })
-        .then((res) => res.json())
-        .then((data) => {
-            if (data.status === "ok") {
-                toast.success("เพิ่มข้อมูลสำเร็จ");
-                setTimeout(() => {
-                    navigate("/infopatient", { state: { id } });
-                }, 1100);
-            } else if (data.status === "error" && data.message === "มีอุปกรณ์นี้อยู่แล้ว") {
-                // ค้นหาอุปกรณ์ที่ซ้ำ และสร้างข้อความแจ้งเตือน
-                const duplicateEquipments = selectedEquipments
-                    .map(equip => equip.equipmentname_forUser)
-                    .join(", ");
-    
-                setValidationMessage(`มีอุปกรณ์ ${duplicateEquipments} อยู่แล้ว`);
-            } else {
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.status === "ok") {
+                    toast.success("เพิ่มข้อมูลสำเร็จ");
+                    setTimeout(() => {
+                        navigate("/infopatient", { state: { id } });
+                    }, 1100);
+                } else if (data.status === "error" && data.message === "มีอุปกรณ์นี้อยู่แล้ว") {
+                    // ค้นหาอุปกรณ์ที่ซ้ำ และสร้างข้อความแจ้งเตือน
+                    const duplicateEquipments = selectedEquipments
+                        .map(equip => equip.equipmentname_forUser)
+                        .join(", ");
+
+                    setValidationMessage(`มีอุปกรณ์ ${duplicateEquipments} อยู่แล้ว`);
+                } else {
+                    toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
+                }
+            })
+            .catch((error) => {
+                console.error("Error adding equipment:", error);
                 toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
-            }
-        })
-        .catch((error) => {
-            console.error("Error adding equipment:", error);
-            toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
-        });
+            });
     };
-    
+
 
     const logOut = () => {
         window.localStorage.clear();
@@ -749,41 +757,41 @@ export default function AddEquipPatient() {
                             <i className="bi bi-chevron-double-right"></i>
                         </li>
                         <li className="middle">
-              <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
-            </li>
-            <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a href="allpatient">...</a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-            <li className="middle">
-              <a
-                href="infopatient"
-                onClick={() =>
-                  navigate("/infopatient", { state: { id: id, user: user } })
-                }
-              >
-                ข้อมูลการดูแลผู้ป่วย
-              </a>
-            </li>
-            <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a className="info" href="infopatient"
-                onClick={() =>
-                  navigate("/infopatient", { state: { id: id, user: user } })
-                }>
-                    ...
-                  </a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
+                            <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
+                        </li>
+                        <li className="arrow middle">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li className="ellipsis">
+                            <a href="allpatient">...</a>
+                        </li>
+                        <li className="arrow ellipsis">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li className="middle">
+                            <a
+                                href="infopatient"
+                                onClick={() =>
+                                    navigate("/infopatient", { state: { id: id, user: user } })
+                                }
+                            >
+                                ข้อมูลการดูแลผู้ป่วย
+                            </a>
+                        </li>
+                        <li className="arrow middle">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li className="ellipsis">
+                            <a className="info" href="infopatient"
+                                onClick={() =>
+                                    navigate("/infopatient", { state: { id: id, user: user } })
+                                }>
+                                ...
+                            </a>
+                        </li>
+                        <li className="arrow ellipsis">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
                         <li>
                             <a>เพิ่มอุปกรณ์สำหรับผู้ป่วย</a>
                         </li>
@@ -792,7 +800,7 @@ export default function AddEquipPatient() {
                 <h3>เพิ่มอุปกรณ์สำหรับผู้ป่วย</h3>
                 <div className="table-responsive">
                     <form onSubmit={handleSubmit}>
-                        <table className="table table-hover" style={{ width: "60%" }}>
+                        <table className="table table-hover" style={{ width: "70%" }}>
                             <thead>
                                 <tr>
                                     <th style={{ width: "10%" }}>
@@ -800,7 +808,7 @@ export default function AddEquipPatient() {
                                             style={{ marginLeft: "20px", cursor: "pointer" }}
                                             type="checkbox"
                                             className="form-check-input"
-                                            onChange={toggleAllCheckboxes} 
+                                            onChange={toggleAllCheckboxes}
                                         />
                                     </th>
                                     <th style={{ width: "10%" }}>#</th>
@@ -829,7 +837,7 @@ export default function AddEquipPatient() {
                                             <tr>
                                                 <td colSpan="3" className="fw-bold text-left"
                                                     style={{ backgroundColor: "#e8f5fd", cursor: "default" }}>
-                                                    {equipmentType}
+                                                    {equipmentType} (จำนวน {equipmentCounts[equipmentType] || 0} รายการ)
                                                 </td>
                                             </tr>
 

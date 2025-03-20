@@ -145,7 +145,7 @@ const handleInputChange = (name, value) => {
                 <input
                   type="number"
                   className="form-control"
-                  style={{ width: "30%" }}
+                  style={{ width: "35%" }}
                   placeholder="กรอกจำนวนชั้น"
                   {...field}
                   onChange={(e) => {
@@ -168,7 +168,7 @@ const handleInputChange = (name, value) => {
                 <input
                   type="number"
                   className="form-control"
-                  style={{ width: "30%" }}
+                  style={{ width: "35%" }}
                   placeholder="กรอกจำนวนห้อง"
                   {...field}
                   onChange={(e) => {
@@ -191,7 +191,7 @@ const handleInputChange = (name, value) => {
                 <input
                   type="number"
                   className="form-control"
-                  style={{ width: "30%" }}
+                  style={{ width: "35%" }}
                   placeholder="กรอกตัวเลขชั้น"
                   {...field}
                   onChange={(e) => {
@@ -520,7 +520,7 @@ const handleInputChange = (name, value) => {
                 <input
                   type='number'
                   className="form-control"
-                  style={{ width: "39%" }}
+                  style={{ width: "41%" }}
                   placeholder="กรอกจำนวนเพื่อนบ้าน"
                   {...field}
                   onChange={(e) => {
