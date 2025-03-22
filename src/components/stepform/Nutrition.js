@@ -38,13 +38,13 @@ export const Nutrition = ({ onDataChange, setValidateForm,userid }) => {
 
   }, [nutritionData, userid]);
   
-  const activityFactors = {
-    sedentary: 1.2,
+  const activityFactors = { 
+    sedentary: 1.2, 
     lightly_active: 1.375,
     moderately_active: 1.55,
     very_active: 1.725,
     super_active: 1.9,
-  };
+  }; 
 
   // ดึงข้อมูลผู้ใช้จากฐานข้อมูล
   useEffect(() => {
@@ -92,7 +92,7 @@ export const Nutrition = ({ onDataChange, setValidateForm,userid }) => {
         ? 88.362 + 13.397 * weight + 4.799 * height - 5.677 * userAge
         : 447.593 + 9.247 * weight + 3.098 * height - 4.330 * userAge;
 
-      calculatedBmr = Math.round(calculatedBmr);
+      calculatedBmr = Math.round(calculatedBmr);  
       setBmr(calculatedBmr);
       setValue('bmr', calculatedBmr);
 

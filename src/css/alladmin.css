@@ -1343,3 +1343,38 @@ input[type="radio"] {
 
 
 }
+/* CSS สำหรับตาราง */
+.table-diagnosis {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-diagnosis th,
+.table-diagnosis td {
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.table-diagnosis th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.table-diagnosis tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.table-diagnosis tr:hover {
+  background-color: #f1f1f1;
+}
+
+.table-diagnosis td b {
+  color: #007bff;
+}
+
+/* CSS สำหรับไอคอนในตาราง */
+.table-diagnosis td span {
+  font-size: 14px;
+  color: #6c757d;
+}
