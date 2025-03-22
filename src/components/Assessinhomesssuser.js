@@ -8,7 +8,6 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from "socket.io-client";
-const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 export default function Assessinhomesssuser({ }) {
   const navigate = useNavigate();
@@ -46,6 +45,7 @@ export default function Assessinhomesssuser({ }) {
     abnormal: 0,
     normal: 0,
   });
+  const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
 
   const fetchLatestAssessments = async () => {

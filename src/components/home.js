@@ -18,7 +18,6 @@ import { fetchAlerts } from "./Alert/alert";
 import { renderAlerts } from "./Alert/renderAlerts";
 import Sidebar from "./sidebar";
 import io from 'socket.io-client';
-const socket = io("https://backend-deploy-render-mxok.onrender.com");
 export default function Home() {
   const [data, setData] = useState([]);
   const [datauser, setDatauser] = useState([]);
@@ -38,7 +37,8 @@ export default function Home() {
   const [sender, setSender] = useState({ name: "", surname: "", _id: "" });
   const [userUnreadCounts, setUserUnreadCounts] = useState([]);
   const hasFetchedUserData = useRef(false);
-  
+  const socket = io("https://backend-deploy-render-mxok.onrender.com");
+
   const [latestAssessments, setLatestAssessments] = useState({});
   const [unreadCountsByType, setUnreadCountsByType] = useState({
     assessment: 0,
