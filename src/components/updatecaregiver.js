@@ -753,14 +753,14 @@ export default function Updatecaregiver() {
               <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
             </li>
             <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a href="allpatient">...</a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a href="allpatient">...</a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
             <li className="middle">
               <a
                 href="infopatient"
@@ -772,26 +772,27 @@ export default function Updatecaregiver() {
               </a>
             </li>
             <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a className="info" href="infopatient"
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
+            <li className="ellipsis">
+              <a className="info" href="infopatient"
                 onClick={() =>
                   navigate("/infopatient", { state: { id: id, user: user } })
                 }>
-                    ...
-                  </a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
+                ...
+              </a>
+            </li>
+            <li className="arrow ellipsis">
+              <i className="bi bi-chevron-double-right"></i>
+            </li>
             <li>
               <a>แก้ไขข้อมูลผู้ดูแล</a>
             </li>
           </ul>
         </div>
-        <h3>แก้ไขข้อมูลผู้ดูแล</h3>
+        {/* <h3>แก้ไขข้อมูลผู้ดูแล</h3> */}
         <div className="adminall card mb-1">
+        <p className="title-header">แก้ไขข้อมูลผู้ดูแล</p>
           <form>
             <div className="mb-1">
               <label>เลขประจําตัวประชาชน</label>
@@ -888,15 +889,18 @@ export default function Updatecaregiver() {
               />
               {telError && <span className="error-text">{telError}</span>}
             </div>
-          </form>
-        </div>
-        <div className="btn-group mt-4">
-          <div className="btn-next">
-            <button onClick={handleSave} className="btn btn-outline py-2">
+            <div className="d-grid">
+            <button
+              onClick={handleSave}
+              // onClick={() => UpdateUser(id)}
+              className="btn btn-outline py-2"
+            >
               บันทึก
             </button>
           </div>
+          </form>
         </div>
+
       </div>
     </main>
   );

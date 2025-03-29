@@ -216,42 +216,42 @@ export default function Updatemedicalinformation() {
 
     const fetchUserData = (token) => {
         return fetch("https://backend-deploy-render-mxok.onrender.com/profiledt", {
-          method: "POST",
-          crossDomain: true,
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-          body: JSON.stringify({ token }),
+            method: "POST",
+            crossDomain: true,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+            body: JSON.stringify({ token }),
         })
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.data === "token expired") {
-              alert("Token expired login again");
-              window.localStorage.clear();
-              setTimeout(() => {
-                window.location.replace("./");
-              }, 0);
-              return null;
-            }
-            setProfileData(data.data);
-            setSender({
-              name: data.data.name,
-              surname: data.data.surname,
-              _id: data.data._id,
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.data === "token expired") {
+                    alert("Token expired login again");
+                    window.localStorage.clear();
+                    setTimeout(() => {
+                        window.location.replace("./");
+                    }, 0);
+                    return null;
+                }
+                setProfileData(data.data);
+                setSender({
+                    name: data.data.name,
+                    surname: data.data.surname,
+                    _id: data.data._id,
+                });
+                setData(data.data);
+                if (data.data === "token expired") {
+                    window.localStorage.clear();
+                    window.location.href = "./";
+                }
+                return data.data;
+            })
+            .catch((error) => {
+                console.error("Error verifying token:", error);
             });
-            setData(data.data);
-            if (data.data === "token expired") {
-              window.localStorage.clear();
-              window.location.href = "./";
-            }
-            return data.data;
-          })
-          .catch((error) => {
-            console.error("Error verifying token:", error);
-          });
-      };
+    };
 
     const fetchAndSetAlerts = (token, userId) => {
         fetchAlerts(token, userId)
@@ -268,7 +268,7 @@ export default function Updatemedicalinformation() {
     };
 
     useEffect(() => {
-        if (hasFetchedUserData.current) return; 
+        if (hasFetchedUserData.current) return;
         hasFetchedUserData.current = true;
         const token = window.localStorage.getItem("token");
         setToken(token);
@@ -425,7 +425,24 @@ export default function Updatemedicalinformation() {
         setPdfURLPhy(pdfURLPhy);
     };
 
+    const handleRemoveFileP = () => {
+        setFileP(null);
+        setPdfURLP(null);
+        setSelectedFileNameP(""); // ลบชื่อไฟล์ที่แสดง
+    };
 
+    const handleRemoveFileM = () => {
+        setFileM(null);
+        setPdfURLM(null);
+        setSelectedFileNameM("");
+    };
+
+    const handleRemoveFilePhy = () => {
+        setFilePhy(null);
+        setPdfURLPhy(null);
+        setSelectedFileNamePhy("");
+    };
+    
     const FormatDate = (date) => {
         if (!date) {
             return ""; // Return an empty string if the date is null, undefined, or empty
@@ -516,7 +533,6 @@ export default function Updatemedicalinformation() {
     };
 
     const UpdateMedical = async () => {
-        console.log(HN, AN,);
         const selectedPersonnelValue =
             document.getElementById("selectedPersonnel").value;
 
@@ -542,15 +558,22 @@ export default function Updatemedicalinformation() {
 
             if (fileP) {
                 formData.append("fileP", fileP);
-            }
-
-            if (fileM) {
+              } else {
+                formData.append("deleteFileP", "true");
+              }
+        
+              if (fileM) {
                 formData.append("fileM", fileM);
-            }
-
-            if (filePhy) {
+              }else {
+                formData.append("deleteFileM", "true");
+              }
+        
+              if (filePhy) {
                 formData.append("filePhy", filePhy);
-            }
+              }else {
+                formData.append("deleteFilePhy", "true");
+              }
+        
 
             console.log("info:", id);
             const response = await fetch(
@@ -583,6 +606,9 @@ export default function Updatemedicalinformation() {
             // ดำเนินการเมื่อเกิดข้อผิดพลาดในการส่งคำขอ
         }
     };
+
+
+
     useEffect(() => {
         // ดึงข้อมูล unread count เมื่อเปิดหน้า
         const fetchUnreadCount = async () => {
@@ -604,6 +630,8 @@ export default function Updatemedicalinformation() {
         };
         fetchUnreadCount();
     }, []);
+
+    
     return (
         <main className="body">
             <ToastContainer />
@@ -629,7 +657,7 @@ export default function Updatemedicalinformation() {
                                 <a href="profile">
                                     <i className="bi bi-person"></i>
                                     <span className="links_name">
-                                    {profileData && profileData.nametitle + profileData.name + " " + profileData.surname}
+                                        {profileData && profileData.nametitle + profileData.name + " " + profileData.surname}
                                     </span>
                                 </a>
                             </li>
@@ -754,50 +782,51 @@ export default function Updatemedicalinformation() {
                             <i class="bi bi-chevron-double-right"></i>
                         </li>
                         <li className="middle">
-              <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
-            </li>
-            <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a href="allpatient">...</a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-            <li className="middle">
-              <a
-                href="infopatient"
-                onClick={() =>
-                  navigate("/infopatient", { state: { id: id, user: user } })
-                }
-              >
-                ข้อมูลการดูแลผู้ป่วย
-              </a>
-            </li>
-            <li className="arrow middle">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
-                <li className="ellipsis">
-                  <a className="info" href="infopatient"
-                onClick={() =>
-                  navigate("/infopatient", { state: { id: id, user: user } })
-                }>
-                    ...
-                  </a>
-                </li>
-                <li className="arrow ellipsis">
-                  <i className="bi bi-chevron-double-right"></i>
-                </li>
+                            <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
+                        </li>
+                        <li className="arrow middle">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li className="ellipsis">
+                            <a href="allpatient">...</a>
+                        </li>
+                        <li className="arrow ellipsis">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li className="middle">
+                            <a
+                                href="infopatient"
+                                onClick={() =>
+                                    navigate("/infopatient", { state: { id: id, user: user } })
+                                }
+                            >
+                                ข้อมูลการดูแลผู้ป่วย
+                            </a>
+                        </li>
+                        <li className="arrow middle">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li className="ellipsis">
+                            <a className="info" href="infopatient"
+                                onClick={() =>
+                                    navigate("/infopatient", { state: { id: id, user: user } })
+                                }>
+                                ...
+                            </a>
+                        </li>
+                        <li className="arrow ellipsis">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
                         <li>
                             <a>แก้ไขข้อมูลการเจ็บป่วย</a>
                         </li>
                     </ul>
                 </div>
                 <br></br>
-                <h3>แก้ไขข้อมูลการเจ็บป่วย</h3>
+                {/* <h3>แก้ไขข้อมูลการเจ็บป่วย</h3> */}
                 {medicalInfo && (
                     <div className="adminall card mb-1">
+                        <p className="title-header">แก้ไขข้อมูลการเจ็บป่วย</p>
                         <div className="mb-1">
                             <label>HN</label>
                             <input
@@ -876,133 +905,206 @@ export default function Updatemedicalinformation() {
                                 onChange={(e) => setChief_complaint(e.target.value)}
                             />
                         </div>
-                        <div className="mb-1">
+                        <div className="mb-2">
                             <label>Present illness</label>
-                            <input
-                                type="file"
-                                className="form-control"
-                                accept="application/pdf"
-                                onChange={handleFileChangeP}
-                            />
+                            {!pdfURLP && !fileP && (
+                                <input
+                                    type="file"
+                                    className="form-control"
+                                    accept="application/pdf"
+                                    onChange={handleFileChangeP}
+                                />
+                            )}
                             <div className="filename">
                                 {pdfURLP ? (
-                                    <a href={pdfURLP} target="_blank" rel="noopener noreferrer">
-                                        {selectedFileNameP}
-                                    </a>
+                                    <div className="mb-2 pdf">
+                                        <a href={pdfURLP} target="_blank" rel="noopener noreferrer">
+                                            <i
+                                                className="bi bi-filetype-pdf"
+                                                style={{ color: "red" }}
+                                            ></i>{" "}
+                                            {selectedFileNameP}
+                                        </a>
+                                        <button
+                                            onClick={handleRemoveFileP}
+                                            className="delete-button-file"
+                                        >
+                                            <i className="bi bi-x"></i>
+                                        </button>
+                                    </div>
                                 ) : (
                                     fileP && (
-                                        <a
-                                            onClick={() => {
-                                                window.open(
-                                                    `${fileP}`,
-                                                    "_blank"
-                                                );
-                                            }}
-                                        >
-                                            {filePName}
-                                        </a>
+                                        <div className="mb-2 pdf">
+                                            <a onClick={() => window.open(`${fileP}`, "_blank")}>
+                                                <i
+                                                    className="bi bi-filetype-pdf"
+                                                    style={{ color: "red" }}
+                                                ></i>{" "}
+                                                {filePName}
+                                            </a>
+                                            <button
+                                                onClick={handleRemoveFileP}
+                                                className="delete-button-file"
+                                            >
+                                                <i className="bi bi-x"></i>
+                                            </button>
+                                        </div>
                                     )
                                 )}
                             </div>
+
                             <textarea
                                 className="form-control"
                                 value={Present_illness} // Set the value attribute
-                                rows="3"
+                                rows="2"
                                 style={{ resize: "vertical" }}
                                 onChange={(e) => setPresent_illness(e.target.value)}
                             />
-
                         </div>
 
-                        <div className="mb-1">
+                        <div className="mb-2">
                             <label>Management plan</label>
-                            <input
-                                type="file"
-                                className="form-control"
-                                accept="application/pdf"
-                                onChange={handleFileChangeM}
-                            />
+                            {!pdfURLM && !fileM && (
+                                <input
+                                    type="file"
+                                    className="form-control"
+                                    accept="application/pdf"
+                                    onChange={handleFileChangeM}
+                                />
+                            )}
                             <div className="filename">
                                 {pdfURLM ? (
-                                    <a href={pdfURLM} target="_blank" rel="noopener noreferrer">
-                                        {selectedFileNameM}
-                                    </a>
+                                    <div className="mb-2 pdf">
+                                        <a href={pdfURLM} target="_blank" rel="noopener noreferrer">
+                                            <i
+                                                className="bi bi-filetype-pdf"
+                                                style={{ color: "red" }}
+                                            ></i>{" "}
+                                            {selectedFileNameM}
+                                        </a>
+                                        <button
+                                            onClick={handleRemoveFileM}
+                                            className="delete-button-file"
+                                        >
+                                            <i className="bi bi-x"></i>
+                                        </button>
+                                    </div>
                                 ) : (
                                     fileM && (
-                                        <a
-                                            onClick={() => {
-                                                window.open(
-                                                    `${fileM}`,
-                                                    "_blank"
-                                                );
-                                            }}
-                                        >
-                                            {fileMName}
-                                        </a>
+                                        <div className="mb-2 pdf">
+                                            <a
+                                                onClick={() => {
+                                                    window.open(`${fileM}`, "_blank");
+                                                }}
+                                            >
+                                                <i
+                                                    className="bi bi-filetype-pdf"
+                                                    style={{ color: "red" }}
+                                                ></i>{" "}
+                                                {fileMName}
+                                            </a>
+                                            <button
+                                                onClick={handleRemoveFileM}
+                                                className="delete-button-file"
+                                            >
+                                                <i className="bi bi-x"></i>
+                                            </button>
+                                        </div>
                                     )
                                 )}
                             </div>
                             <textarea
                                 className="form-control"
                                 value={Management_plan} // Set the value here
-                                rows="3"
+                                rows="2"
                                 style={{ resize: "vertical" }}
                                 onChange={(e) => setManagement_plan(e.target.value)}
                             />
                         </div>
 
-                        <div className="mb-1">
-                            <label>Phychosocial assessment</label>
-
-                            <input
-                                type="file"
-                                className="form-control"
-                                accept="application/pdf"
-                                onChange={handleFileChangePhy}
-                            />
-
+                        <div className="mb-2">
+                            <label>Psychosocial assessment</label>
+                            {!pdfURLPhy && !filePhy && (
+                                <input
+                                    type="file"
+                                    className="form-control"
+                                    accept="application/pdf"
+                                    onChange={handleFileChangePhy}
+                                />
+                            )}
                             <div className="filename">
                                 {pdfURLPhy ? (
-                                    <a href={pdfURLPhy} target="_blank" rel="noopener noreferrer">
-                                        {selectedFileNamePhy}
-                                    </a>
+                                    <div className="mb-2 pdf">
+                                        <a
+                                            href={pdfURLPhy}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <i
+                                                className="bi bi-filetype-pdf"
+                                                style={{ color: "red" }}
+                                            ></i>{" "}
+                                            {selectedFileNamePhy}
+                                        </a>
+                                        <button
+                                            onClick={handleRemoveFilePhy}
+                                            className="delete-button-file"
+                                        >
+                                            <i className="bi bi-x"></i>
+                                        </button>
+                                    </div>
                                 ) : (
                                     filePhy && (
-                                        <a
-                                            onClick={() => {
-                                                window.open(
-                                                    `${filePhy}`,
-                                                    "_blank"
-                                                );
-                                            }}
-                                        >
-                                            {filePhyName}
-                                        </a>
+                                        <div className="mb-2 pdf">
+                                            <a
+                                                onClick={() => {
+                                                    window.open(`${filePhy}`, "_blank");
+                                                }}
+                                            >
+                                                <i
+                                                    className="bi bi-filetype-pdf"
+                                                    style={{ color: "red" }}
+                                                ></i>{" "}
+                                                {filePhyName}
+                                            </a>
+                                            <button
+                                                onClick={handleRemoveFilePhy}
+                                                className="delete-button-file"
+                                            >
+                                                <i className="bi bi-x"></i>
+                                            </button>
+                                        </div>
                                     )
                                 )}
                             </div>
                             <textarea
                                 className="form-control"
                                 value={Phychosocial_assessment} // Set the value here
-                                rows="3"
+                                rows="2"
                                 style={{ resize: "vertical" }}
                                 onChange={(e) => setPhychosocial_assessment(e.target.value)}
                             />
                         </div>
-
+                        <div className="d-grid">
+                            <button
+                                onClick={UpdateMedical}
+                                // onClick={() => UpdateUser(id)}
+                                className="btn btn-outline py-2"
+                            >
+                                บันทึก
+                            </button>
+                        </div>
                     </div>
 
                 )}
-                <div className="btn-group">
+                {/* <div className="btn-group">
                     <div className="btn-next">
                         <button onClick={UpdateMedical} className="btn btn-outline py-2">
                             บันทึก
                         </button>
                     </div>
-                </div>
+                </div> */}
             </div>
-
-            <div></div>
         </main>
     );
 }

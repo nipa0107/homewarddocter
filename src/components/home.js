@@ -3,15 +3,10 @@ import "../css/sidebar.css";
 import "../css/alladmin.css";
 import "../css/noti.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import logow from "../img/logow.png";
 import Pt from "../img/patient.png";
 import Pt2 from "../img/patientcount.png";
-import Bh from "../img/better-health.png";
-import VSG from "../img/vsg.png";
 import VSR from "../img/abnormal.png";
-import Noti from "../img//noti.png";
 import DoughnutChartComponent from "./Chart.js";
-import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis } from 'recharts';
 import CountUp from 'react-countup';
 import { useNavigate } from "react-router-dom";
 import { fetchAlerts } from "./Alert/alert";
@@ -832,21 +827,6 @@ export default function Home() {
             </ul>
           </div>
         </div>
-        {/* <div className="breadcrumbs mt-4">
-          <ul>
-            <li>
-              <a href="home">
-                <i class="bi bi-house-fill"></i>
-              </a>
-            </li>
-            <li className="arrow">
-              <i class="bi bi-chevron-double-right"></i>
-            </li>
-            <li>
-              <a>Dashboard </a>
-            </li>
-          </ul>
-        </div> */}
         {showNotifications && (
           <div className="notifications-dropdown" ref={notificationsRef}>
             <div className="notifications-head">
@@ -959,7 +939,7 @@ export default function Home() {
             <div
               className="col-xl-4 col-md-6 mb-4 mt-4"
               onClick={() => navigate("/allpatient")}
-              style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
+              style={{ cursor: "pointer" }}
             >
               <div className="card border-left shadow h-100  hover-card" style={{ borderRadius: "5px", overflow: "hidden" }}>
                 <div className="card-body pb-0" style={{ backgroundColor: "#e8f5fd", borderTopLeftRadius: "5px", borderTopRightRadius: "5px" }}>
@@ -990,7 +970,7 @@ export default function Home() {
             <div
               className="col-xl-4 col-md-6 mb-4 mt-4"
               onClick={() => navigate("/abnormalcase")}
-              style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
+              style={{ cursor: "pointer" }}
             >
               <div className="card border-left shadow h-100  hover-card" style={{ borderRadius: "5px", overflow: "hidden" }}>
                 <div className="card-body pb-0" style={{ backgroundColor: "#ffe4e4", borderTopLeftRadius: "5px", borderTopRightRadius: "5px" }}>
@@ -1023,7 +1003,7 @@ export default function Home() {
             <div
               className="col-xl-4 col-md-6 mb-4 mt-4"
               onClick={() => navigate("/immobilityg3")}
-              style={{ cursor: "pointer" }} // Add cursor pointer for a clickable effect
+              style={{ cursor: "pointer" }}
             >
               <div className="card border-left shadow h-100  hover-card" style={{ borderRadius: "5px", overflow: "hidden" }}>
                 <div className="card-body pb-0" style={{ backgroundColor: "#fff5e8", borderTopLeftRadius: "5px", borderTopRightRadius: "5px" }}>
@@ -1052,8 +1032,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          {/* <h6 className="m-0" style={{fontWeight:"bold" , color:"#5ab1f8"}}>ผู้ป่วยที่มีคะแนนช่วยเหลือตัวเองได้น้อย</h6> */}
 
           <div class="row">
             <div className="col-12 mb-4">
@@ -1102,67 +1080,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <div className="col-12 mb-4">
-              <div className="card shadow mb-4">
-                <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between" style={{ backgroundColor: "#e8f5fd", border: 'none' }}>
-                  <h6 className="m-0 text-primary" style={{ fontWeight: "bolder" }}>โรคของผู้ป่วยที่เข้ารับการรักษามากที่สุด 3 อันดับแรก</h6>
-                </div>
-                <div className="card-body pt-2">
-                  <div className="container text-center">
-                    <p className="mt-3">Top 3 Diagnosis</p>
-                    <div class="row align-items-center">
-                      <div class="col align-middle">
 
-                        <div>
-
-                          {topDiagnosis.length > 0 && (
-                            <DoughnutChartComponent
-                              data={topDiagnosis.map((entry) => {
-                                // คำนวณจำนวนเคสทั้งหมด
-                                const totalCases = topDiagnosis.reduce((sum, entry) => sum + entry.count, 0);
-                                // คำนวณเปอร์เซ็นต์สำหรับแต่ละโรค
-                                const percentage = totalCases > 0 ? ((entry.count / totalCases) * 100).toFixed(2) : 0;
-
-                                return {
-                                  name: entry._id,   // ชื่อโรค
-                                  value: entry.count, // จำนวนเคส
-                                  percentage: percentage, // เปอร์เซ็นต์ของเคส
-                                };
-                              })}
-                              colors={["#0088FE", "#00C49F", "#FFBB28"]} // ใช้สีที่เหมาะสม
-                            />
-                          )}
-                        </div>
-                      </div>
-                      <div className="col">
-                        {topDiagnosis.length > 0 ? (
-                          <table className="table-diagnosis">
-                            <thead>
-                              <tr>
-                                <th>ลำดับ</th>
-                                <th>ชื่อโรค</th>
-                                <th>จำนวนเคส</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {topDiagnosis.map((entry, index) => (
-                                <tr key={index}>
-                                  <td>{index + 1}</td> {/* ลำดับที่ 1, 2, 3 */}
-                                  <td>{entry._id}</td> {/* ชื่อโรค */}
-                                  <td>{entry.count} เคส</td> {/* จำนวนเคส */}
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        ) : (
-                          <p>ไม่มีข้อมูล</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
             <div className="col-xl-4 col-lg-5">
               <div class="card shadow mb-4" style={{ border: 'none' }}>
@@ -1290,7 +1208,7 @@ export default function Home() {
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            marginBottom: '8px', // เพิ่มระยะห่างระหว่างแต่ละ `li`
+                            marginBottom: '8px',
                           }}
                         >
                           <div className="col-md-5 ms-md-auto text-left">
@@ -1301,7 +1219,7 @@ export default function Home() {
                                 height: "12px",
                                 backgroundColor: COLORS_GENDER[index % COLORS_GENDER.length],
                                 borderRadius: "50%",
-                                marginRight: "10px", // ระยะห่างระหว่างสีและข้อความ
+                                marginRight: "10px",
                               }}
                             ></span>
                             <span style={{ color: COLORS_GENDER[index % COLORS_GENDER.length] }}>
@@ -1310,7 +1228,7 @@ export default function Home() {
                           </div>
                           <div className="col-md-3 ms-auto text-end">
                             <span style={{ color: COLORS_GENDER[index % COLORS_GENDER.length] }}>
-                              <b>{entry.count} คน</b> {/* Show the count of people */}
+                              <b>{entry.count} คน</b>
                             </span>
                           </div>
                         </li>

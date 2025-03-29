@@ -552,12 +552,7 @@ export default function AgendaForm({ }) {
     });
 
     const [ZaritData, setZaritData] = useState(() => {
-        const storedData = JSON.parse(localStorage.getItem(getLocalStorageKey("ZaritData")));
-        return storedData ?? {
-            question_1: "", question_2: "", question_3: "", question_4: "", question_5: "",
-            question_6: "", question_7: "", question_8: "", question_9: "", question_10: "",
-            question_11: "", question_12: "", totalScore: 0
-        };
+        return JSON.parse(localStorage.getItem(getLocalStorageKey("zaritData"))) || {};
     });
 
     // ✅ อัปเดต localStorage เมื่อข้อมูลเปลี่ยนแปลง
@@ -566,7 +561,7 @@ export default function AgendaForm({ }) {
             localStorage.setItem(getLocalStorageKey("patientAgendaData"), JSON.stringify(PatientAgendaData));
             localStorage.setItem(getLocalStorageKey("caregiverAgendaData"), JSON.stringify(careAgenda));
             localStorage.setItem(getLocalStorageKey("careAssessmentData"), JSON.stringify(careAssessment));
-            localStorage.setItem(getLocalStorageKey("ZaritData"), JSON.stringify(ZaritData));
+            localStorage.setItem(getLocalStorageKey("zaritData"), JSON.stringify(ZaritData));
         }
     }, [PatientAgendaData, careAgenda, careAssessment, ZaritData, userid]);
 
@@ -576,8 +571,9 @@ export default function AgendaForm({ }) {
         localStorage.removeItem(getLocalStorageKey("patientAgendaData"));
         localStorage.removeItem(getLocalStorageKey("caregiverAgendaData"));
         localStorage.removeItem(getLocalStorageKey("careAssessmentData"));
-        localStorage.removeItem(getLocalStorageKey("ZaritData"));
+        localStorage.removeItem(getLocalStorageKey("zaritData"));
     };
+    const [resetOnNextMount, setResetOnNextMount] = useState(false);
 
     const handleNext = async (data) => {
         console.log("Form data at step", activeStep, data);
@@ -629,20 +625,20 @@ export default function AgendaForm({ }) {
                 const data = await response.json();
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
+ clearUserLocalStorage();
+                        setPatientAgendaData(() => ({}));
+                        setCaregiverAgendaData(() => ({}));
+                        setCaregiverAssessmentData(() => ({}));
+                        setZaritData(() => ({}));
 
                     // รีเซ็ตข้อมูลหลังจากเปลี่ยนหน้า
                     setTimeout(() => {
-                        // ✅ ล้างข้อมูล localStorage ของ userId นี้
-                        clearUserLocalStorage();
-
-                        // ✅ รีเซ็ตค่าให้เริ่มใหม่
-                        setPatientAgendaData({});
-                        setCaregiverAgendaData({});
-                        setCaregiverAssessmentData({});
-                        setZaritData({});
                         navigate("/assessinhomesssuser", { state: { id } });
-                        window.location.reload(); // รีเฟรชหน้าเพื่อให้แน่ใจว่า localStorage ถูกเคลียร์
-                    }, 1000); // 1 วินาทีหลังจากที่ toast แสดงผล
+
+                       
+                    },50);
+
+0
                 } else {
                     console.error("Error during ReadinessForm submission:", data);
                     toast.error("เกิดข้อผิดพลาดในการประเมิน");

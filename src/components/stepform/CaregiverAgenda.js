@@ -255,10 +255,10 @@ export const CaregiverAgenda = ({ userid, onDataChange }) => {
               </Collapse>
             </div>
           ))}
-          <div className="mt-2">
+          {/* <div className="mt-2">
             <b >ข้อมูลคนในครอบครัว</b>
-          </div>
-          {newCaregivers.map((caregiver, index) => (
+          </div> */}
+          {/* {newCaregivers.map((caregiver, index) => (
             <div key={caregiver.id}>
               <span
                 onClick={() => toggleCollapse(index, "new")}
@@ -336,7 +336,7 @@ export const CaregiverAgenda = ({ userid, onDataChange }) => {
                 </div>
               </Collapse>
             </div>
-          ))}
+          ))} */}
         </div>
       </div>
     </div>

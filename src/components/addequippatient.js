@@ -375,70 +375,6 @@ export default function AddEquipPatient() {
             });
     };
 
-
-    // const handleCheckboxChange = (e, equipmentName, equipmentType) => {
-    //     const isChecked = e.target.checked;
-    //     let updatedEquipments;
-
-    //     if (isChecked) {
-    //         updatedEquipments = [
-    //             ...selectedEquipments,
-    //             {
-    //                 equipmentname_forUser: equipmentName,
-    //                 equipmenttype_forUser: equipmentType,
-    //             },
-    //         ];
-    //     } else {
-    //         updatedEquipments = selectedEquipments.filter(
-    //             (equip) => equip.equipmentname_forUser !== equipmentName
-    //         );
-    //     }
-
-    //     setSelectedEquipments(updatedEquipments);
-
-
-    //     const validationMessages = {};
-    //     updatedEquipments.forEach((equip, index) => {
-    //         const duplicates = updatedEquipments.filter(
-    //             (e) => e.equipmentname_forUser === equip.equipmentname_forUser
-    //         ).length;
-
-    //         if (duplicates > 1) {
-    //             validationMessages[equip.equipmentname_forUser] = "มีอุปกรณ์นี้อยู่แล้ว";
-    //         }
-    //     });
-
-    //     setEquipValidationMessages(validationMessages);
-    //     setValidationMessage(""); 
-    // };
-
-    // const handleSelectAll = (equipmentType, isChecked) => {
-    //     let updatedEquipments = [...selectedEquipments];
-
-    //     data
-    //         .filter((equipment) => equipment.equipment_type === equipmentType)
-    //         .forEach((equipment) => {
-    //             if (isChecked) {
-    //                 if (
-    //                     !updatedEquipments.some(
-    //                         (equip) => equip.equipmentname_forUser === equipment.equipment_name
-    //                     )
-    //                 ) {
-    //                     updatedEquipments.push({
-    //                         equipmentname_forUser: equipment.equipment_name,
-    //                         equipmenttype_forUser: equipmentType,
-    //                     });
-    //                 }
-    //             } else {
-    //                 updatedEquipments = updatedEquipments.filter(
-    //                     (equip) => equip.equipmentname_forUser !== equipment.equipment_name
-    //                 );
-    //             }
-    //         });
-
-    //     setSelectedEquipments(updatedEquipments);
-    // };
-
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -601,6 +537,7 @@ export default function AddEquipPatient() {
         setValidationMessage(""); // เคลียร์ข้อความแจ้งเตือนทั่วไป
     };
 
+    const [selectedCategory, setSelectedCategory] = useState("อุปกรณ์ติดตัว");
 
 
     return (
@@ -797,78 +734,91 @@ export default function AddEquipPatient() {
                         </li>
                     </ul>
                 </div>
-                <h3>เพิ่มอุปกรณ์สำหรับผู้ป่วย</h3>
-                <div className="table-responsive">
+                <p className="title-header mt-4">เพิ่มอุปกรณ์สำหรับผู้ป่วย</p>
+                <div className="equipment-category ps-5 pe-5 mt-4">
+                    {/* ปุ่มเลือกประเภทอุปกรณ์ */}
+                    <div className="mb-3 d-flex gap-2">
+                        {["อุปกรณ์ติดตัว", "อุปกรณ์เสริม", "อุปกรณ์อื่นๆ"].map((type) => (
+                            <button
+                                key={type}
+                                type="button"
+                                className={`btn ${selectedCategory === type ? "btn-primary" : "btn-outline py-2"}`}
+                                onClick={() => setSelectedCategory(type)}
+                            >
+                                {type}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* แสดงชื่อประเภท + จำนวน */}
+                    <div className="mb-2 fw-bold" style={{color:"#1565c0"}}>
+                        {selectedCategory} (จำนวน {equipmentCounts[selectedCategory] || 0} รายการ)
+                    </div>
+
+                    {/* แสดงข้อความ error */}
+                    {validationMessage && (
+                        <div className="mb-3" style={{ color: "red", textAlign: "center" }}>
+                            {validationMessage}
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit}>
-                        <table className="table table-hover" style={{ width: "70%" }}>
-                            <thead>
-                                <tr>
-                                    <th style={{ width: "10%" }}>
-                                        <input
-                                            style={{ marginLeft: "20px", cursor: "pointer" }}
-                                            type="checkbox"
-                                            className="form-check-input"
-                                            onChange={toggleAllCheckboxes}
-                                        />
-                                    </th>
-                                    <th style={{ width: "10%" }}>#</th>
-                                    <th>ชื่ออุปกรณ์</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {["อุปกรณ์ติดตัว", "อุปกรณ์เสริม", "อุปกรณ์อื่นๆ"].map((equipmentType) => {
-                                    const equipmentList = equipments.filter(
-                                        (equipment) => equipment.equipment_type === equipmentType
-                                    );
-
-                                    if (equipmentList.length === 0) {
-                                        return (
-                                            <tr key={equipmentType} className="table-light">
-                                                <td colSpan="3" className="text-center">
-                                                    ไม่มีข้อมูล {equipmentType}
-                                                </td>
-                                            </tr>
+                        {/* ทำให้ตารางอยู่กับที่ + มี scrollbar ถ้ายาว */}
+                        <div >
+                            <table className="equipment-table table-hover" style={{  border: "1px solid #ddd" }}>
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: "10%" }}>
+                                            <input
+                                                style={{ marginLeft: "20px", cursor: "pointer" }}
+                                                type="checkbox"
+                                                className="form-check-input"
+                                                onChange={toggleAllCheckboxes}
+                                            />
+                                        </th>
+                                        <th style={{ width: "10%" }}>#</th>
+                                        <th>ชื่ออุปกรณ์</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {(() => {
+                                        const equipmentList = equipments.filter(
+                                            (equipment) => equipment.equipment_type === selectedCategory
                                         );
-                                    }
 
-                                    return (
-                                        <React.Fragment key={equipmentType}>
-                                            {/* หัวข้อประเภทอุปกรณ์ */}
-                                            <tr>
-                                                <td colSpan="3" className="fw-bold text-left"
-                                                    style={{ backgroundColor: "#e8f5fd", cursor: "default" }}>
-                                                    {equipmentType} (จำนวน {equipmentCounts[equipmentType] || 0} รายการ)
-                                                </td>
-                                            </tr>
-
-                                            {/* รายการอุปกรณ์ */}
-                                            {equipmentList.map((equipment, index) => (
-                                                <tr key={equipment._id}
-                                                    onClick={() => handleCheckboxChange(null, equipment.equipment_name, equipmentType)}
-                                                    style={{ cursor: "pointer" }}>
-                                                    <td style={{ width: "10%" }}>
-                                                        <input
-                                                            style={{ marginLeft: "20px", pointerEvents: "none" }} // ป้องกัน input รับคลิกตรงๆ
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            checked={selectedEquipments.some(equip => equip.equipmentname_forUser === equipment.equipment_name)}
-                                                            readOnly
-                                                        />
+                                        if (equipmentList.length === 0) {
+                                            return (
+                                                <tr className="table-light">
+                                                    <td colSpan="3" className="text-center">
+                                                        ไม่มีข้อมูล {selectedCategory}
                                                     </td>
-                                                    <td style={{ width: "10%" }}>{index + 1}</td>
-                                                    <td>{equipment.equipment_name}</td>
                                                 </tr>
-                                            ))}
-                                        </React.Fragment>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                            );
+                                        }
 
-                        {validationMessage && (
-                            <div className="mt-4" style={{ color: "red", textAlign: "center" }}>{validationMessage}</div>
-                        )}
+                                        return equipmentList.map((equipment, index) => (
+                                            <tr key={equipment._id}
+                                                onClick={() => handleCheckboxChange(null, equipment.equipment_name, selectedCategory)}
+                                                style={{ cursor: "pointer" }}>
+                                                <td style={{ width: "10%" }}>
+                                                    <input
+                                                        style={{ marginLeft: "20px", pointerEvents: "none" }}
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        checked={selectedEquipments.some(equip => equip.equipmentname_forUser === equipment.equipment_name)}
+                                                        readOnly
+                                                    />
+                                                </td>
+                                                <td style={{ width: "10%" }}>{index + 1}</td>
+                                                <td>{equipment.equipment_name}</td>
+                                            </tr>
+                                        ));
+                                    })()}
+                                </tbody>
+                            </table>
+                        </div>
 
+                        {/* ปุ่มบันทึก */}
                         <div className="btn-group mt-4">
                             <div className="btn-next">
                                 <button type="submit" className="btn btn-outline py-2">
@@ -878,8 +828,6 @@ export default function AddEquipPatient() {
                         </div>
                     </form>
                 </div>
-
-
 
             </div>
         </main>

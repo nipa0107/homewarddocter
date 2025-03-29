@@ -150,7 +150,7 @@ export const CaregiverAssessment = ({ userid,onDataChange }) => {
     const newData = newCaregivers.map((cg, index) => ({
       firstName: getValues(`newCaregivers.${index}.firstName`) || cg.firstName || "",
       lastName: getValues(`newCaregivers.${index}.lastName`) || cg.lastName || "",
-      relationship: getValues(`newCaregivers.${index}.relationship`) || "",
+      relationship: getValues(`newCaregivers.${index}.relationship`) || cg.relationship || "",
       care: getValues(`newCaregivers.${index}.care`) || "",
       affection: getValues(`newCaregivers.${index}.affection`) || "",
       rest: getValues(`newCaregivers.${index}.rest`) || "",

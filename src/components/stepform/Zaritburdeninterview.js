@@ -8,7 +8,7 @@ export const Zarit = ({ ZaritData, setZaritData, setHasError, showError, setShow
     const [burdenMessage, setBurdenMessage] = useState('');
 
     // ฟังก์ชันสร้างคีย์สำหรับ localStorage โดยใช้ userId
-const getLocalStorageKey = (key) => `ZaritData_${userid}_${key}`;
+const getLocalStorageKey = (key) => `agenda_${userid}_${key}`;
 
     const scoreKeys = [
         'question_1', 'question_2', 'question_3', 'question_4', 'question_5',
@@ -96,7 +96,7 @@ const getLocalStorageKey = (key) => `ZaritData_${userid}_${key}`;
 
     useEffect(() => {
         if (!userid) return;
-        const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey("ZaritData")));
+        const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey("zaritData")));
         if (savedData) {
             setZaritData(savedData);
 
@@ -110,7 +110,7 @@ const getLocalStorageKey = (key) => `ZaritData_${userid}_${key}`;
        /** ✅ อัปเดต `localStorage` เมื่อมีการเปลี่ยนแปลงค่า */
        useEffect(() => {
         if (userid) {
-            localStorage.setItem(getLocalStorageKey("ZaritData"), JSON.stringify(ZaritData));
+            localStorage.setItem(getLocalStorageKey("zaritData"), JSON.stringify(ZaritData));
         }
     }, [ZaritData, userid]);
     
@@ -129,7 +129,7 @@ const getLocalStorageKey = (key) => `ZaritData_${userid}_${key}`;
         setTotalScore(0);
         setBurdenMessage('');
         setShowError(false);
-        localStorage.removeItem("ZaritData"); // ✅ ล้างค่าจาก localStorage ด้วย
+        localStorage.removeItem("zaritData"); // ✅ ล้างค่าจาก localStorage ด้วย
     };
 
     const getGroupStyle = () => {

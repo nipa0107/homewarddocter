@@ -697,10 +697,9 @@ export default function Updatepatient() {
             </li>
           </ul>
         </div>
-        {/* <h3>แก้ไขข้อมูลทั่วไป</h3> */}
-        <h3>แก้ไขข้อมูลผู้ป่วย</h3>
+
         <div className="adminall card mb-1 mt-4">
-          <p className="title-header"></p>
+          <p className="title-header">แก้ไขข้อมูลผู้ป่วย</p>
           <div className="mb-1">
             <label>ชื่อผู้ใช้</label>
             <input
@@ -804,23 +803,23 @@ export default function Updatepatient() {
             {telError && <span className="error-text">{telError}</span>}
 
           </div>
-          {/* <div className="d-grid">
+          <div className="d-grid">
             <button
               onClick={Updatepatient}
               className="btn btn-outline py-2"
             >
               บันทึก
             </button>
-          </div> */}
+          </div>
           
         </div>
-        <div className="btn-group mt-4">
-            <div className="btn-next">
-              <button onClick={Updatepatient} className="btn btn-outline py-2">
-                บันทึก
-              </button>
-            </div>
+        {/* <div className="btn-group mt-4">
+          <div className="btn-next">
+            <button onClick={Updatepatient} className="btn btn-outline py-2">
+              บันทึก
+            </button>
           </div>
+        </div> */}
       </div>
     </main>
   );

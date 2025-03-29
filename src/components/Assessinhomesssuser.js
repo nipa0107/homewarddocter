@@ -585,13 +585,13 @@ export default function Assessinhomesssuser({ }) {
   const [selectedAssessment, setSelectedAssessment] = useState(
     localStorage.getItem("selectedAssessment") || "Agenda"
   );
-  
+
   // เมื่อผู้ใช้เลือกเปลี่ยนแท็บ จะบันทึกค่าลง localStorage
   const handleTabChange = (assessmentType) => {
     setSelectedAssessment(assessmentType);
     localStorage.setItem("selectedAssessment", assessmentType);
   };
-  
+
 
 
   return (
@@ -809,20 +809,20 @@ export default function Assessinhomesssuser({ }) {
 
           {/* Tab เมนูเลือกการประเมิน */}
           {/* Tab เมนูเลือกการประเมิน */}
-<div className="assessment-tabs">
-  <button
-    className={`tab-btn ${selectedAssessment === "Agenda" ? "active" : ""}`}
-    onClick={() => handleTabChange("Agenda")}
-  >
-    ประเมิน Agenda
-  </button>
-  <button
-    className={`tab-btn ${selectedAssessment === "IN-HOME-SSS" ? "active" : ""}`}
-    onClick={() => handleTabChange("IN-HOME-SSS")}
-  >
-    ประเมิน IN-HOME-SSS
-  </button>
-</div>
+          <div className="assessment-tabs">
+            <button
+              className={`tab-btn ${selectedAssessment === "Agenda" ? "active" : ""}`}
+              onClick={() => handleTabChange("Agenda")}
+            >
+              ประเมิน Agenda
+            </button>
+            <button
+              className={`tab-btn ${selectedAssessment === "IN-HOME-SSS" ? "active" : ""}`}
+              onClick={() => handleTabChange("IN-HOME-SSS")}
+            >
+              ประเมิน IN-HOME-SSS
+            </button>
+          </div>
 
 
           {/* แสดงข้อมูลตามประเภทที่เลือก */}
@@ -849,7 +849,7 @@ export default function Assessinhomesssuser({ }) {
                 <table className="table-all tableass table-hover mt-3">
                   <thead>
                     <tr>
-                      <th  onClick={sortByDateAgenda} style={{ cursor: "pointer"  }}>
+                      <th onClick={sortByDateAgenda} style={{ cursor: "pointer" }}>
                         วันที่บันทึก{" "}
                         {sortOrderAgenda === "asc" ? (
                           <i className="bi bi-caret-up-fill"></i>
@@ -894,15 +894,15 @@ export default function Assessinhomesssuser({ }) {
             <div>
               <div className="content-toolbar d-flex justify-content-between align-items-center mt-4">
                 <div className="search-bar position-relative mb-2">
-                
-                    <button
-                      className="btn btn-primary add-assessment-btn"
-                      onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
-                    >
-                      <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
-                      เพิ่มการประเมิน
-                    </button>
-                  
+
+                  <button
+                    className="btn btn-primary add-assessment-btn"
+                    onClick={() => navigate("/assessinhomesssform", { state: { id: userData._id } })}
+                  >
+                    <i className="bi bi-plus-circle" style={{ marginRight: '8px' }}></i>
+                    เพิ่มการประเมิน
+                  </button>
+
                 </div>
                 <div className="toolbar">
                   <p className="countadmin1 mb-2">

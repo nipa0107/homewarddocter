@@ -590,12 +590,12 @@ export default function Assessreadiness1() {
     // ฟังชันเมื่อกดส่งฟอร์ม
     const onSubmit = async (formData) => {
         setIsSubmitted(true);
-    
+
         if (!validateForm(formData)) {
             toast.error("กรุณาเลือกคำตอบให้ครบทุกข้อ");
             return;
         }
-    
+
         const requestData = {
             userId: id,
             MPersonnel: mpersonnel,
@@ -616,9 +616,9 @@ export default function Assessreadiness1() {
             },
             status_name: 'ประเมินแล้ว'
         };
-    
+
         console.log("📤 Data to submit:", requestData);
-    
+
         try {
             const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/submitReadinessForm/${id}`, {
                 method: 'POST',
@@ -628,23 +628,24 @@ export default function Assessreadiness1() {
                 },
                 body: JSON.stringify(requestData),
             });
-    
+
             const data = await response.json();
             console.log("Response:", data);
-    
+
             if (response.ok) {
                 toast.success("บันทึกข้อมูลสำเร็จ");
-    
+
                 // ✅ ใช้ `_id` ของฟอร์มที่เพิ่งบันทึกเพื่อนำไปที่หน้ารายละเอียด
                 setTimeout(() => {
                     navigate("/detailassessreadiness", { state: { id: data.data._id } });
+                    // ✅ ลบข้อมูลจาก localStorage
+                    localStorage.removeItem(LOCAL_STORAGE_KEY);
+
+                    // ✅ รีเซ็ตค่าฟอร์มทั้งหมด
+                    requiredFields.forEach(field => setValue(field, ""));
                 }, 1000);
-    
-                // ✅ ลบข้อมูลจาก localStorage
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
-    
-                // ✅ รีเซ็ตค่าฟอร์มทั้งหมด
-                requiredFields.forEach(field => setValue(field, ""));
+
+
             } else {
                 toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             }
@@ -653,7 +654,7 @@ export default function Assessreadiness1() {
             toast.error("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
         }
     };
-    
+
 
 
     const clearForm = () => {
@@ -834,16 +835,6 @@ export default function Assessreadiness1() {
                         </div>
                         <div className="col-8">
                             <div className="form-content">
-                                {/* {showMessage ? (
-                                    <div className="success-message mt-2 text-center mt-5">
-                                        <h2>บันทึกการประเมินเสร็จสิ้น</h2>
-                                        <div className="d-flex flex-column align-items-center mt-3">
-                                            <a className="info mb-2" onClick={() => navigate("/detailassessreadiness", { state: { id:id } })}>ดูรายละเอียดคำตอบ</a>
-                                            <a className="info" onClick={() => navigate("/assessreadinessuser", { state: { id } })}>กลับไปหน้าบันทึกประเมิน</a>
-                                        </div>
-                                    </div>
-                                ) : ( */}
-
                                 <form onSubmit={handleSubmit(onSubmit)}>
                                     <div className="info3 card mt-1"
                                     // style={{ border: Object.keys(errors).length > 0 ? '1px solid red' : '1px solid #dee2e6' }}

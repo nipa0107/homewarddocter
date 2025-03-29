@@ -123,6 +123,13 @@
 .adminall .card-body .deleteimg {
     float: right;
 }
+.adminall.card{
+    border-radius: 10px;
+  margin: 1.5rem auto;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
+  border: 1px solid #87CEFA;
+}
 
 .adminall {
     width: 70%;
@@ -167,20 +174,41 @@
     line-height: 50px;
     padding: 20px;
 }
-
-.filename a {
-    text-decoration: none;
-    color: rgb(72, 72, 72);
-    border: 1px solid rgb(228, 228, 228);
-    padding: 7px;
-    border-radius: 8px;
+.filename {
+    cursor: pointer;
+    font-size: 16px;
 }
-
-.filename a:hover {
-    background-color: #7e7e7e;
+.filename, .pdf {
+    align-items: center;
+    display: flex
+;
+    position: relative;
+}
+/* ปุมลบไฟล์ */
+.delete-button-file {
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    margin-left: 0.3rem;
+    cursor: pointer;
+    transition: color 0.3s;
+    background-color: rgba(0, 0, 0, 0.4);
+    /* สีพื้นหลังโปร่งใส */
     color: white;
-}
-
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .delete-button-file:hover{
+    background-color: rgba(220, 53, 69, 0.9);
+  }
+  .delete-button-file:focus {
+    outline: none;
+  }
+  
 .gray-background {
     background-color: #e9ecef;
 }

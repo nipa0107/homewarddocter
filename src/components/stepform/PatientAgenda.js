@@ -1,31 +1,31 @@
 import React, { useEffect } from "react";
 import { Controller, useFormContext } from 'react-hook-form';
 
-export const PatientAgenda = ({ userid,onDataChange }) => {
+export const PatientAgenda = ({ userid, onDataChange }) => {
     const { control, setValue, getValues } = useFormContext();
 
-// ฟังก์ชันสร้างคีย์สำหรับ localStorage โดยใช้ userId
-const getLocalStorageKey = (key) => `agenda_${userid}_${key}`;
+    // ฟังก์ชันสร้างคีย์สำหรับ localStorage โดยใช้ userId
+    const getLocalStorageKey = (key) => `agenda_${userid}_${key}`;
 
-useEffect(() => {
-    if (!userid) return; // ถ้า userId ไม่มีค่าให้หยุดทำงาน
+    useEffect(() => {
+        if (!userid) return; // ถ้า userId ไม่มีค่าให้หยุดทำงาน
 
-    // ✅ โหลดข้อมูลที่ถูกต้องตาม userId
-    const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey("patientAgendaData"))) || {};
-    Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
-    onDataChange(getValues());
-}, [userid]);
+        // ✅ โหลดข้อมูลที่ถูกต้องตาม userId
+        const savedData = JSON.parse(localStorage.getItem(getLocalStorageKey("patientAgendaData"))) || {};
+        Object.keys(savedData).forEach((key) => setValue(key, savedData[key]));
+        onDataChange(getValues());
+    }, [userid]);
 
-const handleInputChange = (name, value) => {
-    setValue(name, value);
-    const updatedValues = { ...getValues(), [name]: value };
+    const handleInputChange = (name, value) => {
+        setValue(name, value);
+        const updatedValues = { ...getValues(), [name]: value };
 
-    // ✅ บันทึกข้อมูลตาม userId
-    if (userid) {
-        localStorage.setItem(getLocalStorageKey("patientAgendaData"), JSON.stringify(updatedValues));
-    }
-    onDataChange(updatedValues);
-};
+        // ✅ บันทึกข้อมูลตาม userId
+        if (userid) {
+            localStorage.setItem(getLocalStorageKey("patientAgendaData"), JSON.stringify(updatedValues));
+        }
+        onDataChange(updatedValues);
+    };
     // const handleInputChange = (name, value) => {
     //     setValue(name, value);
     //     const updatedValues = { ...getValues(), [name]: value };
@@ -138,7 +138,7 @@ const handleInputChange = (name, value) => {
                     </div>
                 </div>
             </div>
-            
+
 
         </div>
     );

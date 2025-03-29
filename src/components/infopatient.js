@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { fetchAlerts } from './Alert/alert';
 import { renderAlerts } from './Alert/renderAlerts';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import Sidebar from "./sidebar";
 import io from 'socket.io-client';
 const socket = io("https://backend-deploy-render-mxok.onrender.com");
@@ -370,32 +372,6 @@ export default function Infopatient({ }) {
         fetchData();
     }, [medicalInfo]);
 
-    const deleteUser = async () => {
-        if (window.confirm(`คุณต้องการลบ ${username} หรือไม่ ?`)) {
-            try {
-                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/deleteUser/${id}`, {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    alert(data.data);
-                    navigate("/alluser");
-                } else {
-                    console.error("Error during deletion:", data.data);
-                }
-            } catch (error) {
-                console.error("Error during fetch:", error);
-            }
-        }
-    };
-
     const handleCheckboxChange = (equipmentName) => {
         setSelectedEquipments((prevSelected) =>
             prevSelected.includes(equipmentName)
@@ -425,33 +401,15 @@ export default function Infopatient({ }) {
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert(data.message);
-                    // รีเฟรชหน้าหลังจากลบข้อมูล
-                    window.location.reload();
-                } else {
-                    console.error("Error during deletion:", data.message);
-                }
-            } catch (error) {
-                console.error("Error during fetch:", error);
-            }
-        }
-    };
-
-    const handleDeleteMedicalInfo = async () => {
-        if (window.confirm("คุณต้องการลบข้อมูลการเจ็บป่วยหรือไม่?")) {
-            try {
-                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/deletemedicalInformation/${id}`, {
-                    method: "DELETE",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                const data = await response.json();
-                if (response.ok) {
-                    alert(data.message);
-                    window.location.reload(); // รีเฟรชหน้าหลังจากลบข้อมูล
+                    // ✅ อัปเดต state ทันที
+                    const updatedEquipment = medicalEquipment.filter(
+                        (item) => !selectedEquipments.includes(item.equipmentname_forUser)
+                    );
+                    setMedicalEquipment(updatedEquipment);
+                    setSelectedEquipments([]); // ล้างการเลือก
+    
+                    // ✅ แสดง Toast ทันที
+                    toast.success("ลบอุปกรณ์สำเร็จ", { autoClose: 800 }); // ✅ แสดง 1 วิแล้วหาย
                 } else {
                     console.error("Error during deletion:", data.message);
                 }
@@ -656,31 +614,6 @@ export default function Infopatient({ }) {
         fetchUnreadCount();
     }, []);
 
-    const handleDelete = async (caregiverId) => {
-        if (window.confirm("คุณต้องการลบข้อมูลผู้ดูแลนี้หรือไม่?")) {
-            try {
-                const response = await fetch(`https://backend-deploy-render-mxok.onrender.com/deletecaregiver`, {
-                    method: "POST", // ใช้ POST หรือ DELETE ตาม API ของคุณ
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ _id: caregiverId }), // ส่ง `_id` ของผู้ดูแลไป
-                });
-
-                const data = await response.json();
-                if (response.ok) {
-                    alert("ลบข้อมูลสำเร็จ");
-                    // อัปเดต caregiverInfo เพื่อรีเฟรชข้อมูล
-                    setCaregiverInfo((prev) =>
-                        prev.filter((caregiver) => caregiver._id !== caregiverId)
-                    );
-                } else {
-                    alert(`เกิดข้อผิดพลาด: ${data.error}`);
-                }
-            } catch (error) {
-                console.error("Error deleting caregiver:", error);
-                alert("เกิดข้อผิดพลาดในการลบข้อมูล");
-            }
-        }
-    };
     const toggleAllCheckboxes = () => {
         const allSelected = sortedEquipment.every(equipment =>
             selectedEquipments.includes(equipment.equipmentname_forUser)
@@ -748,10 +681,55 @@ export default function Infopatient({ }) {
         if (!id) return "";
         return id.replace(/(\d{1})(\d{4})(\d{5})(\d{2})(\d{1})/, "$1-$2-$3-$4-$5");
     };
+    const patientInfoRef = useRef(null);
+    const caregiverInfoRef = useRef(null);
+    const medicalInfoRef = useRef(null);
+    const equipmentRef = useRef(null);
+    
+    const goToEditPatient = () => {
+        localStorage.setItem("selectedSection", "patientInfo");
+        navigate("/updatepatient", { state: { id } });
+    };
+
+    const goToEditCaregiver = (caregiver) => {
+        localStorage.setItem("selectedSection", "caregiverInfo");
+        navigate("/updatecaregiver", { state: { caregiver, id } });
+    };
+
+    const goToMedicalInfo = () => {
+        localStorage.setItem("selectedSection", "medicalInfo");
+        navigate("/updatemedicalinformation", { state: { id } });
+    };
+
+    const goToAddEquipment = () => {
+        localStorage.setItem("selectedSection", "equipment");
+        navigate("/addequippatient", { state: { id } });
+    };
+    useEffect(() => {
+        const section = localStorage.getItem("selectedSection");
+        if (section) {
+            const scrollToRef = {
+                patientInfo: patientInfoRef,
+                caregiverInfo: caregiverInfoRef,
+                medicalInfo: medicalInfoRef,
+                equipment: equipmentRef
+            }[section];
+    
+            if (scrollToRef?.current) {
+                // ✅ รอให้ข้อมูลโหลดเสร็จ (รอ 300-500ms)
+                setTimeout(() => {
+                    scrollToRef.current.scrollIntoView({ block: 'start' });
+                    localStorage.removeItem("selectedSection");
+                }, 500);
+            }
+        }
+    }, [medicalInfo, medicalEquipment]);
+    
 
 
     return (
         <main className="body">
+            <ToastContainer />
             <Sidebar />
             {showNotifications && (
                 <div className="notifications-dropdown" ref={notificationsRef}>
@@ -902,14 +880,14 @@ export default function Infopatient({ }) {
                             <a href="allpatient">จัดการข้อมูลการดูแลผู้ป่วย</a>
                         </li>
                         <li className="arrow middle">
-              <i className="bi bi-chevron-double-right"></i>
-            </li>
-            <li className="ellipsis">
-              <a href="allpatient">...</a>
-            </li>
-            <li className="arrow ellipsis">
-              <i className="bi bi-chevron-double-right"></i>
-            </li>
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
+                        <li className="ellipsis">
+                            <a href="allpatient">...</a>
+                        </li>
+                        <li className="arrow ellipsis">
+                            <i className="bi bi-chevron-double-right"></i>
+                        </li>
                         <li>
                             <a>ข้อมูลการดูแลผู้ป่วย</a>
                         </li>
@@ -918,7 +896,7 @@ export default function Infopatient({ }) {
                 <br></br>
                 <h3>ข้อมูลการดูแลผู้ป่วย</h3>
                 <div className="forminfo mb-4">
-                    <fieldset className="user-fieldset">
+                <fieldset className="user-fieldset" ref={patientInfoRef}>
                         <legend><i className="bi bi-person-fill"></i> ข้อมูลทั่วไป</legend>
                         <div className="user-info mt-3">
                             <div className="row">
@@ -947,7 +925,7 @@ export default function Infopatient({ }) {
 
                         <div className="btn-group mb-4">
                             <div className="editimg1">
-                                <button onClick={() => navigate("/updatepatient", { state: { id } })}>
+                                <button onClick={(goToEditPatient)}>
                                     <i className="bi bi-pencil-square"></i> แก้ไข
                                 </button>
                             </div>
@@ -956,7 +934,7 @@ export default function Infopatient({ }) {
                 </div>
 
                 <div className="forminfo mb-4">
-                    <fieldset className="user-fieldset">
+                    <fieldset className="user-fieldset" ref={caregiverInfoRef}>
                         <legend><i class="bi bi-person-fill"></i> ข้อมูลผู้ดูแล</legend>
                         <div>
                             {caregiverInfo && caregiverInfo.length > 0 ? (
@@ -996,7 +974,7 @@ export default function Infopatient({ }) {
                                                             </button> */}
                                                         </div>
                                                         <div className="mt-3 mb-3 d-flex justify-content-center">
-                                                            <button className="button-edit p-1" onClick={() => handleEdit(caregiver)}>
+                                                            <button className="button-edit p-1" onClick={() => goToEditCaregiver(caregiver)}>
                                                                 <i className="bi bi-pencil-square"></i> แก้ไข
                                                             </button>
                                                         </div>
@@ -1010,161 +988,23 @@ export default function Infopatient({ }) {
                                             </div>
                                         ))}
                                     </div>
-                                    {/* <div className="btn-group mb-4">
-                  <div className="adddata">
-                    <button onClick={handleAddCaregiver}>เพิ่มผู้ดูแล</button>
-                  </div>
-                </div> */}
+
 
                                 </div>
                             ) : (
                                 <div>
                                     <p className="no-equipment">ไม่มีข้อมูลผู้ดูแล</p>
                                     <div className="btn-group mb-4">
-                                        {/* <div className="adddata">
-                    <button onClick={handleAddCaregiver}>เพิ่มผู้ดูแล</button>
-                  </div> */}
+
                                     </div>
                                 </div>
                             )}
                         </div>
                     </fieldset>
                 </div>
-                {/* <div className="forminfo mb-4">
-                    <fieldset className="user-fieldset">
-                        <legend><i className="bi bi-journal-medical"></i> ข้อมูลการเจ็บป่วย</legend>
-                        {medicalInfo ? (
-                            <>
-                                <div className="user-info mt-3">
-                                    <div className="row">
-                                        {[
-                                            { label: "HN", value: medicalInfo.HN || "-" },
-                                            { label: "AN", value: medicalInfo.AN || "-" },
-                                            {
-                                                label: "วันที่ Admit",
-                                                value: medicalInfo.Date_Admit
-                                                    ? new Date(medicalInfo.Date_Admit).toLocaleDateString("th-TH", {
-                                                        day: "numeric",
-                                                        month: "long",
-                                                        year: "numeric",
-                                                    })
-                                                    : "-",
-                                            },
-                                            {
-                                                label: "วันที่ D/C",
-                                                value: medicalInfo.Date_DC
-                                                    ? new Date(medicalInfo.Date_DC).toLocaleDateString("th-TH", {
-                                                        day: "numeric",
-                                                        month: "long",
-                                                        year: "numeric",
-                                                    })
-                                                    : "-",
-                                            },
-                                            { label: "Diagnosis", value: medicalInfo.Diagnosis || "-" },
-                                            {
-                                                label: "แพทย์ผู้ดูแล",
-                                                value: (mdata.nametitle || mdata.name || mdata.surname)
-                                                    ? `${mdata.nametitle || ""} ${mdata.name || ""} ${mdata.surname || ""}`.trim()
-                                                    : "-",
-                                            },
-                                            { label: "Chief complaint", value: medicalInfo.Chief_complaint || "-" },
-                                            { label: "Present illness", value: medicalInfo.Present_illness || "-" },
-                                            {
-                                                label: (
-                                                    <>
-                                                        <i class="bi bi-file-earmark-pdf"></i> File Present illness
-                                                    </>
-                                                ),
-                                                value: medicalInfo.fileP ? (
-                                                    <a
-                                                        className="blue-500"
-                                                        href=""
-                                                        onClick={() => {
-                                                            // const filePath = medicalInfo.fileP.replace(/\\/g, "/");
-                                                            // const fileName = filePath.split("/").pop();
-                                                            // console.log("fileName:", fileName);
-                                                            window.open(`${medicalInfo.fileP}`, "_blank");
-                                                        }}
-                                                    >
-                                                        {medicalInfo.filePName}
-                                                    </a>
-                                                ) : "-",
-                                            },
 
-                                            { label: "Management plan", value: medicalInfo.Management_plan || "-" },
-                                            {
-                                                label: (
-                                                    <>
-                                                        <i class="bi bi-file-earmark-pdf"></i> File Management plan
-                                                    </>
-                                                ),
-                                                value: medicalInfo.fileM ? (
-                                                    <a
-                                                        className="blue-500"
-                                                        href=""
-                                                        onClick={() => {
-                                                            // const filePath = medicalInfo.fileM.replace(/\\/g, "/");
-                                                            // const fileName = filePath.split("/").pop();
-                                                            // console.log("fileName:", fileName);
-                                                            window.open(`${medicalInfo.fileM}`, "_blank");
-                                                        }}
-                                                    >
-                                                        {medicalInfo.fileMName}
-                                                    </a>
-                                                ) : "-",
-                                            },
-                                            { label: "Phychosocial assessment", value: medicalInfo.Phychosocial_assessment || "-" },
-                                            {
-                                                label: (
-                                                    <>
-                                                        <i class="bi bi-file-earmark-pdf"></i> File Phychosocial assessment
-                                                    </>
-                                                ),
-                                                value: medicalInfo.filePhy ? (
-                                                    <a
-                                                        className="blue-500"
-                                                        href=""
-                                                        onClick={() => {
-                                                            // const filePath = medicalInfo.filePhy.replace(/\\/g, "/");
-                                                            // const fileName = filePath.split("/").pop();
-                                                            // console.log("fileName:", fileName);
-                                                            window.open(`${medicalInfo.filePhy}`, "_blank");
-                                                        }}
-                                                    >
-                                                        {medicalInfo.filePhyName}
-                                                    </a>
-                                                ) : "-",
-                                            },
-                                        ].map((item, index) => (
-                                            <React.Fragment key={index}>
-                                                <div className="col-sm-5" style={{ color: "#444" }}>
-                                                    <p><span>{item.label} :</span></p>
-                                                </div>
-                                                <div className="col-sm-7">
-                                                    <p><b>{item.value}</b></p>
-                                                </div>
-                                                <div className="w-100 d-none d-md-block"></div>
-                                            </React.Fragment>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="btn-group mb-4">
-                                    <div className="editimg1">
-                                        <button onClick={() => navigate("/updatemedicalinformation", { state: { id } })}>
-                                            <i className="bi bi-pencil-square"></i> แก้ไข
-                                        </button>
-                                    </div>
-                                </div>
-                            </>
-                        ) : (
-                            <div>
-                                <p className="no-equipment">ไม่พบข้อมูล</p>
-                            </div>
-                        )}
-                    </fieldset>
-                </div> */}
                 <div className="forminfo mb-4">
-                    <fieldset className="user-fieldset">
+                    <fieldset className="user-fieldset" ref={medicalInfoRef}>
                         <legend><i className="bi bi-journal-medical"></i> ข้อมูลการเจ็บป่วย</legend>
                         {medicalInfo ? (
                             <>
@@ -1302,7 +1142,7 @@ export default function Infopatient({ }) {
 
                                 <div className="btn-group mb-4">
                                     <div className="editimg1">
-                                        <button onClick={() => navigate("/updatemedicalinformation", { state: { id } })}>
+                                        <button onClick={(goToMedicalInfo)}>
                                             <i className="bi bi-pencil-square"></i> แก้ไข
                                         </button>
                                     </div>
@@ -1316,7 +1156,7 @@ export default function Infopatient({ }) {
                     </fieldset>
                 </div>
                 <div className="forminfo mb-1">
-                    <fieldset className="user-fieldset">
+                    <fieldset className="user-fieldset" ref={equipmentRef}>
                         <legend>
                             <i className="bi bi-prescription2"></i> อุปกรณ์ทางการแพทย์
                         </legend>
@@ -1377,7 +1217,7 @@ export default function Infopatient({ }) {
                                 {/* ปุ่มควบคุม */}
                                 <div className="btn-group mt-4 mb-3">
                                     <div className="adddata">
-                                        <button onClick={() => navigate("/addequippatient", { state: { id } })}>
+                                        <button onClick={(goToAddEquipment)}>
                                             <i className="bi bi-plus-circle"></i> เพิ่มอุปกรณ์
                                         </button>
                                     </div>
@@ -1393,7 +1233,7 @@ export default function Infopatient({ }) {
                                 <div className="no-equipment text-center mt-3">ไม่พบข้อมูล</div>
                                 <div className="btn-group mb-4">
                                     <div className="adddata">
-                                        <button onClick={() => navigate("/addequippatient", { state: { id } })}>
+                                        <button onClick={goToAddEquipment}>
                                             <i className="bi bi-plus-circle"></i> เพิ่มอุปกรณ์
                                         </button>
                                     </div>
