@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const OtherPeopleForm = ({ formData, onSave, onClose , isExistingCaregiver}) => {
+const OtherPeopleForm = ({ formData, onSave, onClose, isExistingCaregiver }) => {
     const [formValues, setFormValues] = useState({ ...formData });
     const [isEdited, setIsEdited] = useState(false); // ตรวจสอบว่ามีการเปลี่ยนแปลงหรือไม่
 
@@ -71,21 +71,40 @@ const OtherPeopleForm = ({ formData, onSave, onClose , isExistingCaregiver}) => 
                             </div>
                             <div className="m-2">
                                 <label className="form-label mt-2">ความสัมพันธ์ </label>
-                                <input
-                                    className="form-control"
-                                    value={formValues.relationship || ""}
-                                    onChange={(e) =>
-                                        !isExistingCaregiver && handleChange("relationship", e.target.value)
-                                    }
-                                    disabled={isExistingCaregiver} // ✅ ปิดการแก้ไข
-                                    style={isExistingCaregiver ? { backgroundColor: "#e9ecef" } : {}}
-                                />
-                                {isExistingCaregiver && (
-                                    <small className="text-danger">
-                                        * ไม่สามารถแก้ไขความสัมพันธ์ของผู้ดูแลได้
-                                    </small>
+                                {isExistingCaregiver ? (
+                                    <>
+                                        <input
+                                            className="form-control"
+                                            value={formValues.relationship || ""}
+                                            disabled
+                                            style={{ backgroundColor: "#e9ecef" }}
+                                        />
+                                        <small className="text-danger">
+                                            * ไม่สามารถแก้ไขความสัมพันธ์ของผู้ดูแลได้
+                                        </small>
+                                    </>
+                                ) : (
+                                    <select
+                                        className="form-select"
+                                        value={formValues.relationship || ""}
+                                        onChange={(e) => handleChange("relationship", e.target.value)}
+                                    >
+                                        <option value="">เลือกความสัมพันธ์</option>
+                                        <option value="ลูก">ลูก</option>
+                                        <option value="พ่อ">พ่อ</option>
+                                        <option value="แม่">แม่</option>
+                                        <option value="คู่สมรส">คู่สมรส (สามี/ภรรยา)</option>
+                                        <option value="ญาติ">ญาติ</option>
+                                        <option value="ปู่/ย่า/ตา/ยาย">ปู่/ย่า/ตา/ยาย</option>
+                                        <option value="ลุง/ป้า">ลุง/ป้า</option>
+                                        <option value="น้า/อา">น้า/อา</option>
+                                        <option value="พี่ชาย/พี่สาว">พี่ชาย/พี่สาว</option>
+                                        <option value="น้องชาย/น้องสาว">น้องชาย/น้องสาว</option>
+                                        <option value="ผู้ปกครอง">ผู้ปกครอง</option>
+                                    </select>
                                 )}
                             </div>
+
                             <div className="m-2">
                                 <label className="form-label mt-2">อาชีพ </label>
                                 <select

@@ -16,6 +16,7 @@ import MedicationForm from "./UpdateAssessinhomesss/updateMedication.js";
 import PhysicalExaminationForm from "./UpdateAssessinhomesss/updatePhysicalExamination.js";
 import SSSForm from "./UpdateAssessinhomesss/updateSSS.js";
 import Sidebar from "./sidebar";
+import Collapse from '@mui/material/Collapse';
 import io from "socket.io-client";
 const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
@@ -655,6 +656,9 @@ export default function DetailAssessinhomeForm() {
         setOriginalData(updatedDataFromServer.data);
         setIsModalOpen(false);
         // window.location.reload();
+        // ✅ เคลียร์ค่า state เพื่อไม่ให้ modal เด้งจากหัวข้อก่อนหน้า
+        setCurrentEditSection("");
+        setEditingOtherPerson(null);
       }, 1100);
     } catch (error) {
       console.error("Error updating data:", error);
@@ -1380,7 +1384,7 @@ export default function DetailAssessinhomeForm() {
                           </div>
                         </div>
 
-                        {openIndex === `caregiver-${index}` && (
+                        <Collapse in={openIndex === `caregiver-${index}`}>
                           <div className="p-3 border rounded ms-2">
                             <div className="row">
                               <div className="col-sm-3">
@@ -1431,7 +1435,7 @@ export default function DetailAssessinhomeForm() {
                               </button>
                             </div>
                           </div>
-                        )}
+                        </Collapse>
                       </div>
                     ))
                   ) : (
@@ -1465,7 +1469,7 @@ export default function DetailAssessinhomeForm() {
                           </div>
                         </div>
 
-                        {openIndex === `family-${index}` && (
+                        <Collapse in={openIndex === `family-${index}`}>
                           <div className="p-3 border rounded ms-2">
                             <div className="row">
                               <div className="col-sm-3">
@@ -1516,7 +1520,7 @@ export default function DetailAssessinhomeForm() {
                               </button>
                             </div>
                           </div>
-                        )}
+                          </Collapse>
                       </div>
                     ))
                   ) : (
@@ -1923,7 +1927,7 @@ export default function DetailAssessinhomeForm() {
           formData={tempFormValues}
           onSave={handleSaveChanges}
           onClose={handleCloseModal}
-          isExistingCaregiver={editingOtherPerson?.group === "existingCaregivers"} 
+          isExistingCaregiver={editingOtherPerson?.group === "existingCaregivers"}
         />
       )}
       {isModalOpen && currentEditSection === "Medication" && (

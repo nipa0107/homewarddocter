@@ -105,7 +105,7 @@ export const CaregiverAgenda = ({ userid, onDataChange }) => {
               data.data.map((cg) => ({
                 firstName: cg.firstName || "",
                 lastName: cg.lastName || "",
-                relationship: cg.relationship || "ไม่ระบุความสัมพันธ์",
+                relationship: cg.relationship || "",
                 caregiver_idea: cg.caregiver_idea || "",
                 caregiver_feeling: cg.caregiver_feeling || "",
                 caregiver_function: cg.caregiver_function || "",
@@ -255,88 +255,92 @@ export const CaregiverAgenda = ({ userid, onDataChange }) => {
               </Collapse>
             </div>
           ))}
-          {/* <div className="mt-2">
+          <div className="mt-2">
             <b >ข้อมูลคนในครอบครัว</b>
-          </div> */}
-          {/* {newCaregivers.map((caregiver, index) => (
-            <div key={caregiver.id}>
-              <span
-                onClick={() => toggleCollapse(index, "new")}
-                style={{ cursor: "pointer", color: "#007BFF", display: "block", marginTop: "8px" }}
-              >
-                <b>{`คนที่ ${index + 1} : ${caregiver.firstName} ${caregiver.lastName} (${caregiver.relationship})`}</b>
-              </span>
-              <Collapse in={openIndex.new === index}>
-                <div>
-                  <label className="form-label mt-2">Idea <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่ามีส่วนร่วมในกระบวนการดูแลผู้ป่วยอย่างไร เช่น การแบ่งหน้าที่กับผู้ดูแลหลัก)</span></label>
-                  <Controller
-                    name={`newCaregivers.${index}.caregiver_idea`}
-                    control={control}
-                    render={({ field }) => (
-                      <textarea
-                        className="form-control"
-                        placeholder="กรอกคำตอบ"
-                        rows="2"
-                        style={{ resize: "vertical" }}
-                        {...field} onChange={(e) => {
-                          field.onChange(e);
-                          handleFieldChange();
-                        }} />
-                    )}
-                  />
-                  <label className="form-label mt-4">Feeling <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่าคนในครอบครัวรู้สึกอย่างไรเกี่ยวกับการดูแลผู้ป่วย)</span></label>
-                  <Controller
-                    name={`newCaregivers.${index}.caregiver_feeling`}
-                    control={control}
-                    render={({ field }) => (
-                      <textarea
-                        className="form-control"
-                        placeholder="กรอกคำตอบ"
-                        rows="2"
-                        style={{ resize: "vertical" }}
-                        {...field} onChange={(e) => {
-                          field.onChange(e);
-                          handleFieldChange();
-                        }} />
-                    )}
-                  />
-                  <label className="form-label mt-4">Function <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่าคนในครอบครัวคาดหวังอะไรจากระบบการดูแล เช่น การสนับสนุนเพิ่มเติม)</span></label>
-                  <Controller
-                    name={`newCaregivers.${index}.caregiver_function`}
-                    control={control}
-                    render={({ field }) => (
-                      <textarea
-                        className="form-control"
-                        placeholder="กรอกคำตอบ"
-                        rows="2"
-                        style={{ resize: "vertical" }}
-                        {...field} onChange={(e) => {
-                          field.onChange(e);
-                          handleFieldChange();
-                        }} />
-                    )}
-                  />
-                  <label className="form-label mt-4">Expectation <span style={{ color: "#666", fontSize: "15px" }}>(ระบุความรู้สึกของผู้ดูแลว่ามีความกังวลในการดูแลผู้ป่วยหรือไม่)</span></label>
-                  <Controller
-                    name={`newCaregivers.${index}.caregiver_expectation`}
-                    control={control}
-                    render={({ field }) => (
-                      <textarea
-                        className="form-control"
-                        placeholder="กรอกคำตอบ"
-                        rows="2"
-                        style={{ resize: "vertical" }}
-                        {...field} onChange={(e) => {
-                          field.onChange(e);
-                          handleFieldChange();
-                        }} />
-                    )}
-                  />
+          </div>
+          {newCaregivers.length > 0 ? (
+            newCaregivers.map((caregiver, index) => (
+              <div key={caregiver.id}>
+                <span
+                  onClick={() => toggleCollapse(index, "new")}
+                  style={{ cursor: "pointer", color: "#007BFF", display: "block", marginTop: "8px" }}
+                >
+                  <b>{`คนที่ ${index + 1} : ${caregiver.firstName} ${caregiver.lastName} (${caregiver.relationship})`}</b>
+                </span>
+                <Collapse in={openIndex.new === index}>
+                  <div>
+                    <label className="form-label mt-2">Idea <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่ามีส่วนร่วมในกระบวนการดูแลผู้ป่วยอย่างไร เช่น การแบ่งหน้าที่กับผู้ดูแลหลัก)</span></label>
+                    <Controller
+                      name={`newCaregivers.${index}.caregiver_idea`}
+                      control={control}
+                      render={({ field }) => (
+                        <textarea
+                          className="form-control"
+                          placeholder="กรอกคำตอบ"
+                          rows="2"
+                          style={{ resize: "vertical" }}
+                          {...field} onChange={(e) => {
+                            field.onChange(e);
+                            handleFieldChange();
+                          }} />
+                      )}
+                    />
+                    <label className="form-label mt-4">Feeling <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่าคนในครอบครัวรู้สึกอย่างไรเกี่ยวกับการดูแลผู้ป่วย)</span></label>
+                    <Controller
+                      name={`newCaregivers.${index}.caregiver_feeling`}
+                      control={control}
+                      render={({ field }) => (
+                        <textarea
+                          className="form-control"
+                          placeholder="กรอกคำตอบ"
+                          rows="2"
+                          style={{ resize: "vertical" }}
+                          {...field} onChange={(e) => {
+                            field.onChange(e);
+                            handleFieldChange();
+                          }} />
+                      )}
+                    />
+                    <label className="form-label mt-4">Function <span style={{ color: "#666", fontSize: "15px" }}>(ระบุว่าคนในครอบครัวคาดหวังอะไรจากระบบการดูแล เช่น การสนับสนุนเพิ่มเติม)</span></label>
+                    <Controller
+                      name={`newCaregivers.${index}.caregiver_function`}
+                      control={control}
+                      render={({ field }) => (
+                        <textarea
+                          className="form-control"
+                          placeholder="กรอกคำตอบ"
+                          rows="2"
+                          style={{ resize: "vertical" }}
+                          {...field} onChange={(e) => {
+                            field.onChange(e);
+                            handleFieldChange();
+                          }} />
+                      )}
+                    />
+                    <label className="form-label mt-4">Expectation <span style={{ color: "#666", fontSize: "15px" }}>(ระบุความรู้สึกของผู้ดูแลว่ามีความกังวลในการดูแลผู้ป่วยหรือไม่)</span></label>
+                    <Controller
+                      name={`newCaregivers.${index}.caregiver_expectation`}
+                      control={control}
+                      render={({ field }) => (
+                        <textarea
+                          className="form-control"
+                          placeholder="กรอกคำตอบ"
+                          rows="2"
+                          style={{ resize: "vertical" }}
+                          {...field} onChange={(e) => {
+                            field.onChange(e);
+                            handleFieldChange();
+                          }} />
+                      )}
+                    />
 
-                </div>
-              </Collapse>
-            </div>
-          ))} */}
+                  </div>
+                </Collapse>
+              </div>
+            ))
+          ) : (
+            <p className="text-muted mt-3">ไม่มีข้อมูลคนในครอบครัว</p>
+          )}
         </div>
       </div>
     </div>

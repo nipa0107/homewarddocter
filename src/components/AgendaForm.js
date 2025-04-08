@@ -625,21 +625,18 @@ export default function AgendaForm({ }) {
                 const data = await response.json();
                 if (response.ok) {
                     toast.success("บันทึกข้อมูลสำเร็จ");
- clearUserLocalStorage();
-                        setPatientAgendaData(() => ({}));
-                        setCaregiverAgendaData(() => ({}));
-                        setCaregiverAssessmentData(() => ({}));
-                        setZaritData(() => ({}));
 
-                    // รีเซ็ตข้อมูลหลังจากเปลี่ยนหน้า
+                    clearUserLocalStorage();
+                    // setPatientAgendaData(() => ({}));
+                    // setCaregiverAgendaData(() => ({}));
+                    // setCaregiverAssessmentData(() => ({}));
+                    // setZaritData(() => ({}));
+
                     setTimeout(() => {
                         navigate("/assessinhomesssuser", { state: { id } });
-
-                       
-                    },50);
-
-0
-                } else {
+                    }, 800); // แนะนำเพิ่ม delay สั้นๆ ให้ toast ได้โชว์ก่อนเปลี่ยนหน้า
+                }
+                else {
                     console.error("Error during ReadinessForm submission:", data);
                     toast.error("เกิดข้อผิดพลาดในการประเมิน");
                 }
@@ -652,7 +649,12 @@ export default function AgendaForm({ }) {
             setActiveStep((prevActiveStep) => prevActiveStep + 1);
         }
     };
-
+    useEffect(() => {
+        return () => {
+            clearUserLocalStorage();
+            // ล้างข้อมูลเมื่อ component ถูก unmounted หรือเปลี่ยนหน้า
+        };
+    }, []);
 
     const handleBack = () => {
         scrollToTop(); // เลื่อนไปด้านบนสุดทันที

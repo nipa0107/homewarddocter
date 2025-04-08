@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useFormContext, useFieldArray, Controller } from "react-hook-form";
+import { useFormContext, useFieldArray, Controller , useWatch } from "react-hook-form";
 import Collapse from '@mui/material/Collapse';
 
-export const Otherpeople = ({ onDataChange }) => {
+export const Otherpeople = ({ onDataChange,userid }) => {
   const { control, register, getValues, setValue } = useFormContext();
   const { fields: existingFields, replace: replaceExisting } = useFieldArray({ control, name: "existingCaregivers" });
   const { fields: newFields, append: appendNew, remove: removeNew } = useFieldArray({ control, name: "newCaregivers" });
@@ -12,6 +12,20 @@ export const Otherpeople = ({ onDataChange }) => {
   const location = useLocation();
   const { id } = location.state || {};
 
+  const getLocalStorageKey = (userid, key) => `Assessinhomesss_${userid}_${key}`;
+  useEffect(() => {
+    const localData = localStorage.getItem(getLocalStorageKey(userid, "otherPeopleData"));
+    if (localData) {
+      const parsed = JSON.parse(localData);
+      if (Array.isArray(parsed.existingCaregivers)) {
+        replaceExisting(parsed.existingCaregivers);
+      }
+      if (Array.isArray(parsed.newCaregivers)) {
+        parsed.newCaregivers.forEach((caregiver) => appendNew(caregiver));
+      }
+    }
+  }, [userid, replaceExisting, appendNew]);
+  
   useEffect(() => {
     handleFieldChange(); // เรียกฟังก์ชันเพื่อรวมข้อมูลใหม่ทุกครั้ง
   }, [existingFields, getValues]);
@@ -99,7 +113,7 @@ export const Otherpeople = ({ onDataChange }) => {
       firstName: getValues(`existingCaregivers.${index}.firstName`) || field.firstName || "",
       lastName: getValues(`existingCaregivers.${index}.lastName`) || field.lastName || "",
       birthDate: getValues(`existingCaregivers.${index}.birthDate`) || field.birthDate || "",
-      relationship: getValues(`existingCaregivers.${index}.relationship`) || field.relationship || "ไม่ระบุ", // เพิ่มส่วนนี้
+      relationship: getValues(`existingCaregivers.${index}.relationship`) || field.relationship || "ไม่ระบุความสัมพันธ์", // เพิ่มส่วนนี้
       occupation: getValues(`existingCaregivers.${index}.occupation`) || field.occupation || "",
       status: getValues(`existingCaregivers.${index}.status`) || field.status || "",
       education: getValues(`existingCaregivers.${index}.education`) || field.education || "",
@@ -127,16 +141,26 @@ export const Otherpeople = ({ onDataChange }) => {
       isNew: true,
     }));
 
+    const combinedData = {
+      existingCaregivers: existingCaregiversData,
+      newCaregivers: newCaregiversData,
+    };
+  
+    // 💾 บันทึกลง localStorage
+    localStorage.setItem(getLocalStorageKey(userid, "otherPeopleData"), JSON.stringify(combinedData));
+  
     onDataChange({
       ...getValues(),
-      OtherPeople: {
-        existingCaregivers: existingCaregiversData,
-        newCaregivers: newCaregiversData,
-      },
+      OtherPeople: combinedData,
     });
   };
 
+  const watchedFields = useWatch({ control });
 
+  useEffect(() => {
+    handleFieldChange();
+  }, [watchedFields]);
+  
   return (
     <div>
       {/* Existing Caregivers */}
@@ -712,4 +736,3 @@ export const Otherpeople = ({ onDataChange }) => {
     </div>
   );
 };
-// ไฟนอลแล้ว

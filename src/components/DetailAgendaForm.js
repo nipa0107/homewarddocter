@@ -14,6 +14,7 @@ import PatientAgendaForm from "./UpdateAssessinhomesss/updatePatientAgenda.js";
 import CaregiverAgendaForm from "./UpdateAssessinhomesss/updateCaregiverAgenda.js";
 import CaregiverAssessmentForm from "./UpdateAssessinhomesss/updateCaregiverAssessment.js";
 import ZaritburdeninterviewForm from "./UpdateAssessinhomesss/updateZaritburdeninterview.js";
+import Collapse from '@mui/material/Collapse';
 import io from "socket.io-client";
 const socket = io("https://backend-deploy-render-mxok.onrender.com");
 
@@ -1105,7 +1106,7 @@ export default function DetailAgendaForm() {
                           </div>
 
                         </div>
-                        {openIndex === `caregiver-${index}` && (
+                        <Collapse in={openIndex === `caregiver-${index}`}>
                           <div className=" p-3 border rounded ms-2 ">
                             <div className="row">
                               <div className="col-sm-2">
@@ -1151,7 +1152,7 @@ export default function DetailAgendaForm() {
 
                             </div>
                           </div>
-                        )}
+                        </Collapse>
                       </div>
                     ))
                   ) : (
@@ -1182,7 +1183,7 @@ export default function DetailAgendaForm() {
 
                         </div>
 
-                        {openIndex === `family-${index}` && (
+                         <Collapse in={openIndex === `family-${index}`}>
                           <div className=" p-3 border rounded ms-2 ">
                             <div className="row">
                               <div className="col-sm-2">
@@ -1228,7 +1229,7 @@ export default function DetailAgendaForm() {
 
                             </div>
                           </div>
-                        )}
+                          </Collapse>
                       </div>
                     ))
                   ) : (
@@ -1263,7 +1264,7 @@ export default function DetailAgendaForm() {
                             </strong>
                           </div>
                         </div>
-                        {openIndex === `caregiver-${index}` && (
+                        <Collapse in={openIndex === `caregiver-${index}`}>
                           <div className="p-3 border rounded ms-2">
                             <div className="row ">
                               <div className="col-sm-4">
@@ -1340,7 +1341,7 @@ export default function DetailAgendaForm() {
 
                             </div>
                           </div>
-                        )}
+                        </Collapse>
                       </div>
                     ))
                   ) : (
@@ -1369,7 +1370,7 @@ export default function DetailAgendaForm() {
                             </strong>
                           </div>
                         </div>
-                        {openIndex === `family-${index}` && (
+                         <Collapse in={openIndex === `family-${index}`}>
                           <div className="p-3 border rounded ms-2">
                             <div className="row ">
                               <div className="col-sm-2">
@@ -1446,7 +1447,7 @@ export default function DetailAgendaForm() {
 
                             </div>
                           </div>
-                        )}
+                          </Collapse>
                       </div>
                     ))
                   ) : (
@@ -1474,7 +1475,7 @@ export default function DetailAgendaForm() {
                               >
                                 <b>{AgendaForms.Zaritburdeninterview.totalScore ||
                                   "0"}{" "}
-                                คะแนน</b>
+                                  คะแนน</b>
                               </p>
                             </div>
                           </div>

@@ -344,42 +344,54 @@ export default function AddEquipPatient() {
                 return "ไม่ทราบ";
         }
     };
+
+    const [medicalEquipment, setMedicalEquipment] = useState([]);
     useEffect(() => {
-        fetchAllEquip();
-    }, []);
-
-    const fetchAllEquip = () => {
-        fetch("https://backend-deploy-render-mxok.onrender.com/allequip", {
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (Array.isArray(data.data)) {
-                    setEquipments(data.data); // ตั้งค่า `equipments` แทน `data`
-                } else {
-                    setEquipments([]); // ป้องกัน error ถ้า API คืนค่าผิด
+        const fetchMedicalEquipmentThenEquip = async () => {
+            try {
+                const res = await fetch(`https://backend-deploy-render-mxok.onrender.com/equipment/${id}`);
+                const data = await res.json();
+                setMedicalEquipment(data);
+    
+                // รอโหลด medicalEquipment ก่อน แล้วค่อย fetch อุปกรณ์ทั้งหมด
+                const allEquipRes = await fetch("https://backend-deploy-render-mxok.onrender.com/allequip", {
+                    method: "GET",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const allEquipData = await allEquipRes.json();
+    
+                if (Array.isArray(allEquipData.data)) {
+                    setEquipments(allEquipData.data);
+    
+                    // คำนวณจำนวนเฉพาะอุปกรณ์ที่ยังไม่มี
+                    const counts = allEquipData.data.reduce((acc, item) => {
+                        const alreadyAssigned = data.some(
+                            (equip) => equip.equipmentname_forUser === item.equipment_name
+                        );
+                        if (!alreadyAssigned) {
+                            acc[item.equipment_type] = (acc[item.equipment_type] || 0) + 1;
+                        }
+                        return acc;
+                    }, {});
+                    setEquipmentCounts(counts);
                 }
-                // นับจำนวนอุปกรณ์แต่ละประเภท
-                const counts = data.data.reduce((acc, item) => {
-                    acc[item.equipment_type] = (acc[item.equipment_type] || 0) + 1;
-                    return acc;
-                }, {});
-                setEquipmentCounts(counts);
-            })
-
-            .catch((error) => {
-                console.error("Error fetching equipment data:", error);
-            });
-    };
+            } catch (error) {
+                console.error("Error loading equipment:", error);
+            }
+        };
+    
+        fetchMedicalEquipmentThenEquip();
+    }, [id, token]);
+    
+    
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (selectedEquipments.length === 0) {
-            setValidationMessage("โปรดเลือกอุปกรณ์อย่างน้อยหนึ่งรายการ");
+            window.alert("กรุณาเลือกอุปกรณ์อย่างน้อยหนึ่งรายการ");
             return;
         }
         if (!id) {
@@ -408,13 +420,6 @@ export default function AddEquipPatient() {
                     setTimeout(() => {
                         navigate("/infopatient", { state: { id } });
                     }, 1100);
-                } else if (data.status === "error" && data.message === "มีอุปกรณ์นี้อยู่แล้ว") {
-                    // ค้นหาอุปกรณ์ที่ซ้ำ และสร้างข้อความแจ้งเตือน
-                    const duplicateEquipments = selectedEquipments
-                        .map(equip => equip.equipmentname_forUser)
-                        .join(", ");
-
-                    setValidationMessage(`มีอุปกรณ์ ${duplicateEquipments} อยู่แล้ว`);
                 } else {
                     toast.error("เกิดข้อผิดพลาดในการเพิ่มข้อมูล");
                 }
@@ -486,23 +491,45 @@ export default function AddEquipPatient() {
     }, []);
 
     const toggleAllCheckboxes = () => {
-        const allSelected = equipments.every(equipment =>
-            selectedEquipments.some(equip => equip.equipmentname_forUser === equipment.equipment_name)
+        const unassignedEquipments = equipments.filter(equipment =>
+            equipment.equipment_type === selectedCategory &&
+            !medicalEquipment.some(
+                (me) => me.equipmentname_forUser === equipment.equipment_name
+            )
+        );
+
+        const allSelected = unassignedEquipments.every(equipment =>
+            selectedEquipments.some(
+                (equip) => equip.equipmentname_forUser === equipment.equipment_name
+            )
         );
 
         if (allSelected) {
-            setSelectedEquipments([]);
+            // ยกเลิกเฉพาะของประเภทนี้
+            const remaining = selectedEquipments.filter(
+                (equip) =>
+                    equip.equipmenttype_forUser !== selectedCategory
+            );
+            setSelectedEquipments(remaining);
         } else {
-            setSelectedEquipments(equipments.map(equipment => ({
+            const validEquipments = unassignedEquipments.map(equipment => ({
                 equipmentname_forUser: equipment.equipment_name,
-                equipmenttype_forUser: equipment.equipment_type
-            })));
+                equipmenttype_forUser: equipment.equipment_type,
+            }));
+
+            setSelectedEquipments([...selectedEquipments, ...validEquipments]);
         }
+
+        setValidationMessage("");
     };
 
 
+
     const handleCheckboxChange = (e, equipmentName, equipmentType) => {
-        const isChecked = e ? e.target.checked : !selectedEquipments.some(equip => equip.equipmentname_forUser === equipmentName);
+        const isChecked = e ? e.target.checked : !selectedEquipments.some(
+            equip => equip.equipmentname_forUser === equipmentName
+        );
+
         let updatedEquipments;
 
         if (isChecked) {
@@ -520,22 +547,10 @@ export default function AddEquipPatient() {
         }
 
         setSelectedEquipments(updatedEquipments);
-
-        // ตรวจสอบอุปกรณ์ซ้ำและสร้าง validation message
-        const validationMessages = {};
-        updatedEquipments.forEach((equip) => {
-            const duplicates = updatedEquipments.filter(
-                (e) => e.equipmentname_forUser === equip.equipmentname_forUser
-            ).length;
-
-            if (duplicates > 1) {
-                validationMessages[equip.equipmentname_forUser] = "มีอุปกรณ์นี้อยู่แล้ว";
-            }
-        });
-
-        setEquipValidationMessages(validationMessages);
-        setValidationMessage(""); // เคลียร์ข้อความแจ้งเตือนทั่วไป
+        setValidationMessage(""); // ไม่ต้องแจ้งเตือนแล้ว
     };
+
+
 
     const [selectedCategory, setSelectedCategory] = useState("อุปกรณ์ติดตัว");
 
@@ -736,13 +751,13 @@ export default function AddEquipPatient() {
                 </div>
                 <p className="title-header mt-4">เพิ่มอุปกรณ์สำหรับผู้ป่วย</p>
                 <div className="equipment-category ps-5 pe-5 mt-4">
+
                     {/* ปุ่มเลือกประเภทอุปกรณ์ */}
-                    <div className="mb-3 d-flex gap-2">
+                    <div className="assessment-tabs mt-0">
                         {["อุปกรณ์ติดตัว", "อุปกรณ์เสริม", "อุปกรณ์อื่นๆ"].map((type) => (
                             <button
                                 key={type}
-                                type="button"
-                                className={`btn ${selectedCategory === type ? "btn-primary" : "btn-outline py-2"}`}
+                                className={`tab-btn ${selectedCategory === type ? "active" : ""}`}
                                 onClick={() => setSelectedCategory(type)}
                             >
                                 {type}
@@ -750,62 +765,104 @@ export default function AddEquipPatient() {
                         ))}
                     </div>
 
-                    {/* แสดงชื่อประเภท + จำนวน */}
-                    <div className="mb-2 fw-bold" style={{color:"#1565c0"}}>
-                        {selectedCategory} (จำนวน {equipmentCounts[selectedCategory] || 0} รายการ)
+                    {/* แสดงชื่อประเภท + จำนวน + แจ้งเตือน */}
+                    <div className="mb-2 fw-bold d-flex align-items-center" style={{ color: "#1565c0" }}>
+                        <span>
+                            {selectedCategory} (จำนวน {equipmentCounts[selectedCategory] || 0} รายการ)
+                        </span>
                     </div>
-
-                    {/* แสดงข้อความ error */}
-                    {validationMessage && (
-                        <div className="mb-3" style={{ color: "red", textAlign: "center" }}>
-                            {validationMessage}
-                        </div>
-                    )}
 
                     <form onSubmit={handleSubmit}>
                         {/* ทำให้ตารางอยู่กับที่ + มี scrollbar ถ้ายาว */}
-                        <div >
-                            <table className="equipment-table table-hover" style={{  border: "1px solid #ddd" }}>
+                        <div style={{  overflowY: "auto" }}>
+                            <table className="equipment-table table-hover" style={{ border: "1px solid #ddd" }}>
                                 <thead>
                                     <tr>
                                         <th style={{ width: "10%" }}>
-                                            <input
-                                                style={{ marginLeft: "20px", cursor: "pointer" }}
-                                                type="checkbox"
-                                                className="form-check-input"
-                                                onChange={toggleAllCheckboxes}
-                                            />
+                                            {equipmentCounts[selectedCategory] > 0 && (
+                                                <input
+                                                    style={{ marginLeft: "20px", cursor: "pointer" }}
+                                                    type="checkbox"
+                                                    className="form-check-input"
+                                                    onChange={toggleAllCheckboxes}
+                                                    checked={
+                                                        equipments.filter(e =>
+                                                            e.equipment_type === selectedCategory &&
+                                                            !medicalEquipment.some(
+                                                                (me) => me.equipmentname_forUser === e.equipment_name
+                                                            )
+                                                        ).every(e =>
+                                                            selectedEquipments.some(
+                                                                (se) => se.equipmentname_forUser === e.equipment_name
+                                                            )
+                                                        )
+                                                    }
+                                                />
+                                            )}
                                         </th>
                                         <th style={{ width: "10%" }}>#</th>
                                         <th>ชื่ออุปกรณ์</th>
                                     </tr>
                                 </thead>
+
+
                                 <tbody>
                                     {(() => {
                                         const equipmentList = equipments.filter(
-                                            (equipment) => equipment.equipment_type === selectedCategory
+                                            (equipment) => {
+                                                const isSameType = equipment.equipment_type === selectedCategory;
+                                                const alreadyAssigned = medicalEquipment.some(
+                                                    (me) => me.equipmentname_forUser === equipment.equipment_name
+                                                );
+                                                return isSameType && !alreadyAssigned;
+                                            }
                                         );
+
+                                        // ✅ เช็คว่าไม่มีอุปกรณ์ให้เลือก เพราะ "ถูกเลือกครบแล้ว"
+                                        const originalEquipmentsOfCategory = equipments.filter(
+                                            (e) => e.equipment_type === selectedCategory
+                                        );
+                                        const allAssigned =
+                                            originalEquipmentsOfCategory.length > 0 &&
+                                            originalEquipmentsOfCategory.every((e) =>
+                                                medicalEquipment.some(
+                                                    (me) => me.equipmentname_forUser === e.equipment_name
+                                                )
+                                            );
 
                                         if (equipmentList.length === 0) {
                                             return (
                                                 <tr className="table-light">
                                                     <td colSpan="3" className="text-center">
-                                                        ไม่มีข้อมูล {selectedCategory}
+                                                        {allAssigned
+                                                            ? `คุณได้เพิ่ม ${selectedCategory} ครบแล้ว`
+                                                            : `ไม่มีข้อมูล ${selectedCategory}`}
                                                     </td>
                                                 </tr>
                                             );
                                         }
 
                                         return equipmentList.map((equipment, index) => (
-                                            <tr key={equipment._id}
-                                                onClick={() => handleCheckboxChange(null, equipment.equipment_name, selectedCategory)}
-                                                style={{ cursor: "pointer" }}>
+                                            <tr
+                                                key={equipment._id}
+                                                onClick={() =>
+                                                    handleCheckboxChange(
+                                                        null,
+                                                        equipment.equipment_name,
+                                                        selectedCategory
+                                                    )
+                                                }
+                                                style={{ cursor: "pointer" }}
+                                            >
                                                 <td style={{ width: "10%" }}>
                                                     <input
                                                         style={{ marginLeft: "20px", pointerEvents: "none" }}
                                                         className="form-check-input"
                                                         type="checkbox"
-                                                        checked={selectedEquipments.some(equip => equip.equipmentname_forUser === equipment.equipment_name)}
+                                                        checked={selectedEquipments.some(
+                                                            (equip) =>
+                                                                equip.equipmentname_forUser === equipment.equipment_name
+                                                        )}
                                                         readOnly
                                                     />
                                                 </td>
@@ -815,6 +872,8 @@ export default function AddEquipPatient() {
                                         ));
                                     })()}
                                 </tbody>
+
+
                             </table>
                         </div>
 
