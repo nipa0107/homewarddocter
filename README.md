@@ -1,4 +1,12 @@
 ![Homeward-Doctor](src/img/Homeward-Doctor.png)
+
+Demo Credentials
+-----------------
+
+For Demo, please use the following login credentials:
+
+- **Username:** 24377
+- **Password:** test8800
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
